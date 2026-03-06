@@ -14,7 +14,7 @@ interface ReviewCardProps {
 }
 
 const ReviewCard = ({ reviewerName, rating, text, courseName, date, verified, anonymous }: ReviewCardProps) => (
-  <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300">
+  <Card className="shadow-card hover:shadow-card-hover transition-all duration-500 animated-border bg-card">
     <CardContent className="p-6">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
@@ -23,7 +23,7 @@ const ReviewCard = ({ reviewerName, rating, text, courseName, date, verified, an
           </div>
           <div>
             <p className="font-display font-semibold text-sm text-foreground">
-              {anonymous ? "Anonymous" : reviewerName}
+              {anonymous ? "אנונימי" : reviewerName}
             </p>
             <p className="text-xs text-muted-foreground">{date}</p>
           </div>
@@ -32,7 +32,7 @@ const ReviewCard = ({ reviewerName, rating, text, courseName, date, verified, an
       </div>
       <StarRating rating={rating} size={16} />
       <p className="mt-3 text-sm text-foreground/80 leading-relaxed">{text}</p>
-      <p className="mt-3 text-xs text-muted-foreground">Course: {courseName}</p>
+      <p className="mt-3 text-xs text-muted-foreground">קורס: {courseName}</p>
     </CardContent>
   </Card>
 );
