@@ -9,19 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
 import { useState } from "react";
-
-const MOCK_BUSINESSES = [
-  { slug: "digital-marketing-academy", name: "אקדמיית שיווק דיגיטלי", category: "שיווק", rating: 4.8, reviewCount: 124, description: "קורסים מקיפים בשיווק דיגיטלי למתחילים ולמתקדמים." },
-  { slug: "code-masters-il", name: "Code Masters IL", category: "תכנות", rating: 4.6, reviewCount: 89, description: "בוטקמפ פיתוח Full-Stack עם פרויקטים מעשיים." },
-  { slug: "design-school-tlv", name: "בית הספר לעיצוב ת״א", category: "עיצוב", rating: 4.9, reviewCount: 67, description: "קורסי UI/UX מאנשי מקצוע מהתעשייה." },
-  { slug: "data-science-hub", name: "מרכז מדעי הנתונים", category: "מדעי נתונים", rating: 4.7, reviewCount: 156, description: "מיסודות Python ועד למידת מכונה מתקדמת." },
-];
-
-const MOCK_REVIEWS = [
-  { reviewerName: "שרה ל.", rating: 5, text: "קורס מדהים! החניכה האישית הייתה יוצאת מן הכלל ומצאתי עבודה תוך חודשיים.", courseName: "בוטקמפ Full-Stack", date: "28 פבר׳ 2026", verified: true, anonymous: false },
-  { reviewerName: "אנונימי", rating: 4, text: "תוכן מעולה ותרגילים מעשיים. הקהילה תומכת מאוד.", courseName: "שיווק דיגיטלי מאסטרקלאס", date: "25 פבר׳ 2026", verified: true, anonymous: true },
-  { reviewerName: "דוד כ.", rating: 5, text: "ההשקעה הטובה ביותר שעשיתי בקריירה שלי. תוכנית הלימודים מובנית ועדכנית.", courseName: "יסודות עיצוב UI/UX", date: "20 פבר׳ 2026", verified: true, anonymous: false },
-];
+import { BUSINESSES, REVIEWS } from "@/data/mockData";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -36,6 +24,9 @@ const Index = () => {
     e.preventDefault();
     if (searchQuery.trim()) navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
+
+  const topBusinesses = BUSINESSES.slice(0, 4);
+  const recentReviews = REVIEWS.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-background noise-overlay">
@@ -109,7 +100,7 @@ const Index = () => {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {MOCK_BUSINESSES.map((biz, i) => (
+          {topBusinesses.map((biz, i) => (
             <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
               <BusinessCard {...biz} />
             </motion.div>
@@ -123,8 +114,8 @@ const Index = () => {
           <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">ביקורות אחרונות</h2>
           <p className="text-muted-foreground mb-10">משוב אמיתי מסטודנטים מאומתים</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {MOCK_REVIEWS.map((review, i) => (
-              <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+            {recentReviews.map((review, i) => (
+              <motion.div key={review.id} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
                 <ReviewCard {...review} />
               </motion.div>
             ))}
@@ -143,7 +134,7 @@ const Index = () => {
             <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
               בנו אמון עם ביקורות מאומתות והגדילו את העסק שלכם.
             </p>
-            <Link to="/dashboard">
+            <Link to="/register">
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
                 צרו פרופיל עסקי
               </Button>

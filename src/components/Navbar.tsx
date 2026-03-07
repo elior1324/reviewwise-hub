@@ -22,6 +22,9 @@ const Navbar = () => {
           <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             לעסקים
           </Link>
+          <Link to="/register" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            הרשמת עסק
+          </Link>
         </div>
         <div className="flex items-center gap-3">
           <Link to="/search">
@@ -29,7 +32,7 @@ const Navbar = () => {
               <Search size={18} />
             </Button>
           </Link>
-          <Link to="/dashboard" className="hidden md:block">
+          <Link to="/register" className="hidden md:block">
             <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary">
               התחל עכשיו
             </Button>
@@ -43,6 +46,7 @@ const Navbar = () => {
         <div className="md:hidden border-t border-border/50 p-4 space-y-3 glass">
           <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>עיון בקורסים</Link>
           <Link to="/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לעסקים</Link>
+          <Link to="/register" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>הרשמת עסק</Link>
         </div>
       )}
     </nav>

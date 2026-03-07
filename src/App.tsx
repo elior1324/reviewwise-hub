@@ -8,6 +8,9 @@ import BusinessProfile from "./pages/BusinessProfile";
 import SearchPage from "./pages/SearchPage";
 import Dashboard from "./pages/Dashboard";
 import WriteReview from "./pages/WriteReview";
+import CoursePage from "./pages/CoursePage";
+import AffiliateRedirect from "./pages/AffiliateRedirect";
+import BusinessRegister from "./pages/BusinessRegister";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,9 +24,12 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/business/:slug" element={<BusinessProfile />} />
+          <Route path="/course/:courseId" element={<CoursePage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/register" element={<BusinessRegister />} />
           <Route path="/review/:token" element={<WriteReview />} />
+          <Route path="/go/:courseId" element={<AffiliateRedirect />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
