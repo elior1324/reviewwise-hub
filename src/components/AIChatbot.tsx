@@ -4,6 +4,7 @@ import { MessageCircle, X, Send, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ReactMarkdown from "react-markdown";
+import { COURSES, BUSINESSES } from "@/data/mockData";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -12,19 +13,41 @@ const INITIAL_MESSAGE: Msg = {
   content: "שלום! 👋 אני העוזר החכם של ReviewHub. אני יכול לעזור לכם למצוא קורסים, לקרוא ביקורות ולקבל המלצות. במה אוכל לעזור?",
 };
 
-// Mock responses until Cloud is enabled
 const getMockResponse = (input: string): string => {
   const lower = input.toLowerCase();
-  if (lower.includes("קורס") || lower.includes("course")) {
-    return "**הנה כמה קורסים מומלצים:**\n\n⭐ **אקדמיית שיווק דיגיטלי** - דירוג 4.8 (124 ביקורות)\n⭐ **בית הספר לעיצוב ת״א** - דירוג 4.9 (67 ביקורות)\n⭐ **מרכז מדעי הנתונים** - דירוג 4.7 (156 ביקורות)\n\nתרצו לדעת עוד על אחד מהם?";
+
+  // Course recommendations based on actual data
+  if (lower.includes("קורס") || lower.includes("course") || lower.includes("המלצ")) {
+    const topCourses = [...COURSES].sort((a, b) => b.rating - a.rating).slice(0, 4);
+    const list = topCourses.map(c => {
+      const biz = BUSINESSES.find(b => b.slug === c.businessSlug);
+      return `⭐ **${c.name}** (${c.rating}) - ₪${c.price.toLocaleString()}\n   ${biz?.name || ""} | ${c.verifiedPurchases} רכישות מאומתות`;
+    }).join("\n\n");
+    return `**הקורסים המומלצים ביותר:**\n\n${list}\n\nתרצו לדעת עוד על אחד מהם?`;
   }
+
+  // Category-specific search
+  const categories = ["שיווק", "תכנות", "עיצוב", "מדעי נתונים", "עסקים"];
+  const matchedCat = categories.find(c => lower.includes(c));
+  if (matchedCat) {
+    const catCourses = COURSES.filter(c => c.category === matchedCat).sort((a, b) => b.rating - a.rating);
+    if (catCourses.length > 0) {
+      const list = catCourses.map(c => `⭐ **${c.name}** - דירוג ${c.rating} | ₪${c.price.toLocaleString()}`).join("\n");
+      return `**קורסי ${matchedCat} מומלצים:**\n\n${list}\n\nכל הקורסים כוללים ביקורות מאומתות מסטודנטים אמיתיים.`;
+    }
+  }
+
+  if (lower.includes("מחיר") || lower.includes("זול") || lower.includes("price")) {
+    const affordable = [...COURSES].sort((a, b) => a.price - b.price).slice(0, 3);
+    const list = affordable.map(c => `💰 **${c.name}** - ₪${c.price.toLocaleString()} (⭐ ${c.rating})`).join("\n");
+    return `**הקורסים במחיר הנגיש ביותר:**\n\n${list}`;
+  }
+
   if (lower.includes("ביקורת") || lower.includes("review")) {
     return "במערכת שלנו יש **מעל 12,400 ביקורות מאומתות**. כל ביקורת מקושרת לרכישה אמיתית, כך שתוכלו לסמוך על המידע. 🔒\n\nתרצו לחפש ביקורות לקורס מסוים?";
   }
-  if (lower.includes("שיווק") || lower.includes("marketing")) {
-    return "**קורסי שיווק דיגיטלי מובילים:**\n\n1. 🏆 שיווק דיגיטלי מאסטרקלאס - ⭐ 4.8\n2. 📈 יסודות SEO - ⭐ 4.5\n3. 📊 הסמכת Google Ads - ⭐ 4.7\n\nכל הקורסים כוללים ביקורות מאומתות מסטודנטים אמיתיים.";
-  }
-  return "תודה על השאלה! 😊 אני יכול לעזור לכם עם:\n\n• 🔍 **חיפוש קורסים** - מצאו את הקורס המתאים\n• ⭐ **ביקורות** - קראו חוויות של סטודנטים\n• 💡 **המלצות** - קבלו המלצות מותאמות\n• 📊 **השוואה** - השוו בין קורסים\n\nנסו לשאול אותי על קורס או תחום מסוים!";
+
+  return "תודה על השאלה! 😊 אני יכול לעזור לכם עם:\n\n• 🔍 **חיפוש קורסים** - מצאו את הקורס המתאים\n• ⭐ **ביקורות** - קראו חוויות של סטודנטים\n• 💡 **המלצות** - קבלו המלצות מותאמות\n• 💰 **מחירים** - מצאו קורסים בתקציב שלכם\n• 📊 **השוואה** - השוו בין קורסים\n\nנסו לשאול על קורסי שיווק, תכנות, עיצוב ועוד!";
 };
 
 const AIChatbot = () => {
@@ -47,7 +70,6 @@ const AIChatbot = () => {
     setInput("");
     setIsLoading(true);
 
-    // Simulate typing delay
     setTimeout(() => {
       const response = getMockResponse(userMsg.content);
       setMessages(prev => [...prev, { role: "assistant", content: response }]);
@@ -64,7 +86,6 @@ const AIChatbot = () => {
 
   return (
     <>
-      {/* FAB */}
       <motion.button
         onClick={() => setOpen(!open)}
         className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg glow-primary"
@@ -84,7 +105,6 @@ const AIChatbot = () => {
         </AnimatePresence>
       </motion.button>
 
-      {/* Chat Window */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -94,7 +114,6 @@ const AIChatbot = () => {
             transition={{ duration: 0.2 }}
             className="fixed bottom-24 left-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[520px] rounded-2xl overflow-hidden glass border border-border/50 flex flex-col shadow-2xl"
           >
-            {/* Header */}
             <div className="p-4 border-b border-border/50 flex items-center gap-3" style={{ background: "linear-gradient(135deg, hsl(160 100% 40% / 0.1), transparent)" }}>
               <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center">
                 <Bot size={18} className="text-primary" />
@@ -105,7 +124,6 @@ const AIChatbot = () => {
               </div>
             </div>
 
-            {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((msg, i) => (
                 <motion.div
@@ -150,7 +168,6 @@ const AIChatbot = () => {
               )}
             </div>
 
-            {/* Input */}
             <div className="p-3 border-t border-border/50">
               <div className="flex gap-2">
                 <Input

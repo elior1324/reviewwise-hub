@@ -3,25 +3,34 @@ import Footer from "@/components/Footer";
 import StarRating from "@/components/StarRating";
 import ReviewCard from "@/components/ReviewCard";
 import ReviewSummary from "@/components/ReviewSummary";
-import CourseCard from "@/components/CourseCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Globe, Mail, Phone } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { ShieldCheck, ExternalLink, Users } from "lucide-react";
+import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import AIChatbot from "@/components/AIChatbot";
-import { getBusinessBySlug, getCoursesByBusiness, getReviewsByBusiness, generateReviewSummary, BUSINESSES } from "@/data/mockData";
+import { getCourseById, getReviewsByCourse, getBusinessBySlug, generateReviewSummary } from "@/data/mockData";
 
-const DEFAULT_KEY = "digital-marketing-academy";
-
-const BusinessProfile = () => {
-  const { slug } = useParams();
+const CoursePage = () => {
+  const { courseId } = useParams();
   const [filterRating, setFilterRating] = useState<number | null>(null);
 
-  const business = getBusinessBySlug(slug || "") || getBusinessBySlug(DEFAULT_KEY)!;
-  const courses = getCoursesByBusiness(business.slug);
-  const reviews = getReviewsByBusiness(business.slug);
+  const course = getCourseById(courseId || "");
+  if (!course) {
+    return (
+      <div className="min-h-screen bg-background noise-overlay">
+        <Navbar />
+        <div className="container py-20 text-center">
+          <h1 className="font-display font-bold text-2xl">הקורס לא נמצא</h1>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const business = getBusinessBySlug(course.businessSlug);
+  const reviews = getReviewsByCourse(course.id);
   const filteredReviews = filterRating ? reviews.filter(r => r.rating === filterRating) : reviews;
   const summary = generateReviewSummary(reviews);
 
@@ -32,49 +41,45 @@ const BusinessProfile = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl p-8 shadow-card mb-8 animated-border bg-card">
           <div className="flex flex-col md:flex-row md:items-start gap-6">
             <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-3xl shrink-0">
-              {business.name.charAt(0)}
+              {course.name.charAt(0)}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <h1 className="font-display font-bold text-2xl md:text-3xl">{business.name}</h1>
+                <h1 className="font-display font-bold text-2xl md:text-3xl">{course.name}</h1>
                 <Badge className="bg-trust-green-light text-trust-green border-0 gap-1">
                   <ShieldCheck size={14} /> מאומת
                 </Badge>
               </div>
+              {business && (
+                <Link to={`/business/${business.slug}`} className="text-sm text-primary hover:underline mb-2 inline-block">
+                  {business.name}
+                </Link>
+              )}
               <div className="flex items-center gap-3 mb-4">
-                <StarRating rating={business.rating} size={20} showValue />
-                <span className="text-muted-foreground text-sm">מבוסס על {business.reviewCount} ביקורות</span>
+                <StarRating rating={course.rating} size={20} showValue />
+                <span className="text-muted-foreground text-sm">({course.reviewCount} ביקורות)</span>
               </div>
-              <p className="text-muted-foreground mb-4 max-w-2xl">{business.description}</p>
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                {business.website && <span className="flex items-center gap-1"><Globe size={14} /> {business.website}</span>}
-                {business.email && <span className="flex items-center gap-1"><Mail size={14} /> {business.email}</span>}
-                {business.phone && <span className="flex items-center gap-1"><Phone size={14} /> {business.phone}</span>}
+              <p className="text-muted-foreground mb-4 max-w-2xl">{course.description}</p>
+              <div className="flex flex-wrap gap-4 items-center">
+                <span className="font-display font-bold text-2xl text-primary">₪{course.price.toLocaleString()}</span>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Users size={14} />
+                  <span>{course.verifiedPurchases} רכישות מאומתות</span>
+                </div>
+                <Link to={`/go/${course.id}`} target="_blank">
+                  <Button size="sm" className="bg-primary text-primary-foreground gap-2 glow-primary">
+                    <ExternalLink size={14} /> לאתר הקורס
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Courses */}
-        {courses.length > 0 && (
-          <div className="mb-10">
-            <h2 className="font-display font-bold text-xl mb-4">קורסים ({courses.length})</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courses.map((course, i) => (
-                <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <CourseCard {...course} />
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* AI Summary */}
         {summary && <ReviewSummary summary={summary} />}
 
-        {/* Review filters */}
         <div className="flex items-center gap-2 mb-6 flex-wrap">
-          <span className="text-sm text-muted-foreground ml-2">סינון ביקורות:</span>
+          <span className="text-sm text-muted-foreground ml-2">סינון:</span>
           <Button variant={filterRating === null ? "default" : "outline"} size="sm" onClick={() => setFilterRating(null)}>הכל</Button>
           {[5, 4, 3, 2, 1].map(r => (
             <Button key={r} variant={filterRating === r ? "default" : "outline"} size="sm" onClick={() => setFilterRating(r)}>
@@ -100,4 +105,4 @@ const BusinessProfile = () => {
   );
 };
 
-export default BusinessProfile;
+export default CoursePage;
