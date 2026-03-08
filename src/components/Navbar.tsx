@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Search, Menu, X } from "lucide-react";
 import { useState } from "react";
+import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -22,17 +23,23 @@ const Navbar = () => {
           <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             אודות
           </Link>
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            לבעלי עסקים
+          <Link to="/for-business" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            לחברות
           </Link>
-          <Link to="/register" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            הרשמת עסק
+          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            לוח בקרה
           </Link>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link to="/search">
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
               <Search size={18} />
+            </Button>
+          </Link>
+          <NotificationBell />
+          <Link to="/for-business" className="hidden md:block">
+            <Button size="sm" variant="outline" className="border-primary/40 text-primary hover:bg-primary/10 font-medium">
+              לחברות
             </Button>
           </Link>
           <Link to="/register" className="hidden md:block">
@@ -49,7 +56,8 @@ const Navbar = () => {
         <div className="md:hidden border-t border-border/50 p-4 space-y-3 glass">
           <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>עיון בקורסים</Link>
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
-          <Link to="/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לבעלי עסקים</Link>
+          <Link to="/for-business" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לחברות</Link>
+          <Link to="/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לוח בקרה</Link>
           <Link to="/register" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>הרשמת עסק</Link>
         </div>
       )}
