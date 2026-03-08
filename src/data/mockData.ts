@@ -63,12 +63,12 @@ export interface AffiliateClick {
 
 // ─── Businesses ─────────────────────────────────────────
 export const BUSINESSES: Business[] = [
-  { slug: "digital-marketing-academy", name: "אקדמיית שיווק דיגיטלי", category: "שיווק", rating: 4.8, reviewCount: 124, description: "הפלטפורמה המובילה בישראל לחינוך שיווק דיגיטלי. קורסים מקיפים ב-SEO, רשתות חברתיות, Google Ads ואסטרטגיית תוכן.", website: "https://dma.co.il", email: "info@dma.co.il", phone: "03-1234567" },
-  { slug: "code-masters-il", name: "Code Masters IL", category: "תכנות", rating: 4.6, reviewCount: 89, description: "בוטקמפ פיתוח Full-Stack עם פרויקטים מעשיים ותעסוקה מובטחת.", website: "https://codemasters.co.il", email: "hello@codemasters.co.il", phone: "03-9876543" },
-  { slug: "design-school-tlv", name: "בית הספר לעיצוב ת״א", category: "עיצוב", rating: 4.9, reviewCount: 67, description: "קורסי UI/UX מאנשי מקצוע מהתעשייה. פורטפוליו מוכן לעבודה.", website: "https://designtlv.co.il", email: "info@designtlv.co.il", phone: "03-5551234" },
-  { slug: "data-science-hub", name: "מרכז מדעי הנתונים", category: "מדעי נתונים", rating: 4.7, reviewCount: 156, description: "מיסודות Python ועד למידת מכונה מתקדמת. הכנה למקצועות העתיד.", website: "https://datahub.co.il", email: "learn@datahub.co.il", phone: "03-4445566" },
-  { slug: "hebrew-tech", name: "Hebrew Tech", category: "תכנות", rating: 4.5, reviewCount: 42, description: "חינוך טכנולוגי בעברית. קורסים נגישים לכולם.", website: "https://hebrewtech.co.il", email: "info@hebrewtech.co.il", phone: "03-7778899" },
-  { slug: "growth-academy", name: "אקדמיית צמיחה", category: "עסקים", rating: 4.4, reviewCount: 31, description: "Growth hacking ואסטרטגיית סטארטאפ. מהרעיון לביצוע.", website: "https://growth.co.il", email: "team@growth.co.il", phone: "03-1112233" },
+  { slug: "digital-marketing-academy", name: "אקדמיית שיווק דיגיטלי", category: "שיווק", rating: 4.8, reviewCount: 124, description: "הפלטפורמה המובילה בישראל לחינוך שיווק דיגיטלי. קורסים מקיפים ב-SEO, רשתות חברתיות, Google Ads ואסטרטגיית תוכן.", logo: dmaLogo, website: "https://dma.co.il", email: "info@dma.co.il", phone: "03-1234567" },
+  { slug: "code-masters-il", name: "Code Masters IL", category: "תכנות", rating: 4.6, reviewCount: 89, description: "בוטקמפ פיתוח Full-Stack עם פרויקטים מעשיים ותעסוקה מובטחת.", logo: codemastersLogo, website: "https://codemasters.co.il", email: "hello@codemasters.co.il", phone: "03-9876543" },
+  { slug: "design-school-tlv", name: "בית הספר לעיצוב ת״א", category: "עיצוב", rating: 4.9, reviewCount: 67, description: "קורסי UI/UX מאנשי מקצוע מהתעשייה. פורטפוליו מוכן לעבודה.", logo: designtlvLogo, website: "https://designtlv.co.il", email: "info@designtlv.co.il", phone: "03-5551234" },
+  { slug: "data-science-hub", name: "מרכז מדעי הנתונים", category: "מדעי נתונים", rating: 4.7, reviewCount: 156, description: "מיסודות Python ועד למידת מכונה מתקדמת. הכנה למקצועות העתיד.", logo: datahubLogo, website: "https://datahub.co.il", email: "learn@datahub.co.il", phone: "03-4445566" },
+  { slug: "hebrew-tech", name: "Hebrew Tech", category: "תכנות", rating: 4.5, reviewCount: 42, description: "חינוך טכנולוגי בעברית. קורסים נגישים לכולם.", logo: hebrewtechLogo, website: "https://hebrewtech.co.il", email: "info@hebrewtech.co.il", phone: "03-7778899" },
+  { slug: "growth-academy", name: "אקדמיית צמיחה", category: "עסקים", rating: 4.4, reviewCount: 31, description: "Growth hacking ואסטרטגיית סטארטאפ. מהרעיון לביצוע.", logo: growthLogo, website: "https://growth.co.il", email: "team@growth.co.il", phone: "03-1112233" },
 ];
 
 // ─── Courses ─────────────────────────────────────────
