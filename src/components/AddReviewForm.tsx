@@ -104,11 +104,11 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                 </div>
                 {/* Verification status */}
                 <div className={`flex items-center gap-2 text-xs font-medium mt-2 px-3 py-1.5 rounded-lg w-fit ${
-                  isVerifiedPurchaser
+                  receiptVerified
                     ? "bg-trust-green-light text-trust-green"
                     : "bg-muted text-muted-foreground"
                 }`}>
-                  {isVerifiedPurchaser ? (
+                  {receiptVerified ? (
                     <>
                       <ShieldCheck size={14} />
                       רכישה מאומתת — הביקורת תסומן כמאומתת
@@ -116,7 +116,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                   ) : (
                     <>
                       <ShieldX size={14} />
-                      ביקורת ללא אימות רכישה
+                      ביקורת ללא אימות רכישה — העלו קבלה לאימות
                     </>
                   )}
                 </div>
