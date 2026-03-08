@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import StarRating from "./StarRating";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface BusinessCardProps {
   slug: string;
@@ -10,16 +11,37 @@ interface BusinessCardProps {
   rating: number;
   reviewCount: number;
   description: string;
+  logo?: string;
 }
 
-const BusinessCard = ({ slug, name, category, rating, reviewCount, description }: BusinessCardProps) => (
+const BusinessCard = ({ slug, name, category, rating, reviewCount, description, logo }: BusinessCardProps) => (
   <Link to={`/biz/${slug}`}>
-    <Card className="shadow-card hover:shadow-card-hover transition-all duration-500 group cursor-pointer h-full animated-border bg-card">
-      <CardContent className="p-6 flex flex-col h-full">
-        <div className="flex items-start justify-between mb-3">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-lg">
-            {name.charAt(0)}
-          </div>
+    <Card className="shadow-card hover:shadow-card-hover transition-all duration-500 group cursor-pointer h-full animated-border bg-card overflow-hidden relative">
+      {/* Ambient glow on hover */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+        style={{ background: "radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.08), transparent 70%)" }}
+      />
+      <CardContent className="p-6 flex flex-col h-full relative z-10">
+        <div className="flex items-start justify-between mb-4">
+          {/* Logo with 3D float effect */}
+          <motion.div
+            whileHover={{ rotateY: 12, rotateX: -8, scale: 1.08 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className="relative"
+            style={{ perspective: "600px", transformStyle: "preserve-3d" }}
+          >
+            {logo ? (
+              <div className="w-16 h-16 rounded-xl overflow-hidden relative group-hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.4)] transition-shadow duration-500">
+                <img src={logo} alt={name} className="w-full h-full object-contain bg-white/5 p-1.5" />
+                {/* Shine overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-xl group-hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.4)] transition-shadow duration-500">
+                {name.charAt(0)}
+              </div>
+            )}
+          </motion.div>
           <span className="text-xs text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">{category}</span>
         </div>
         <h3 className="font-display font-semibold text-lg text-foreground mb-1">{name}</h3>
