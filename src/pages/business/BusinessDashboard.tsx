@@ -857,11 +857,11 @@ const BusinessDashboard = () => {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 rounded-lg bg-primary/5">
-                        <p className="font-display font-bold text-2xl text-primary">{isDemo ? "47" : "0"}</p>
-                        <p className="text-xs text-muted-foreground">לידים חדשים החודש</p>
+                        <p className="font-display font-bold text-2xl text-primary">{isDemo ? "47" : realLeads.filter(l => l.status === "new").length}</p>
+                        <p className="text-xs text-muted-foreground">לידים חדשים</p>
                       </div>
                       <div className="text-center p-4 rounded-lg bg-accent/5">
-                        <p className="font-display font-bold text-2xl text-accent">{isDemo ? "23%" : "0%"}</p>
+                        <p className="font-display font-bold text-2xl text-accent">{isDemo ? "23%" : (realLeads.length > 0 ? Math.round(realLeads.filter(l => l.status === "converted").length / realLeads.length * 100) : 0) + "%"}</p>
                         <p className="text-xs text-muted-foreground">אחוז המרה</p>
                       </div>
                     </div>
