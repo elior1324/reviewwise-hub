@@ -30,10 +30,10 @@ const BusinessDashboard = () => {
   const totalRevenue = AFFILIATE_CLICKS.filter(c => c.converted).reduce((s, c) => s + (c.revenue || 0), 0);
 
   const STATS = [
-    { icon: Star, label: "דירוג ממוצע", value: "4.8", change: "+0.2", up: true },
-    { icon: MessageSquare, label: "סה״כ ביקורות", value: "124", change: "+12", up: true },
-    { icon: MousePointerClick, label: "קליקים לאתר", value: totalClicks.toString(), change: "+23%", up: true },
-    { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: `₪${totalRevenue.toLocaleString()}`, change: "+18%", up: true },
+    { icon: Star, label: "דירוג ממוצע", value: "4.8", change: "+0.2", up: true, tooltip: "הציון הממוצע שלקוחות נתנו לכל הקורסים שלכם. דירוג גבוה מגביר אמון ומושך לקוחות חדשים." },
+    { icon: MessageSquare, label: "סה״כ ביקורות", value: "124", change: "+12", up: true, tooltip: "מספר הביקורות שנכתבו על הקורסים שלכם. יותר ביקורות = יותר הוכחה חברתית ונראות בפלטפורמה." },
+    { icon: MousePointerClick, label: "קליקים לאתר", value: totalClicks.toString(), change: "+23%", up: true, tooltip: "כמה אנשים לחצו על הקישור לאתר שלכם מתוך דף הביקורות. מדד ישיר לתנועה שמגיעה אליכם מ-ReviewHub." },
+    { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: `₪${totalRevenue.toLocaleString()}`, change: "+18%", up: true, tooltip: "סך ההכנסות מרכישות שהגיעו דרך קישורי האפיליאט שלכם. כסף אמיתי שנכנס הודות לביקורות." },
   ];
 
   const aiReport = {
