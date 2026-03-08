@@ -16,6 +16,12 @@ import { REVIEWS, COURSES, AFFILIATE_CLICKS } from "@/data/mockData";
 const BUSINESS_SLUG = "digital-marketing-academy";
 
 const BusinessDashboard = () => {
+  // Demo business identity
+  const demoBusiness = {
+    name: "Digital Marketing Academy",
+    email: "admin@dma.co.il",
+  };
+
   const businessReviews = REVIEWS.filter(r => r.businessSlug === BUSINESS_SLUG);
   const businessCourses = COURSES.filter(c => c.businessSlug === BUSINESS_SLUG);
   const totalClicks = AFFILIATE_CLICKS.length;
@@ -67,6 +73,18 @@ const BusinessDashboard = () => {
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
       <div className="container py-10">
+        {/* Demo logged-in banner */}
+        <div className="mb-6 flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+          <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+            DM
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-foreground">מחובר כ: {demoBusiness.name}</p>
+            <p className="text-xs text-muted-foreground">{demoBusiness.email}</p>
+          </div>
+          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">מנהל</span>
+        </div>
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-display font-bold text-3xl">לוח בקרה עסקי</h1>
