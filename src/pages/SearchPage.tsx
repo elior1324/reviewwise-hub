@@ -64,6 +64,14 @@ const SearchPage = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
   const [sortOption, setSortOption] = useState<SortOption>("default");
 
+  const top5Overall = useMemo(() => 
+    [...BUSINESSES]
+      .filter(b => b.rating >= 4.0)
+      .sort((a, b) => b.reviewCount - a.reviewCount || b.rating - a.rating)
+      .slice(0, 5),
+    []
+  );
+
   const { data: freelancerCats = [] } = useCategories("freelancer");
   const { data: courseCats = [] } = useCategories("course");
   const ALL_FREELANCER_CATS = ["הכל", ...freelancerCats.filter(c => c !== "אחר"), "אחר"];
