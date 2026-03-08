@@ -6,7 +6,7 @@ import ReviewSummary from "@/components/ReviewSummary";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, ExternalLink, Users } from "lucide-react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import AIChatbot from "@/components/AIChatbot";
@@ -14,6 +14,7 @@ import { getCourseById, getReviewsByCourse, getBusinessBySlug, generateReviewSum
 
 const CoursePage = () => {
   const { courseId } = useParams();
+  const navigate = useNavigate();
   const [filterRating, setFilterRating] = useState<number | null>(null);
 
   const course = getCourseById(courseId || "");
@@ -38,6 +39,16 @@ const CoursePage = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
       <div className="container py-10">
+        <div className="mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="text-muted-foreground hover:text-foreground font-medium"
+          >
+            → חזרה
+          </Button>
+        </div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl p-8 shadow-card mb-8 animated-border bg-card">
           <div className="flex flex-col md:flex-row md:items-start gap-6">
             <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-3xl shrink-0">
