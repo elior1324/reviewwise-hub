@@ -8,15 +8,20 @@ import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
   Award, ArrowLeft, CheckCircle, Users, X, Crown, Sparkles,
   Lock, MessageSquare, FileText, Webhook, LineChart, Headphones,
-  UserCheck, Globe, Eye
+  UserCheck, Globe, ChevronDown
 } from "lucide-react";
 import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import featureProfile from "@/assets/previews/feature-profile.jpg";
+import featureAnalytics from "@/assets/previews/feature-analytics.jpg";
+import featureAffiliate from "@/assets/previews/feature-affiliate.jpg";
+import featureAiReport from "@/assets/previews/feature-ai-report.jpg";
+import featureCrm from "@/assets/previews/feature-crm.jpg";
+import featureWidgets from "@/assets/previews/feature-widgets.jpg";
 import starterPreview from "@/assets/previews/starter-dashboard.jpg";
-import proPreview from "@/assets/previews/pro-dashboard.jpg";
-import premiumPreview from "@/assets/previews/premium-dashboard.jpg";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
