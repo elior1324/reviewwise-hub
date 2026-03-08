@@ -21,7 +21,7 @@ interface UploadedTemplate {
 const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,.csv,image/*,application/pdf";
 const MAX_SIZE_MB = 10;
 
-const InvoiceTemplateUploader = ({ businessId }: InvoiceTemplateUploaderProps) => {
+const InvoiceTemplateUploader = forwardRef<HTMLDivElement, InvoiceTemplateUploaderProps>(({ businessId }, ref) => {
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [templates, setTemplates] = useState<UploadedTemplate[]>([]);
