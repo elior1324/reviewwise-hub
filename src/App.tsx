@@ -51,6 +51,7 @@ const App = () => (
             <Route path="/go/:courseId" element={<AffiliateRedirect />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/guidelines" element={<CompanyGuidelines />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />
