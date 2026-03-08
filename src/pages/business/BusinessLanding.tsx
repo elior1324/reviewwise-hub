@@ -286,7 +286,7 @@ const BusinessLanding = () => {
       <section className="container py-20">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-            <Sparkles size={14} /> תוכנית מקצועי — ₪189/חודש
+            <Sparkles size={14} /> תוכנית מקצועי{user ? " — ₪189/חודש" : ""}
           </div>
           <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">כלים מתקדמים לצמיחה</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה ואפיליאט — הכל בחבילה אחת</p>
