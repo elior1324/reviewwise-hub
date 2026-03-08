@@ -40,6 +40,12 @@ interface SearchResult {
   type: "freelancer" | "course";
   businessName?: string;
   slug?: string;
+  yearsExperience?: number;
+  difficultyLevel?: string;
+  targetAudience?: string;
+  location?: string;
+  duration?: string;
+  format?: string;
 }
 
 type Msg = { role: "user" | "assistant"; content: string };
