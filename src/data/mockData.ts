@@ -1,5 +1,12 @@
 // Centralized mock data for ReviewHub
 
+import dmaLogo from "@/assets/logos/dma-logo.png";
+import codemastersLogo from "@/assets/logos/codemasters-logo.png";
+import designtlvLogo from "@/assets/logos/designtlv-logo.png";
+import datahubLogo from "@/assets/logos/datahub-logo.png";
+import hebrewtechLogo from "@/assets/logos/hebrewtech-logo.png";
+import growthLogo from "@/assets/logos/growth-logo.png";
+
 export interface Course {
   id: string;
   businessSlug: string;
@@ -20,6 +27,7 @@ export interface Business {
   rating: number;
   reviewCount: number;
   description: string;
+  logo?: string;
   website?: string;
   email?: string;
   phone?: string;
