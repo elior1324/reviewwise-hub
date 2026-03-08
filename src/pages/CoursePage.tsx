@@ -6,7 +6,7 @@ import ReviewSummary from "@/components/ReviewSummary";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, ExternalLink, Users } from "lucide-react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import AIChatbot from "@/components/AIChatbot";
