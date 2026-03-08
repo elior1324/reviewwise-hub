@@ -30,28 +30,28 @@ const fadeUp = {
 
 // ─── Features organized by tier ───────────────────────────
 const FREE_FEATURES = [
-  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת." },
-  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור." },
-  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח." },
+  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת.", preview: starterPreview },
+  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור.", preview: featureProfile },
+  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח.", preview: featureProfile },
   { icon: Star, title: "תג דירוג בסיסי", desc: "הציגו את הדירוג שלכם עם תג אמינות ReviewHub." },
 ];
 
 const PRO_FEATURES = [
-  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת." },
-  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת." },
+  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת.", preview: featureAnalytics },
+  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת.", preview: featureWidgets },
   { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות." },
-  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. עמלה של 10% על כל מכירה שנכנסת דרככם." },
+  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. עמלה של 10% על כל מכירה שנכנסת דרככם.", preview: featureAffiliate },
   { icon: Globe, title: "רשתות חברתיות ואתר", desc: "חברו YouTube, Instagram, TikTok, LinkedIn, Facebook ואתר האינטרנט שלכם לפרופיל העסקי." },
-  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור." },
+  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור.", preview: featureAiReport },
   { icon: Headphones, title: "תמיכה בעדיפות", desc: "תמיכה מהירה עם מענה תוך 4 שעות בימי עבודה." },
 ];
 
 const PREMIUM_FEATURES = [
-  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true },
-  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true },
+  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true, preview: featureCrm },
+  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true, preview: featureCrm },
   { icon: Webhook, title: "Webhook למערכות חיצוניות", desc: "חברו ל-Zapier, Make ולכל מערכת עם webhook.", locked: true },
   { icon: Globe, title: "Google Ads Review Stars ⭐", desc: "הציגו כוכבי דירוג ישירות במודעות Google שלכם.", locked: true },
-  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true },
+  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true, preview: featureAiReport },
   { icon: Code, title: "גישת API מלאה", desc: "בנו אינטגרציות מותאמות אישית עם ה-API שלנו.", locked: true },
 ];
 
