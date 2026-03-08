@@ -14,7 +14,7 @@ import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
+
 import featureProfile from "@/assets/previews/feature-profile.jpg";
 import featureAnalytics from "@/assets/previews/feature-analytics.jpg";
 import featureAffiliate from "@/assets/previews/feature-affiliate.jpg";
@@ -299,28 +299,16 @@ const BusinessLanding = () => {
                 </div>
                 <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-                <AnimatePresence mode="wait">
-                  {expandedFeature === title && preview && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0, scale: 0.97 }}
-                      animate={{ opacity: 1, height: "auto", scale: 1 }}
-                      exit={{ opacity: 0, height: 0, scale: 0.97 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
-                      className="overflow-hidden"
-                    >
-                      <motion.img
-                        src={preview}
-                        alt={`תצוגה מקדימה — ${title}`}
-                        className="mt-4 rounded-lg border border-border/30 w-full"
-                        loading="lazy"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.08, duration: 0.2 }}
-                      />
-                      <p className="text-[11px] text-muted-foreground mt-2 text-center">תצוגה מקדימה של הפיצ׳ר</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] ${expandedFeature === title && preview ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                  <div className="overflow-hidden">
+                    {preview && (
+                      <div className={`transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] ${expandedFeature === title ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-2 scale-[0.98]"}`}>
+                        <img src={preview} alt={`תצוגה מקדימה — ${title}`} className="mt-4 rounded-lg border border-border/30 w-full" loading="lazy" />
+                        <p className="text-[11px] text-muted-foreground mt-2 mb-1 text-center">תצוגה מקדימה של הפיצ׳ר</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -357,28 +345,16 @@ const BusinessLanding = () => {
                 </div>
                 <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-                <AnimatePresence mode="wait">
-                  {expandedFeature === title && preview && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0, scale: 0.97 }}
-                      animate={{ opacity: 1, height: "auto", scale: 1 }}
-                      exit={{ opacity: 0, height: 0, scale: 0.97 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
-                      className="overflow-hidden"
-                    >
-                      <motion.img
-                        src={preview}
-                        alt={`תצוגה מקדימה — ${title}`}
-                        className="mt-4 rounded-lg border border-border/30 w-full"
-                        loading="lazy"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.08, duration: 0.2 }}
-                      />
-                      <p className="text-[11px] text-muted-foreground mt-2 text-center">תצוגה מקדימה של הפיצ׳ר</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] ${expandedFeature === title && preview ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                  <div className="overflow-hidden">
+                    {preview && (
+                      <div className={`transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] ${expandedFeature === title ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-2 scale-[0.98]"}`}>
+                        <img src={preview} alt={`תצוגה מקדימה — ${title}`} className="mt-4 rounded-lg border border-border/30 w-full" loading="lazy" />
+                        <p className="text-[11px] text-muted-foreground mt-2 mb-1 text-center">תצוגה מקדימה של הפיצ׳ר</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -420,28 +396,16 @@ const BusinessLanding = () => {
                 </div>
                 <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-                <AnimatePresence mode="wait">
-                  {expandedFeature === title && preview && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0, scale: 0.97 }}
-                      animate={{ opacity: 1, height: "auto", scale: 1 }}
-                      exit={{ opacity: 0, height: 0, scale: 0.97 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
-                      className="overflow-hidden"
-                    >
-                      <motion.img
-                        src={preview}
-                        alt={`תצוגה מקדימה — ${title}`}
-                        className="mt-4 rounded-lg border border-border/30 w-full"
-                        loading="lazy"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.08, duration: 0.2 }}
-                      />
-                      <p className="text-[11px] text-muted-foreground mt-2 text-center">תצוגה מקדימה של הפיצ׳ר</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] ${expandedFeature === title && preview ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                  <div className="overflow-hidden">
+                    {preview && (
+                      <div className={`transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] ${expandedFeature === title ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-2 scale-[0.98]"}`}>
+                        <img src={preview} alt={`תצוגה מקדימה — ${title}`} className="mt-4 rounded-lg border border-border/30 w-full" loading="lazy" />
+                        <p className="text-[11px] text-muted-foreground mt-2 mb-1 text-center">תצוגה מקדימה של הפיצ׳ר</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
