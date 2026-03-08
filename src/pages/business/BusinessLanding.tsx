@@ -328,22 +328,44 @@ const BusinessLanding = () => {
           <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">כלים מתקדמים לצמיחה</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה ואפיליאט — הכל בחבילה אחת</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PRO_FEATURES.map(({ icon: Icon, title, desc }, i) => (
-            <motion.div
-              key={title}
-              initial="hidden" whileInView="visible" viewport={{ once: true }}
-              variants={fadeUp} custom={i}
-              className="rounded-xl p-6 bg-card border border-primary/20 hover:border-primary/40 transition-all duration-300 group"
-            >
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                <Icon size={22} className="text-primary" />
-              </div>
-              <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-            </motion.div>
-          ))}
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {PRO_FEATURES.map(({ icon: Icon, title, desc, preview }, i) => (
+              <motion.div
+                key={title}
+                initial="hidden" whileInView="visible" viewport={{ once: true }}
+                variants={fadeUp} custom={i}
+                className={`rounded-xl p-6 bg-card border transition-all duration-300 group cursor-pointer ${
+                  expandedFeature === title ? "border-primary/50 shadow-card-hover" : "border-primary/20 hover:border-primary/40"
+                }`}
+                onClick={() => preview && toggleFeature(title)}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <Icon size={22} className="text-primary" />
+                  </div>
+                  {preview && (
+                    <ChevronDown size={16} className={`text-muted-foreground transition-transform duration-300 ${expandedFeature === title ? "rotate-180" : ""}`} />
+                  )}
+                </div>
+                <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                <AnimatePresence>
+                  {expandedFeature === title && preview && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <img src={preview} alt={`תצוגה מקדימה — ${title}`} className="mt-4 rounded-lg border border-border/30 w-full" loading="lazy" />
+                      <p className="text-[11px] text-muted-foreground mt-2 text-center">תצוגה מקדימה של הפיצ׳ר</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
       </section>
 
       {/* Premium Features — shown with lock icons */}
