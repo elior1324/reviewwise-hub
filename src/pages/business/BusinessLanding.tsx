@@ -158,6 +158,26 @@ const BusinessLanding = () => {
   const { toast } = useToast();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
+  const [trustedCompanies, setTrustedCompanies] = useState<{ name: string; initials: string }[]>([]);
+
+  useEffect(() => {
+    const fetchTrusted = async () => {
+      const { data } = await supabase
+        .from("businesses")
+        .select("name")
+        .eq("verified", true)
+        .gte("rating", 4)
+        .order("review_count", { ascending: false })
+        .limit(8);
+      if (data && data.length > 0) {
+        setTrustedCompanies(data.map(b => ({
+          name: b.name,
+          initials: b.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase(),
+        })));
+      }
+    };
+    fetchTrusted();
+  }, []);
 
   const toggleFeature = (title: string) => {
     setExpandedFeature(prev => prev === title ? null : title);
