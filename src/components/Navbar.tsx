@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, Scale } from "lucide-react";
+import { Menu, X, LogOut, User, Scale, DollarSign } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,6 +41,10 @@ const Navbar = () => {
           </Link>
           <Link to="/search" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             קטגוריות
+          </Link>
+          <Link to="/partner" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
+            <DollarSign size={14} />
+            שותפים
           </Link>
           <Link to="/compare" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
             <Scale size={14} />
@@ -111,6 +115,7 @@ const Navbar = () => {
           <Link to="/" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>עמוד הבית</Link>
           
           <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>קטגוריות</Link>
+          <Link to="/partner" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>שותפים</Link>
           <Link to="/compare" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>השוואה חכמה</Link>
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
           <Link to="/business" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>לעסקים</Link>

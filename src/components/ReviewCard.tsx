@@ -46,9 +46,7 @@ const ReviewCard = ({ id, reviewerName, rating, text, courseName, date, purchase
 
     if (id) {
       const { error } = await supabase
-        .from("reviews")
-        .update({ like_count: likeCount + 1 })
-        .eq("id", id);
+        .rpc("increment_review_likes", { review_id: id });
       if (error) {
         setLiked(false);
         setLikeCount(prev => prev - 1);

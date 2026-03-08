@@ -1012,6 +1012,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_review_likes: {
+        Args: { review_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
