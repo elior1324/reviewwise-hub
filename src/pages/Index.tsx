@@ -158,46 +158,57 @@ const Index = () => {
       <section className="border-y border-border/50 glass">
         <div className="container py-12">
           {/* Freelancers */}
-          <div className="mb-10">
-            <div className="flex items-center gap-2 mb-2">
+          <motion.div
+            className="mb-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+          >
+            <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2 mb-2">
               <UserCheck size={20} className="text-primary" />
               <h2 className="font-display font-bold text-xl text-foreground">בעלי מקצוע עצמאים</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-5">מנהלי סושיאל, מעצבי אתרים, עורכי וידאו, כותבים שיווקיים ועוד</p>
+            </motion.div>
+            <motion.p variants={fadeUp} custom={1} className="text-sm text-muted-foreground mb-5">מנהלי סושיאל, מעצבי אתרים, עורכי וידאו, כותבים שיווקיים ועוד</motion.p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {FREELANCER_CATS_DISPLAY.map(({ label, query, count }) => (
-                <Link
-                  key={label}
-                  to={`/search?q=${encodeURIComponent(query)}&tab=freelancers`}
-                  className="rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 transition-all duration-300 text-center group"
-                >
-                  <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
-                </Link>
+              {FREELANCER_CATS_DISPLAY.map(({ label, query, count }, i) => (
+                <motion.div key={label} variants={fadeUp} custom={2 + i * 0.3}>
+                  <Link
+                    to={`/search?q=${encodeURIComponent(query)}&tab=freelancers`}
+                    className="block rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 text-center group"
+                  >
+                    <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
+                  </Link>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Course Providers */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+          >
+            <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2 mb-2">
               <BookOpen size={20} className="text-primary" />
               <h2 className="font-display font-bold text-xl text-foreground">קורסים, סדנאות והכשרות</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-5">קורסים, סדנאות, הרצאות, לימודים, תעודות הכשרה ועוד</p>
+            </motion.div>
+            <motion.p variants={fadeUp} custom={1} className="text-sm text-muted-foreground mb-5">קורסים, סדנאות, הרצאות, לימודים, תעודות הכשרה ועוד</motion.p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {COURSE_CATS_DISPLAY.map(({ label, query, count }) => (
-                <Link
-                  key={label}
-                  to={`/search?q=${encodeURIComponent(query)}&tab=courses`}
-                  className="rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 transition-all duration-300 text-center group"
-                >
-                  <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
-                </Link>
+              {COURSE_CATS_DISPLAY.map(({ label, query, count }, i) => (
+                <motion.div key={label} variants={fadeUp} custom={2 + i * 0.3}>
+                  <Link
+                    to={`/search?q=${encodeURIComponent(query)}&tab=courses`}
+                    className="block rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 text-center group"
+                  >
+                    <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
+                  </Link>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
