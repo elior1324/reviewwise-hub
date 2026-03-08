@@ -158,6 +158,7 @@ const SmoothCollapse = ({ isOpen, preview, title }: { isOpen: boolean; preview?:
 };
 
 const BusinessLanding = () => {
+  const { user, subscriptionTier } = useAuth();
   const { toast } = useToast();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
