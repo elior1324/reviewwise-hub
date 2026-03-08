@@ -77,9 +77,15 @@ const Navbar = () => {
                 <DropdownMenuItem onClick={() => navigate("/business/dashboard")}>
                   לוח בקרה עסקי
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut size={14} className="ml-2" />
                   התנתקו
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="p-0">
+                  <div>
+                    <DeleteAccountButton />
+                  </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
