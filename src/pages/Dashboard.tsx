@@ -48,7 +48,7 @@ const Dashboard = () => {
       <Navbar />
       <div className="container py-10">
         <h1 className="font-display font-bold text-3xl mb-2">לוח בקרה עסקי</h1>
-        <p className="text-muted-foreground mb-8">נהלו את הביקורות והגדילו את המוניטין שלכם.</p>
+        <p className="text-muted-foreground mb-8">נהלו את הביקורות, עקבו אחר הנתונים והגדילו את המוניטין של העסק שלכם.</p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {STATS.map(({ icon: Icon, label, value }) => (
@@ -108,7 +108,7 @@ const Dashboard = () => {
           {/* Course Management */}
           <TabsContent value="courses">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="font-display font-semibold text-lg">הקורסים שלכם ({businessCourses.length})</h2>
+              <h2 className="font-display font-semibold text-lg">הקורסים שלכם ({businessCourses.length} קורסים)</h2>
               <Button size="sm" className="gap-1 bg-primary text-primary-foreground">
                 <Plus size={14} /> הוסף קורס
               </Button>
@@ -131,7 +131,7 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">ביקורות שזוהו על ידי מערכת AI כחשודות בזיוף או ספאם.</p>
+                <p className="text-sm text-muted-foreground mb-4">ביקורות שזוהו על ידי מערכת ה-AI כחשודות בזיוף או בספאם. בדקו אותן ופעלו בהתאם.</p>
               </CardContent>
             </Card>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -215,11 +215,11 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  העלו קובץ CSV עם העמודות: email, course_name, purchase_date, receipt_id, amount
+                  העלו קובץ CSV הכולל את העמודות הבאות: email, course_name, purchase_date, receipt_id, amount
                 </p>
                 <div className="border-2 border-dashed border-border/50 rounded-lg p-10 text-center">
                   <Upload size={32} className="mx-auto mb-3 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-3">גררו ושחררו את הקובץ כאן</p>
+                  <p className="text-sm text-muted-foreground mb-3">גררו ושחררו קובץ לכאן</p>
                   <Button variant="outline" size="sm">עיון בקבצים</Button>
                 </div>
               </CardContent>

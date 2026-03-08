@@ -11,6 +11,7 @@ import WriteReview from "./pages/WriteReview";
 import CoursePage from "./pages/CoursePage";
 import AffiliateRedirect from "./pages/AffiliateRedirect";
 import BusinessRegister from "./pages/BusinessRegister";
+import AboutPage from "./pages/AboutPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/business/:slug" element={<BusinessProfile />} />
           <Route path="/course/:courseId" element={<CoursePage />} />
           <Route path="/search" element={<SearchPage />} />

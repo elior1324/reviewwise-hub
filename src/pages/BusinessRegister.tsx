@@ -45,8 +45,8 @@ const BusinessRegister = () => {
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <Building2 size={32} className="text-primary" />
             </div>
-            <h1 className="font-display font-bold text-3xl text-foreground mb-2">רשמו את העסק שלכם</h1>
-            <p className="text-muted-foreground">הצטרפו ל-ReviewHub ובנו אמון עם ביקורות מאומתות</p>
+            <h1 className="font-display font-bold text-3xl text-foreground mb-2">הרשמת עסק חדש</h1>
+            <p className="text-muted-foreground">הצטרפו ל-ReviewHub ובנו אמון אמיתי עם ביקורות מאומתות מלקוחות שרכשו בפועל</p>
           </div>
 
           <Card className="shadow-card animated-border bg-card">

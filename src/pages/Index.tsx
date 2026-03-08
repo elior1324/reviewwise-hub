@@ -48,7 +48,7 @@ const Index = () => {
               <br />בישראל
             </motion.h1>
             <motion.p variants={fadeUp} custom={2} className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl mx-auto">
-              ביקורות אמיתיות ומאומתות מסטודנטים אמיתיים. קבלו החלטות חכמות על הלימודים שלכם.
+              ביקורות אמיתיות ומאומתות מסטודנטים שרכשו בפועל. קבלו החלטות מושכלות לגבי ההשכלה שלכם.
             </motion.p>
             <motion.form variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex gap-3 max-w-lg mx-auto">
               <div className="relative flex-1">
@@ -76,7 +76,7 @@ const Index = () => {
               { icon: Star, label: "ביקורות", value: "12,400+" },
               { icon: Users, label: "עסקים", value: "850+" },
               { icon: ShieldCheck, label: "מאומתות", value: "98%" },
-              { icon: TrendingUp, label: "מבקרים חודשיים", value: "45K+" },
+              { icon: TrendingUp, label: "מבקרים בחודש", value: "45K+" },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label}>
                 <Icon size={24} className="mx-auto mb-2 text-primary" />
@@ -96,7 +96,7 @@ const Index = () => {
             <p className="text-muted-foreground mt-1">אלפי סטודנטים סומכים עליהם</p>
           </div>
           <Link to="/search">
-            <Button variant="outline" size="sm" className="border-border/50">הצג הכל</Button>
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -123,22 +123,29 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* About CTA */}
       <section className="container py-20">
-        <div className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border" style={{ background: "linear-gradient(135deg, hsl(160 100% 40% / 0.15), hsl(200 100% 50% / 0.08))" }}>
+        <div className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border" style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}>
           <div className="absolute inset-0 bg-primary/5 blur-3xl" />
           <div className="relative">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
-              יוצר קורסים? הצטרף עכשיו
+              יוצרי קורסים? הצטרפו עכשיו
             </h2>
             <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-              בנו אמון עם ביקורות מאומתות והגדילו את העסק שלכם.
+              בנו אמון אמיתי עם ביקורות מאומתות והגדילו את העסק שלכם.
             </p>
-            <Link to="/register">
-              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
-                צרו פרופיל עסקי
-              </Button>
-            </Link>
+            <div className="flex gap-3 justify-center flex-wrap">
+              <Link to="/register">
+                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
+                  צרו פרופיל עסקי
+                </Button>
+              </Link>
+              <Link to="/about">
+                <Button size="lg" variant="outline" className="border-border/50 font-semibold">
+                  קראו עוד על ReviewHub
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

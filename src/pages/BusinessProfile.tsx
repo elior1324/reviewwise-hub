@@ -91,7 +91,7 @@ const BusinessProfile = () => {
           ))}
         </div>
         {filteredReviews.length === 0 && (
-          <p className="text-center text-muted-foreground py-10">אין ביקורות התואמות לסינון זה.</p>
+          <p className="text-center text-muted-foreground py-10">אין ביקורות התואמות לסינון שבחרתם. נסו לשנות את הפילטר.</p>
         )}
       </div>
       <Footer />
