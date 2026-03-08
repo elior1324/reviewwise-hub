@@ -159,14 +159,12 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
               <Separator className="flex-1" />
             </div>
 
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full border border-dashed border-border/50 hover:bg-accent/50 h-11 text-muted-foreground hover:text-foreground"
-              onClick={() => navigate("/business/dashboard")}
+            <Link
+              to="/business/dashboard"
+              className="flex items-center justify-center w-full border border-dashed border-border/50 hover:bg-accent/50 h-11 text-muted-foreground hover:text-foreground rounded-md text-sm font-medium transition-colors"
             >
               👁️ כניסה לדמו — צפייה בלוח הבקרה
-            </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
