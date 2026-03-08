@@ -307,6 +307,107 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Earn Money CTA */}
+      <section className="container py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="rounded-2xl relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg, hsl(45 100% 51% / 0.12), hsl(35 100% 50% / 0.06), hsl(160 84% 39% / 0.08))" }}
+        >
+          <div className="absolute inset-0 noise-overlay opacity-30" />
+          <div className="absolute top-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 right-0 w-72 h-72 bg-accent/10 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2" />
+          
+          <div className="relative p-10 md:p-16 text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6"
+            >
+              <DollarSign size={16} />
+              תוכנית שותפים
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="font-display font-bold text-3xl md:text-5xl text-foreground mb-4"
+            >
+              הדעה שלכם שווה כסף 💰
+            </motion.h2>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="text-lg text-muted-foreground mb-3 max-w-2xl mx-auto"
+            >
+              כתבו ביקורת מאומתת על קורס, הכשרה או בעל מקצוע — 
+              <span className="text-foreground font-semibold"> והתחילו להרוויח מכל מכירה שתגיע בעקבותיכם.</span>
+            </motion.p>
+
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto"
+            >
+              כל ביקורת מאומתת הופכת אתכם לשותפים — אתם מרוויחים חלק מההכנסות, בלי שתצטרכו לעשות כלום אחרי.
+              <span className="text-primary font-medium"> הכנסה פאסיבית, פשוט ככה.</span>
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-10"
+            >
+              {[
+                { step: "01", title: "כתבו ביקורת", desc: "שתפו חוויה אמיתית על מוצר שרכשתם" },
+                { step: "02", title: "אנחנו מאמתים", desc: "הביקורת עוברת אימות רכישה" },
+                { step: "03", title: "מרוויחים", desc: "על כל מכירה שתגיע — אתם מקבלים חלק" },
+              ].map(({ step, title, desc }, i) => (
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.5 + i * 0.1, duration: 0.4 }}
+                  className="bg-card/60 backdrop-blur-sm border border-border/40 rounded-xl p-5 text-center"
+                >
+                  <span className="text-primary/40 font-display font-bold text-3xl">{step}</span>
+                  <h3 className="font-display font-bold text-foreground mt-1">{title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+            >
+              <Link to="/auth">
+                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-base glow-primary px-10">
+                  הירשמו והתחילו להרוויח
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </motion.div>
+      </section>
+
       {/* About CTA */}
       <section className="container pb-20">
         <motion.div
