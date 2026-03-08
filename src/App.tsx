@@ -19,6 +19,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import CompanyGuidelines from "./pages/CompanyGuidelines";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/go/:courseId" element={<AffiliateRedirect />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/guidelines" element={<CompanyGuidelines />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />
