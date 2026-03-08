@@ -51,11 +51,11 @@ const AUDIENCE_TYPES = [
   { icon: BarChart3, label: "יזמים", desc: "Growth וניהול סטארטאפ" },
 ];
 
-const FREELANCER_CATS_DISPLAY = FREELANCER_CATEGORIES.slice(0, 6).map(cat => ({
+const FREELANCER_CATS_DISPLAY = FREELANCER_CATEGORIES.slice(0, 8).map(cat => ({
   label: cat,
   query: cat,
   count: BUSINESSES.filter(b => b.type === "freelancer" && b.category === cat).reduce((s, b) => s + b.reviewCount, 0),
-}));
+})).filter(c => c.count > 0);
 
 const COURSE_CATS_DISPLAY = COURSE_CATEGORIES.map(cat => ({
   label: cat,

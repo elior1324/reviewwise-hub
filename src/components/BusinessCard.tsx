@@ -8,13 +8,14 @@ interface BusinessCardProps {
   slug: string;
   name: string;
   category: string;
+  subcategory?: string;
   rating: number;
   reviewCount: number;
   description: string;
   logo?: string;
 }
 
-const BusinessCard = ({ slug, name, category, rating, reviewCount, description, logo }: BusinessCardProps) => (
+const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, description, logo }: BusinessCardProps) => (
   <Link to={`/biz/${slug}`}>
     <Card className="shadow-card hover:shadow-card-hover transition-all duration-500 group cursor-pointer h-full animated-border bg-card overflow-hidden relative">
       {/* Ambient glow on hover */}
@@ -42,7 +43,12 @@ const BusinessCard = ({ slug, name, category, rating, reviewCount, description, 
               </div>
             )}
           </motion.div>
-          <span className="text-xs text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">{category}</span>
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-xs text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">{category}</span>
+            {subcategory && (
+              <span className="text-[10px] text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full">{subcategory}</span>
+            )}
+          </div>
         </div>
         <h3 className="font-display font-semibold text-lg text-foreground mb-1">{name}</h3>
         <div className="flex items-center gap-2 mb-3">
