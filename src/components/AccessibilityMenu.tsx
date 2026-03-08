@@ -61,6 +61,7 @@ const AccessibilityMenu = () => {
     root.classList.toggle("a11y-big-cursor", settings.bigCursor);
     root.classList.toggle("a11y-grayscale", settings.grayscale);
     root.classList.toggle("a11y-text-spacing", settings.textSpacing);
+    root.classList.toggle("a11y-invert-colors", settings.invertColors);
   }, [settings]);
 
   const toggle = (key: keyof Omit<AccessibilitySettings, "fontSize">) => {
