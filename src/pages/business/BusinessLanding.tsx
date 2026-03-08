@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
-  Award, ArrowLeft, CheckCircle, Users
+  Award, ArrowLeft, CheckCircle, Users, X, Crown, Sparkles
 } from "lucide-react";
 
 const fadeUp = {
