@@ -157,12 +157,33 @@ const Index = () => {
         </motion.div>
       </section>
 
-      {/* Two Category Sections */}
+      {/* Top Freelancers */}
+      <section className="container py-20">
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <UserCheck size={22} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">בעלי מקצוע מובילים</h2>
+            </div>
+            <p className="text-muted-foreground mt-1">פרילנסרים מוערכים עם ביקורות מאומתות</p>
+          </div>
+          <Link to="/search?tab=freelancers">
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {topFreelancers.map((biz, i) => (
+            <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+              <BusinessCard {...biz} />
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Freelancer Categories */}
       <section className="border-y border-border/50 glass">
         <div className="container py-12">
-          {/* Freelancers */}
           <motion.div
-            className="mb-10"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
@@ -186,8 +207,35 @@ const Index = () => {
               ))}
             </div>
           </motion.div>
+        </div>
+      </section>
 
-          {/* Course Providers */}
+      {/* Top Course Providers */}
+      <section className="container py-20">
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <BookOpen size={22} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">מוכרי קורסים מובילים</h2>
+            </div>
+            <p className="text-muted-foreground mt-1">קורסים, סדנאות והכשרות מאומתים</p>
+          </div>
+          <Link to="/search?tab=courses">
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {topCourseProviders.map((biz, i) => (
+            <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+              <BusinessCard {...biz} />
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Course Categories */}
+      <section className="border-y border-border/50 glass">
+        <div className="container py-12">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -244,54 +292,6 @@ const Index = () => {
               </motion.div>
             ))}
           </motion.div>
-        </div>
-      </section>
-
-      {/* Top Freelancers */}
-      <section className="container py-20">
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <UserCheck size={22} className="text-primary" />
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">בעלי מקצוע מובילים</h2>
-            </div>
-            <p className="text-muted-foreground mt-1">פרילנסרים מוערכים עם ביקורות מאומתות</p>
-          </div>
-          <Link to="/search?tab=freelancers">
-            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {topFreelancers.map((biz, i) => (
-            <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-              <BusinessCard {...biz} />
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Top Course Providers */}
-      <section className="border-y border-border/50">
-        <div className="container py-20">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <BookOpen size={22} className="text-primary" />
-                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">מוכרי קורסים מובילים</h2>
-              </div>
-              <p className="text-muted-foreground mt-1">קורסים, סדנאות והכשרות מאומתים</p>
-            </div>
-            <Link to="/search?tab=courses">
-              <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {topCourseProviders.map((biz, i) => (
-              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-                <BusinessCard {...biz} />
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 
