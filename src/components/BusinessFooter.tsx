@@ -13,7 +13,7 @@ const BusinessFooter = () => (
             <span className="font-display font-bold text-lg gradient-text">ReviewHub</span>
             <span className="text-xs text-muted-foreground">לעסקים</span>
           </div>
-          <p className="text-sm text-muted-foreground">ביקורות מאומתות לחינוך דיגיטלי בישראל.</p>
+          <p className="text-sm text-muted-foreground">הפלטפורמה שעוזרת לכם לבחור נכון ולבנות את העתיד.</p>
         </div>
         <div>
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">מוצר</h4>
