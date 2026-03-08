@@ -124,8 +124,40 @@ const TRUSTED = [
   { name: "TechPro Academy", initials: "TP" },
   { name: "LearnX Israel", initials: "LX" },
 ];
+// Smooth collapsible with measured height
+const SmoothCollapse = ({ isOpen, preview, title }: { isOpen: boolean; preview?: string; title: string }) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
 
-const BusinessLanding = () => {
+  useEffect(() => {
+    if (contentRef.current) {
+      setHeight(contentRef.current.scrollHeight);
+    }
+  }, [isOpen, preview]);
+
+  return (
+    <div
+      className="overflow-hidden transition-[height] duration-[400ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]"
+      style={{ height: isOpen && preview ? height : 0 }}
+    >
+      <div ref={contentRef}>
+        {preview && (
+          <div className="pt-4 pb-1">
+            <img
+              src={preview}
+              alt={`תצוגה מקדימה — ${title}`}
+              className={`rounded-lg border border-border/30 w-full transition-[opacity,transform] duration-[400ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"}`}
+              loading="lazy"
+            />
+            <p className={`text-[11px] text-muted-foreground mt-2 text-center transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0"}`}>תצוגה מקדימה של הפיצ׳ר</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
   const { user, subscriptionTier } = useAuth();
   const { toast } = useToast();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
