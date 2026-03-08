@@ -75,6 +75,9 @@ const BusinessProfile = () => {
         {/* AI Summary */}
         {summary && <ReviewSummary summary={summary} />}
 
+        {/* Testimonial Videos/Images */}
+        {dbBusinessId && <TestimonialCarousel businessId={dbBusinessId} />}
+
         {/* Add Review */}
         <div className="mb-8">
           <h2 className="font-display font-bold text-xl mb-4">הוסיפו ביקורת</h2>
