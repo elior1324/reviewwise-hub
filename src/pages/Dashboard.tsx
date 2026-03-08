@@ -328,22 +328,7 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="links">
-            <Card className="shadow-card animated-border bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Link2 size={20} /> יצירת קישורי ביקורת</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-1 block">אימייל לקוח</label>
-                  <Input placeholder="customer@example.com" className="glass border-border/50" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block">שם הקורס</label>
-                  <Input placeholder="לדוגמה: שיווק דיגיטלי מאסטרקלאס" className="glass border-border/50" />
-                </div>
-                <Button className="bg-primary text-primary-foreground gap-2 glow-primary"><Send size={16} /> יצירה ושליחה</Button>
-              </CardContent>
-            </Card>
+            <ReviewRequestForm courses={businessCourses} />
           </TabsContent>
 
           <TabsContent value="widgets">
