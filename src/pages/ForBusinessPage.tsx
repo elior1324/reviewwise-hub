@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import logoIcon from "@/assets/logo-icon-cropped.png";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
 import { motion } from "framer-motion";
@@ -150,8 +151,8 @@ const ForBusinessPage = () => {
                 {/* Stats preview card */}
                 <div className="rounded-2xl p-6 bg-card border border-border/50 shadow-card space-y-4">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary glow-primary flex items-center justify-center">
-                      <span className="text-primary-foreground font-display font-bold text-sm">R</span>
+                    <div className="w-10 h-10 rounded-xl overflow-hidden">
+                      <img src={logoIcon} alt="ReviewHub" className="w-full h-full object-cover" />
                     </div>
                     <div>
                       <p className="font-display font-semibold text-sm">דאשבורד ReviewHub</p>
