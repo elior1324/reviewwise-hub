@@ -21,6 +21,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import CompanyGuidelines from "./pages/CompanyGuidelines";
 import TrademarkGuidelines from "./pages/TrademarkGuidelines";
+import ModernSlaveryStatement from "./pages/ModernSlaveryStatement";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/terms" element={<TermsAndConditions />} />
             <Route path="/guidelines" element={<CompanyGuidelines />} />
             <Route path="/trademark" element={<TrademarkGuidelines />} />
+            <Route path="/modern-slavery" element={<ModernSlaveryStatement />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />
