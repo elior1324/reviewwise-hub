@@ -103,6 +103,7 @@ const Navbar = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-border/50 p-4 space-y-3 glass">
+          <Link to="/" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>עמוד הבית</Link>
           <Link to="/write-review" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>כתבו ביקורת</Link>
           <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>קטגוריות</Link>
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
