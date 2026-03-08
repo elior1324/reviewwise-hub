@@ -172,6 +172,8 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                     />
                   )}
 
+                  <FormPrivacyNotice className="mt-1" />
+
                   <Button
                     type="submit"
                     disabled={submitting}
