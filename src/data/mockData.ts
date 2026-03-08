@@ -57,6 +57,9 @@ export interface Review {
   updatedAt?: string;
   flagged?: boolean;
   flagReason?: string;
+  isEarlyBird?: boolean;
+  isExpert?: boolean;
+  likeCount?: number;
   ownerResponse?: {
     text: string;
     date: string;

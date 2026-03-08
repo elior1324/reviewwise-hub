@@ -90,6 +90,20 @@ const BusinessProfile = () => {
         .order("created_at", { ascending: false });
 
       if (reviewData) {
+        // Build expert map: user_id -> number of high-rated reviews in this business category
+        const expertCounts: Record<string, number> = {};
+        reviewData.forEach((r: any) => {
+          if (r.rating >= 4) {
+            expertCounts[r.user_id] = (expertCounts[r.user_id] || 0) + 1;
+          }
+        });
+
+        // First 5 reviews (by created_at asc) are Early Bird
+        const sortedByDate = [...reviewData].sort(
+          (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+        const earlyBirdIds = new Set(sortedByDate.slice(0, 5).map((r: any) => r.id));
+
         setReviews(reviewData.map((r: any) => ({
           id: r.id,
           reviewerName: r.anonymous ? "אנונימי" : "משתמש",
@@ -105,6 +119,9 @@ const BusinessProfile = () => {
           updatedAt: r.updated_at !== r.created_at ? new Date(r.updated_at).toLocaleDateString("he-IL") : undefined,
           flagged: r.flagged || false,
           flagReason: r.flag_reason || undefined,
+          likeCount: r.like_count || 0,
+          isEarlyBird: earlyBirdIds.has(r.id),
+          isExpert: (expertCounts[r.user_id] || 0) >= 3,
           ownerResponse: r.business_responses?.[0] ? {
             text: r.business_responses[0].text,
             date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
