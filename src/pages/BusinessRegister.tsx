@@ -244,7 +244,14 @@ const BusinessRegister = () => {
                   />
                 </div>
 
-                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" size="lg">
+                <PrivacyConsentCheckbox
+                  checked={privacyConsent}
+                  onCheckedChange={setPrivacyConsent}
+                />
+
+                <FormPrivacyNotice className="mt-1" />
+
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" size="lg" disabled={!privacyConsent}>
                   הרשמה ויצירת פרופיל
                 </Button>
               </form>
