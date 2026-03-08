@@ -21,6 +21,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import CompanyGuidelines from "./pages/CompanyGuidelines";
 import TrademarkGuidelines from "./pages/TrademarkGuidelines";
+import ModernSlaveryStatement from "./pages/ModernSlaveryStatement";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
