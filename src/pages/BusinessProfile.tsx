@@ -92,7 +92,7 @@ const BusinessProfile = () => {
       if (reviewData) {
         setReviews(reviewData.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.profiles?.display_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating,
           text: r.text,
           courseName: r.courses?.name || "",
