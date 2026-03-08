@@ -5,6 +5,7 @@ import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationBell from "./NotificationBell";
+import AccessibilityMenu from "./AccessibilityMenu";
 import {
   DropdownMenu,
   DropdownMenuContent,
