@@ -76,6 +76,11 @@ const Index = () => {
   const topCourseProviders = BUSINESSES.filter(b => b.type === "course-provider").sort((a, b) => b.rating - a.rating).slice(0, 4);
   const recentReviews = REVIEWS.slice(0, 3);
 
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0.3]);
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 40]);
+
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
