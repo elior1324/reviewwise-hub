@@ -1,3 +1,4 @@
+import ReactMarkdown from "react-markdown";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import AIChatbot from "@/components/AIChatbot";
