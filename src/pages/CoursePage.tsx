@@ -51,7 +51,7 @@ const CoursePage = () => {
                 </Badge>
               </div>
               {business && (
-                <Link to={`/business/${business.slug}`} className="text-sm text-primary hover:underline mb-2 inline-block">
+                <Link to={`/biz/${business.slug}`} className="text-sm text-primary hover:underline mb-2 inline-block">
                   {business.name}
                 </Link>
               )}

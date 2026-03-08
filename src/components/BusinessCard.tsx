@@ -13,7 +13,7 @@ interface BusinessCardProps {
 }
 
 const BusinessCard = ({ slug, name, category, rating, reviewCount, description }: BusinessCardProps) => (
-  <Link to={`/business/${slug}`}>
+  <Link to={`/biz/${slug}`}>
     <Card className="shadow-card hover:shadow-card-hover transition-all duration-500 group cursor-pointer h-full animated-border bg-card">
       <CardContent className="p-6 flex flex-col h-full">
         <div className="flex items-start justify-between mb-3">
