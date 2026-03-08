@@ -129,6 +129,7 @@ export type Database = {
           rating: number | null
           review_count: number | null
           slug: string
+          subscription_tier: string
           updated_at: string
           verified: boolean | null
           website: string | null
@@ -146,6 +147,7 @@ export type Database = {
           rating?: number | null
           review_count?: number | null
           slug: string
+          subscription_tier?: string
           updated_at?: string
           verified?: boolean | null
           website?: string | null
@@ -163,6 +165,7 @@ export type Database = {
           rating?: number | null
           review_count?: number | null
           slug?: string
+          subscription_tier?: string
           updated_at?: string
           verified?: boolean | null
           website?: string | null

@@ -1,0 +1,1 @@
+ALTER TABLE public.businesses ADD COLUMN subscription_tier text NOT NULL DEFAULT 'free' CHECK (subscription_tier IN ('free', 'pro', 'premium'));
