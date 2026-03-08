@@ -39,7 +39,7 @@ const FREE_FEATURES: Feature[] = [
   { icon: Star, title: "תג דירוג בסיסי", desc: "הציגו את הדירוג שלכם עם תג אמינות ReviewHub." },
 ];
 
-const PRO_FEATURES = [
+const PRO_FEATURES: Feature[] = [
   { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת." },
   { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת." },
   { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות." },
