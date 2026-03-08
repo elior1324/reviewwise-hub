@@ -44,7 +44,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
     
     toast({
       title: "הביקורת נשלחה בהצלחה! ✨",
-      description: isVerifiedPurchaser
+      description: receiptVerified
         ? "הביקורת שלכם תפורסם כביקורת רכישה מאומתת."
         : "הביקורת שלכם תפורסם ללא תג רכישה מאומתת.",
     });
