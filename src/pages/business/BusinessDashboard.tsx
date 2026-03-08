@@ -329,6 +329,7 @@ const BusinessDashboard = () => {
 
           {/* Clicks & Conversions */}
           <TabsContent value="clicks">
+            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <TooltipProvider delayDuration={200}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card className="shadow-card bg-card">
