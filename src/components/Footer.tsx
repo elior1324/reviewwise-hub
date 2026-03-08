@@ -58,6 +58,7 @@ const Footer = () => (
           <div className="space-y-2">
             <span className="block text-sm text-muted-foreground">תיעוד API</span>
             <span className="block text-sm text-muted-foreground">מדריך וידג׳טים</span>
+            <Link to="/#faq" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">שאלות נפוצות</Link>
           </div>
         </div>
         <div>
