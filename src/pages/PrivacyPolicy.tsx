@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { Shield, Mail, Lock, Eye, Trash2, FileText, Users, Globe, Database, Cookie, Baby, RefreshCw } from "lucide-react";
+import { Shield, Mail, Lock, Eye, Trash2, FileText, Users, Globe, Database, Cookie, Baby, RefreshCw, CheckCircle, ExternalLink } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
