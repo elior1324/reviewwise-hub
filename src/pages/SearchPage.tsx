@@ -139,7 +139,7 @@ const SearchPage = () => {
                   className="h-7 text-xs"
                   onClick={() => setSelectedSubcat(null)}
                 >
-                  כל ה{selectedFreelancerCat}
+                  כל {CATEGORY_PLURAL[selectedFreelancerCat] || `ה${selectedFreelancerCat}`}
                 </Button>
                 {currentSubcats.map(sub => (
                   <Button
