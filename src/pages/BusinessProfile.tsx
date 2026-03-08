@@ -5,6 +5,7 @@ import ReviewCard from "@/components/ReviewCard";
 import ReviewSummary from "@/components/ReviewSummary";
 import CourseCard from "@/components/CourseCard";
 import BusinessHero from "@/components/BusinessHero";
+import AddReviewForm from "@/components/AddReviewForm";
 import { Button } from "@/components/ui/button";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -46,6 +47,16 @@ const BusinessProfile = () => {
 
         {/* AI Summary */}
         {summary && <ReviewSummary summary={summary} />}
+
+        {/* Add Review */}
+        <div className="mb-8">
+          <h2 className="font-display font-bold text-xl mb-4">הוסיפו ביקורת</h2>
+          <AddReviewForm
+            businessSlug={business.slug}
+            businessName={business.name}
+            isVerifiedPurchaser={false}
+          />
+        </div>
 
         {/* Review filters */}
         <div className="flex items-center gap-2 mb-6 flex-wrap">
