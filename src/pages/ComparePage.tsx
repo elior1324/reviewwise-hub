@@ -21,6 +21,12 @@ interface CompareItem {
   description?: string;
   type: "freelancer" | "course";
   slug?: string;
+  yearsExperience?: number;
+  difficultyLevel?: string;
+  targetAudience?: string;
+  location?: string;
+  duration?: string;
+  format?: string;
 }
 
 interface SearchResult {
@@ -34,6 +40,12 @@ interface SearchResult {
   type: "freelancer" | "course";
   businessName?: string;
   slug?: string;
+  yearsExperience?: number;
+  difficultyLevel?: string;
+  targetAudience?: string;
+  location?: string;
+  duration?: string;
+  format?: string;
 }
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -69,8 +81,8 @@ const ComparePage = () => {
     setIsSearching(true);
     try {
       const [bizRes, courseRes] = await Promise.all([
-        supabase.from("businesses").select("id, name, slug, category, rating, review_count, description").ilike("name", `%${query}%`).limit(5),
-        supabase.from("courses").select("id, name, category, rating, review_count, price, description, business_id, businesses(name, slug)").ilike("name", `%${query}%`).limit(5),
+        supabase.from("businesses").select("id, name, slug, category, rating, review_count, description, years_experience, difficulty_level, target_audience, location").ilike("name", `%${query}%`).limit(5),
+        supabase.from("courses").select("id, name, category, rating, review_count, price, description, duration, difficulty_level, format, business_id, businesses(name, slug, years_experience, target_audience, location)").ilike("name", `%${query}%`).limit(5),
       ]);
 
       const results: SearchResult[] = [];
@@ -86,6 +98,10 @@ const ComparePage = () => {
             description: b.description || "",
             type: "freelancer",
             slug: b.slug,
+            yearsExperience: b.years_experience,
+            difficultyLevel: b.difficulty_level,
+            targetAudience: b.target_audience,
+            location: b.location,
           });
         });
       }
@@ -103,6 +119,12 @@ const ComparePage = () => {
             type: "course",
             businessName: c.businesses?.name,
             slug: c.businesses?.slug,
+            duration: c.duration,
+            difficultyLevel: c.difficulty_level,
+            format: c.format,
+            yearsExperience: c.businesses?.years_experience,
+            targetAudience: c.businesses?.target_audience,
+            location: c.businesses?.location,
           });
         });
       }
@@ -534,6 +556,76 @@ const ComparePage = () => {
                             );
                           })}
                         </tr>
+                        <tr className="border-b border-border/50">
+                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">שנות ניסיון</td>
+                          {selectedItems.map(item => {
+                            const experiences = selectedItems.filter(i => i.yearsExperience).map(i => i.yearsExperience!);
+                            const maxExp = experiences.length > 0 ? Math.max(...experiences) : null;
+                            const isTop = item.yearsExperience && item.yearsExperience === maxExp;
+                            return (
+                              <td key={item.id} className="p-4 text-center">
+                                {item.yearsExperience ? (
+                                  <span className={`font-semibold ${isTop ? "text-primary" : "text-foreground"}`}>
+                                    {item.yearsExperience} שנים
+                                    {isTop && <span className="text-xs mr-1">⭐</span>}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground">—</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        <tr className="border-b border-border/50">
+                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">רמת קושי</td>
+                          {selectedItems.map(item => (
+                            <td key={item.id} className="p-4 text-center">
+                              {item.difficultyLevel ? (
+                                <span className="text-xs px-2 py-1 rounded-full bg-accent/50 text-accent-foreground font-medium">
+                                  {item.difficultyLevel}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                        <tr className="border-b border-border/50">
+                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">קהל יעד</td>
+                          {selectedItems.map(item => (
+                            <td key={item.id} className="p-4 text-center text-xs text-muted-foreground leading-relaxed">
+                              {item.targetAudience || "—"}
+                            </td>
+                          ))}
+                        </tr>
+                        <tr className="border-b border-border/50">
+                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">מיקום</td>
+                          {selectedItems.map(item => (
+                            <td key={item.id} className="p-4 text-center text-foreground text-sm">
+                              {item.location || "—"}
+                            </td>
+                          ))}
+                        </tr>
+                        {selectedItems.some(i => i.duration) && (
+                          <tr className="border-b border-border/50">
+                            <td className="p-4 font-medium text-muted-foreground bg-muted/10">משך</td>
+                            {selectedItems.map(item => (
+                              <td key={item.id} className="p-4 text-center text-foreground text-sm">
+                                {item.duration || "—"}
+                              </td>
+                            ))}
+                          </tr>
+                        )}
+                        {selectedItems.some(i => i.format) && (
+                          <tr className="border-b border-border/50">
+                            <td className="p-4 font-medium text-muted-foreground bg-muted/10">פורמט</td>
+                            {selectedItems.map(item => (
+                              <td key={item.id} className="p-4 text-center text-foreground text-sm">
+                                {item.format || "—"}
+                              </td>
+                            ))}
+                          </tr>
+                        )}
                         {selectedItems.some(i => i.description) && (
                           <tr>
                             <td className="p-4 font-medium text-muted-foreground bg-muted/10 align-top">תיאור</td>

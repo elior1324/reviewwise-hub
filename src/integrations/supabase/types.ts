@@ -120,8 +120,10 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
+          difficulty_level: string | null
           email: string | null
           id: string
+          location: string | null
           logo_url: string | null
           name: string
           owner_id: string
@@ -131,16 +133,20 @@ export type Database = {
           slug: string
           social_links: Json | null
           subscription_tier: string
+          target_audience: string | null
           updated_at: string
           verified: boolean | null
           website: string | null
+          years_experience: number | null
         }
         Insert: {
           category: string
           created_at?: string
           description?: string | null
+          difficulty_level?: string | null
           email?: string | null
           id?: string
+          location?: string | null
           logo_url?: string | null
           name: string
           owner_id: string
@@ -150,16 +156,20 @@ export type Database = {
           slug: string
           social_links?: Json | null
           subscription_tier?: string
+          target_audience?: string | null
           updated_at?: string
           verified?: boolean | null
           website?: string | null
+          years_experience?: number | null
         }
         Update: {
           category?: string
           created_at?: string
           description?: string | null
+          difficulty_level?: string | null
           email?: string | null
           id?: string
+          location?: string | null
           logo_url?: string | null
           name?: string
           owner_id?: string
@@ -169,9 +179,11 @@ export type Database = {
           slug?: string
           social_links?: Json | null
           subscription_tier?: string
+          target_audience?: string | null
           updated_at?: string
           verified?: boolean | null
           website?: string | null
+          years_experience?: number | null
         }
         Relationships: []
       }
@@ -182,6 +194,9 @@ export type Database = {
           category: string | null
           created_at: string
           description: string | null
+          difficulty_level: string | null
+          duration: string | null
+          format: string | null
           id: string
           name: string
           price: number | null
@@ -196,6 +211,9 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          difficulty_level?: string | null
+          duration?: string | null
+          format?: string | null
           id?: string
           name: string
           price?: number | null
@@ -210,6 +228,9 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          difficulty_level?: string | null
+          duration?: string | null
+          format?: string | null
           id?: string
           name?: string
           price?: number | null
