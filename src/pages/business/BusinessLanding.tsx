@@ -3,6 +3,7 @@ import BusinessNavbar from "@/components/BusinessNavbar";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import BusinessFooter from "@/components/BusinessFooter";
 import AIChatbot from "@/components/AIChatbot";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
