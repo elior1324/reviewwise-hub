@@ -23,6 +23,7 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import CompanyGuidelines from "./pages/CompanyGuidelines";
 import TrademarkGuidelines from "./pages/TrademarkGuidelines";
 import ModernSlaveryStatement from "./pages/ModernSlaveryStatement";
+import AccessibilityStatement from "./pages/AccessibilityStatement";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
