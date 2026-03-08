@@ -169,7 +169,7 @@ const Dashboard = () => {
             <TabsTrigger value="flagged">חשודות</TabsTrigger>
             <TabsTrigger value="affiliate">אפיליאט</TabsTrigger>
             <TabsTrigger value="upload">העלאת רכישות</TabsTrigger>
-            <TabsTrigger value="links">קישורי ביקורת</TabsTrigger>
+            
             <TabsTrigger value="widgets">וידג׳טים</TabsTrigger>
           </TabsList>
 
