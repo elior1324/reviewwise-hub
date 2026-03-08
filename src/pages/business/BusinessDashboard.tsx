@@ -9,8 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
-  Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video
+  Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { REVIEWS, COURSES, AFFILIATE_CLICKS } from "@/data/mockData";
 
 const BUSINESS_SLUG = "digital-marketing-academy";
@@ -29,10 +30,10 @@ const BusinessDashboard = () => {
   const totalRevenue = AFFILIATE_CLICKS.filter(c => c.converted).reduce((s, c) => s + (c.revenue || 0), 0);
 
   const STATS = [
-    { icon: Star, label: "דירוג ממוצע", value: "4.8", change: "+0.2", up: true },
-    { icon: MessageSquare, label: "סה״כ ביקורות", value: "124", change: "+12", up: true },
-    { icon: MousePointerClick, label: "קליקים לאתר", value: totalClicks.toString(), change: "+23%", up: true },
-    { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: `₪${totalRevenue.toLocaleString()}`, change: "+18%", up: true },
+    { icon: Star, label: "דירוג ממוצע", value: "4.8", change: "+0.2", up: true, tooltip: "הציון הממוצע שלקוחות נתנו לכל הקורסים שלכם. דירוג גבוה מגביר אמון ומושך לקוחות חדשים." },
+    { icon: MessageSquare, label: "סה״כ ביקורות", value: "124", change: "+12", up: true, tooltip: "מספר הביקורות שנכתבו על הקורסים שלכם. יותר ביקורות = יותר הוכחה חברתית ונראות בפלטפורמה." },
+    { icon: MousePointerClick, label: "קליקים לאתר", value: totalClicks.toString(), change: "+23%", up: true, tooltip: "כמה אנשים לחצו על הקישור לאתר שלכם מתוך דף הביקורות. מדד ישיר לתנועה שמגיעה אליכם מ-ReviewHub." },
+    { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: `₪${totalRevenue.toLocaleString()}`, change: "+18%", up: true, tooltip: "סך ההכנסות מרכישות שהגיעו דרך קישורי האפיליאט שלכם. כסף אמיתי שנכנס הודות לביקורות." },
   ];
 
   const aiReport = {
@@ -96,17 +97,30 @@ const BusinessDashboard = () => {
         </div>
 
         {/* Stats Grid */}
+        <TooltipProvider delayDuration={200}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {STATS.map(({ icon: Icon, label, value, change, up }) => (
+          {STATS.map(({ icon: Icon, label, value, change, up, tooltip }) => (
             <Card key={label} className="shadow-card animated-border bg-card">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Icon size={20} className="text-primary" />
                   </div>
-                  <div className={`flex items-center gap-1 text-xs font-medium ${up ? "text-primary" : "text-destructive"}`}>
-                    {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                    {change}
+                  <div className="flex items-center gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                          <HelpCircle size={14} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                        {tooltip}
+                      </TooltipContent>
+                    </Tooltip>
+                    <div className={`flex items-center gap-1 text-xs font-medium ${up ? "text-primary" : "text-destructive"}`}>
+                      {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                      {change}
+                    </div>
                   </div>
                 </div>
                 <p className="font-display font-bold text-2xl">{value}</p>
@@ -115,6 +129,7 @@ const BusinessDashboard = () => {
             </Card>
           ))}
         </div>
+        </TooltipProvider>
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass flex-wrap">
@@ -221,16 +236,27 @@ const BusinessDashboard = () => {
 
           {/* Clicks & Conversions */}
           <TabsContent value="clicks">
+            <TooltipProvider delayDuration={200}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card className="shadow-card bg-card">
                 <CardContent className="p-5 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <MousePointerClick size={20} className="text-primary" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-display font-bold text-xl">{totalClicks}</p>
                     <p className="text-xs text-muted-foreground">סה״כ קליקים</p>
                   </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                        <HelpCircle size={14} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                      מספר הפעמים שמשתמשים לחצו על קישור האפיליאט שלכם. כל קליק מייצג לקוח פוטנציאלי שהגיע מ-ReviewHub.
+                    </TooltipContent>
+                  </Tooltip>
                 </CardContent>
               </Card>
               <Card className="shadow-card bg-card">
@@ -238,10 +264,20 @@ const BusinessDashboard = () => {
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <TrendingUp size={20} className="text-primary" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-display font-bold text-xl">{conversions}</p>
                     <p className="text-xs text-muted-foreground">המרות ({totalClicks > 0 ? Math.round(conversions / totalClicks * 100) : 0}%)</p>
                   </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                        <HelpCircle size={14} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                      כמה מהקליקים הפכו לרכישה בפועל. אחוז המרה גבוה מעיד על ביקורות אמינות שמשכנעות לקוחות לקנות.
+                    </TooltipContent>
+                  </Tooltip>
                 </CardContent>
               </Card>
               <Card className="shadow-card bg-card">
@@ -249,13 +285,24 @@ const BusinessDashboard = () => {
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <DollarSign size={20} className="text-primary" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-display font-bold text-xl">₪{totalRevenue.toLocaleString()}</p>
                     <p className="text-xs text-muted-foreground">סה״כ הכנסות</p>
                   </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                        <HelpCircle size={14} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                      סך ההכנסות שנוצרו מרכישות דרך ReviewHub. זה הכסף שהביקורות המאומתות שלכם הניבו ישירות.
+                    </TooltipContent>
+                  </Tooltip>
                 </CardContent>
               </Card>
             </div>
+            </TooltipProvider>
 
             <Card className="shadow-card bg-card">
               <CardHeader>
