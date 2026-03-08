@@ -23,6 +23,15 @@ export interface Course {
   verifiedPurchases: number;
 }
 
+export interface SocialLinks {
+  youtube?: string;
+  instagram?: string;
+  tiktok?: string;
+  linkedin?: string;
+  twitter?: string;
+  facebook?: string;
+}
+
 export interface Business {
   slug: string;
   name: string;
@@ -36,6 +45,7 @@ export interface Business {
   website?: string;
   email?: string;
   phone?: string;
+  socialLinks?: SocialLinks;
 }
 
 export interface Review {
