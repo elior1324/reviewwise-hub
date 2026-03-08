@@ -433,8 +433,8 @@ const BusinessDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* AI Weekly Report */}
           <TabsContent value="ai-report">
+            <LockedOverlay isLocked={!isPremium} onUpgrade={handleUpgrade}>
             <Card className="shadow-card bg-card mb-6">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
@@ -493,6 +493,7 @@ const BusinessDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+            </LockedOverlay>
           </TabsContent>
 
           {/* Testimonials Tab */}
