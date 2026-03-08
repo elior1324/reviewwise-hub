@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, ShieldCheck, Sparkles } from "lucide-react";
+import { Building2, ShieldCheck, Sparkles, Link2 } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -15,12 +15,13 @@ import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import SocialLinksEditor, { type SocialLinksData } from "@/components/SocialLinksEditor";
 
 const OTHER_VALUE = "__other__";
 
 const BusinessRegister = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, subscriptionTier } = useAuth();
   const navigate = useNavigate();
   const { data: freelancerCats = [], isLoading: catsLoading } = useCategories("freelancer");
   const { data: courseCats = [] } = useCategories("course");
@@ -36,10 +37,14 @@ const BusinessRegister = () => {
     description: "",
   });
 
+  const [socialLinks, setSocialLinks] = useState<SocialLinksData>({});
+
   const categories = form.businessType === "freelancer" ? freelancerCats : courseCats;
   const filteredCategories = categories.filter(c => c !== "אחר");
+  const canEditSocials = subscriptionTier === "pro" || subscriptionTier === "premium";
 
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
+  const updateSocial = (key: keyof SocialLinksData, value: string) => setSocialLinks(prev => ({ ...prev, [key]: value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,15 +62,18 @@ const BusinessRegister = () => {
     const isCustomCategory = form.category === OTHER_VALUE && form.customCategory.trim();
     const finalCategory = isCustomCategory ? "אחר" : form.category;
 
-    // Create slug
     const slug = form.businessName
       .toLowerCase()
       .replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "")
       .replace(/\s+/g, "-")
       .slice(0, 50) + "-" + Date.now().toString(36);
 
+    // Build social_links JSON only if user has paid tier
+    const socialLinksJson = canEditSocials
+      ? Object.fromEntries(Object.entries(socialLinks).filter(([, v]) => v && v.trim()))
+      : {};
+
     try {
-      // Insert business
       const { data: biz, error: bizError } = await supabase
         .from("businesses")
         .insert({
@@ -75,9 +83,10 @@ const BusinessRegister = () => {
           owner_id: user.id,
           email: form.email,
           phone: form.phone || null,
-          website: form.website || null,
+          website: canEditSocials ? (socialLinks.website || form.website || null) : (form.website || null),
           description: form.description || null,
-        })
+          social_links: socialLinksJson,
+        } as any)
         .select("id")
         .single();
 
@@ -95,36 +104,15 @@ const BusinessRegister = () => {
 
         if (!evalError && evalData) {
           if (evalData.status === "already_exists") {
-            // Category exists - update business to use it
-            await supabase
-              .from("businesses")
-              .update({ category: evalData.category })
-              .eq("id", biz.id);
-
-            toast({
-              title: "העסק נרשם בהצלחה! 🎉",
-              description: `הוצב בקטגוריה: ${evalData.category}`,
-            });
+            await supabase.from("businesses").update({ category: evalData.category }).eq("id", biz.id);
+            toast({ title: "העסק נרשם בהצלחה! 🎉", description: `הוצב בקטגוריה: ${evalData.category}` });
           } else if (evalData.status === "approved" || evalData.status === "mapped_to_existing") {
-            await supabase
-              .from("businesses")
-              .update({ category: evalData.category })
-              .eq("id", biz.id);
-
-            toast({
-              title: "העסק נרשם בהצלחה! 🎉✨",
-              description: `קטגוריה חדשה נוצרה: ${evalData.category}`,
-            });
+            await supabase.from("businesses").update({ category: evalData.category }).eq("id", biz.id);
+            toast({ title: "העסק נרשם בהצלחה! 🎉✨", description: `קטגוריה חדשה נוצרה: ${evalData.category}` });
           } else if (evalData.status === "pending") {
-            toast({
-              title: "העסק נרשם בהצלחה! 🎉",
-              description: evalData.message || `העסק שויך לקטגוריית "אחר" בינתיים. ${evalData.suggestions_count}/${evalData.threshold} עסקים ביקשו קטגוריה זו.`,
-            });
+            toast({ title: "העסק נרשם בהצלחה! 🎉", description: evalData.message || `העסק שויך לקטגוריית "אחר" בינתיים.` });
           } else {
-            toast({
-              title: "העסק נרשם בהצלחה! 🎉",
-              description: `שויך לקטגוריית "אחר"`,
-            });
+            toast({ title: "העסק נרשם בהצלחה! 🎉", description: `שויך לקטגוריית "אחר"` });
           }
         } else {
           toast({ title: "העסק נרשם בהצלחה! 🎉", description: "שויך לקטגוריית \"אחר\" בינתיים." });
@@ -151,7 +139,7 @@ const BusinessRegister = () => {
             <p className="text-muted-foreground">הצטרפו ל-ReviewHub ובנו אמון אמיתי עם ביקורות מאומתות מלקוחות שרכשו בפועל</p>
           </div>
 
-          <Card className="shadow-card animated-border bg-card">
+          <Card className="shadow-card animated-border bg-card mb-6">
             <CardHeader>
               <CardTitle className="font-display flex items-center gap-2">
                 <ShieldCheck size={20} className="text-primary" />
@@ -209,7 +197,7 @@ const BusinessRegister = () => {
                     />
                     <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
                       <Sparkles size={12} className="text-primary" />
-                      הקטגוריה תתווסף אוטומטית לאתר אחרי ש-3 עסקים יבקשו אותה. בינתיים העסק יופיע בקטגוריית "אחר".
+                      הקטגוריה תתווסף אוטומטית לאתר אחרי ש-3 עסקים יבקשו אותה.
                     </p>
                   </motion.div>
                 )}
@@ -222,14 +210,33 @@ const BusinessRegister = () => {
                   <Label className="mb-2 block">טלפון</Label>
                   <Input placeholder="03-1234567" value={form.phone} onChange={e => update("phone", e.target.value)} className="glass border-border/50" />
                 </div>
-                <div>
-                  <Label className="mb-2 block">אתר אינטרנט</Label>
-                  <Input placeholder="https://yourbusiness.co.il" value={form.website} onChange={e => update("website", e.target.value)} className="glass border-border/50" />
-                </div>
+
+                {/* Website field for free users */}
+                {!canEditSocials && (
+                  <div>
+                    <Label className="mb-2 block">אתר אינטרנט</Label>
+                    <Input placeholder="https://yourbusiness.co.il" value={form.website} onChange={e => update("website", e.target.value)} className="glass border-border/50" />
+                  </div>
+                )}
+
                 <div>
                   <Label className="mb-2 block">תיאור העסק</Label>
                   <Textarea placeholder="ספרו על העסק, הקורסים והשירותים שלכם..." value={form.description} onChange={e => update("description", e.target.value)} rows={4} className="glass border-border/50" />
                 </div>
+
+                {/* Social Links Section */}
+                <div className="pt-2">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Link2 size={18} className="text-primary" />
+                    <Label className="font-display font-semibold text-base">רשתות חברתיות ואתר</Label>
+                  </div>
+                  <SocialLinksEditor
+                    values={socialLinks}
+                    onChange={updateSocial}
+                    locked={!canEditSocials}
+                  />
+                </div>
+
                 <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" size="lg">
                   הרשמה ויצירת פרופיל
                 </Button>
