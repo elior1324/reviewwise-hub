@@ -102,42 +102,8 @@ const BusinessNavbar = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="lg:hidden border-t border-border/50 p-4 space-y-3 glass">
-          <p className="text-xs text-muted-foreground font-medium">פתרונות — לפי יעד עסקי</p>
-          <Link to="/business/solutions/engage" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ניהול משוב</Link>
-          <Link to="/business/solutions/conversions" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>האצת המרות</Link>
-          <Link to="/business/solutions/insights" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>שיפור עם תובנות</Link>
-          <Link to="/business/solutions/revenue" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>הגדלת הכנסות</Link>
-          <div className="border-t border-border/30 my-2" />
-          <p className="text-xs text-muted-foreground font-medium">פתרונות — לפי גודל עסק</p>
-          <Link to="/business/solutions/small-business" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>עסקים קטנים וצומחים</Link>
-          <Link to="/business/solutions/enterprise" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ארגונים וחברות גדולות</Link>
-          <div className="border-t border-border/30 my-2" />
-          <p className="text-xs text-muted-foreground font-medium">יכולות — הזמנת ביקורות</p>
-          <Link to="/business/features/service-reviews" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ביקורות שירות</Link>
-          <Link to="/business/features/product-reviews" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ביקורות מוצר</Link>
-          <Link to="/business/features/location-reviews" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ביקורות מיקום</Link>
-          <Link to="/business/features/review-invitations" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>הזמנות ביקורת</Link>
-          <div className="border-t border-border/30 my-2" />
-          <p className="text-xs text-muted-foreground font-medium">יכולות — ניהול משוב</p>
-          <Link to="/business/features/profile-page" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>דף פרופיל</Link>
-          <Link to="/business/features/respond-reviews" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>תגובה לביקורות</Link>
-          <div className="border-t border-border/30 my-2" />
-          <p className="text-xs text-muted-foreground font-medium">יכולות — האצת המרות</p>
-          <Link to="/business/features/review-seo" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>SEO ביקורות וגילוי AI</Link>
-          <Link to="/business/features/widgets" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>וידג׳טים להטמעה</Link>
-          <Link to="/business/features/social-media" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>כלי רשתות חברתיות</Link>
-          <Link to="/business/features/marketing-assets" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>נכסים שיווקיים</Link>
-          <div className="border-t border-border/30 my-2" />
-          <p className="text-xs text-muted-foreground font-medium">יכולות — שיפור עם תובנות</p>
-          <Link to="/business/features/review-spotlight" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>זרקור ביקורות</Link>
-          <Link to="/business/features/market-insights" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>תובנות שוק</Link>
-          <Link to="/business/features/review-insights" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>תובנות ביקורות</Link>
-          <Link to="/business/features/analytics" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>נתונים ואנליטיקס</Link>
-          <Link to="/business/features/review-tagging" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>תיוג ביקורות</Link>
-          <Link to="/business/features/visitor-insights" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>תובנות מבקרים</Link>
-          <div className="border-t border-border/30 my-2" />
           <Link to="/business/pricing" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>מחירים</Link>
-          <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודותינו</Link>
+          <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
           <div className="border-t border-border/30 my-2" />
           {!user && (
             <Link to="/business/login" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>התחברו / הרשמו</Link>
