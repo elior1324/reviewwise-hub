@@ -204,20 +204,32 @@ const Index = () => {
       {/* Stats */}
       <section className="border-b border-border/50">
         <div className="container py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={staggerContainer}
+          >
             {[
               { icon: Star, label: "ביקורות", value: "12,400+" },
               { icon: Users, label: "עסקים ופרילנסרים", value: "850+" },
               { icon: ShieldCheck, label: "מאומתות", value: "98%" },
               { icon: TrendingUp, label: "מבקרים בחודש", value: "45K+" },
             ].map(({ icon: Icon, label, value }) => (
-              <div key={label}>
-                <Icon size={24} className="mx-auto mb-2 text-primary" />
-                <p className="font-display font-bold text-2xl text-foreground">{value}</p>
-                <p className="text-sm text-muted-foreground">{label}</p>
-              </div>
+              <motion.div key={label} variants={scaleIn}>
+                <motion.div
+                  whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+                >
+                  <Icon size={24} className="mx-auto mb-2 text-primary" />
+                  <p className="font-display font-bold text-2xl text-foreground">
+                    <AnimatedCounter value={value} />
+                  </p>
+                  <p className="text-sm text-muted-foreground">{label}</p>
+                </motion.div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
