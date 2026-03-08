@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import ReceiptUploader from "@/components/ReceiptUploader";
 
 interface AddReviewFormProps {
   businessSlug: string;
