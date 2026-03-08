@@ -41,7 +41,7 @@ const TESTIMONIALS = [
 const PLANS = [
   { name: "סטארטר", price: "חינם", period: "", features: ["פרופיל עסקי ציבורי", "עד 10 ביקורות בחודש", "תג דירוג בסיסי", "תגובות לביקורות"], excluded: ["וידג׳טים להטמעה", "חיבור CRM ולידים", "דוחות AI"], cta: "התחילו בחינם", highlighted: false },
   { name: "מקצועי", price: "₪189", period: "/חודש", originalPrice: "₪249", features: ["ביקורות ללא הגבלה", "דאשבורד מתקדם", "וידג׳טים להטמעה", "בקשות ביקורת אוטומטיות", "מערכת אפיליאט", "סיכומי AI שבועיים", "תמיכה בעדיפות"], excluded: ["חיבור CRM ולידים"], cta: "התחילו 14 ימי ניסיון", highlighted: true },
-  { name: "פרימיום", price: "₪389", period: "/חודש", features: ["הכל מהמקצועי, ועוד:", "חיבור CRM — HubSpot, Salesforce", "ניהול לידים אוטומטי", "Webhook (Zapier/Make)", "Google Ads Review Stars ⭐", "דוחות AI יומיים", "גישת API מלאה", "מנהל הצלחה אישי"], excluded: [] as string[], cta: "שדרגו לפרימיום", highlighted: false, premium: true },
+  { name: "פרימיום", price: "₪479", period: "/חודש", features: ["הכל מהמקצועי, ועוד:", "חיבור CRM — HubSpot, Salesforce", "ניהול לידים אוטומטי", "Webhook (Zapier/Make)", "Google Ads Review Stars ⭐", "דוחות AI יומיים", "גישת API מלאה", "מנהל הצלחה אישי"], excluded: [] as string[], cta: "שדרגו לפרימיום", highlighted: false, premium: true },
 ];
 
 const ForBusinessPage = () => {
