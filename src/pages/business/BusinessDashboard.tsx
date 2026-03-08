@@ -885,27 +885,52 @@ const BusinessDashboard = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <h3 className="text-sm font-display font-semibold mb-3">מפתח API</h3>
-                    <div className="bg-secondary rounded-lg p-4 flex items-center justify-between" dir="ltr">
-                      <code className="text-xs text-foreground/70">rh_live_sk_••••••••••••••••••••3f8a</code>
-                      <Button size="sm" variant="outline" className="text-xs">העתק</Button>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-display font-semibold">מפתחות API</h3>
+                      {!isDemo && businessId && (
+                        <Button size="sm" variant="outline" className="text-xs" onClick={handleGenerateApiKey} disabled={generatingApiKey}>
+                          {generatingApiKey ? "מייצר..." : "צור מפתח חדש"}
+                        </Button>
+                      )}
                     </div>
+                    {!isDemo && realApiKeys.length > 0 ? (
+                      <div className="space-y-2">
+                        {realApiKeys.map((k: any) => (
+                          <div key={k.id} className="bg-secondary rounded-lg p-3 flex items-center justify-between" dir="ltr">
+                            <code className="text-xs text-foreground/70">{k.key_prefix}••••••••••••</code>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${k.active ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
+                              {k.active ? "פעיל" : "מושבת"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-secondary rounded-lg p-4" dir="ltr">
+                        <code className="text-xs text-foreground/70">{isDemo ? "rh_live_sk_••••••••••••••••••••3f8a" : "אין מפתחות עדיין"}</code>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <h3 className="text-sm font-display font-semibold mb-3">Webhooks פעילים</h3>
                     <div className="space-y-2">
-                      {[
-                        { url: "https://your-crm.com/webhooks/review", event: "review.created", status: "פעיל" },
-                        { url: "https://zapier.com/hooks/catch/123", event: "conversion.completed", status: "פעיל" },
-                      ].map((wh, i) => (
-                        <div key={i} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
-                          <div>
-                            <p className="text-xs font-mono text-foreground/70" dir="ltr">{wh.url}</p>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">{wh.event}</p>
+                      {(() => {
+                        const whList = isDemo ? [
+                          { id: "d1", url: "https://your-crm.com/webhooks/review", events: ["new_review"], active: true },
+                          { id: "d2", url: "https://zapier.com/hooks/catch/123", events: ["affiliate_conversion"], active: true },
+                        ] : realWebhooks;
+                        if (whList.length === 0) return <p className="text-sm text-muted-foreground py-2 text-center">אין webhooks מוגדרים.</p>;
+                        return whList.map((wh: any) => (
+                          <div key={wh.id} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
+                            <div>
+                              <p className="text-xs font-mono text-foreground/70" dir="ltr">{wh.url}</p>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">{(wh.events || []).join(", ")}</p>
+                            </div>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${wh.active ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
+                              {wh.active ? "פעיל" : "מושבת"}
+                            </span>
                           </div>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{wh.status}</span>
-                        </div>
-                      ))}
+                        ));
+                      })()}
                     </div>
                   </div>
                   <div>
