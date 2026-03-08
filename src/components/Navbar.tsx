@@ -72,8 +72,8 @@ const Navbar = () => {
                 <DropdownMenuItem className="text-xs text-muted-foreground cursor-default">
                   {user.email}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                  לוח בקרה
+                <DropdownMenuItem onClick={() => navigate("/business/dashboard")}>
+                  לוח בקרה עסקי
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut size={14} className="ml-2" />
