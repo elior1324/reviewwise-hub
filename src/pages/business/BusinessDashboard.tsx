@@ -163,6 +163,40 @@ const BusinessDashboard = () => {
             </div>
           </TabsContent>
 
+          {/* Invoices & Verification */}
+          <TabsContent value="invoices">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <InvoiceTemplateUploader businessId="mock-business-id" />
+              <Card className="shadow-card bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Brain size={18} className="text-primary" /> איך זה עובד?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3 text-sm text-muted-foreground">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">1</div>
+                      <p>העלו דוגמאות של חשבוניות/קבלות שלכם (PDF, תמונה או CSV)</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">2</div>
+                      <p>ה-AI ינתח את המבנה ויזהה פרטים מזהים (לוגו, שם העסק, מספרי מסמך)</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">3</div>
+                      <p>כשלקוח מעלה קבלה בטופס הביקורת, ה-AI ישווה אותה מול התבניות שלכם</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">4</div>
+                      <p>רוב הקבלות יאומתו אוטומטית. מקרים חריגים יועברו לבדיקה ידנית</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* Clicks & Conversions */}
           <TabsContent value="clicks">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
