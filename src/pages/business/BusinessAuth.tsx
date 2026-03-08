@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
+import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
+import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 
 interface BusinessAuthProps {
   mode: "login" | "signup";
@@ -20,6 +22,7 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [privacyConsent, setPrivacyConsent] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -30,6 +33,11 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
     setLoading(true);
     try {
       if (mode === "signup") {
+        if (!privacyConsent) {
+          toast({ title: "יש לאשר את מדיניות הפרטיות ותנאי השימוש", variant: "destructive" });
+          setLoading(false);
+          return;
+        }
         const { error } = await signUp(email, password, name);
         if (error) throw error;
         toast({ title: "החשבון נוצר בהצלחה!", description: "בדקו את האימייל שלכם לאימות החשבון." });
@@ -135,7 +143,17 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
                   minLength={6}
                 />
               </div>
-              <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" disabled={loading}>
+              {mode === "signup" && (
+                <PrivacyConsentCheckbox
+                  checked={privacyConsent}
+                  onCheckedChange={setPrivacyConsent}
+                  className="mt-1"
+                />
+              )}
+
+              {mode === "login" && <FormPrivacyNotice className="mt-1" />}
+
+              <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" disabled={loading || (mode === "signup" && !privacyConsent)}>
                 {loading ? "..." : mode === "login" ? "התחברו" : "צרו חשבון"}
                 <ArrowLeft size={16} className="mr-2" />
               </Button>

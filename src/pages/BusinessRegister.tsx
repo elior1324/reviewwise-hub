@@ -16,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import SocialLinksEditor, { type SocialLinksData } from "@/components/SocialLinksEditor";
+import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
+import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 
 const OTHER_VALUE = "__other__";
 
@@ -38,6 +40,7 @@ const BusinessRegister = () => {
   });
 
   const [socialLinks, setSocialLinks] = useState<SocialLinksData>({});
+  const [privacyConsent, setPrivacyConsent] = useState(false);
 
   const categories = form.businessType === "freelancer" ? freelancerCats : courseCats;
   const filteredCategories = categories.filter(c => c !== "אחר");
@@ -50,6 +53,10 @@ const BusinessRegister = () => {
     e.preventDefault();
     if (!form.businessName || !form.email || (!form.category && !form.customCategory)) {
       toast({ title: "אנא מלאו את כל השדות הנדרשים", variant: "destructive" });
+      return;
+    }
+    if (!privacyConsent) {
+      toast({ title: "יש לאשר את מדיניות הפרטיות ותנאי השימוש", variant: "destructive" });
       return;
     }
 
@@ -237,7 +244,14 @@ const BusinessRegister = () => {
                   />
                 </div>
 
-                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" size="lg">
+                <PrivacyConsentCheckbox
+                  checked={privacyConsent}
+                  onCheckedChange={setPrivacyConsent}
+                />
+
+                <FormPrivacyNotice className="mt-1" />
+
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" size="lg" disabled={!privacyConsent}>
                   הרשמה ויצירת פרופיל
                 </Button>
               </form>

@@ -12,6 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { lovable } from "@/integrations/lovable/index";
+import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
+import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 
 const AuthPage = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -21,11 +23,16 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [privacyConsent, setPrivacyConsent] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mode === "signup" && !privacyConsent) {
+      toast.error("יש לאשר את מדיניות הפרטיות ותנאי השימוש כדי להירשם.");
+      return;
+    }
     setLoading(true);
 
     if (mode === "login") {
@@ -162,7 +169,17 @@ const AuthPage = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-primary text-primary-foreground glow-primary" disabled={loading}>
+              {mode === "signup" && (
+                <PrivacyConsentCheckbox
+                  checked={privacyConsent}
+                  onCheckedChange={setPrivacyConsent}
+                  className="mt-1"
+                />
+              )}
+
+              {mode === "login" && <FormPrivacyNotice className="mt-1" />}
+
+              <Button type="submit" className="w-full bg-primary text-primary-foreground glow-primary" disabled={loading || (mode === "signup" && !privacyConsent)}>
                 {loading ? "טוען..." : mode === "login" ? "התחברו" : "הרשמו"}
               </Button>
             </form>

@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import ReceiptUploader from "@/components/ReceiptUploader";
+import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 
 interface AddReviewFormProps {
   businessSlug: string;
@@ -170,6 +171,8 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                       onVerified={(verified) => setReceiptVerified(verified)}
                     />
                   )}
+
+                  <FormPrivacyNotice className="mt-1" />
 
                   <Button
                     type="submit"
