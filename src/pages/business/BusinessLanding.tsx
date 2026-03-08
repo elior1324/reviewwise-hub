@@ -447,8 +447,7 @@ const SmoothCollapse = ({ isOpen, preview, title }: { isOpen: boolean; preview?:
         </div>
       </section>
 
-
-
+const BusinessLanding = () => {
       {/* Pricing — only visible to authenticated users */}
       {user && (
         <section className="container py-20" id="pricing">
