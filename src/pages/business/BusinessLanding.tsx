@@ -14,7 +14,7 @@ import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
+
 import featureProfile from "@/assets/previews/feature-profile.jpg";
 import featureAnalytics from "@/assets/previews/feature-analytics.jpg";
 import featureAffiliate from "@/assets/previews/feature-affiliate.jpg";
