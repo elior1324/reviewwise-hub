@@ -85,7 +85,7 @@ const BusinessProfile = () => {
       // Fetch reviews with responses and profile names
       const { data: reviewData } = await supabase
         .from("reviews")
-        .select("*, courses(name), profiles(display_name), business_responses(text, created_at)")
+        .select("*, courses(name), business_responses(text, created_at)")
         .eq("business_id", bizData.id)
         .order("created_at", { ascending: false });
 
