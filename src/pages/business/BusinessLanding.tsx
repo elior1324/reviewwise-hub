@@ -7,6 +7,10 @@ import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
   Award, ArrowLeft, CheckCircle, Users, X, Crown, Sparkles
 } from "lucide-react";
+import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
