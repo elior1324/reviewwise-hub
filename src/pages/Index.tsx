@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,7 +12,8 @@ import ReviewCard from "@/components/ReviewCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
-import { useState } from "react";
+import AnimatedCounter from "@/components/AnimatedCounter";
+import { useState, useRef } from "react";
 import { BUSINESSES, REVIEWS, FREELANCER_CATEGORIES, COURSE_CATEGORIES } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
 
