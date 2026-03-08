@@ -296,16 +296,41 @@ const Index = () => {
 
       {/* About CTA */}
       <section className="container pb-20">
-        <div className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border" style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border"
+          style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}
+        >
           <div className="absolute inset-0 bg-primary/5 blur-3xl" />
           <div className="relative">
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4"
+            >
               בעלי מקצוע ויוצרי קורסים? הצטרפו עכשיו
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.25, duration: 0.5 }}
+              className="text-muted-foreground mb-8 max-w-lg mx-auto"
+            >
               בנו אמון אמיתי עם ביקורות מאומתות והגדילו את העסק שלכם.
-            </p>
-            <div className="flex gap-3 justify-center flex-wrap">
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.35, duration: 0.5 }}
+              className="flex gap-3 justify-center flex-wrap"
+            >
               <Link to="/business">
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
                   גלו את הפלטפורמה לעסקים
@@ -316,9 +341,9 @@ const Index = () => {
                   קראו עוד על ReviewHub
                 </Button>
               </Link>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <Footer />
