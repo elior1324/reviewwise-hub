@@ -288,7 +288,19 @@ const BusinessLanding = () => {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Demo CTA Banner */}
+      <section className="bg-primary/5 border-y border-primary/20">
+        <div className="container py-4">
+          <Link to="/business/dashboard" className="flex items-center justify-center gap-3 group">
+            <Eye size={18} className="text-primary" />
+            <span className="font-display font-semibold text-foreground group-hover:text-primary transition-colors">
+              🎯 רוצים לראות איך זה נראה מבפנים? נסו את הדמו בחינם
+            </span>
+            <ArrowLeft size={16} className="text-primary group-hover:translate-x-[-4px] transition-transform" />
+          </Link>
+        </div>
+      </section>
+
       <section className="container py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
