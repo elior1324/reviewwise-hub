@@ -6,12 +6,14 @@ import ReviewSummary from "@/components/ReviewSummary";
 import CourseCard from "@/components/CourseCard";
 import BusinessHero from "@/components/BusinessHero";
 import AddReviewForm from "@/components/AddReviewForm";
+import TestimonialCarousel from "@/components/TestimonialCarousel";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AIChatbot from "@/components/AIChatbot";
 import { getBusinessBySlug, getCoursesByBusiness, getReviewsByBusiness, generateReviewSummary } from "@/data/mockData";
+import { supabase } from "@/integrations/supabase/client";
 
 const DEFAULT_KEY = "digital-marketing-academy";
 
