@@ -15,32 +15,56 @@ serve(async (req) => {
 
     // Build item descriptions for context
     const itemDescriptions = items.map((item: any, i: number) => {
-      const parts = [`${i + 1}. **${item.name}**`];
+      const parts = [`${i + 1}. ${item.name}`];
       if (item.businessName) parts.push(`(${item.businessName})`);
       if (item.category) parts.push(`| קטגוריה: ${item.category}`);
-      if (item.rating !== undefined) parts.push(`| דירוג: ⭐${item.rating}`);
+      if (item.rating !== undefined) parts.push(`| דירוג: ${item.rating}`);
       if (item.reviewCount !== undefined) parts.push(`| ביקורות: ${item.reviewCount}`);
       if (item.price !== undefined) parts.push(`| מחיר: ₪${item.price}`);
+      if (item.yearsExperience) parts.push(`| שנות ניסיון: ${item.yearsExperience}`);
+      if (item.difficultyLevel) parts.push(`| רמת קושי: ${item.difficultyLevel}`);
+      if (item.targetAudience) parts.push(`| קהל יעד: ${item.targetAudience}`);
+      if (item.location) parts.push(`| מיקום: ${item.location}`);
+      if (item.duration) parts.push(`| משך: ${item.duration}`);
+      if (item.format) parts.push(`| פורמט: ${item.format}`);
       if (item.description) parts.push(`| תיאור: ${item.description}`);
       if (item.type) parts.push(`| סוג: ${item.type === 'freelancer' ? 'בעל מקצוע' : 'קורס/הכשרה'}`);
       return parts.join(" ");
     }).join("\n");
 
-    const systemPrompt = `אתה מומחה להשוואת שירותים מקצועיים ב-ReviewHub — פלטפורמת ביקורות מאומתות מובילה בישראל.
+    const itemNames = items.map((item: any) => item.name).join(" | ");
 
-הנה הפריטים שהמשתמש רוצה להשוות:
+    const systemPrompt = `אתה מומחה להשוואת שירותים מקצועיים ב-ReviewHub.
+
+הפריטים להשוואה:
 ${itemDescriptions}
 
-## הנחיות:
-- תמיד ענה בעברית
-- אם זו הודעה ראשונה (אין היסטוריית שיחה), צור השוואה מפורטת הכוללת:
-  1. **טבלת השוואה** בפורמט markdown עם כל הפרמטרים הרלוונטיים (דירוג, מחיר, ביקורות, קטגוריה, יתרונות)
-  2. **ניתוח יתרונות וחסרונות** לכל פריט
-  3. **המלצה מסכמת** — למי מתאים כל אחד ומה ההמלצה הכללית
-- אם יש היסטוריית שיחה, ענה לשאלות המשך בהקשר של ההשוואה
-- השתמש באימוג'ים בצורה מקצועית
-- אם חסר מידע, ציין זאת בכנות
-- התייחס להבדלים משמעותיים בין הפריטים`;
+## כללי עיצוב תגובה — חובה לעקוב:
+
+1. **מבנה ברור וקצר** — אל תכתוב מגילה. כל סעיף צריך להיות תמציתי ולעניין.
+
+2. **אם זו הודעה ראשונה**, בנה את התגובה בדיוק כך:
+
+### 📊 סיכום מהיר
+טבלת markdown קצרה עם העמודות הרלוונטיות (שם, דירוג, מחיר, ביקורות, רמת קושי וכו').
+
+### ✅ יתרונות עיקריים
+רשימה קצרה (2-3 נקודות) לכל פריט. שם הפריט **מודגש**, ואז הנקודות.
+
+### ⚠️ חסרונות / נקודות לשיפור
+אותו פורמט — 2-3 נקודות לכל פריט.
+
+### 🎯 שורה תחתונה
+פסקה אחת קצרה — למי מתאים כל אחד, ומה ההמלצה.
+
+3. **אם יש היסטוריית שיחה** — ענה לשאלה בצורה ממוקדת וקצרה, ללא חזרה על ההשוואה המלאה.
+
+## כללים נוספים:
+- תמיד בעברית
+- אל תשתמש ביותר מ-3 אימוג'ים בכל סעיף
+- אל תחזור על מידע שכבר מופיע בטבלה בגוף הטקסט
+- אם חסר מידע, אל תמציא — ציין שחסר
+- שמור על שורות קצרות ופסקאות מופרדות היטב`;
 
     const allMessages = [
       { role: "system", content: systemPrompt },
