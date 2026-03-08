@@ -287,7 +287,7 @@ const Index = () => {
       </section>
 
       {/* Top Course Providers */}
-      <section className="container py-20">
+      <section className="container py-10">
         <div className="flex items-end justify-between mb-10">
           <div>
             <div className="flex items-center gap-2 mb-1">
