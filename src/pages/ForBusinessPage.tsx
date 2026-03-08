@@ -4,7 +4,7 @@ import AIChatbot from "@/components/AIChatbot";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ShieldCheck, Star, TrendingUp, Users, Zap, BarChart3, Code, Award, ArrowLeft, CheckCircle } from "lucide-react";
+import { ShieldCheck, Star, TrendingUp, Users, Zap, BarChart3, Code, Award, ArrowLeft, CheckCircle, X, Crown, Sparkles, Plug } from "lucide-react";
 import { BUSINESSES } from "@/data/mockData";
 
 const fadeUp = {
