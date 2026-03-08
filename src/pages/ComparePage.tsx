@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Scale, Send, Bot, User, Loader2, Plus, Trash2 } from "lucide-react";
+import { Search, X, Scale, Send, Bot, User, Loader2, Plus, Trash2, MessageSquare, Table2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,6 +52,7 @@ const ComparePage = () => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isAILoading, setIsAILoading] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const [viewMode, setViewMode] = useState<"chat" | "table">("chat");
   const chatEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -412,67 +413,214 @@ const ComparePage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-card border border-border rounded-2xl overflow-hidden"
+              className="space-y-4"
             >
-              {/* Messages */}
-              <div className="max-h-[600px] overflow-y-auto p-6 space-y-4">
-                {messages.map((msg, i) => (
-                  <div key={i} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "assistant" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                      {msg.role === "assistant" ? <Bot size={16} /> : <User size={16} />}
-                    </div>
-                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted/50"}`}>
-                      {msg.role === "assistant" ? (
-                        <div className="prose prose-sm prose-invert max-w-none text-foreground [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-border/50 [&_th]:px-3 [&_th]:py-2 [&_th]:bg-muted/50 [&_th]:text-foreground [&_th]:font-semibold [&_th]:text-sm [&_td]:border [&_td]:border-border/50 [&_td]:px-3 [&_td]:py-2 [&_td]:text-sm [&_td]:text-muted-foreground [&_strong]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:mt-3 [&_h3]:mb-1 [&_ul]:space-y-1 [&_li]:text-muted-foreground">
-                          <ReactMarkdown>{msg.content}</ReactMarkdown>
-                          {isAILoading && i === messages.length - 1 && (
-                            <span className="inline-block w-2 h-4 bg-primary/60 animate-pulse mr-1" />
+              {/* View Toggle */}
+              <div className="flex items-center justify-center gap-1 bg-muted/50 rounded-xl p-1 max-w-xs mx-auto">
+                <button
+                  onClick={() => setViewMode("chat")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 justify-center ${
+                    viewMode === "chat"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <MessageSquare size={15} />
+                  ניתוח AI
+                </button>
+                <button
+                  onClick={() => setViewMode("table")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 justify-center ${
+                    viewMode === "table"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Table2 size={15} />
+                  טבלה
+                </button>
+              </div>
+
+              {/* Table View */}
+              {viewMode === "table" && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="bg-card border border-border rounded-2xl overflow-hidden"
+                >
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-right p-4 font-semibold text-muted-foreground bg-muted/30 min-w-[120px]">קריטריון</th>
+                          {selectedItems.map((item, i) => (
+                            <th key={item.id} className="p-4 text-center min-w-[160px]">
+                              <div className="flex flex-col items-center gap-1">
+                                <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                                <span className="font-semibold text-foreground text-sm">{item.name}</span>
+                                {item.businessName && <span className="text-xs text-muted-foreground">{item.businessName}</span>}
+                              </div>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b border-border/50">
+                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">סוג</td>
+                          {selectedItems.map(item => (
+                            <td key={item.id} className="p-4 text-center">
+                              <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
+                                {item.type === "freelancer" ? "בעל מקצוע" : "קורס"}
+                              </span>
+                            </td>
+                          ))}
+                        </tr>
+                        <tr className="border-b border-border/50">
+                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">קטגוריה</td>
+                          {selectedItems.map(item => (
+                            <td key={item.id} className="p-4 text-center text-foreground">{item.category || "—"}</td>
+                          ))}
+                        </tr>
+                        <tr className="border-b border-border/50">
+                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">דירוג</td>
+                          {selectedItems.map(item => {
+                            const maxRating = Math.max(...selectedItems.map(i => i.rating));
+                            const isTop = item.rating === maxRating;
+                            return (
+                              <td key={item.id} className="p-4 text-center">
+                                <div className="flex items-center justify-center gap-1">
+                                  <StarRating rating={item.rating} size={14} />
+                                  <span className={`font-semibold ${isTop ? "text-primary" : "text-foreground"}`}>
+                                    {item.rating}
+                                  </span>
+                                  {isTop && <span className="text-xs text-primary">👑</span>}
+                                </div>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        <tr className="border-b border-border/50">
+                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">ביקורות</td>
+                          {selectedItems.map(item => {
+                            const maxReviews = Math.max(...selectedItems.map(i => i.reviewCount));
+                            const isTop = item.reviewCount === maxReviews;
+                            return (
+                              <td key={item.id} className="p-4 text-center">
+                                <span className={`font-semibold ${isTop ? "text-primary" : "text-foreground"}`}>
+                                  {item.reviewCount}
+                                </span>
+                                {isTop && <span className="text-xs text-primary mr-1">🏆</span>}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        <tr className="border-b border-border/50">
+                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">מחיר</td>
+                          {selectedItems.map(item => {
+                            const prices = selectedItems.filter(i => i.price !== undefined).map(i => i.price!);
+                            const minPrice = prices.length > 0 ? Math.min(...prices) : null;
+                            const isCheapest = item.price !== undefined && item.price === minPrice;
+                            return (
+                              <td key={item.id} className="p-4 text-center">
+                                {item.price !== undefined ? (
+                                  <span className={`font-semibold ${isCheapest ? "text-green-600 dark:text-green-400" : "text-foreground"}`}>
+                                    ₪{item.price.toLocaleString()}
+                                    {isCheapest && <span className="text-xs mr-1">💰</span>}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground">—</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        {selectedItems.some(i => i.description) && (
+                          <tr>
+                            <td className="p-4 font-medium text-muted-foreground bg-muted/10 align-top">תיאור</td>
+                            {selectedItems.map(item => (
+                              <td key={item.id} className="p-4 text-muted-foreground text-xs leading-relaxed">
+                                {item.description || "—"}
+                              </td>
+                            ))}
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="p-4 border-t border-border bg-muted/20 text-center">
+                    <p className="text-xs text-muted-foreground mb-2">רוצים ניתוח מעמיק יותר?</p>
+                    <Button variant="outline" size="sm" onClick={() => setViewMode("chat")} className="gap-2">
+                      <MessageSquare size={14} />
+                      עברו לניתוח AI
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Chat View */}
+              {viewMode === "chat" && (
+                <div className="bg-card border border-border rounded-2xl overflow-hidden">
+                  {/* Messages */}
+                  <div className="max-h-[600px] overflow-y-auto p-6 space-y-4">
+                    {messages.map((msg, i) => (
+                      <div key={i} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "assistant" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                          {msg.role === "assistant" ? <Bot size={16} /> : <User size={16} />}
+                        </div>
+                        <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted/50"}`}>
+                          {msg.role === "assistant" ? (
+                            <div className="prose prose-sm prose-invert max-w-none text-foreground [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-border/50 [&_th]:px-3 [&_th]:py-2 [&_th]:bg-muted/50 [&_th]:text-foreground [&_th]:font-semibold [&_th]:text-sm [&_td]:border [&_td]:border-border/50 [&_td]:px-3 [&_td]:py-2 [&_td]:text-sm [&_td]:text-muted-foreground [&_strong]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:mt-3 [&_h3]:mb-1 [&_ul]:space-y-1 [&_li]:text-muted-foreground">
+                              <ReactMarkdown>{msg.content}</ReactMarkdown>
+                              {isAILoading && i === messages.length - 1 && (
+                                <span className="inline-block w-2 h-4 bg-primary/60 animate-pulse mr-1" />
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-sm">{msg.content}</p>
                           )}
                         </div>
-                      ) : (
-                        <p className="text-sm">{msg.content}</p>
-                      )}
+                      </div>
+                    ))}
+
+                    {isAILoading && messages.length === 0 && (
+                      <div className="flex items-center gap-3 text-muted-foreground">
+                        <Loader2 size={18} className="animate-spin" />
+                        <span className="text-sm">מנתח ומשווה...</span>
+                      </div>
+                    )}
+                    <div ref={chatEndRef} />
+                  </div>
+
+                  {/* Follow-up Chat Input */}
+                  <div className="border-t border-border p-4">
+                    <p className="text-xs text-muted-foreground mb-2">💡 שאלו שאלות המשך על ההשוואה</p>
+                    <div className="flex gap-2">
+                      <Input
+                        value={chatInput}
+                        onChange={e => setChatInput(e.target.value)}
+                        onKeyDown={e => e.key === "Enter" && sendFollowUp()}
+                        placeholder="למשל: מה מתאים למתחיל? מי זול יותר?"
+                        disabled={isAILoading}
+                        className="flex-1"
+                      />
+                      <Button onClick={sendFollowUp} disabled={isAILoading || !chatInput.trim()} size="icon">
+                        {isAILoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                      </Button>
+                    </div>
+                    <div className="flex gap-2 mt-2 flex-wrap">
+                      {["מי מתאים למתחיל?", "מה היתרון הכי גדול של כל אחד?", "איזה יחס מחיר-ערך הכי טוב?"].map(q => (
+                        <button
+                          key={q}
+                          onClick={() => { setChatInput(q); }}
+                          className="text-xs px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        >
+                          {q}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                ))}
-
-                {isAILoading && messages.length === 0 && (
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <Loader2 size={18} className="animate-spin" />
-                    <span className="text-sm">מנתח ומשווה...</span>
-                  </div>
-                )}
-                <div ref={chatEndRef} />
-              </div>
-
-              {/* Follow-up Chat Input */}
-              <div className="border-t border-border p-4">
-                <p className="text-xs text-muted-foreground mb-2">💡 שאלו שאלות המשך על ההשוואה</p>
-                <div className="flex gap-2">
-                  <Input
-                    value={chatInput}
-                    onChange={e => setChatInput(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && sendFollowUp()}
-                    placeholder="למשל: מה מתאים למתחיל? מי זול יותר?"
-                    disabled={isAILoading}
-                    className="flex-1"
-                  />
-                  <Button onClick={sendFollowUp} disabled={isAILoading || !chatInput.trim()} size="icon">
-                    {isAILoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                  </Button>
                 </div>
-                <div className="flex gap-2 mt-2 flex-wrap">
-                  {["מי מתאים למתחיל?", "מה היתרון הכי גדול של כל אחד?", "איזה יחס מחיר-ערך הכי טוב?"].map(q => (
-                    <button
-                      key={q}
-                      onClick={() => { setChatInput(q); }}
-                      className="text-xs px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
