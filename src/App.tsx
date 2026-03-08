@@ -26,6 +26,7 @@ import TrademarkGuidelines from "./pages/TrademarkGuidelines";
 import ModernSlaveryStatement from "./pages/ModernSlaveryStatement";
 import AccessibilityStatement from "./pages/AccessibilityStatement";
 import ComparePage from "./pages/ComparePage";
+import RefundPolicy from "./pages/RefundPolicy";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
