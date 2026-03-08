@@ -44,6 +44,10 @@ const Navbar = () => {
           <Link to="/search" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             קטגוריות
           </Link>
+          <Link to="/compare" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
+            <Scale size={14} />
+            השוואה
+          </Link>
           <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             אודות
           </Link>
