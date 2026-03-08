@@ -43,7 +43,12 @@ const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, 
               </div>
             )}
           </motion.div>
-          <span className="text-xs text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">{category}</span>
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-xs text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">{category}</span>
+            {subcategory && (
+              <span className="text-[10px] text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full">{subcategory}</span>
+            )}
+          </div>
         </div>
         <h3 className="font-display font-semibold text-lg text-foreground mb-1">{name}</h3>
         <div className="flex items-center gap-2 mb-3">
