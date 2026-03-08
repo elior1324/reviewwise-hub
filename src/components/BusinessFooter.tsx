@@ -35,7 +35,7 @@ const BusinessFooter = () => (
           <div className="space-y-2">
             <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">אודות</Link>
             <Link to="/business/contact" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">צרו קשר</Link>
-            <span className="block text-sm text-muted-foreground">מדיניות פרטיות</span>
+            <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות פרטיות</Link>
             <span className="block text-sm text-muted-foreground">תנאי שימוש</span>
           </div>
         </div>

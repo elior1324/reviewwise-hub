@@ -17,6 +17,7 @@ import ForBusinessPage from "./pages/ForBusinessPage";
 import AuthPage from "./pages/AuthPage";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/register" element={<BusinessRegister />} />
             <Route path="/review/:token" element={<WriteReview />} />
             <Route path="/go/:courseId" element={<AffiliateRedirect />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />

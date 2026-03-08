@@ -32,7 +32,7 @@ const Footer = () => (
         <div>
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">משפטי</h4>
           <div className="space-y-2">
-            <span className="block text-sm text-muted-foreground">מדיניות פרטיות</span>
+            <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות פרטיות</Link>
             <span className="block text-sm text-muted-foreground">תנאי שימוש</span>
           </div>
         </div>
