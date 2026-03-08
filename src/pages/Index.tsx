@@ -286,6 +286,33 @@ const Index = () => {
         )}
       </section>
 
+      {/* Top Course Providers */}
+      <section className="container py-20">
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <BookOpen size={22} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">מוכרי קורסים מובילים</h2>
+            </div>
+            <p className="text-muted-foreground mt-1">קורסים, סדנאות והכשרות מאומתים</p>
+          </div>
+          <Link to="/search?tab=courses">
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+          </Link>
+        </div>
+        {topCourseProviders.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topCourseProviders.map((biz, i) => (
+              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <BusinessCard {...biz} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-10">עדיין אין ספקי קורסים רשומים. היו הראשונים!</p>
+        )}
+      </section>
+
       {/* Freelancer Categories */}
       {FREELANCER_CATS_DISPLAY.length > 0 && (
         <section className="border-y border-border/50 glass">
@@ -317,33 +344,6 @@ const Index = () => {
           </div>
         </section>
       )}
-
-      {/* Top Course Providers */}
-      <section className="container py-20">
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <BookOpen size={22} className="text-primary" />
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">מוכרי קורסים מובילים</h2>
-            </div>
-            <p className="text-muted-foreground mt-1">קורסים, סדנאות והכשרות מאומתים</p>
-          </div>
-          <Link to="/search?tab=courses">
-            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
-          </Link>
-        </div>
-        {topCourseProviders.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {topCourseProviders.map((biz, i) => (
-              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-                <BusinessCard {...biz} />
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-muted-foreground py-10">עדיין אין ספקי קורסים רשומים. היו הראשונים!</p>
-        )}
-      </section>
 
       {/* Course Categories */}
       {COURSE_CATS_DISPLAY.some(c => c.count > 0) && (
