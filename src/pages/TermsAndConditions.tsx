@@ -247,6 +247,35 @@ const TermsAndConditions = () => {
             </p>
           </Section>
 
+          {/* Affiliate Program */}
+          <Section icon={DollarSign} title="תוכנית שותפים (אפיליאט)">
+            <p className="mb-3">
+              ReviewHub מפעילה תוכנית שותפים המאפשרת למשתמשים ולעסקים להרוויח עמלות מהפניות שהובילו לרכישה.
+            </p>
+            <p className="font-semibold text-foreground mb-2">כיצד התוכנית פועלת:</p>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
+              <li><strong>עמלה לשותפים:</strong> שותפים רשומים מרוויחים 10% מהכנסות העסק על כל מכירה שבוצעה דרך קישור ההפניה שלהם.</li>
+              <li><strong>עמלה למבקרים מאומתים:</strong> משתמשים שכתבו ביקורת מאומתת (עם אימות רכישה) ולקוח רכש דרך הביקורת שלהם — מרוויחים עמלה פאסיבית של 0.09% מהמכירה.</li>
+              <li><strong>מעקב והפניות:</strong> ReviewHub עוקבת אחר קליקים, המרות והכנסות באמצעות קישורי הפניה ייחודיים. הנתונים זמינים בלוח הבקרה של השותף.</li>
+            </ul>
+            <p className="font-semibold text-foreground mb-2">חובות השותף:</p>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
+              <li><strong>גילוי נאות:</strong> כל שותף המפרסם קישור הפניה של ReviewHub מחויב לציין בצורה ברורה וגלויה כי מדובר בקישור שותפים שעשוי להניב לו עמלה, בהתאם לחוק הגנת הצרכן, התשמ"א-1981.</li>
+              <li><strong>דיווח מס:</strong> הכנסות מתוכנית השותפים חייבות בדיווח לרשויות המס בהתאם לפקודת מס הכנסה [נוסח חדש], התשכ"א-1961. ReviewHub אינה אחראית לחובות המס של השותף.</li>
+              <li><strong>אמינות:</strong> אסור לשותף ליצור ביקורות מזויפות, לבצע קליקים מלאכותיים או לנקוט בכל פעולה מניפולטיבית לצורך הגדלת העמלה. כל חשד להונאה יוביל לסיום מיידי של ההשתתפות בתוכנית ולביטול כל העמלות שנצברו.</li>
+              <li><strong>תוכן שיווקי:</strong> אסור לשותף לפרסם תוכן מטעה, שקרי או פוגעני בהקשר לתוכנית השותפים או לשירותים של ReviewHub.</li>
+            </ul>
+            <p className="font-semibold text-foreground mb-2">זכויות ReviewHub:</p>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
+              <li>ReviewHub רשאית לשנות את שיעורי העמלה, תנאי התוכנית או לסיים את התוכנית בכל עת עם הודעה מוקדמת של 30 ימים.</li>
+              <li>ReviewHub רשאית להסיר שותף מהתוכנית מיידית במקרה של הפרת תנאים אלה.</li>
+              <li>עמלות משולמות רק לאחר אימות הרכישה ולאחר תום תקופת ביטול העסקה (14 ימים בהתאם לחוק הגנת הצרכן).</li>
+            </ul>
+            <p className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-foreground text-sm">
+              💡 <strong>שימו לב:</strong> קישורי הפניה באתר ReviewHub מסומנים בהודעת גילוי נאות. כל הפניה דרך הפלטפורמה כוללת ציון ברור כי מדובר בקישור שותפים.
+            </p>
+          </Section>
+
           {/* Third-Party Content */}
           <Section icon={Globe} title="תוכן צדדים שלישיים וקישורים חיצוניים">
             <p className="mb-3">

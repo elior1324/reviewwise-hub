@@ -181,6 +181,7 @@ const CoursePage = () => {
                     <p className="text-xs text-muted-foreground mt-1.5">* קישור שותפים — ReviewHub עשויה לקבל עמלה מרכישה זו</p>
                   </div>
                 )}
+              </div>
             </div>
           </div>
         </motion.div>
