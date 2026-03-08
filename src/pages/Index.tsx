@@ -126,6 +126,7 @@ const Index = () => {
             className="max-w-5xl mx-auto"
             initial="hidden"
             animate="visible"
+            variants={staggerContainer}
           >
             <motion.p variants={fadeUp} custom={4} className="text-center text-sm text-muted-foreground mb-6 font-medium">
               מי אתם? מצאו מה שמתאים לכם
@@ -136,7 +137,9 @@ const Index = () => {
                   key={label}
                   variants={fadeUp}
                   custom={5 + i * 0.5}
-                  className="group cursor-pointer rounded-xl p-4 bg-card/60 border border-border/40 hover:border-primary/40 hover:bg-card transition-all duration-300"
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  whileTap={{ scale: 0.97 }}
+                  className="group cursor-pointer rounded-xl p-4 bg-card/60 border border-border/40 hover:border-primary/40 hover:bg-card transition-colors duration-300"
                   onClick={() => navigate(`/search?audience=${encodeURIComponent(label)}`)}
                 >
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
@@ -148,7 +151,7 @@ const Index = () => {
               ))}
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Two Category Sections */}
