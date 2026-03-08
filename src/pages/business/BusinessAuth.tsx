@@ -152,6 +152,21 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
                 <>כבר יש לכם חשבון? <Link to="/business/login" className="text-primary hover:underline">התחברו</Link></>
               )}
             </p>
+
+            <div className="flex items-center gap-3 pt-2">
+              <Separator className="flex-1" />
+              <span className="text-xs text-muted-foreground">או</span>
+              <Separator className="flex-1" />
+            </div>
+
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full border border-dashed border-border/50 hover:bg-accent/50 h-11 text-muted-foreground hover:text-foreground"
+              onClick={() => navigate("/business/dashboard")}
+            >
+              👁️ כניסה לדמו — צפייה בלוח הבקרה
+            </Button>
           </CardContent>
         </Card>
       </div>
