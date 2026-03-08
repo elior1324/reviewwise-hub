@@ -16,13 +16,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useRef, useCallback, useEffect } from "react";
 
-import featureProfile from "@/assets/previews/feature-profile.jpg";
-import featureAnalytics from "@/assets/previews/feature-analytics.jpg";
-import featureAffiliate from "@/assets/previews/feature-affiliate.jpg";
-import featureAiReport from "@/assets/previews/feature-ai-report.jpg";
-import featureCrm from "@/assets/previews/feature-crm.jpg";
-import featureWidgets from "@/assets/previews/feature-widgets.jpg";
-import starterPreview from "@/assets/previews/starter-dashboard.jpg";
+// Preview images removed — uncomment and replace with real screenshots when ready
+// import featureProfile from "@/assets/previews/feature-profile.jpg";
+// import featureAnalytics from "@/assets/previews/feature-analytics.jpg";
+// import featureAffiliate from "@/assets/previews/feature-affiliate.jpg";
+// import featureAiReport from "@/assets/previews/feature-ai-report.jpg";
+// import featureCrm from "@/assets/previews/feature-crm.jpg";
+// import featureWidgets from "@/assets/previews/feature-widgets.jpg";
+// import starterPreview from "@/assets/previews/starter-dashboard.jpg";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -30,29 +31,30 @@ const fadeUp = {
 };
 
 // ─── Features organized by tier ───────────────────────────
-const FREE_FEATURES = [
-  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת.", preview: starterPreview },
-  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור.", preview: featureProfile },
-  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח.", preview: featureProfile },
+type Feature = { icon: any; title: string; desc: string; preview?: string; locked?: boolean };
+const FREE_FEATURES: Feature[] = [
+  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת." },
+  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור." },
+  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח." },
   { icon: Star, title: "תג דירוג בסיסי", desc: "הציגו את הדירוג שלכם עם תג אמינות ReviewHub." },
 ];
 
-const PRO_FEATURES = [
-  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת.", preview: featureAnalytics },
-  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת.", preview: featureWidgets },
+const PRO_FEATURES: Feature[] = [
+  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת." },
+  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת." },
   { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות." },
-  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. עמלה של 10% על כל מכירה שנכנסת דרככם.", preview: featureAffiliate },
+  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. עמלה של 10% על כל מכירה שנכנסת דרככם." },
   { icon: Globe, title: "רשתות חברתיות ואתר", desc: "חברו YouTube, Instagram, TikTok, LinkedIn, Facebook ואתר האינטרנט שלכם לפרופיל העסקי." },
-  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור.", preview: featureAiReport },
+  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור." },
   { icon: Headphones, title: "תמיכה בעדיפות", desc: "תמיכה מהירה עם מענה תוך 4 שעות בימי עבודה." },
 ];
 
-const PREMIUM_FEATURES = [
-  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true, preview: featureCrm },
-  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true, preview: featureCrm },
+const PREMIUM_FEATURES: Feature[] = [
+  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true },
+  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true },
   { icon: Webhook, title: "Webhook למערכות חיצוניות", desc: "חברו ל-Zapier, Make ולכל מערכת עם webhook.", locked: true },
   { icon: Globe, title: "Google Ads Review Stars ⭐", desc: "הציגו כוכבי דירוג ישירות במודעות Google שלכם.", locked: true },
-  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true, preview: featureAiReport },
+  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true },
   { icon: Code, title: "גישת API מלאה", desc: "בנו אינטגרציות מותאמות אישית עם ה-API שלנו.", locked: true },
 ];
 
