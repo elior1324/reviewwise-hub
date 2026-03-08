@@ -425,6 +425,7 @@ const BusinessDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+            </LockedOverlay>
           </TabsContent>
 
           {/* Notifications */}
