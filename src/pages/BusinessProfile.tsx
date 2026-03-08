@@ -7,7 +7,7 @@ import CourseCard from "@/components/CourseCard";
 import BusinessHero from "@/components/BusinessHero";
 import AddReviewForm from "@/components/AddReviewForm";
 import { Button } from "@/components/ui/button";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import AIChatbot from "@/components/AIChatbot";
@@ -17,6 +17,7 @@ const DEFAULT_KEY = "digital-marketing-academy";
 
 const BusinessProfile = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [filterRating, setFilterRating] = useState<number | null>(null);
 
   const business = getBusinessBySlug(slug || "") || getBusinessBySlug(DEFAULT_KEY)!;
@@ -29,6 +30,16 @@ const BusinessProfile = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
       <div className="container py-10">
+        <div className="mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="text-muted-foreground hover:text-foreground font-medium"
+          >
+            → חזרה
+          </Button>
+        </div>
         <BusinessHero business={business} />
 
         {/* Courses */}
