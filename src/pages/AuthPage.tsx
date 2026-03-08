@@ -29,6 +29,10 @@ const AuthPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mode === "signup" && !privacyConsent) {
+      toast.error("יש לאשר את מדיניות הפרטיות ותנאי השימוש כדי להירשם.");
+      return;
+    }
     setLoading(true);
 
     if (mode === "login") {
