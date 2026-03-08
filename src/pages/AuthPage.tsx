@@ -23,6 +23,7 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [privacyConsent, setPrivacyConsent] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
