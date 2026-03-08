@@ -5,7 +5,7 @@ import CourseCard from "@/components/CourseCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown, Trophy, Star } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
@@ -14,6 +14,7 @@ import { BUSINESSES, COURSES, FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, Busines
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { useCategories } from "@/hooks/useCategories";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,13 +65,45 @@ const SearchPage = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
   const [sortOption, setSortOption] = useState<SortOption>("default");
 
-  const top5Overall = useMemo(() => 
+  // Fallback mock top 5
+  const mockTop5 = useMemo(() => 
     [...BUSINESSES]
       .filter(b => b.rating >= 4.0)
       .sort((a, b) => b.reviewCount - a.reviewCount || b.rating - a.rating)
       .slice(0, 5),
     []
   );
+
+  // Fetch AI-generated monthly top 5 from DB
+  const [dbTop5, setDbTop5] = useState<any[] | null>(null);
+  const [top5Month, setTop5Month] = useState("");
+
+  useEffect(() => {
+    const fetchTop5 = async () => {
+      const now = new Date();
+      const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      
+      const { data } = await supabase
+        .from("monthly_top5")
+        .select("*")
+        .eq("month_year", monthYear)
+        .order("rank", { ascending: true });
+
+      if (data && data.length > 0) {
+        setTop5Month(monthYear);
+        // Map DB rankings to mock business data for BusinessCard display
+        const mapped = data.map((item: any) => {
+          const biz = BUSINESSES.find(b => b.slug === item.business_slug);
+          return biz ? { ...biz, _aiReasoning: item.ai_reasoning } : null;
+        }).filter(Boolean);
+        if (mapped.length > 0) setDbTop5(mapped);
+      }
+    };
+    fetchTop5();
+  }, []);
+
+  const top5Overall = dbTop5 || mockTop5;
+  const isAiRanked = dbTop5 !== null;
 
   const { data: freelancerCats = [] } = useCategories("freelancer");
   const { data: courseCats = [] } = useCategories("course");
@@ -136,10 +169,16 @@ const SearchPage = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mb-8 rounded-xl border border-border/50 bg-card/50 p-5"
         >
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-1">
             <Trophy size={20} className="text-primary" />
             <h2 className="font-display font-bold text-lg text-foreground">טופ 5 — הכי הרבה ביקורות חיוביות</h2>
+            {isAiRanked && (
+              <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">🤖 AI מעודכן</span>
+            )}
           </div>
+          {isAiRanked && top5Month && (
+            <p className="text-xs text-muted-foreground mb-3 mr-7">דירוג חודשי מבוסס AI — עודכן לאחרונה ב-{top5Month}</p>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {top5Overall.map((biz, i) => (
               <motion.div
