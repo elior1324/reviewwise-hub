@@ -14,6 +14,7 @@ import { getCourseById, getReviewsByCourse, getBusinessBySlug, generateReviewSum
 
 const CoursePage = () => {
   const { courseId } = useParams();
+  const navigate = useNavigate();
   const [filterRating, setFilterRating] = useState<number | null>(null);
 
   const course = getCourseById(courseId || "");
