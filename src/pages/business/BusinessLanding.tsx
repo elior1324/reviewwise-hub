@@ -3,6 +3,7 @@ import BusinessNavbar from "@/components/BusinessNavbar";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import BusinessFooter from "@/components/BusinessFooter";
 import AIChatbot from "@/components/AIChatbot";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -375,7 +376,19 @@ const BusinessLanding = () => {
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
             <Sparkles size={14} /> תוכנית מקצועי{user ? " — ₪189/חודש" : ""}
           </div>
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">כלים מתקדמים לצמיחה</h2>
+          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3 inline-flex items-center gap-2 justify-center">
+            כלים מתקדמים לצמיחה
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button type="button" className="inline-flex" aria-label="מידע נוסף">
+                  <HelpCircle size={18} className="text-muted-foreground hover:text-primary transition-colors" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs text-sm leading-relaxed text-right">
+                <p>כלים שעוזרים לכם לנתח ביצועים, לשפר המרות ולהגדיל הכנסות — כולל אנליטיקס מתקדם, מערכת אפיליאט ואוטומציות שיווקיות.</p>
+              </TooltipContent>
+            </Tooltip>
+          </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה ואפיליאט — הכל בחבילה אחת</p>
         </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -412,7 +425,19 @@ const BusinessLanding = () => {
             <div className="inline-flex items-center gap-2 bg-foreground text-background text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
               <Crown size={14} /> תוכנית פרימיום{user ? " — ₪479/חודש" : ""}
             </div>
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">CRM, לידים ואינטגרציות</h2>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3 inline-flex items-center gap-2 justify-center">
+              CRM, לידים ואינטגרציות
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="inline-flex" aria-label="מידע נוסף">
+                    <HelpCircle size={18} className="text-muted-foreground hover:text-primary transition-colors" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs text-sm leading-relaxed text-right">
+                  <p>מערכת ניהול לידים מלאה שמחברת את ReviewHub ל-CRM שלכם, אוספת פניות מלקוחות ומאפשרת אינטגרציה עם כלים חיצוניים כמו Zapier ו-Webhook.</p>
+                </TooltipContent>
+              </Tooltip>
+            </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">חברו את ReviewHub לכל המערכות שלכם והפכו ביקורות ללידים</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
