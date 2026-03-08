@@ -11,7 +11,7 @@ interface ReceiptUploaderProps {
   onVerified: (verified: boolean) => void;
 }
 
-const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png";
+const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,image/*,application/pdf";
 const MAX_SIZE_MB = 10;
 
 const ReceiptUploader = ({ businessId, courseId, onVerified }: ReceiptUploaderProps) => {
@@ -127,9 +127,20 @@ const ReceiptUploader = ({ businessId, courseId, onVerified }: ReceiptUploaderPr
             className="hidden"
             id="receipt-upload"
           />
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleUpload}
+            className="hidden"
+            id="receipt-camera"
+          />
           <label htmlFor="receipt-upload" className="cursor-pointer">
             <Upload size={20} className="mx-auto mb-1.5 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground">PDF או תמונה — עד {MAX_SIZE_MB}MB</p>
+            <p className="text-xs text-muted-foreground">PDF, תמונה, גלריה, iCloud/Google Drive — עד {MAX_SIZE_MB}MB</p>
+          </label>
+          <label htmlFor="receipt-camera" className="inline-flex items-center gap-1.5 mt-2 text-xs text-primary font-medium cursor-pointer hover:underline">
+            📷 צלמו קבלה עם המצלמה
           </label>
         </div>
       )}
