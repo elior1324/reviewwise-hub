@@ -196,8 +196,9 @@ const BusinessDashboard = () => {
               <Bell size={14} className="ml-1" /> התראות
               <span className="mr-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full">{notifications.length}</span>
             </TabsTrigger>
-            <TabsTrigger value="ai-report">
+            <TabsTrigger value="ai-report" className="gap-1">
               <Brain size={14} className="ml-1" /> דוח AI שבועי
+              {!isPremium && <PremiumBadge />}
             </TabsTrigger>
             <TabsTrigger value="testimonials">
               <Video size={14} className="ml-1" /> סרטוני לקוחות
