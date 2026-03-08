@@ -361,6 +361,18 @@ const BusinessDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Testimonials Tab */}
+          <TabsContent value="testimonials">
+            <div className="max-w-2xl">
+              <p className="text-muted-foreground text-sm mb-4">
+                העלו עד 5 סרטונים או תמונות של לקוחות מרוצים. ניתן להעלות קבצים ישירות או להוסיף קישורי YouTube / TikTok.
+                <br />
+                <span className="text-xs text-primary">זמין למנויי Professional ו-Premium בלבד.</span>
+              </p>
+              <TestimonialMediaUploader businessId="PLACEHOLDER_ID" maxItems={5} />
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
       <BusinessFooter />
