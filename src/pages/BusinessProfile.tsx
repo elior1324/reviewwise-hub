@@ -147,8 +147,31 @@ const BusinessProfile = () => {
     );
   }
 
+  // JSON-LD structured data for Google Review Stars
+  const jsonLd = business ? {
+    "@context": "https://schema.org",
+    "@type": business.type === "freelancer" ? "LocalBusiness" : "EducationalOrganization",
+    "name": business.name,
+    "description": business.description,
+    ...(business.website ? { "url": business.website } : {}),
+    ...(business.logo ? { "image": business.logo } : {}),
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": business.rating.toFixed(1),
+      "bestRating": "5",
+      "worstRating": "1",
+      "reviewCount": business.reviewCount.toString(),
+    },
+  } : null;
+
   return (
     <div className="min-h-screen bg-background noise-overlay">
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       <Navbar />
       <div className="container py-10">
         <div className="mb-4">
