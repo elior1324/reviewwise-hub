@@ -4,6 +4,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Accessibility overrides */
+.a11y-high-contrast {
+  --foreground: 0 0% 100% !important;
+  --background: 0 0% 0% !important;
+  --muted-foreground: 0 0% 80% !important;
+  --border: 0 0% 40% !important;
+}
+
+.a11y-reduced-motion,
+.a11y-reduced-motion * {
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
+}
+
+.a11y-link-highlight a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
 @layer base {
   :root {
     --background: 0 0% 4%;

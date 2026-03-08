@@ -51,6 +51,7 @@ const Navbar = () => {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
+          <AccessibilityMenu />
           {user && <NotificationBell />}
 
           {/* לעסקים */}
