@@ -625,7 +625,8 @@ const ComparePage = () => {
                               </td>
                             ))}
                           </tr>
-                        )
+                        )}
+                        {selectedItems.some(i => i.description) && (
                           <tr>
                             <td className="p-4 font-medium text-muted-foreground bg-muted/10 align-top">תיאור</td>
                             {selectedItems.map(item => (
