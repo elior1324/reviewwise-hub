@@ -169,7 +169,17 @@ const AuthPage = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-primary text-primary-foreground glow-primary" disabled={loading}>
+              {mode === "signup" && (
+                <PrivacyConsentCheckbox
+                  checked={privacyConsent}
+                  onCheckedChange={setPrivacyConsent}
+                  className="mt-1"
+                />
+              )}
+
+              {mode === "login" && <FormPrivacyNotice className="mt-1" />}
+
+              <Button type="submit" className="w-full bg-primary text-primary-foreground glow-primary" disabled={loading || (mode === "signup" && !privacyConsent)}>
                 {loading ? "טוען..." : mode === "login" ? "התחברו" : "הרשמו"}
               </Button>
             </form>
