@@ -10,8 +10,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import DeleteAccountButton from "./DeleteAccountButton";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
