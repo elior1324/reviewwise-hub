@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import {
   Search, ShieldCheck, Star, TrendingUp, Users,
   GraduationCap, Briefcase, Palette, Code2, BarChart3, Brain, Megaphone, Wrench,
-  UserCheck, BookOpen, DollarSign
+  UserCheck, BookOpen, DollarSign, HelpCircle, ChevronDown
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import BusinessCard from "@/components/BusinessCard";
