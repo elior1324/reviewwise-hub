@@ -130,6 +130,7 @@ const BusinessDashboard = () => {
       // User has a business — switch to real mode
       setIsDemo(false);
       setBusinessId(biz.id);
+      setBusinessSlug(biz.slug);
       setBusinessInfo({ name: biz.name, email: biz.email || user.email || "" });
 
       // Fetch reviews
