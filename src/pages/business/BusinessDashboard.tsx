@@ -133,7 +133,7 @@ const BusinessDashboard = () => {
       // Fetch reviews
       const { data: reviewData } = await supabase
         .from("reviews")
-        .select("*, courses(name), profiles(display_name)")
+        .select("*, courses(name)")
         .eq("business_id", biz.id)
         .order("created_at", { ascending: false })
         .limit(10);
