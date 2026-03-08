@@ -21,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 
 const BUSINESS_SLUG = "digital-marketing-academy";
 
-type DemoTier = "pro" | "premium";
+type DemoTier = "free" | "pro" | "premium";
 
 const BusinessDashboard = () => {
   const navigate = useNavigate();
@@ -31,6 +31,8 @@ const BusinessDashboard = () => {
   const [demoTier, setDemoTier] = useState<DemoTier>("pro");
   const currentTier: SubscriptionTier = subscriptionTier !== "free" ? subscriptionTier : demoTier;
   const isPremium = currentTier === "premium";
+  const isPro = currentTier === "pro";
+  const isFree = currentTier === "free";
 
   const demoBusiness = {
     name: "Digital Marketing Academy",
