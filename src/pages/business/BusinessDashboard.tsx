@@ -112,6 +112,9 @@ const BusinessDashboard = () => {
             <TabsTrigger value="ai-report">
               <Brain size={14} className="ml-1" /> דוח AI שבועי
             </TabsTrigger>
+            <TabsTrigger value="testimonials">
+              <Video size={14} className="ml-1" /> סרטוני לקוחות
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview */}
