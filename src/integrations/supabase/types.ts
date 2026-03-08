@@ -52,6 +52,85 @@ export type Database = {
           },
         ]
       }
+      ai_reports: {
+        Row: {
+          business_id: string
+          content: string
+          created_at: string
+          id: string
+          period_end: string | null
+          period_start: string | null
+          report_type: string
+        }
+        Insert: {
+          business_id: string
+          content: string
+          created_at?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          report_type?: string
+        }
+        Update: {
+          business_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          report_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_reports_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_keys: {
+        Row: {
+          active: boolean
+          business_id: string
+          created_at: string
+          id: string
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          business_id: string
+          created_at?: string
+          id?: string
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string
+          created_at?: string
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approved_categories: {
         Row: {
           auto_approved: boolean
@@ -111,6 +190,47 @@ export type Database = {
             columns: ["review_id"]
             isOneToOne: true
             referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_webhooks: {
+        Row: {
+          active: boolean
+          business_id: string
+          created_at: string
+          events: string[]
+          id: string
+          last_triggered_at: string | null
+          secret: string | null
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          business_id: string
+          created_at?: string
+          events?: string[]
+          id?: string
+          last_triggered_at?: string | null
+          secret?: string | null
+          url: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string
+          created_at?: string
+          events?: string[]
+          id?: string
+          last_triggered_at?: string | null
+          secret?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_webhooks_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
         ]
@@ -337,6 +457,60 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          business_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          id: string
+          notes: string | null
+          review_id: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          id?: string
+          notes?: string | null
+          review_id?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          id?: string
+          notes?: string | null
+          review_id?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
             referencedColumns: ["id"]
           },
         ]
