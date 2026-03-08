@@ -139,12 +139,31 @@ const Index = () => {
     const fetchReviews = async () => {
       const { data } = await supabase
         .from("reviews")
-        .select("*, courses(name)")
+        .select("*, courses(name), business_responses(text, created_at)")
         .order("created_at", { ascending: false })
-        .limit(3);
+        .limit(6);
 
       if (data) {
-        const mapped: Review[] = data.map((r: any) => ({
+        // Expert detection among these reviews
+        const expertCounts: Record<string, number> = {};
+        data.forEach((r: any) => {
+          if (r.rating >= 4) {
+            expertCounts[r.user_id] = (expertCounts[r.user_id] || 0) + 1;
+          }
+        });
+
+        // For homepage, group by business_id to determine early bird per business
+        const businessFirsts: Record<string, string[]> = {};
+        const sortedByDate = [...data].sort(
+          (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+        sortedByDate.forEach((r: any) => {
+          if (!businessFirsts[r.business_id]) businessFirsts[r.business_id] = [];
+          if (businessFirsts[r.business_id].length < 5) businessFirsts[r.business_id].push(r.id);
+        });
+        const earlyBirdIds = new Set(Object.values(businessFirsts).flat());
+
+        const mapped: Review[] = data.slice(0, 3).map((r: any) => ({
           id: r.id,
           reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating,
@@ -159,6 +178,13 @@ const Index = () => {
           updatedAt: r.updated_at !== r.created_at ? new Date(r.updated_at).toLocaleDateString("he-IL") : undefined,
           flagged: r.flagged || false,
           flagReason: r.flag_reason || undefined,
+          likeCount: r.like_count || 0,
+          isEarlyBird: earlyBirdIds.has(r.id),
+          isExpert: (expertCounts[r.user_id] || 0) >= 3,
+          ownerResponse: r.business_responses?.[0] ? {
+            text: r.business_responses[0].text,
+            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
+          } : undefined,
         }));
         setRecentReviews(mapped);
         setStats(prev => ({ ...prev, reviews: data.length }));
