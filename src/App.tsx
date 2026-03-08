@@ -17,6 +17,7 @@ import ForBusinessPage from "./pages/ForBusinessPage";
 import AuthPage from "./pages/AuthPage";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
