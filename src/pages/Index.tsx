@@ -123,7 +123,7 @@ const Index = () => {
     const fetchReviews = async () => {
       const { data } = await supabase
         .from("reviews")
-        .select("*, courses(name), profiles(display_name)")
+        .select("*, courses(name)")
         .order("created_at", { ascending: false })
         .limit(3);
 
