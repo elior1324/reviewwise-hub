@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
 import { useState } from "react";
 import { BUSINESSES, REVIEWS, FREELANCER_CATEGORIES, COURSE_CATEGORIES } from "@/data/mockData";
+import { useCategories } from "@/hooks/useCategories";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
