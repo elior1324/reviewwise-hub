@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
-  Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3
+  Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText
 } from "lucide-react";
 import { REVIEWS, COURSES, AFFILIATE_CLICKS } from "@/data/mockData";
 
