@@ -5,6 +5,7 @@ import BusinessFooter from "@/components/BusinessFooter";
 import AIChatbot from "@/components/AIChatbot";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "react-router-dom";
 import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
@@ -32,31 +33,31 @@ const fadeUp = {
 };
 
 // ─── Features organized by tier ───────────────────────────
-type Feature = { icon: any; title: string; desc: string; preview?: string; locked?: boolean };
+type Feature = { icon: any; title: string; desc: string; preview?: string; locked?: boolean; tooltip?: string };
 const FREE_FEATURES: Feature[] = [
-  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת." },
-  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור." },
-  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח." },
-  { icon: Star, title: "תג דירוג בסיסי", desc: "הציגו את הדירוג שלכם עם תג אמינות ReviewHub." },
+  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת.", tooltip: "המערכת מוודאת שרק מי שרכש את המוצר יכול להשאיר ביקורת — כך כל ביקורת היא אמיתית ומהימנה." },
+  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור.", tooltip: "עמוד ייעודי לעסק שלכם שנגיש לכולם, כולל לוגו, תיאור, פרטי קשר ודירוג מצטבר." },
+  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח.", tooltip: "אפשרות להגיב לכל ביקורת ישירות מהדאשבורד — מראים ללקוחות שאכפת לכם." },
+  { icon: Star, title: "תג דירוג בסיסי", desc: "הציגו את הדירוג שלכם עם תג אמינות ReviewHub.", tooltip: "תג קטן עם הדירוג שלכם שאפשר לשתף או להציג, מעיד על אמינות העסק." },
 ];
 
 const PRO_FEATURES: Feature[] = [
-  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת." },
-  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת." },
-  { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות." },
-  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. עמלה של 10% על כל מכירה שנכנסת דרככם." },
-  { icon: Globe, title: "רשתות חברתיות ואתר", desc: "חברו YouTube, Instagram, TikTok, LinkedIn, Facebook ואתר האינטרנט שלכם לפרופיל העסקי." },
-  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור." },
-  { icon: Headphones, title: "תמיכה בעדיפות", desc: "תמיכה מהירה עם מענה תוך 4 שעות בימי עבודה." },
+  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת.", tooltip: "לוח בקרה עם גרפים ונתונים בזמן אמת — דירוגים, מגמות, ביקורות חדשות ואחוזי מענה." },
+  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת.", tooltip: "קוד קצר שמטמיע קרוסלת ביקורות או תג דירוג ישירות באתר שלכם — ללא מתכנת." },
+  { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות.", tooltip: "שלחו ללקוחות קישור אישי לכתיבת ביקורת, או העלו רשימת רכישות ותנו למערכת לעשות את השאר." },
+  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. עמלה של 10% על כל מכירה שנכנסת דרככם.", tooltip: "צרו קישורי הפניה ייחודיים ועקבו אחרי קליקים, המרות והכנסות — הרוויחו 10% מכל מכירה." },
+  { icon: Globe, title: "רשתות חברתיות ואתר", desc: "חברו YouTube, Instagram, TikTok, LinkedIn, Facebook ואתר האינטרנט שלכם לפרופיל העסקי.", tooltip: "הוסיפו קישורים לכל הרשתות החברתיות שלכם ולאתר — הכל מופיע בפרופיל העסקי." },
+  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור.", tooltip: "כל שבוע תקבלו דוח AI שמנתח את הביקורות, מזהה מגמות ונותן המלצות לשיפור." },
+  { icon: Headphones, title: "תמיכה בעדיפות", desc: "תמיכה מהירה עם מענה תוך 4 שעות בימי עבודה.", tooltip: "פניות שלכם מטופלות לפני כולם — מענה מובטח תוך 4 שעות בימי עבודה." },
 ];
 
 const PREMIUM_FEATURES: Feature[] = [
-  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true },
-  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true },
-  { icon: Webhook, title: "Webhook למערכות חיצוניות", desc: "חברו ל-Zapier, Make ולכל מערכת עם webhook.", locked: true },
-  { icon: Globe, title: "Google Ads Review Stars ⭐", desc: "הציגו כוכבי דירוג ישירות במודעות Google שלכם.", locked: true },
-  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true },
-  { icon: Code, title: "גישת API מלאה", desc: "בנו אינטגרציות מותאמות אישית עם ה-API שלנו.", locked: true },
+  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true, tooltip: "סנכרנו ביקורות ולידים ישירות למערכת ה-CRM שלכם — HubSpot, Salesforce ועוד." },
+  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true, tooltip: "ביקורת חיובית הופכת אוטומטית לליד — המערכת שולחת הפניה ללקוח המרוצה." },
+  { icon: Webhook, title: "Webhook למערכות חיצוניות", desc: "חברו ל-Zapier, Make ולכל מערכת עם webhook.", locked: true, tooltip: "כל אירוע (ביקורת חדשה, ליד וכו׳) נשלח אוטומטית ל-Zapier, Make או כל מערכת אחרת." },
+  { icon: Globe, title: "Google Ads Review Stars ⭐", desc: "הציגו כוכבי דירוג ישירות במודעות Google שלכם.", locked: true, tooltip: "כוכבי הדירוג שלכם מופיעים ישירות במודעות Google — מגדיל CTR ואמינות." },
+  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true, tooltip: "דוחות AI יומיים עם ניתוח מעמיק — מגמות, התרעות על ביקורות שליליות ותחזיות." },
+  { icon: Code, title: "גישת API מלאה", desc: "בנו אינטגרציות מותאמות אישית עם ה-API שלנו.", locked: true, tooltip: "גישה מלאה ל-API של ReviewHub — בנו אינטגרציות מותאמות לצרכים שלכם." },
 ];
 
 const PLANS = [
@@ -342,16 +343,30 @@ const BusinessLanding = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">כל הכלים הבסיסיים שצריך כדי להתחיל לאסוף ביקורות מאומתות</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FREE_FEATURES.map(({ icon: Icon, title, desc, preview }, i) => (
+            {FREE_FEATURES.map(({ icon: Icon, title, desc, preview, tooltip }, i) => (
               <motion.div
                 key={title}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp} custom={i}
-                className={`rounded-xl p-6 bg-card border transition-all duration-300 group cursor-pointer ${
+                className={`rounded-xl p-6 bg-card border transition-all duration-300 group cursor-pointer relative ${
                   expandedFeature === title ? "border-primary/50 shadow-card-hover" : "border-border/50 hover:border-primary/30"
                 }`}
                 onClick={() => preview && toggleFeature(title)}
               >
+                {tooltip && (
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <button className="absolute top-4 left-4 w-6 h-6 rounded-full bg-muted/60 hover:bg-primary/15 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                          <HelpCircle size={14} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[250px] text-sm leading-relaxed text-right" dir="rtl">
+                        {tooltip}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
                 <div className="flex items-start justify-between">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                     <Icon size={22} className="text-primary" />
@@ -379,16 +394,30 @@ const BusinessLanding = () => {
           <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה ואפיליאט — הכל בחבילה אחת</p>
         </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {PRO_FEATURES.map(({ icon: Icon, title, desc, preview }, i) => (
+            {PRO_FEATURES.map(({ icon: Icon, title, desc, preview, tooltip }, i) => (
               <motion.div
                 key={title}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp} custom={i}
-                className={`rounded-xl p-6 bg-card border transition-all duration-300 group cursor-pointer ${
+                className={`rounded-xl p-6 bg-card border transition-all duration-300 group cursor-pointer relative ${
                   expandedFeature === title ? "border-primary/50 shadow-card-hover" : "border-primary/20 hover:border-primary/40"
                 }`}
                 onClick={() => preview && toggleFeature(title)}
               >
+                {tooltip && (
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <button className="absolute top-4 left-4 w-6 h-6 rounded-full bg-muted/60 hover:bg-primary/15 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                          <HelpCircle size={14} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[250px] text-sm leading-relaxed text-right" dir="rtl">
+                        {tooltip}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
                 <div className="flex items-start justify-between">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                     <Icon size={22} className="text-primary" />
@@ -416,7 +445,7 @@ const BusinessLanding = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">חברו את ReviewHub לכל המערכות שלכם והפכו ביקורות ללידים</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {PREMIUM_FEATURES.map(({ icon: Icon, title, desc, preview }, i) => (
+            {PREMIUM_FEATURES.map(({ icon: Icon, title, desc, preview, tooltip }, i) => (
               <motion.div
                 key={title}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
@@ -426,7 +455,21 @@ const BusinessLanding = () => {
                 }`}
                 onClick={() => preview && toggleFeature(title)}
               >
-                <div className="absolute top-4 left-4">
+                <div className="absolute top-4 left-4 flex items-center gap-2">
+                  {tooltip && (
+                    <TooltipProvider delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <button className="w-6 h-6 rounded-full bg-muted/60 hover:bg-primary/15 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                            <HelpCircle size={14} />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[250px] text-sm leading-relaxed text-right" dir="rtl">
+                          {tooltip}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   <div className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
                     <Lock size={10} /> פרימיום
                   </div>
