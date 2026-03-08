@@ -27,7 +27,7 @@ const FloatingEarnCTA = () => {
     >
       <div className="flex items-center bg-primary/90 backdrop-blur-sm text-primary-foreground pl-3 pr-2 py-1.5 md:py-2 rounded-l-none rounded-r-full shadow-md hover:shadow-primary/20 transition-all duration-300 hover:pr-3 md:hover:pr-4">
         <DollarSign size={14} className="ml-1.5 shrink-0 animate-pulse" />
-        <span className="font-display font-semibold text-[11px] md:text-xs whitespace-nowrap">הרוויחו מביקורות 💰</span>
+        <span className="font-display font-semibold text-[11px] md:text-xs whitespace-nowrap">שותפים 50/50 💰</span>
       </div>
     </motion.button>
   );
