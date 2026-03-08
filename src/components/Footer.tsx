@@ -66,6 +66,7 @@ const Footer = () => (
           <div className="space-y-2">
             <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות פרטיות</Link>
             <Link to="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">תנאי שימוש</Link>
+            <Link to="/accessibility" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">הצהרת נגישות</Link>
           </div>
         </div>
       </div>
