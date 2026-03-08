@@ -99,6 +99,12 @@ const BusinessDashboard = () => {
   const [realStats, setRealStats] = useState<typeof DEMO_STATS | null>(null);
   const [realClicks, setRealClicks] = useState<typeof DEMO_CLICKS>([]);
   const [realNotifications, setRealNotifications] = useState<typeof DEMO_NOTIFICATIONS>([]);
+  const [realLeads, setRealLeads] = useState<any[]>([]);
+  const [realWebhooks, setRealWebhooks] = useState<any[]>([]);
+  const [realApiKeys, setRealApiKeys] = useState<any[]>([]);
+  const [realAiReports, setRealAiReports] = useState<any[]>([]);
+  const [generatingReport, setGeneratingReport] = useState(false);
+  const [generatingApiKey, setGeneratingApiKey] = useState(false);
 
   // Determine tier
   const currentTier: SubscriptionTier = !isDemo && subscriptionTier !== "free" ? subscriptionTier : demoTier;
