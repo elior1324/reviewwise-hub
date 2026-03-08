@@ -172,8 +172,9 @@ const CoursePage = () => {
                   <span>{course.verifiedPurchases} רכישות מאומתות</span>
                 </div>
                 {course.affiliateUrl && (
-                  <Link to={`/go/${course.id}`} target="_blank">
-                    <Button size="sm" className="bg-primary text-primary-foreground gap-2 glow-primary">
+                  <div>
+                    <Link to={`/go/${course.id}`} target="_blank">
+                      <Button size="sm" className="bg-primary text-primary-foreground gap-2 glow-primary">
                       <ExternalLink size={14} /> לאתר הקורס
                     </Button>
                   </Link>
