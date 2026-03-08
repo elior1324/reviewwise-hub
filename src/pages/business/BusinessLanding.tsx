@@ -315,17 +315,27 @@ const BusinessLanding = () => {
                   ))}
                 </ul>
               )}
-              <Link to="/business/signup">
-                <Button className={`w-full ${
-                  plan.highlighted
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
-                    : (plan as any).premium
-                    ? "bg-foreground text-background hover:bg-foreground/90"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}>
-                  {plan.cta}
+              {plan.tier === "free" ? (
+                <Link to="/business/signup">
+                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                    {plan.cta}
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  onClick={() => handleCheckout(plan.tier as "pro" | "premium")}
+                  disabled={checkoutLoading === plan.tier || subscriptionTier === plan.tier}
+                  className={`w-full ${
+                    plan.highlighted
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
+                      : plan.premium
+                      ? "bg-foreground text-background hover:bg-foreground/90"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  }`}
+                >
+                  {subscriptionTier === plan.tier ? "✓ התוכנית הנוכחית" : checkoutLoading === plan.tier ? "טוען..." : plan.cta}
                 </Button>
-              </Link>
+              )}
             </motion.div>
           ))}
         </div>
