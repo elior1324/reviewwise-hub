@@ -22,8 +22,8 @@ const Footer = () => (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display font-bold text-sm">R</span>
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={logoIcon} alt="ReviewHub" className="w-full h-full object-cover" />
             </div>
             <span className="font-display font-bold text-lg gradient-text">ReviewHub</span>
           </div>
