@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
+import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
+import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 
 interface BusinessAuthProps {
   mode: "login" | "signup";
