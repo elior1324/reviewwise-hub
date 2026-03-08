@@ -79,7 +79,7 @@ const AccessibilityMenu = () => {
           <Accessibility size={18} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52" dir="rtl">
+      <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuItem onClick={cycleFontSize}>
           <span className="flex items-center justify-between w-full">
             <span>גודל טקסט</span>
