@@ -9,12 +9,10 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
-import { BUSINESSES, COURSES, FREELANCER_CATEGORIES, COURSE_CATEGORIES } from "@/data/mockData";
+import { BUSINESSES, COURSES } from "@/data/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-
-const ALL_FREELANCER_CATS = ["הכל", ...FREELANCER_CATEGORIES];
-const ALL_COURSE_CATS = ["הכל", ...COURSE_CATEGORIES];
+import { useCategories } from "@/hooks/useCategories";
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
