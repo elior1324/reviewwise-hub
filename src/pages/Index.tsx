@@ -64,6 +64,21 @@ const Index = () => {
   const [courseCatCounts, setCourseCatCounts] = useState<Record<string, number>>({});
   const [stats, setStats] = useState({ reviews: 0, businesses: 0 });
 
+  const { data: communityPool } = useQuery({
+    queryKey: ["community-pool-homepage"],
+    queryFn: async () => {
+      const now = new Date();
+      const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      const { data } = await supabase
+        .from("rewards_pool")
+        .select("community_pool, total_points")
+        .eq("month_year", monthYear)
+        .maybeSingle();
+      return data ?? { community_pool: 0, total_points: 0 };
+    },
+    refetchInterval: 30000,
+  });
+
   useEffect(() => {
     // Fetch top freelancers
     supabase
