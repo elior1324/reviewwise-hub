@@ -240,13 +240,8 @@ const BusinessNavbar = () => {
           ) : (
             <div className="hidden md:flex items-center gap-2">
               <Link to="/business/login">
-                <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground font-medium">
-                  התחברו
-                </Button>
-              </Link>
-              <Link to="/business/signup">
                 <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary font-medium">
-                  צרו חשבון בחינם
+                  התחברו / הרשמו
                 </Button>
               </Link>
             </div>
