@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Search, ShieldCheck, Star, TrendingUp, Users,
-  GraduationCap, Briefcase, Palette, Code2, BarChart3, Brain, Megaphone, Wrench
+  GraduationCap, Briefcase, Palette, Code2, BarChart3, Brain, Megaphone, Wrench,
+  UserCheck, BookOpen
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import BusinessCard from "@/components/BusinessCard";
@@ -12,7 +13,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
 import { useState } from "react";
-import { BUSINESSES, REVIEWS } from "@/data/mockData";
+import { BUSINESSES, REVIEWS, FREELANCER_CATEGORIES, COURSE_CATEGORIES } from "@/data/mockData";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -30,14 +31,17 @@ const AUDIENCE_TYPES = [
   { icon: BarChart3, label: "יזמים", desc: "Growth וניהול סטארטאפ" },
 ];
 
-const CATEGORIES = [
-  { label: "שיווק דיגיטלי", query: "שיווק", count: 124 },
-  { label: "תכנות ופיתוח", query: "תכנות", count: 89 },
-  { label: "עיצוב UI/UX", query: "עיצוב", count: 67 },
-  { label: "מדעי נתונים", query: "מדעי נתונים", count: 156 },
-  { label: "עסקים ויזמות", query: "עסקים", count: 31 },
-  { label: "צילום ווידאו", query: "צילום", count: 18 },
-];
+const FREELANCER_CATS_DISPLAY = FREELANCER_CATEGORIES.slice(0, 6).map(cat => ({
+  label: cat,
+  query: cat,
+  count: BUSINESSES.filter(b => b.type === "freelancer" && b.category === cat).reduce((s, b) => s + b.reviewCount, 0),
+}));
+
+const COURSE_CATS_DISPLAY = COURSE_CATEGORIES.map(cat => ({
+  label: cat,
+  query: cat,
+  count: BUSINESSES.filter(b => b.type === "course-provider" && b.category === cat).reduce((s, b) => s + b.reviewCount, 0),
+}));
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,7 +52,8 @@ const Index = () => {
     if (searchQuery.trim()) navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
-  const topBusinesses = BUSINESSES.slice(0, 4);
+  const topFreelancers = BUSINESSES.filter(b => b.type === "freelancer").sort((a, b) => b.rating - a.rating).slice(0, 4);
+  const topCourseProviders = BUSINESSES.filter(b => b.type === "course-provider").sort((a, b) => b.rating - a.rating).slice(0, 4);
   const recentReviews = REVIEWS.slice(0, 3);
 
   return (
@@ -66,18 +71,20 @@ const Index = () => {
               <ShieldCheck size={16} /> רק ביקורות מאומתות
             </motion.div>
             <motion.h1 variants={fadeUp} custom={1} className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-4">
-              מצאו את ההכשרה{" "}
-              <span className="gradient-text glow-text">המושלמת</span>
-              {" "}בשבילכם
+              מצאו את{" "}
+              <span className="gradient-text glow-text">בעל המקצוע</span>
+              {" "}או{" "}
+              <span className="gradient-text glow-text">הקורס</span>
+              {" "}המושלם
             </motion.h1>
             <motion.p variants={fadeUp} custom={2} className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-              קורסים, הכשרות, סדנאות ומנטורינג — עם ביקורות מאומתות מאנשים שבאמת רכשו.
+              פרילנסרים, קורסים, סדנאות, הרצאות ומנטורינג — עם ביקורות מאומתות מלקוחות שבאמת רכשו.
             </motion.p>
             <motion.form variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex gap-3 max-w-lg mx-auto mb-12">
               <div className="relative flex-1">
                 <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="חפשו קורסים, מנטורים או קטגוריות..."
+                  placeholder="חפשו פרילנסרים, קורסים או קטגוריות..."
                   className="pr-10 h-12 glass border-border/50"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -119,21 +126,49 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* Two Category Sections */}
       <section className="border-y border-border/50 glass">
-        <div className="container py-10">
-          <h2 className="font-display font-bold text-xl text-foreground mb-6 text-center">קטגוריות פופולריות</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {CATEGORIES.map(({ label, query, count }) => (
-              <Link
-                key={label}
-                to={`/search?q=${encodeURIComponent(query)}`}
-                className="rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 transition-all duration-300 text-center group"
-              >
-                <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
-                <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
-              </Link>
-            ))}
+        <div className="container py-12">
+          {/* Freelancers */}
+          <div className="mb-10">
+            <div className="flex items-center gap-2 mb-2">
+              <UserCheck size={20} className="text-primary" />
+              <h2 className="font-display font-bold text-xl text-foreground">בעלי מקצוע עצמאים</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-5">מנהלי סושיאל, מעצבי אתרים, עורכי וידאו, כותבים שיווקיים ועוד</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {FREELANCER_CATS_DISPLAY.map(({ label, query, count }) => (
+                <Link
+                  key={label}
+                  to={`/search?q=${encodeURIComponent(query)}&tab=freelancers`}
+                  className="rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 transition-all duration-300 text-center group"
+                >
+                  <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Course Providers */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <BookOpen size={20} className="text-primary" />
+              <h2 className="font-display font-bold text-xl text-foreground">קורסים, סדנאות והכשרות</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-5">קורסים, סדנאות, הרצאות, לימודים, תעודות הכשרה ועוד</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {COURSE_CATS_DISPLAY.map(({ label, query, count }) => (
+                <Link
+                  key={label}
+                  to={`/search?q=${encodeURIComponent(query)}&tab=courses`}
+                  className="rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 transition-all duration-300 text-center group"
+                >
+                  <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -144,7 +179,7 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
               { icon: Star, label: "ביקורות", value: "12,400+" },
-              { icon: Users, label: "עסקים", value: "850+" },
+              { icon: Users, label: "עסקים ופרילנסרים", value: "850+" },
               { icon: ShieldCheck, label: "מאומתות", value: "98%" },
               { icon: TrendingUp, label: "מבקרים בחודש", value: "45K+" },
             ].map(({ icon: Icon, label, value }) => (
@@ -158,19 +193,22 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Top Businesses */}
+      {/* Top Freelancers */}
       <section className="container py-20">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">עסקים מובילים</h2>
-            <p className="text-muted-foreground mt-1">אלפי סטודנטים סומכים עליהם</p>
+            <div className="flex items-center gap-2 mb-1">
+              <UserCheck size={22} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">בעלי מקצוע מובילים</h2>
+            </div>
+            <p className="text-muted-foreground mt-1">פרילנסרים מוערכים עם ביקורות מאומתות</p>
           </div>
-          <Link to="/search">
+          <Link to="/search?tab=freelancers">
             <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {topBusinesses.map((biz, i) => (
+          {topFreelancers.map((biz, i) => (
             <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
               <BusinessCard {...biz} />
             </motion.div>
@@ -178,28 +216,51 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Recent Reviews */}
+      {/* Top Course Providers */}
       <section className="border-y border-border/50">
         <div className="container py-20">
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">ביקורות אחרונות</h2>
-          <p className="text-muted-foreground mb-10">משוב אמיתי מסטודנטים מאומתים</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {recentReviews.map((review, i) => (
-              <motion.div key={review.id} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-                <ReviewCard {...review} />
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <BookOpen size={22} className="text-primary" />
+                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">מוכרי קורסים מובילים</h2>
+              </div>
+              <p className="text-muted-foreground mt-1">קורסים, סדנאות והכשרות מאומתים</p>
+            </div>
+            <Link to="/search?tab=courses">
+              <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topCourseProviders.map((biz, i) => (
+              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <BusinessCard {...biz} />
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* About CTA */}
+      {/* Recent Reviews */}
       <section className="container py-20">
+        <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">ביקורות אחרונות</h2>
+        <p className="text-muted-foreground mb-10">משוב אמיתי מלקוחות מאומתים</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {recentReviews.map((review, i) => (
+            <motion.div key={review.id} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+              <ReviewCard {...review} />
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* About CTA */}
+      <section className="container pb-20">
         <div className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border" style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}>
           <div className="absolute inset-0 bg-primary/5 blur-3xl" />
           <div className="relative">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
-              יוצרי קורסים? הצטרפו עכשיו
+              בעלי מקצוע ויוצרי קורסים? הצטרפו עכשיו
             </h2>
             <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
               בנו אמון אמיתי עם ביקורות מאומתות והגדילו את העסק שלכם.
