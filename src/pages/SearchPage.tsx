@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
+import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import { BUSINESSES, COURSES, FREELANCER_SUBCATEGORIES } from "@/data/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";

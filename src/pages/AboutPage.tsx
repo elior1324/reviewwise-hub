@@ -16,7 +16,7 @@ const AboutPage = () => {
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
-
+      <FloatingEarnCTA />
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
