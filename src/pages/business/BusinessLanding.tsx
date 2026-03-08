@@ -1,3 +1,4 @@
+import AnimatedCounter from "@/components/AnimatedCounter";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import BusinessFooter from "@/components/BusinessFooter";
