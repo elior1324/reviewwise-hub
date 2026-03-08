@@ -289,6 +289,7 @@ const BusinessDashboard = () => {
               <p className="text-xs text-muted-foreground">{displayBusiness.email}</p>
             </div>
             <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">מנהל</span>
+            <DeleteAccountButton />
           </div>
         )}
 
