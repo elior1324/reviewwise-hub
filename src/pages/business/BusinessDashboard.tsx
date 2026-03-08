@@ -96,6 +96,12 @@ const BusinessDashboard = () => {
     </span>
   );
 
+  const ProBadge = () => (
+    <span className="inline-flex items-center gap-1 bg-accent/10 text-accent text-[10px] px-1.5 py-0.5 rounded-full font-bold mr-1">
+      <Sparkles size={10} /> מקצועי
+    </span>
+  );
+
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
