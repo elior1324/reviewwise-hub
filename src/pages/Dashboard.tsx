@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ReviewCard from "@/components/ReviewCard";
 import CourseCard from "@/components/CourseCard";
-import ReviewRequestForm from "@/components/ReviewRequestForm";
+
 import { Star, MessageSquare, Link2, Upload, TrendingUp, Users, BarChart3, Send, AlertTriangle, DollarSign, MousePointerClick, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
