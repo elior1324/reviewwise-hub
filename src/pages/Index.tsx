@@ -472,7 +472,7 @@ const Index = () => {
               className="text-lg text-muted-foreground mb-3 max-w-2xl mx-auto"
             >
               כתבו ביקורת מאומתת על קורס, הכשרה או בעל מקצוע — 
-              <span className="text-foreground font-semibold"> והתחילו להרוויח מכל מכירה שתגיע בעקבותיכם.</span>
+              <span className="text-foreground font-semibold"> והתחילו להרוויח 0.01% מההכנסות שמגיעות בעקבותיכם.</span>
             </motion.p>
 
             <motion.p
@@ -482,8 +482,8 @@ const Index = () => {
               transition={{ delay: 0.4, duration: 0.5 }}
               className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto"
             >
-              כל ביקורת מאומתת הופכת אתכם לשותפים — אתם מרוויחים חלק מההכנסות, בלי שתצטרכו לעשות כלום אחרי.
-              <span className="text-primary font-medium"> הכנסה פאסיבית, פשוט ככה.</span>
+              על כל 10 לייקים שהביקורת שלכם מקבלת — מתווסף עוד 0.01%, עד מקסימום 1%.
+              <span className="text-primary font-medium"> ככל שהביקורת שלכם טובה יותר — אתם מרוויחים יותר. 🚀</span>
             </motion.p>
 
             <motion.div
@@ -494,9 +494,9 @@ const Index = () => {
               className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-10"
             >
               {[
-                { step: "01", title: "כתבו ביקורת", desc: "שתפו חוויה אמיתית על מוצר שרכשתם" },
-                { step: "02", title: "אנחנו מאמתים", desc: "הביקורת עוברת אימות רכישה" },
-                { step: "03", title: "מרוויחים", desc: "כשמישהו רוכש בזכותכם — אתם מרוויחים" },
+                { step: "01", title: "כתבו ביקורת", desc: "שתפו חוויה אמיתית ותתחילו עם 0.01%" },
+                { step: "02", title: "צברו לייקים", desc: "כל 10 לייקים = עוד 0.01% עמלה" },
+                { step: "03", title: "הרוויחו עד 1%", desc: "מכל רכישה שהגיעה בזכות הביקורת שלכם" },
               ].map(({ step, title, desc }, i) => (
                 <motion.div
                   key={step}
