@@ -5,6 +5,7 @@ import BusinessFooter from "@/components/BusinessFooter";
 import AIChatbot from "@/components/AIChatbot";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "react-router-dom";
 import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
