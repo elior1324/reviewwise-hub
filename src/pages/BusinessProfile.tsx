@@ -30,6 +30,16 @@ const BusinessProfile = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
       <div className="container py-10">
+        <div className="mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="text-muted-foreground hover:text-foreground font-medium"
+          >
+            → חזרה
+          </Button>
+        </div>
         <BusinessHero business={business} />
 
         {/* Courses */}
