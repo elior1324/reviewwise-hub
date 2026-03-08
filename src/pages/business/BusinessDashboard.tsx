@@ -525,6 +525,7 @@ const BusinessDashboard = () => {
 
           {/* Testimonials Tab */}
           <TabsContent value="testimonials">
+            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <div className="max-w-2xl">
               <p className="text-muted-foreground text-sm mb-4">
                 העלו עד 5 סרטונים או תמונות של לקוחות מרוצים. ניתן להעלות קבצים ישירות או להוסיף קישורי YouTube / TikTok.
@@ -533,6 +534,7 @@ const BusinessDashboard = () => {
               </p>
               <TestimonialMediaUploader businessId="PLACEHOLDER_ID" maxItems={5} />
             </div>
+            </LockedOverlay>
           </TabsContent>
 
           {/* ===== PREMIUM-ONLY TABS ===== */}
