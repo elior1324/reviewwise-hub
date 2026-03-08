@@ -48,19 +48,41 @@ const BusinessNavbar = () => {
                   פתרונות
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="w-[400px] p-4 grid gap-3">
-                    <Link to="/business/solutions/reviews" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">ביקורות מאומתות</p>
-                      <p className="text-xs text-muted-foreground">אספו ביקורות אותנטיות מלקוחות אמיתיים</p>
-                    </Link>
-                    <Link to="/business/solutions/widgets" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">וידג׳טים להטמעה</p>
-                      <p className="text-xs text-muted-foreground">הציגו ביקורות באתר שלכם בשורת קוד אחת</p>
-                    </Link>
-                    <Link to="/business/solutions/analytics" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">אנליטיקס ותובנות</p>
-                      <p className="text-xs text-muted-foreground">דוחות AI שבועיים ומעקב ביצועים</p>
-                    </Link>
+                  <div className="w-[520px] p-5 grid grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-3">לפי יעד עסקי</p>
+                      <div className="space-y-1">
+                        <Link to="/business/solutions/engage" className="block rounded-lg p-2.5 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-sm">ניהול משוב</p>
+                          <p className="text-xs text-muted-foreground">השיבו לביקורות ובנו קשר עם הלקוחות</p>
+                        </Link>
+                        <Link to="/business/solutions/conversions" className="block rounded-lg p-2.5 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-sm">האצת המרות</p>
+                          <p className="text-xs text-muted-foreground">הפכו ביקורות חיוביות למנוע צמיחה</p>
+                        </Link>
+                        <Link to="/business/solutions/insights" className="block rounded-lg p-2.5 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-sm">שיפור עם תובנות</p>
+                          <p className="text-xs text-muted-foreground">זהו חוזקות וחולשות בעזרת דוחות AI</p>
+                        </Link>
+                        <Link to="/business/solutions/revenue" className="block rounded-lg p-2.5 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-sm">הגדלת הכנסות</p>
+                          <p className="text-xs text-muted-foreground">מעקב אפיליאט, קליקים והמרות</p>
+                        </Link>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-3">לפי גודל עסק</p>
+                      <div className="space-y-1">
+                        <Link to="/business/solutions/small-business" className="block rounded-lg p-2.5 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-sm">עסקים קטנים וצומחים</p>
+                          <p className="text-xs text-muted-foreground">כלים פשוטים לבניית מוניטין מהיום הראשון</p>
+                        </Link>
+                        <Link to="/business/solutions/enterprise" className="block rounded-lg p-2.5 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-sm">ארגונים וחברות גדולות</p>
+                          <p className="text-xs text-muted-foreground">API, אינטגרציות מותאמות ומנהל חשבון</p>
+                        </Link>
+                      </div>
+                    </div>
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
@@ -178,10 +200,15 @@ const BusinessNavbar = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="lg:hidden border-t border-border/50 p-4 space-y-3 glass">
-          <p className="text-xs text-muted-foreground font-medium">פתרונות</p>
-          <Link to="/business/solutions/reviews" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ביקורות מאומתות</Link>
-          <Link to="/business/solutions/widgets" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>וידג׳טים להטמעה</Link>
-          <Link to="/business/solutions/analytics" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>אנליטיקס ותובנות</Link>
+          <p className="text-xs text-muted-foreground font-medium">פתרונות — לפי יעד עסקי</p>
+          <Link to="/business/solutions/engage" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ניהול משוב</Link>
+          <Link to="/business/solutions/conversions" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>האצת המרות</Link>
+          <Link to="/business/solutions/insights" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>שיפור עם תובנות</Link>
+          <Link to="/business/solutions/revenue" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>הגדלת הכנסות</Link>
+          <div className="border-t border-border/30 my-2" />
+          <p className="text-xs text-muted-foreground font-medium">פתרונות — לפי גודל עסק</p>
+          <Link to="/business/solutions/small-business" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>עסקים קטנים וצומחים</Link>
+          <Link to="/business/solutions/enterprise" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ארגונים וחברות גדולות</Link>
           <div className="border-t border-border/30 my-2" />
           <p className="text-xs text-muted-foreground font-medium">יכולות</p>
           <Link to="/business/features/affiliate" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>מעקב אפיליאט</Link>
