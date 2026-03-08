@@ -1,9 +1,19 @@
 import { motion } from "framer-motion";
 import { DollarSign } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 const FloatingEarnCTA = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === "#earn-money") {
+      setTimeout(() => {
+        document.getElementById("earn-money")?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    }
+  }, [location]);
 
   return (
     <motion.button
