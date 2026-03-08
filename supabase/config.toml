@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.generate-monthly-top5]
 verify_jwt = false
+
+[functions.compare-items]
+verify_jwt = false
