@@ -14,16 +14,450 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      affiliate_clicks: {
+        Row: {
+          clicked_at: string
+          converted: boolean | null
+          course_id: string
+          id: string
+          ip_hash: string | null
+          referrer: string | null
+          revenue: number | null
+        }
+        Insert: {
+          clicked_at?: string
+          converted?: boolean | null
+          course_id: string
+          id?: string
+          ip_hash?: string | null
+          referrer?: string | null
+          revenue?: number | null
+        }
+        Update: {
+          clicked_at?: string
+          converted?: boolean | null
+          course_id?: string
+          id?: string
+          ip_hash?: string | null
+          referrer?: string | null
+          revenue?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_clicks_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_responses: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          review_id: string
+          text: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          review_id: string
+          text: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          review_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_responses_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_responses_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: true
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      businesses: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          owner_id: string
+          phone: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string
+          updated_at: string
+          verified: boolean | null
+          website: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          owner_id: string
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug: string
+          updated_at?: string
+          verified?: boolean | null
+          website?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          owner_id?: string
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string
+          updated_at?: string
+          verified?: boolean | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          affiliate_url: string | null
+          business_id: string
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          price: number | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string
+          verified_purchases: number | null
+        }
+        Insert: {
+          affiliate_url?: string | null
+          business_id: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          price?: number | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          verified_purchases?: number | null
+        }
+        Update: {
+          affiliate_url?: string | null
+          business_id?: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          verified_purchases?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          course_id: string
+          created_at: string
+          customer_email: string
+          customer_user_id: string | null
+          id: string
+          purchase_date: string
+          verification_method: string
+          verified: boolean | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          customer_email: string
+          customer_user_id?: string | null
+          id?: string
+          purchase_date: string
+          verification_method?: string
+          verified?: boolean | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          customer_email?: string
+          customer_user_id?: string | null
+          id?: string
+          purchase_date?: string
+          verification_method?: string
+          verified?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string | null
+          review_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_id?: string | null
+          review_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string | null
+          review_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_reports_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_requests: {
+        Row: {
+          business_id: string
+          completed_at: string | null
+          course_id: string
+          customer_email: string
+          id: string
+          opened_at: string | null
+          sent_at: string
+          status: string
+          token: string
+        }
+        Insert: {
+          business_id: string
+          completed_at?: string | null
+          course_id: string
+          customer_email: string
+          id?: string
+          opened_at?: string | null
+          sent_at?: string
+          status?: string
+          token?: string
+        }
+        Update: {
+          business_id?: string
+          completed_at?: string | null
+          course_id?: string
+          customer_email?: string
+          id?: string
+          opened_at?: string | null
+          sent_at?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_requests_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_requests_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          anonymous: boolean | null
+          business_id: string
+          course_id: string
+          created_at: string
+          flag_reason: string | null
+          flagged: boolean | null
+          id: string
+          purchase_id: string | null
+          rating: number
+          text: string
+          updated_at: string
+          user_id: string
+          verified: boolean | null
+        }
+        Insert: {
+          anonymous?: boolean | null
+          business_id: string
+          course_id: string
+          created_at?: string
+          flag_reason?: string | null
+          flagged?: boolean | null
+          id?: string
+          purchase_id?: string | null
+          rating: number
+          text: string
+          updated_at?: string
+          user_id: string
+          verified?: boolean | null
+        }
+        Update: {
+          anonymous?: boolean | null
+          business_id?: string
+          course_id?: string
+          created_at?: string
+          flag_reason?: string | null
+          flagged?: boolean | null
+          id?: string
+          purchase_id?: string | null
+          rating?: number
+          text?: string
+          updated_at?: string
+          user_id?: string
+          verified?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +584,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
