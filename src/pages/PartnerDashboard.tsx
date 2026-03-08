@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { DollarSign, TrendingUp, Trophy, Star, ThumbsUp, Wallet, Users, Award, Crown, Sparkles, Timer, Gift } from "lucide-react";
+import {
+  DollarSign, TrendingUp, Trophy, Star, ThumbsUp, Wallet, Users,
+  Award, Crown, Sparkles, Timer, Gift, Zap, Shield, Info,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { useSeasonInfo } from "@/hooks/useSeasonInfo";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -26,6 +34,8 @@ interface RewardEntry {
   likeCount: number;
   multiplier: number;
   totalPoints: number;
+  isEarlyBird: boolean;
+  helpfulBonus: number;
 }
 
 interface LeaderboardEntry {
@@ -33,6 +43,7 @@ interface LeaderboardEntry {
   totalPoints: number;
   badge: string | null;
   rank: number;
+  isExpert: boolean;
 }
 
 const PartnerDashboard = () => {
@@ -47,108 +58,166 @@ const PartnerDashboard = () => {
   const [payouts, setPayouts] = useState<any[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [expertCategories, setExpertCategories] = useState<string[]>([]);
+  const [earlyBirdCount, setEarlyBirdCount] = useState(0);
+  const [helpfulBonusTotal, setHelpfulBonusTotal] = useState(0);
+
+  // Live countdown timer
+  const [timeLeft, setTimeLeft] = useState({ days: season.daysLeft, hours: season.hoursLeft, minutes: 0 });
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const msLeft = Math.max(0, season.seasonEnd.getTime() - now.getTime());
+      setTimeLeft({
+        days: Math.floor(msLeft / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((msLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60)),
+      });
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [season.seasonEnd]);
+
+  const fetchData = useCallback(async () => {
     if (!user) return;
 
-    const fetchData = async () => {
-      // Fetch rewards for ALL months in the current season
-      const { data: rewardsData } = await supabase
-        .from("rewards_log")
-        .select("*")
-        .eq("user_id", user.id)
-        .in("month_year", season.seasonMonths);
+    // Fetch rewards for ALL months in the current season
+    const { data: rewardsData } = await supabase
+      .from("rewards_log")
+      .select("*")
+      .eq("user_id", user.id)
+      .in("month_year", season.seasonMonths);
 
-      if (rewardsData) {
-        const reviewIds = rewardsData.map((r: any) => r.review_id);
-        const { data: reviews } = await supabase
+    if (rewardsData) {
+      const reviewIds = rewardsData.map((r: any) => r.review_id);
+      const { data: reviews } = await supabase
+        .from("reviews")
+        .select("id, text, course_id, business_id, courses(name)")
+        .in("id", reviewIds.length > 0 ? reviewIds : ["none"]);
+
+      const reviewMap = new Map((reviews || []).map((r: any) => [r.id, r]));
+
+      // Check Early Bird: count reviews per business to see if this was in first 5
+      const businessIds = [...new Set((reviews || []).map((r: any) => r.business_id))];
+      let earlyBirdSet = new Set<string>();
+      let ebCount = 0;
+
+      for (const bizId of businessIds) {
+        const { data: bizReviews } = await supabase
           .from("reviews")
-          .select("id, text, course_id, courses(name)")
-          .in("id", reviewIds.length > 0 ? reviewIds : ["none"]);
-
-        const reviewMap = new Map((reviews || []).map((r: any) => [r.id, r]));
-
-        const mapped: RewardEntry[] = rewardsData.map((r: any) => {
-          const review = reviewMap.get(r.review_id);
-          return {
-            reviewId: r.review_id,
-            reviewText: review?.text?.slice(0, 80) || "ביקורת",
-            courseName: review?.courses?.name || "קורס",
-            basePoints: Number(r.base_points),
-            likeCount: r.like_count,
-            multiplier: Number(r.multiplier),
-            totalPoints: Number(r.total_points),
-          };
-        });
-        setRewards(mapped);
+          .select("id")
+          .eq("business_id", bizId)
+          .order("created_at", { ascending: true })
+          .limit(5);
+        if (bizReviews) {
+          bizReviews.forEach((br: any) => earlyBirdSet.add(br.id));
+        }
       }
 
-      // Pool data aggregated across season months
-      const { data: poolRows } = await supabase
-        .from("rewards_pool")
-        .select("*")
-        .in("month_year", season.seasonMonths);
+      const mapped: RewardEntry[] = rewardsData.map((r: any) => {
+        const review = reviewMap.get(r.review_id);
+        const isEB = earlyBirdSet.has(r.review_id);
+        if (isEB) ebCount++;
+        return {
+          reviewId: r.review_id,
+          reviewText: review?.text?.slice(0, 80) || "ביקורת",
+          courseName: review?.courses?.name || "קורס",
+          basePoints: Number(r.base_points),
+          likeCount: r.like_count,
+          multiplier: Number(r.multiplier),
+          totalPoints: Number(r.total_points) * (isEB ? 1.5 : 1),
+          isEarlyBird: isEB,
+          helpfulBonus: 0,
+        };
+      });
+      setRewards(mapped);
+      setEarlyBirdCount(ebCount);
+    }
 
-      const communityPool = (poolRows || []).reduce((s: number, p: any) => s + Number(p.community_pool), 0);
-      const totalPlatformPoints = (poolRows || []).reduce((s: number, p: any) => s + Number(p.total_points), 0);
-      const myTotalPoints = (rewardsData || []).reduce((s: number, r: any) => s + Number(r.total_points), 0);
+    // Pool data aggregated across season months
+    const { data: poolRows } = await supabase
+      .from("rewards_pool")
+      .select("*")
+      .in("month_year", season.seasonMonths);
 
-      setPoolData({ communityPool, totalPoints: totalPlatformPoints, myPoints: myTotalPoints });
+    const communityPool = (poolRows || []).reduce((s: number, p: any) => s + Number(p.community_pool), 0);
+    const totalPlatformPoints = (poolRows || []).reduce((s: number, p: any) => s + Number(p.total_points), 0);
+    const myTotalPoints = (rewardsData || []).reduce((s: number, r: any) => s + Number(r.total_points), 0);
 
-      const earnings = totalPlatformPoints > 0 ? (myTotalPoints / totalPlatformPoints) * communityPool : 0;
-      setMyEarnings(earnings);
+    setPoolData({ communityPool, totalPoints: totalPlatformPoints, myPoints: myTotalPoints });
 
-      // Total historical earnings
-      const { data: profile } = await supabase
+    const earnings = totalPlatformPoints > 0 ? (myTotalPoints / totalPlatformPoints) * communityPool : 0;
+    setMyEarnings(earnings);
+
+    // Total historical earnings
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("total_earnings")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    setTotalEarnings(Number(profile?.total_earnings) || 0);
+
+    // Check Category Expert: 3+ high-rated reviews in same category
+    const { data: userReviews } = await supabase
+      .from("reviews")
+      .select("id, rating, course_id, courses(category)")
+      .eq("user_id", user.id)
+      .gte("rating", 4);
+
+    if (userReviews) {
+      const catCounts: Record<string, number> = {};
+      userReviews.forEach((r: any) => {
+        const cat = r.courses?.category;
+        if (cat) catCounts[cat] = (catCounts[cat] || 0) + 1;
+      });
+      setExpertCategories(Object.entries(catCounts).filter(([, c]) => c >= 3).map(([cat]) => cat));
+    }
+
+    // Payouts
+    const { data: payoutsData } = await supabase
+      .from("reward_payouts")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("requested_at", { ascending: false });
+    setPayouts(payoutsData || []);
+
+    // Leaderboard for current season
+    const { data: allRewards } = await supabase
+      .from("rewards_log")
+      .select("user_id, total_points")
+      .in("month_year", season.seasonMonths);
+
+    if (allRewards) {
+      const userPoints: Record<string, number> = {};
+      allRewards.forEach((r: any) => {
+        userPoints[r.user_id] = (userPoints[r.user_id] || 0) + Number(r.total_points);
+      });
+
+      const sortedUsers = Object.entries(userPoints)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10);
+
+      const userIds = sortedUsers.map(([uid]) => uid);
+      const { data: profiles } = await supabase
         .from("profiles")
-        .select("total_earnings")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      setTotalEarnings(Number(profile?.total_earnings) || 0);
+        .select("user_id, display_name, partner_badge")
+        .in("user_id", userIds.length > 0 ? userIds : ["none"]);
 
-      // Payouts
-      const { data: payoutsData } = await supabase
-        .from("reward_payouts")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("requested_at", { ascending: false });
-      setPayouts(payoutsData || []);
+      const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
 
-      // Leaderboard for current season
-      const { data: allRewards } = await supabase
-        .from("rewards_log")
-        .select("user_id, total_points")
-        .in("month_year", season.seasonMonths);
-
-      if (allRewards) {
-        const userPoints: Record<string, number> = {};
-        allRewards.forEach((r: any) => {
-          userPoints[r.user_id] = (userPoints[r.user_id] || 0) + Number(r.total_points);
-        });
-
-        const sortedUsers = Object.entries(userPoints)
-          .sort(([, a], [, b]) => b - a)
-          .slice(0, 10);
-
-        const userIds = sortedUsers.map(([uid]) => uid);
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("user_id, display_name, partner_badge")
-          .in("user_id", userIds.length > 0 ? userIds : ["none"]);
-
-        const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
-
-        setLeaderboard(sortedUsers.map(([uid, pts], i) => ({
-          displayName: profileMap.get(uid)?.display_name || "משתמש",
-          totalPoints: pts,
-          badge: profileMap.get(uid)?.partner_badge || null,
-          rank: i + 1,
-        })));
-      }
-    };
-
-    fetchData();
+      setLeaderboard(sortedUsers.map(([uid, pts], i) => ({
+        displayName: profileMap.get(uid)?.display_name || "משתמש",
+        totalPoints: pts,
+        badge: profileMap.get(uid)?.partner_badge || null,
+        rank: i + 1,
+        isExpert: false,
+      })));
+    }
   }, [user, season.seasonMonths]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleWithdraw = async () => {
     if (myEarnings < 100) {
@@ -224,9 +293,9 @@ const PartnerDashboard = () => {
       </section>
 
       <div className="container py-10">
-        {/* Season Banner + Countdown */}
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8">
-          <Card className="shadow-card bg-card border-primary/20 overflow-hidden">
+        {/* Season Banner + Live Countdown */}
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-6">
+          <Card className="shadow-card bg-card border-primary/20 overflow-hidden relative">
             <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.06), transparent 60%)" }} />
             <CardContent className="p-6 relative">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -237,29 +306,36 @@ const PartnerDashboard = () => {
                   <div>
                     <h2 className="font-display font-bold text-lg text-foreground">{season.seasonLabel}</h2>
                     <p className="text-sm text-muted-foreground">
-                      {season.daysLeft > 0
-                        ? `נותרו ${season.daysLeft} ימים ו-${season.hoursLeft} שעות לסיום העונה`
-                        : "העונה מסתיימת היום!"}
+                      הנקודות מתאפסות בסוף העונה — הלייקים נשארים!
                     </p>
                   </div>
                 </div>
-                <div className="flex-1 max-w-xs">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
-                    <span>התקדמות העונה</span>
-                    <span>{Math.round(season.progressPercent)}%</span>
-                  </div>
-                  <Progress value={season.progressPercent} className="h-2.5" />
+                {/* Live countdown digits */}
+                <div className="flex items-center gap-3">
+                  {[
+                    { value: timeLeft.days, label: "ימים" },
+                    { value: timeLeft.hours, label: "שעות" },
+                    { value: timeLeft.minutes, label: "דקות" },
+                  ].map((unit, i) => (
+                    <div key={i} className="text-center">
+                      <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center">
+                        <span className="font-display font-bold text-2xl text-foreground">{unit.value}</span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground mt-1 block">{unit.label}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
+              <Progress value={season.progressPercent} className="h-2 mt-4" />
             </CardContent>
           </Card>
         </motion.div>
 
         {/* Prize Banner */}
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="mb-8">
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="mb-6">
           <div className="rounded-xl p-5 border border-accent/20" style={{ background: "linear-gradient(135deg, hsl(var(--accent) / 0.1), hsl(var(--accent) / 0.03))" }}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-accent/15 flex items-center justify-center shrink-0">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
                 <Gift size={20} className="text-accent" />
               </div>
               <div>
@@ -267,10 +343,65 @@ const PartnerDashboard = () => {
                   🏆 השותף המוביל בעונה זוכה ב-40% הנחה על כל קורס!
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  הביקורת שלכם יכולה להפוך אתכם למוביל העונה. צברו נקודות וטפסו בלידרבורד.
+                  צברו הכי הרבה נקודות העונה ותזכו בפרס הגדול. כל עונה — הזדמנות חדשה!
                 </p>
               </div>
             </div>
+          </div>
+        </motion.div>
+
+        {/* Bonus Indicators Row */}
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.7} className="mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Early Bird Status */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-2.5 p-3 rounded-lg bg-secondary/50 border border-border/30 cursor-help">
+                  <Zap size={16} className="text-accent shrink-0" />
+                  <div>
+                    <p className="text-xs font-semibold text-foreground">Early Bird</p>
+                    <p className="text-[10px] text-muted-foreground">{earlyBirdCount > 0 ? `${earlyBirdCount} ביקורות עם בונוס 1.5x` : "כתבו מ-5 הראשונים!"}</p>
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs max-w-[220px]">
+                5 הביקורות הראשונות על כל עסק מקבלות אוטומטית בונוס 1.5x לנקודות הבסיס. תהיו מהראשונים!
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Expert Status */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-2.5 p-3 rounded-lg bg-secondary/50 border border-border/30 cursor-help">
+                  <Shield size={16} className="text-primary shrink-0" />
+                  <div>
+                    <p className="text-xs font-semibold text-foreground">מומחה קטגוריה</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {expertCategories.length > 0 ? `מומחה ב: ${expertCategories.join(", ")}` : "3+ ביקורות טובות = מומחה"}
+                    </p>
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs max-w-[220px]">
+                כתבו 3+ ביקורות עם דירוג 4+ באותה קטגוריה ותקבלו תג "מומחה". לייקים ממומחים שווים כפול!
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Helpful Reply Bonus */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-2.5 p-3 rounded-lg bg-secondary/50 border border-border/30 cursor-help">
+                  <ThumbsUp size={16} className="text-primary shrink-0" />
+                  <div>
+                    <p className="text-xs font-semibold text-foreground">בונוס תגובה מועילה</p>
+                    <p className="text-[10px] text-muted-foreground">+20 נק׳ כשתגובת בעל עסק מסומנת כמועילה</p>
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs max-w-[220px]">
+                כשמישהו מסמן את תגובת בעל העסק על הביקורת שלכם כ"מועילה", אתם מקבלים +20 נקודות בונוס.
+              </TooltipContent>
+            </Tooltip>
           </div>
         </motion.div>
 
@@ -282,6 +413,12 @@ const PartnerDashboard = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
                   <Wallet size={16} className="text-primary" /> הערכת רווח עונתי
+                  <Tooltip>
+                    <TooltipTrigger><Info size={12} className="text-muted-foreground/50" /></TooltipTrigger>
+                    <TooltipContent className="text-xs max-w-[200px]">
+                      הנוסחה: (הנקודות שלכם / סה"כ נקודות) × 50% מהעמלות
+                    </TooltipContent>
+                  </Tooltip>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -325,22 +462,33 @@ const PartnerDashboard = () => {
             </Card>
           </motion.div>
 
-          {/* Likes to Next Multiplier */}
+          {/* Goal Tracker - Likes to Next Multiplier */}
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
             <Card className="shadow-card bg-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                  <ThumbsUp size={16} className="text-primary" /> מכפיל הבא
+                  <TrendingUp size={16} className="text-primary" /> מטרה הבאה
+                  <Tooltip>
+                    <TooltipTrigger><Info size={12} className="text-muted-foreground/50" /></TooltipTrigger>
+                    <TooltipContent className="text-xs max-w-[200px]">
+                      כל 10 לייקים = מכפיל 2x נוסף. 10→2x, 20→4x, 30→6x... עד 10x מקסימום.
+                    </TooltipContent>
+                  </Tooltip>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="font-display font-bold text-2xl text-foreground">
-                  {currentMultiplier < 10 ? `עוד ${likesToNext} לייקים ל-${Math.min(currentMultiplier + 1, 10)}x` : "מקסימום! 🏆"}
+                <p className="font-display font-bold text-xl text-foreground">
+                  {currentMultiplier < 10
+                    ? `עוד ${likesToNext} לייקים להכפיל (${Math.min(currentMultiplier + 2, 10)}x) את הנקודות!`
+                    : "מכפיל מקסימלי! 🏆"}
                 </p>
                 <Progress value={currentMultiplier >= 10 ? 100 : progressToNext} className="h-3 mt-3" />
-                <p className="text-xs text-muted-foreground mt-2">
-                  מכפיל נוכחי: <span className="text-primary font-bold">{currentMultiplier}x</span> (מקסימום 10x)
-                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-muted-foreground">
+                    מכפיל נוכחי: <span className="text-primary font-bold">{currentMultiplier}x</span>
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">מקסימום 10x</p>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
@@ -398,7 +546,19 @@ const PartnerDashboard = () => {
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <p className="font-display font-semibold text-foreground text-sm">{r.courseName}</p>
+                          <p className="font-display font-semibold text-foreground text-sm flex items-center gap-2">
+                            {r.courseName}
+                            {r.isEarlyBird && (
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5">
+                                    <Zap size={9} /> 1.5x
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs">בונוס Early Bird — מ-5 הביקורות הראשונות!</TooltipContent>
+                              </Tooltip>
+                            )}
+                          </p>
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{r.reviewText}...</p>
                         </div>
                         <Badge className="bg-primary/10 text-primary shrink-0">
@@ -415,6 +575,11 @@ const PartnerDashboard = () => {
                         <span className="flex items-center gap-1">
                           <TrendingUp size={12} className="text-primary" /> מכפיל: {r.multiplier}x
                         </span>
+                        {r.isEarlyBird && (
+                          <span className="flex items-center gap-1 text-accent">
+                            <Zap size={12} /> EB 1.5x
+                          </span>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -451,6 +616,11 @@ const PartnerDashboard = () => {
                             {entry.badge === "elite" && (
                               <Crown size={12} className="text-accent" />
                             )}
+                            {entry.rank === 1 && (
+                              <Badge className="bg-accent/15 text-accent border-0 text-[9px] px-1">
+                                🏆 40% OFF
+                              </Badge>
+                            )}
                           </p>
                         </div>
                         <span className="text-xs font-medium text-primary">{entry.totalPoints.toLocaleString()} נק׳</span>
@@ -461,7 +631,7 @@ const PartnerDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* How it works */}
+            {/* How it works - Enhanced */}
             <Card className="shadow-card bg-card">
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2">
@@ -482,11 +652,19 @@ const PartnerDashboard = () => {
                   <span><strong className="text-foreground">50%</strong> מכלל העמלות הולכים לקופה משותפת</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-primary font-bold">4.</span>
-                  <span>הרווח שלכם = <strong className="text-foreground">(הנקודות שלכם / סה״כ נקודות) × הקופה</strong></span>
+                  <span className="text-accent font-bold">⚡</span>
+                  <span><strong className="text-foreground">Early Bird:</strong> 5 ביקורות ראשונות = <strong className="text-accent">1.5x בונוס</strong></span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-primary font-bold">5.</span>
+                  <span className="text-primary font-bold">🛡️</span>
+                  <span><strong className="text-foreground">מומחה:</strong> 3+ ביקורות טובות בקטגוריה = לייקים x2</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="text-primary font-bold">💬</span>
+                  <span><strong className="text-foreground">תגובה מועילה:</strong> +20 נקודות בונוס</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="text-primary font-bold">🔄</span>
                   <span>הנקודות <strong className="text-foreground">מתאפסות כל עונה</strong> (4 חודשים) — הלייקים נשארים!</span>
                 </div>
                 <div className="pt-2 border-t border-border/30">
