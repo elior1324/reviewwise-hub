@@ -101,6 +101,7 @@ const PLANS = [
     tier: "premium" as const,
     features: [
       "הכל מהמקצועי, ועוד:",
+      "עסקים ללא הגבלה בחשבון אחד",
       "חיבור CRM — HubSpot, Salesforce ועוד",
       "ניהול לידים והפניות אוטומטי",
       "Webhook לכל מערכת (Zapier/Make)",
