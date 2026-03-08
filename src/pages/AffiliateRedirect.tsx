@@ -58,8 +58,8 @@ const AffiliateRedirect = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center noise-overlay">
       <div className="text-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto animate-pulse">
-          <span className="font-display font-bold text-primary text-2xl">R</span>
+        <div className="w-16 h-16 rounded-full overflow-hidden mx-auto animate-pulse">
+          <img src={logoIcon} alt="ReviewHub" className="w-full h-full object-cover" />
         </div>
         {error ? (
           <>
