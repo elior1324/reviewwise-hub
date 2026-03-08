@@ -72,14 +72,14 @@ const Dashboard = () => {
       // Reviews
       const { data: reviews } = await supabase
         .from("reviews")
-        .select("*, courses(name), profiles(display_name), business_responses(text, created_at)")
+        .select("*, courses(name), business_responses(text, created_at)")
         .eq("business_id", biz.id)
         .order("created_at", { ascending: false });
 
       if (reviews) {
         const mapped: Review[] = reviews.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.profiles?.display_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating,
           text: r.text,
           courseName: r.courses?.name || "",

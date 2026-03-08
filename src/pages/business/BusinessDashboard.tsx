@@ -133,7 +133,7 @@ const BusinessDashboard = () => {
       // Fetch reviews
       const { data: reviewData } = await supabase
         .from("reviews")
-        .select("*, courses(name), profiles(display_name)")
+        .select("*, courses(name)")
         .eq("business_id", biz.id)
         .order("created_at", { ascending: false })
         .limit(10);
@@ -141,7 +141,7 @@ const BusinessDashboard = () => {
       if (reviewData) {
         setRealReviews(reviewData.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.profiles?.display_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating,
           text: r.text,
           courseName: r.courses?.name || "",

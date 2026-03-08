@@ -123,14 +123,14 @@ const Index = () => {
     const fetchReviews = async () => {
       const { data } = await supabase
         .from("reviews")
-        .select("*, courses(name), profiles(display_name)")
+        .select("*, courses(name)")
         .order("created_at", { ascending: false })
         .limit(3);
 
       if (data) {
         const mapped: Review[] = data.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.profiles?.display_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating,
           text: r.text,
           courseName: r.courses?.name || "",

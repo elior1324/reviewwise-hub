@@ -67,14 +67,14 @@ const CoursePage = () => {
       // Fetch reviews
       const { data: reviewData } = await supabase
         .from("reviews")
-        .select("*, courses(name), profiles(display_name), business_responses(text, created_at)")
+        .select("*, courses(name), business_responses(text, created_at)")
         .eq("course_id", courseId)
         .order("created_at", { ascending: false });
 
       if (reviewData) {
         setReviews(reviewData.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.profiles?.display_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating,
           text: r.text,
           courseName: r.courses?.name || "",
