@@ -91,6 +91,7 @@ const BusinessDashboard = () => {
   const [isDemo, setIsDemo] = useState(true);
   const [loadingData, setLoadingData] = useState(true);
   const [businessId, setBusinessId] = useState<string | null>(null);
+  const [businessSlug, setBusinessSlug] = useState<string>("");
   const [businessInfo, setBusinessInfo] = useState<{ name: string; email: string } | null>(null);
   const [realReviews, setRealReviews] = useState<Review[]>([]);
   const [realCourses, setRealCourses] = useState<Course[]>([]);
