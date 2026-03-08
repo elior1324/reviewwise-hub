@@ -19,7 +19,7 @@ const StarRating = ({ rating, maxRating = 5, size = 20, showValue = false, anima
           ? {
               initial: { opacity: 0, scale: 0, rotate: -30 },
               animate: { opacity: 1, scale: 1, rotate: 0 },
-              transition: { delay: i * 0.08, duration: 0.35, type: "spring", stiffness: 400, damping: 15 },
+              transition: { delay: i * 0.08, duration: 0.35, type: "spring" as const, stiffness: 400, damping: 15 },
             }
           : {};
         return (
