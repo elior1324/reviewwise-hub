@@ -953,6 +953,11 @@ const BusinessDashboard = () => {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <CalendarClock size={18} className="text-primary" /> דוחות AI יומיים
+                    {!isDemo && businessId && (
+                      <Button size="sm" variant="outline" className="mr-auto text-xs" onClick={() => handleGenerateReport("daily")} disabled={generatingReport}>
+                        {generatingReport ? "מייצר..." : "צור דוח יומי"}
+                      </Button>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -960,23 +965,26 @@ const BusinessDashboard = () => {
                     קבלו כל בוקר דוח AI מפורט עם ניתוח הביצועים של אתמול, שינויים במגמות, וצעדים מומלצים.
                   </p>
                   <div className="space-y-3">
-                    {[
-                      { date: "8 במרץ 2026", summary: "3 ביקורות חדשות, 2 המרות, עלייה של 5% בדירוג", read: false },
-                      { date: "7 במרץ 2026", summary: "ביקורת שלילית זוהתה, 4 קליקים חדשים, המלצה לעדכן תיאור קורס", read: true },
-                      { date: "6 במרץ 2026", summary: "יום שיא — 8 המרות, הכנסות של ₪19,920", read: true },
-                      { date: "5 במרץ 2026", summary: "2 ביקורות חשודות נחסמו, שיפור של 12% באמון", read: true },
-                    ].map((report, i) => (
-                      <div key={i} className="flex items-center justify-between py-3 border-b border-border/20 last:border-0">
-                        <div className="flex items-center gap-3">
-                          {!report.read && <div className="w-2 h-2 rounded-full bg-primary shrink-0" />}
-                          <div>
-                            <p className="text-sm font-medium">{report.date}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{report.summary}</p>
-                          </div>
+                    {(() => {
+                      const dailyReports = isDemo ? [
+                        { id: "d1", created_at: "2026-03-08", content: "3 ביקורות חדשות, 2 המרות, עלייה של 5% בדירוג" },
+                        { id: "d2", created_at: "2026-03-07", content: "ביקורת שלילית זוהתה, 4 קליקים חדשים" },
+                        { id: "d3", created_at: "2026-03-06", content: "יום שיא — 8 המרות, הכנסות של ₪19,920" },
+                      ] : realAiReports.filter(r => r.report_type === "daily");
+                      if (dailyReports.length === 0) return <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין דוחות יומיים. לחצו "צור דוח יומי" כדי להתחיל.</p>;
+                      return dailyReports.map((report: any) => (
+                        <div key={report.id} className="border border-border/20 rounded-lg p-4">
+                          <p className="text-xs text-muted-foreground mb-2">{new Date(report.created_at).toLocaleDateString("he-IL")}</p>
+                          {isDemo ? (
+                            <p className="text-sm text-foreground/80">{report.content}</p>
+                          ) : (
+                            <div className="prose prose-sm prose-invert max-w-none text-foreground/80">
+                              <ReactMarkdown>{report.content}</ReactMarkdown>
+                            </div>
+                          )}
                         </div>
-                        <Button size="sm" variant="outline" className="text-xs">צפה בדוח</Button>
-                      </div>
-                    ))}
+                      ));
+                    })()}
                   </div>
                   <div className="pt-4 border-t border-border/30">
                     <p className="text-xs text-muted-foreground">
