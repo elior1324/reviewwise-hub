@@ -4,14 +4,13 @@ import StarRating from "@/components/StarRating";
 import ReviewCard from "@/components/ReviewCard";
 import ReviewSummary from "@/components/ReviewSummary";
 import CourseCard from "@/components/CourseCard";
+import BusinessHero from "@/components/BusinessHero";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Globe, Mail, Phone } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import AIChatbot from "@/components/AIChatbot";
-import { getBusinessBySlug, getCoursesByBusiness, getReviewsByBusiness, generateReviewSummary, BUSINESSES } from "@/data/mockData";
+import { getBusinessBySlug, getCoursesByBusiness, getReviewsByBusiness, generateReviewSummary } from "@/data/mockData";
 
 const DEFAULT_KEY = "digital-marketing-academy";
 
@@ -29,31 +28,7 @@ const BusinessProfile = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
       <div className="container py-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl p-8 shadow-card mb-8 animated-border bg-card">
-          <div className="flex flex-col md:flex-row md:items-start gap-6">
-            <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-3xl shrink-0">
-              {business.name.charAt(0)}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <h1 className="font-display font-bold text-2xl md:text-3xl">{business.name}</h1>
-                <Badge className="bg-trust-green-light text-trust-green border-0 gap-1">
-                  <ShieldCheck size={14} /> מאומת
-                </Badge>
-              </div>
-              <div className="flex items-center gap-3 mb-4">
-                <StarRating rating={business.rating} size={20} showValue />
-                <span className="text-muted-foreground text-sm">מבוסס על {business.reviewCount} ביקורות</span>
-              </div>
-              <p className="text-muted-foreground mb-4 max-w-2xl">{business.description}</p>
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                {business.website && <span className="flex items-center gap-1"><Globe size={14} /> {business.website}</span>}
-                {business.email && <span className="flex items-center gap-1"><Mail size={14} /> {business.email}</span>}
-                {business.phone && <span className="flex items-center gap-1"><Phone size={14} /> {business.phone}</span>}
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        <BusinessHero business={business} />
 
         {/* Courses */}
         {courses.length > 0 && (
