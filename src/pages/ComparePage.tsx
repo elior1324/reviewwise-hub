@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Scale, Send, Bot, User, Loader2, Plus, Trash2 } from "lucide-react";
+import { Search, X, Scale, Send, Bot, User, Loader2, Plus, Trash2, MessageSquare, Table2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
