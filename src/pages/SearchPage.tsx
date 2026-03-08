@@ -179,28 +179,23 @@ const SearchPage = () => {
           {isAiRanked && top5Month && (
             <p className="text-xs text-muted-foreground mb-3 mr-7">דירוג חודשי מבוסס AI — עודכן לאחרונה ב-{top5Month}</p>
           )}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 auto-rows-fr">
             {top5Overall.map((biz, i) => (
               <motion.div
                 key={biz.slug}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.06 }}
+                className="h-full"
               >
-                <div className="relative">
-                  {i === 0 && (
-                    <div className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shadow-md">
-                      🥇
-                    </div>
-                  )}
-                  {i === 1 && (
-                    <div className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full bg-muted flex items-center justify-center text-foreground text-xs font-bold shadow-md">
-                      🥈
-                    </div>
-                  )}
-                  {i === 2 && (
-                    <div className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-xs font-bold shadow-md">
-                      🥉
+                <div className="relative h-full">
+                  {i < 3 && (
+                    <div className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-md"
+                      style={{
+                        background: i === 0 ? 'hsl(var(--primary))' : i === 1 ? 'hsl(var(--muted))' : 'hsl(var(--accent))',
+                      }}
+                    >
+                      {["🥇", "🥈", "🥉"][i]}
                     </div>
                   )}
                   <BusinessCard {...biz} />
