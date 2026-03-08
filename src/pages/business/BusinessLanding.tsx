@@ -129,6 +129,11 @@ const BusinessLanding = () => {
   const { user, subscriptionTier } = useAuth();
   const { toast } = useToast();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
+
+  const toggleFeature = (title: string) => {
+    setExpandedFeature(prev => prev === title ? null : title);
+  };
 
   const handleCheckout = async (tier: "pro" | "premium") => {
     if (!user) {
