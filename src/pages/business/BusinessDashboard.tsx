@@ -711,49 +711,72 @@ const BusinessDashboard = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Brain size={18} className="text-primary" /> דוח AI שבועי
-                  <span className="text-xs text-muted-foreground font-normal mr-2">{aiReport.date}</span>
+                  {!isDemo && businessId && (
+                    <Button size="sm" variant="outline" className="mr-auto text-xs" onClick={() => handleGenerateReport("weekly")} disabled={generatingReport}>
+                      {generatingReport ? "מייצר..." : "צור דוח חדש"}
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div>
-                  <h3 className="text-sm font-display font-semibold text-primary flex items-center gap-2 mb-3">
-                    <ArrowUpRight size={16} /> חוזקות
-                  </h3>
-                  <ul className="space-y-2">
-                    {aiReport.strengths.map((s, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                        {s}
-                      </li>
+                {!isDemo && realAiReports.filter(r => r.report_type === "weekly").length > 0 ? (
+                  <div className="space-y-4">
+                    {realAiReports.filter(r => r.report_type === "weekly").map((report: any) => (
+                      <div key={report.id} className="border border-border/30 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs text-muted-foreground">{new Date(report.created_at).toLocaleDateString("he-IL")} | {report.period_start} — {report.period_end}</span>
+                        </div>
+                        <div className="prose prose-sm prose-invert max-w-none text-foreground/80" dir="rtl">
+                          <ReactMarkdown>{report.content}</ReactMarkdown>
+                        </div>
+                      </div>
                     ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-sm font-display font-semibold text-destructive flex items-center gap-2 mb-3">
-                    <ArrowDownRight size={16} /> נקודות לשיפור
-                  </h3>
-                  <ul className="space-y-2">
-                    {aiReport.weaknesses.map((w, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                        <div className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
-                        {w}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-sm font-display font-semibold text-accent flex items-center gap-2 mb-3">
-                    <Brain size={16} /> המלצות AI
-                  </h3>
-                  <ul className="space-y-2">
-                    {aiReport.recommendations.map((r, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                        <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                  </div>
+                ) : isDemo ? (
+                  <>
+                    <div>
+                      <h3 className="text-sm font-display font-semibold text-primary flex items-center gap-2 mb-3">
+                        <ArrowUpRight size={16} /> חוזקות
+                      </h3>
+                      <ul className="space-y-2">
+                        {aiReport.strengths.map((s, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                            {s}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-display font-semibold text-destructive flex items-center gap-2 mb-3">
+                        <ArrowDownRight size={16} /> נקודות לשיפור
+                      </h3>
+                      <ul className="space-y-2">
+                        {aiReport.weaknesses.map((w, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                            <div className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
+                            {w}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-display font-semibold text-accent flex items-center gap-2 mb-3">
+                        <Brain size={16} /> המלצות AI
+                      </h3>
+                      <ul className="space-y-2">
+                        {aiReport.recommendations.map((r, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                            <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
+                            {r}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין דוחות. לחצו "צור דוח חדש" כדי לייצר את הדוח הראשון.</p>
+                )}
                 <div className="pt-4 border-t border-border/30">
                   <p className="text-xs text-muted-foreground">
                     דוח זה נוצר על ידי AI על בסיס נתוני הביקורות, אנליטיקת הקליקים ומגמות ההמרה שלכם.
