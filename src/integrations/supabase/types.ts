@@ -596,6 +596,8 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          partner_badge: string | null
+          total_earnings: number | null
           updated_at: string
           user_id: string
         }
@@ -605,6 +607,8 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          partner_badge?: string | null
+          total_earnings?: number | null
           updated_at?: string
           user_id: string
         }
@@ -614,6 +618,8 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          partner_badge?: string | null
+          total_earnings?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -755,6 +761,7 @@ export type Database = {
           flag_reason: string | null
           flagged: boolean | null
           id: string
+          like_count: number
           purchase_id: string | null
           rating: number
           text: string
@@ -770,6 +777,7 @@ export type Database = {
           flag_reason?: string | null
           flagged?: boolean | null
           id?: string
+          like_count?: number
           purchase_id?: string | null
           rating: number
           text: string
@@ -785,6 +793,7 @@ export type Database = {
           flag_reason?: string | null
           flagged?: boolean | null
           id?: string
+          like_count?: number
           purchase_id?: string | null
           rating?: number
           text?: string
@@ -815,6 +824,119 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reward_payouts: {
+        Row: {
+          amount: number
+          id: string
+          month_year: string
+          points: number
+          processed_at: string | null
+          requested_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          id?: string
+          month_year: string
+          points?: number
+          processed_at?: string | null
+          requested_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          id?: string
+          month_year?: string
+          points?: number
+          processed_at?: string | null
+          requested_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rewards_log: {
+        Row: {
+          base_points: number
+          created_at: string
+          id: string
+          like_count: number
+          month_year: string
+          multiplier: number
+          review_id: string
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base_points?: number
+          created_at?: string
+          id?: string
+          like_count?: number
+          month_year: string
+          multiplier?: number
+          review_id: string
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base_points?: number
+          created_at?: string
+          id?: string
+          like_count?: number
+          month_year?: string
+          multiplier?: number
+          review_id?: string
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rewards_log_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rewards_pool: {
+        Row: {
+          community_pool: number
+          created_at: string
+          distributed: boolean
+          id: string
+          month_year: string
+          total_commissions: number
+          total_points: number
+          updated_at: string
+        }
+        Insert: {
+          community_pool?: number
+          created_at?: string
+          distributed?: boolean
+          id?: string
+          month_year: string
+          total_commissions?: number
+          total_points?: number
+          updated_at?: string
+        }
+        Update: {
+          community_pool?: number
+          created_at?: string
+          distributed?: boolean
+          id?: string
+          month_year?: string
+          total_commissions?: number
+          total_points?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       testimonial_media: {
         Row: {
