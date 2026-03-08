@@ -191,6 +191,8 @@ const InvoiceTemplateUploader = forwardRef<HTMLDivElement, InvoiceTemplateUpload
       </CardContent>
     </Card>
   );
-};
+});
+
+InvoiceTemplateUploader.displayName = "InvoiceTemplateUploader";
 
 export default InvoiceTemplateUploader;
