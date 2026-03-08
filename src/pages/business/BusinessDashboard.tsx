@@ -2,6 +2,7 @@ import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import AIChatbot from "@/components/AIChatbot";
 import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
+import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
