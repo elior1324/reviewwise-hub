@@ -65,15 +65,18 @@ const AccessibilityStatement = () => {
           {/* Features */}
           <Section icon={Settings} title="התאמות הנגישות בפלטפורמה">
             <p className="mb-3">
-              הפלטפורמה כוללת תפריט נגישות המאפשר התאמות מגוונות, ביניהן:
+              הפלטפורמה כוללת תפריט נגישות הממוקם בפינה השמאלית העליונה של כל עמוד (סמל <Accessibility size={14} className="inline text-primary" />). לחיצה על הסמל פותחת תפריט המאפשר את ההתאמות הבאות:
             </p>
-            <ul className="list-disc pr-6 space-y-1 text-muted-foreground">
-              <li>הגדלת פונטים והתאמת גודל טקסט</li>
-              <li>ניגודיות גבוהה ושינוי צבעים</li>
-              <li>הדגשת קישורים</li>
-              <li>עצירת אנימציות והבהובים</li>
-              <li>שינוי סוג הפונט לפונט קריא יותר</li>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground">
+              <li><strong>שינוי גודל טקסט</strong> — שלוש רמות: רגיל, גדול (115%), וגדול מאוד (130%). לחיצה חוזרת מחליפה בין הרמות</li>
+              <li><strong>ניגודיות גבוהה</strong> — מפעיל מצב ניגודיות גבוהה (רקע כהה וטקסט בהיר) לשיפור הקריאות</li>
+              <li><strong>הפחתת אנימציות</strong> — עוצר את כל האנימציות והמעברים באתר, מתאים למי שרגיש להבהובים ותנועה</li>
+              <li><strong>הדגשת קישורים</strong> — מוסיף קו תחתון לכל הקישורים באתר לזיהוי קל יותר</li>
+              <li><strong>איפוס הגדרות</strong> — מחזיר את כל ההגדרות למצב ברירת המחדל</li>
             </ul>
+            <p className="mt-3 text-muted-foreground">
+              ההגדרות נשמרות אוטומטית במכשיר שלכם ויישמרו גם בביקורים הבאים באתר.
+            </p>
           </Section>
 
           {/* Keyboard & Screen Readers */}
