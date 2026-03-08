@@ -446,7 +446,6 @@ const BusinessLanding = () => {
         </div>
       </section>
 
-const BusinessLanding = () => {
       {/* Pricing — only visible to authenticated users */}
       {user && (
         <section className="container py-20" id="pricing">
