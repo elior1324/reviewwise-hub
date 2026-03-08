@@ -229,7 +229,6 @@ export const FREELANCER_SUBCATEGORIES: Record<string, string[]> = {
     "מאמן כושר קרבי",
     "מאמן קרוספיט",
     "מאמן ריצה",
-    "כולם",
     "אחר",
   ],
 };
