@@ -11,8 +11,9 @@ import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
-  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye
+  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2
 } from "lucide-react";
+import EmbedWidgetGenerator from "@/components/EmbedWidgetGenerator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { type Review, type Course } from "@/data/mockData";
 import { useState, useEffect } from "react";
@@ -90,6 +91,7 @@ const BusinessDashboard = () => {
   const [isDemo, setIsDemo] = useState(true);
   const [loadingData, setLoadingData] = useState(true);
   const [businessId, setBusinessId] = useState<string | null>(null);
+  const [businessSlug, setBusinessSlug] = useState<string>("");
   const [businessInfo, setBusinessInfo] = useState<{ name: string; email: string } | null>(null);
   const [realReviews, setRealReviews] = useState<Review[]>([]);
   const [realCourses, setRealCourses] = useState<Course[]>([]);
@@ -128,6 +130,7 @@ const BusinessDashboard = () => {
       // User has a business — switch to real mode
       setIsDemo(false);
       setBusinessId(biz.id);
+      setBusinessSlug(biz.slug);
       setBusinessInfo({ name: biz.name, email: biz.email || user.email || "" });
 
       // Fetch reviews
@@ -394,6 +397,10 @@ const BusinessDashboard = () => {
             <TabsTrigger value="daily-ai" className="gap-1">
               <CalendarClock size={14} className="ml-1" /> דוחות AI יומיים
               {!isPremium && <PremiumBadge />}
+            </TabsTrigger>
+            <TabsTrigger value="widget" className="gap-1">
+              <Code2 size={14} className="ml-1" /> ווידג'ט להטמעה
+              {isFree && <ProBadge />}
             </TabsTrigger>
           </TabsList>
 
@@ -815,6 +822,18 @@ const BusinessDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
+            </LockedOverlay>
+          </TabsContent>
+
+          {/* Embed Widget */}
+          <TabsContent value="widget">
+            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
+              <EmbedWidgetGenerator
+                businessSlug={isDemo ? "demo-business" : (businessId ? businessSlug : "demo-business")}
+                businessName={isDemo ? "העסק שלכם" : displayBusiness.name}
+                rating={isDemo ? 4.8 : (Number(displayStats[0]?.value) || 0)}
+                reviewCount={isDemo ? 124 : (Number(displayStats[1]?.value) || 0)}
+              />
             </LockedOverlay>
           </TabsContent>
         </Tabs>
