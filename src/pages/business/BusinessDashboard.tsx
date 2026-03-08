@@ -16,6 +16,12 @@ import { REVIEWS, COURSES, AFFILIATE_CLICKS } from "@/data/mockData";
 const BUSINESS_SLUG = "digital-marketing-academy";
 
 const BusinessDashboard = () => {
+  // Demo business identity
+  const demoBusiness = {
+    name: "Digital Marketing Academy",
+    email: "admin@dma.co.il",
+  };
+
   const businessReviews = REVIEWS.filter(r => r.businessSlug === BUSINESS_SLUG);
   const businessCourses = COURSES.filter(c => c.businessSlug === BUSINESS_SLUG);
   const totalClicks = AFFILIATE_CLICKS.length;
