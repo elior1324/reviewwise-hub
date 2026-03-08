@@ -4,16 +4,54 @@ import BusinessCard from "@/components/BusinessCard";
 import CourseCard from "@/components/CourseCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, UserCheck, BookOpen, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown } from "lucide-react";
+import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
 import FloatingEarnCTA from "@/components/FloatingEarnCTA";
-import { BUSINESSES, COURSES, FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL } from "@/data/mockData";
+import { BUSINESSES, COURSES, FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, Business } from "@/data/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { useCategories } from "@/hooks/useCategories";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+type SortOption = "default" | "top5" | "alpha-asc" | "rating-desc" | "rating-asc" | "most-reviews" | "least-reviews";
+
+const SORT_LABELS: Record<SortOption, string> = {
+  "default": "ברירת מחדל",
+  "top5": "טופ 5 הכי מוכרים",
+  "alpha-asc": "א׳–ב׳ (א–ת)",
+  "rating-desc": "דירוג גבוה תחילה",
+  "rating-asc": "דירוג נמוך תחילה",
+  "most-reviews": "הכי הרבה ביקורות",
+  "least-reviews": "הכי פחות ביקורות",
+};
+
+function sortBusinesses(list: Business[], sort: SortOption): Business[] {
+  const sorted = [...list];
+  switch (sort) {
+    case "top5":
+      return sorted.sort((a, b) => b.reviewCount - a.reviewCount).slice(0, 5);
+    case "alpha-asc":
+      return sorted.sort((a, b) => a.name.localeCompare(b.name, "he"));
+    case "rating-desc":
+      return sorted.sort((a, b) => b.rating - a.rating);
+    case "rating-asc":
+      return sorted.sort((a, b) => a.rating - b.rating);
+    case "most-reviews":
+      return sorted.sort((a, b) => b.reviewCount - a.reviewCount);
+    case "least-reviews":
+      return sorted.sort((a, b) => a.reviewCount - b.reviewCount);
+    default:
+      return sorted;
+  }
+}
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
@@ -24,6 +62,7 @@ const SearchPage = () => {
   const [selectedCourseCat, setSelectedCourseCat] = useState("הכל");
   const [minRating, setMinRating] = useState(0);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
+  const [sortOption, setSortOption] = useState<SortOption>("default");
 
   const { data: freelancerCats = [] } = useCategories("freelancer");
   const { data: courseCats = [] } = useCategories("course");
@@ -35,7 +74,7 @@ const SearchPage = () => {
     ? FREELANCER_SUBCATEGORIES[selectedFreelancerCat] || [] 
     : [];
 
-  const freelancers = BUSINESSES.filter(b => {
+  const freelancersFiltered = BUSINESSES.filter(b => {
     if (b.type !== "freelancer") return false;
     const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query) || (b.subcategory && b.subcategory.includes(query));
     const matchesCat = selectedFreelancerCat === "הכל" || b.category === selectedFreelancerCat;
@@ -43,6 +82,8 @@ const SearchPage = () => {
     const matchesRating = b.rating >= minRating;
     return matchesQuery && matchesCat && matchesSubcat && matchesRating;
   });
+
+  const freelancers = useMemo(() => sortBusinesses(freelancersFiltered, sortOption), [freelancersFiltered, sortOption]);
 
   const courseProviders = BUSINESSES.filter(b => {
     if (b.type !== "course-provider") return false;
@@ -62,7 +103,7 @@ const SearchPage = () => {
 
   const handleCatSelect = (cat: string) => {
     setSelectedFreelancerCat(cat);
-    setSelectedSubcat(null); // Reset sub when changing category
+    setSelectedSubcat(null);
   };
 
   return (
@@ -80,8 +121,8 @@ const SearchPage = () => {
           </div>
         </div>
 
-        {/* Rating Filter */}
-        <div className="flex flex-wrap gap-4 mb-6 items-end">
+        {/* Rating Filter + Sort */}
+        <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
           <div className="flex gap-2 items-center">
             <span className="text-xs text-muted-foreground">דירוג:</span>
             {[{ v: 0, l: "הכל" }, { v: 4, l: "4+ ★" }, { v: 4.5, l: "4.5+ ★" }].map(({ v, l }) => (
@@ -90,6 +131,27 @@ const SearchPage = () => {
               </Button>
             ))}
           </div>
+
+          {/* Sort Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <ArrowUpDown size={14} />
+                {SORT_LABELS[sortOption]}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[180px]">
+              {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([key, label]) => (
+                <DropdownMenuItem
+                  key={key}
+                  onClick={() => setSortOption(key)}
+                  className={sortOption === key ? "bg-accent font-medium" : ""}
+                >
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
@@ -114,7 +176,6 @@ const SearchPage = () => {
                   variant={selectedFreelancerCat === cat ? "default" : "outline"} 
                   size="sm" 
                   onClick={() => handleCatSelect(cat)}
-                  className={selectedFreelancerCat === cat ? "" : ""}
                 >
                   {cat}
                   {FREELANCER_SUBCATEGORIES[cat] && selectedFreelancerCat !== cat && (
