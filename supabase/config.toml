@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.compare-items]
 verify_jwt = false
+
+[functions.widget-data]
+verify_jwt = false
