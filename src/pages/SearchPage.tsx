@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
+import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import { BUSINESSES, COURSES, FREELANCER_SUBCATEGORIES } from "@/data/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
@@ -67,6 +68,7 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
+      <FloatingEarnCTA />
       <div className="container py-10">
         <h1 className="font-display font-bold text-3xl mb-6">חפשו בעלי מקצוע וקורסים</h1>
 

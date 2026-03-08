@@ -12,6 +12,7 @@ import ReviewCard from "@/components/ReviewCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
+import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { useState, useRef } from "react";
 import { BUSINESSES, REVIEWS, FREELANCER_CATEGORIES, COURSE_CATEGORIES } from "@/data/mockData";
@@ -85,19 +86,7 @@ const Index = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
 
-      {/* Floating Earn CTA */}
-      <motion.button
-        initial={{ opacity: 0, x: 30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 2, duration: 0.5, ease: "easeOut" }}
-        onClick={() => document.getElementById("earn-money")?.scrollIntoView({ behavior: "smooth" })}
-        className="fixed top-1/3 left-0 z-40 cursor-pointer"
-      >
-        <div className="flex items-center bg-primary/90 backdrop-blur-sm text-primary-foreground pl-3 pr-2 py-1.5 md:py-2 rounded-l-none rounded-r-full shadow-md hover:shadow-primary/20 transition-all duration-300 hover:pr-3 md:hover:pr-4">
-          <DollarSign size={14} className="ml-1.5 shrink-0 animate-pulse" />
-          <span className="font-display font-semibold text-[11px] md:text-xs whitespace-nowrap">הרוויחו מביקורות 💰</span>
-        </div>
-      </motion.button>
+      <FloatingEarnCTA />
 
       {/* Hero — Audience-First */}
       <section ref={heroRef} className="relative overflow-hidden">
