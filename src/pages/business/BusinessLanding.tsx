@@ -96,6 +96,29 @@ const TRUSTED = [
 ];
 
 const BusinessLanding = () => {
+  const { user, subscriptionTier } = useAuth();
+  const { toast } = useToast();
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
+  const handleCheckout = async (tier: "pro" | "premium") => {
+    if (!user) {
+      toast({ title: "יש להתחבר תחילה", variant: "destructive" });
+      return;
+    }
+    setCheckoutLoading(tier);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: STRIPE_TIERS[tier].price_id },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
