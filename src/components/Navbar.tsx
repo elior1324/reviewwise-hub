@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User, PenLine } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationBell from "./NotificationBell";
@@ -24,35 +24,38 @@ const Navbar = () => {
   return (
     <nav className="glass sticky top-0 z-50 border-b border-border/50">
       <div className="container flex items-center justify-between h-16">
+        {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-xl bg-primary glow-primary flex items-center justify-center">
             <span className="text-primary-foreground font-display font-bold text-sm">R</span>
           </div>
           <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
         </Link>
+
+        {/* Center nav links */}
         <div className="hidden md:flex items-center gap-6">
+          <Link to="/write-review" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
+            <PenLine size={14} />
+            כתבו ביקורת
+          </Link>
           <Link to="/search" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            עיון בקורסים
+            קטגוריות
           </Link>
           <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             אודות
           </Link>
-          <Link to="/for-business" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            לחברות
-          </Link>
-          {user && (
-            <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              לוח בקרה
-            </Link>
-          )}
         </div>
+
+        {/* Right side */}
         <div className="flex items-center gap-2">
-          <Link to="/search">
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-              <Search size={18} />
+          {user && <NotificationBell />}
+
+          {/* לעסקים */}
+          <Link to="/business" className="hidden md:block">
+            <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground font-medium text-sm">
+              לעסקים
             </Button>
           </Link>
-          {user && <NotificationBell />}
 
           {user ? (
             <DropdownMenu>
@@ -75,18 +78,18 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <>
-              <Link to="/auth" className="hidden md:block">
+            <div className="hidden md:flex items-center gap-2">
+              <Link to="/auth">
                 <Button size="sm" variant="outline" className="border-primary/40 text-primary hover:bg-primary/10 font-medium">
                   התחברו
                 </Button>
               </Link>
-              <Link to="/auth" className="hidden md:block">
-                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary">
-                  הרשמו
+              <Link to="/auth?tab=signup">
+                <Button size="sm" variant="ghost" className="text-xs text-muted-foreground hover:text-foreground">
+                  צרו חשבון
                 </Button>
               </Link>
-            </>
+            </div>
           )}
 
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -94,13 +97,16 @@ const Navbar = () => {
           </Button>
         </div>
       </div>
+
+      {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-border/50 p-4 space-y-3 glass">
-          <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>עיון בקורסים</Link>
+          <Link to="/write-review" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>כתבו ביקורת</Link>
+          <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>קטגוריות</Link>
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
-          <Link to="/for-business" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לחברות</Link>
+          <Link to="/business" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>לעסקים</Link>
           {user && <Link to="/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לוח בקרה</Link>}
-          {!user && <Link to="/auth" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>התחברו / הרשמו</Link>}
+          {!user && <Link to="/auth" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>התחברו / צרו חשבון</Link>}
           {user && (
             <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-2 text-destructive">
               התנתקו

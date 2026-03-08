@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, ShieldCheck, Star, TrendingUp, Users } from "lucide-react";
+import {
+  Search, ShieldCheck, Star, TrendingUp, Users,
+  GraduationCap, Briefcase, Palette, Code2, BarChart3, Brain, Megaphone, Wrench
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import BusinessCard from "@/components/BusinessCard";
 import ReviewCard from "@/components/ReviewCard";
@@ -15,6 +18,26 @@ const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.6, ease: "easeOut" as const } }),
 };
+
+const AUDIENCE_TYPES = [
+  { icon: GraduationCap, label: "סטודנטים", desc: "מחפשים קורסים איכותיים" },
+  { icon: Briefcase, label: "מחליפי קריירה", desc: "מעבר לתחום חדש" },
+  { icon: Code2, label: "מפתחים", desc: "שדרוג מיומנויות טכניות" },
+  { icon: Palette, label: "מעצבים", desc: "UI/UX, גרפיקה ועיצוב" },
+  { icon: Megaphone, label: "משווקים", desc: "שיווק דיגיטלי ו-SEO" },
+  { icon: Brain, label: "דאטה סיינטיסטים", desc: "Python, ML ו-AI" },
+  { icon: Wrench, label: "פרילנסרים", desc: "בניית עסק עצמאי" },
+  { icon: BarChart3, label: "יזמים", desc: "Growth וניהול סטארטאפ" },
+];
+
+const CATEGORIES = [
+  { label: "שיווק דיגיטלי", query: "שיווק", count: 124 },
+  { label: "תכנות ופיתוח", query: "תכנות", count: 89 },
+  { label: "עיצוב UI/UX", query: "עיצוב", count: 67 },
+  { label: "מדעי נתונים", query: "מדעי נתונים", count: 156 },
+  { label: "עסקים ויזמות", query: "עסקים", count: 31 },
+  { label: "צילום ווידאו", query: "צילום", count: 18 },
+];
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,25 +55,25 @@ const Index = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
 
-      {/* Hero */}
+      {/* Hero — Audience-First */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
         <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl animate-float" />
         <div className="absolute bottom-10 right-1/4 w-64 h-64 rounded-full bg-accent/5 blur-3xl animate-float" style={{ animationDelay: "3s" }} />
-        <div className="container py-24 md:py-36 relative">
-          <motion.div className="max-w-3xl mx-auto text-center" initial="hidden" animate="visible">
+        <div className="container py-16 md:py-24 relative">
+          <motion.div className="max-w-4xl mx-auto text-center" initial="hidden" animate="visible">
             <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
               <ShieldCheck size={16} /> רק ביקורות מאומתות
             </motion.div>
-            <motion.h1 variants={fadeUp} custom={1} className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-foreground leading-tight mb-6">
-              מצאו את הקורסים{" "}
-              <span className="gradient-text glow-text">הטובים ביותר</span>
-              <br />בישראל
+            <motion.h1 variants={fadeUp} custom={1} className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-4">
+              מצאו את ההכשרה{" "}
+              <span className="gradient-text glow-text">המושלמת</span>
+              {" "}בשבילכם
             </motion.h1>
-            <motion.p variants={fadeUp} custom={2} className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl mx-auto">
-              ביקורות אמיתיות ומאומתות מסטודנטים שרכשו בפועל. קבלו החלטות מושכלות לגבי ההשכלה שלכם.
+            <motion.p variants={fadeUp} custom={2} className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+              קורסים, הכשרות, סדנאות ומנטורינג — עם ביקורות מאומתות מאנשים שבאמת רכשו.
             </motion.p>
-            <motion.form variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex gap-3 max-w-lg mx-auto">
+            <motion.form variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex gap-3 max-w-lg mx-auto mb-12">
               <div className="relative flex-1">
                 <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -65,11 +88,58 @@ const Index = () => {
               </Button>
             </motion.form>
           </motion.div>
+
+          {/* Audience Tiles */}
+          <motion.div
+            className="max-w-5xl mx-auto"
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.p variants={fadeUp} custom={4} className="text-center text-sm text-muted-foreground mb-6 font-medium">
+              מי אתם? מצאו מה שמתאים לכם
+            </motion.p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {AUDIENCE_TYPES.map(({ icon: Icon, label, desc }, i) => (
+                <motion.div
+                  key={label}
+                  variants={fadeUp}
+                  custom={5 + i * 0.5}
+                  className="group cursor-pointer rounded-xl p-4 bg-card/60 border border-border/40 hover:border-primary/40 hover:bg-card transition-all duration-300"
+                  onClick={() => navigate(`/search?audience=${encodeURIComponent(label)}`)}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+                    <Icon size={20} className="text-primary" />
+                  </div>
+                  <p className="font-display font-semibold text-sm text-foreground">{label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="border-y border-border/50 glass">
+        <div className="container py-10">
+          <h2 className="font-display font-bold text-xl text-foreground mb-6 text-center">קטגוריות פופולריות</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {CATEGORIES.map(({ label, query, count }) => (
+              <Link
+                key={label}
+                to={`/search?q=${encodeURIComponent(query)}`}
+                className="rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 transition-all duration-300 text-center group"
+              >
+                <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
+                <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Stats */}
-      <section className="border-y border-border/50 glass">
+      <section className="border-b border-border/50">
         <div className="container py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
@@ -135,9 +205,9 @@ const Index = () => {
               בנו אמון אמיתי עם ביקורות מאומתות והגדילו את העסק שלכם.
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
-              <Link to="/register">
+              <Link to="/business">
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
-                  צרו פרופיל עסקי
+                  גלו את הפלטפורמה לעסקים
                 </Button>
               </Link>
               <Link to="/about">
