@@ -97,7 +97,7 @@ const PLANS = [
   },
   {
     name: "פרימיום",
-    price: "₪389",
+    price: "₪479",
     period: "/חודש",
     tier: "premium" as const,
     features: [
