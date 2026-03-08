@@ -33,5 +33,3 @@ verify_jwt = false
 [functions.api-gateway]
 verify_jwt = false
 
-[functions.send-review-request]
-verify_jwt = false

@@ -328,9 +328,6 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="links">
-            <ReviewRequestForm courses={businessCourses} />
-          </TabsContent>
 
           <TabsContent value="widgets">
             <Card className="shadow-card animated-border bg-card">
