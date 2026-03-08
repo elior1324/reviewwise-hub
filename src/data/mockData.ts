@@ -28,6 +28,7 @@ export interface Business {
   name: string;
   type: BusinessType;
   category: string;
+  subcategory?: string;
   rating: number;
   reviewCount: number;
   description: string;
@@ -77,7 +78,121 @@ export const FREELANCER_CATEGORIES = [
   "צילום מקצועי",
   "ניהול קמפיינים",
   "אסטרטגיה דיגיטלית",
+  "מנהל סושיאל",
+  "יועץ עסקי",
+  "יועץ משכנתאות",
+  "רואה חשבון",
+  "עורך דין",
 ];
+
+// ─── Sub-specialties per category ───────────────────────
+export const FREELANCER_SUBCATEGORIES: Record<string, string[]> = {
+  "מנהל סושיאל": [
+    "מנהל סושיאל לעסקים קטנים",
+    "מנהל סושיאל למותגי אופנה",
+    "מנהל סושיאל למסעדות ופוד",
+    "מנהל סושיאל ל-E-commerce",
+    "מנהל סושיאל לסטארטאפים",
+  ],
+  "יועץ עסקי": [
+    "יועץ עסקי לסטארטאפים",
+    "יועץ עסקי לעסקים קטנים ובינוניים",
+    "יועץ עסקי למסחר אלקטרוני",
+    "יועץ עסקי לגיוס משקיעים",
+    "יועץ עסקי לאסטרטגיית צמיחה",
+  ],
+  "יועץ משכנתאות": [
+    "יועץ משכנתאות לרוכשי דירה ראשונה",
+    "יועץ משכנתאות למחזרי משכנתא",
+    "יועץ משכנתאות למשקיעי נדל״ן",
+    "יועץ משכנתאות לזוגות צעירים",
+    "יועץ משכנתאות לתושבים חוזרים",
+  ],
+  "רואה חשבון": [
+    "רואה חשבון מתמחה בתיקי נוסטרו",
+    "רואה חשבון שמבין בשוק ההון",
+    "רואה חשבון שמבין בנדל״ן",
+    "רואה חשבון שמבין בעוסק פטור",
+    "רואה חשבון שעובד רק עם חברות בע״מ",
+  ],
+  "עורך דין": [
+    "עורך דין מקרקעין ונדל״ן",
+    "עורך דין דיני עבודה",
+    "עורך דין מסחרי וחוזים",
+    "עורך דין היי-טק וקניין רוחני",
+    "עורך דין משפחה וגירושין",
+  ],
+  "שיווק וסושיאל": [
+    "שיווק ברשתות חברתיות",
+    "שיווק משפיענים",
+    "שיווק תוכן",
+    "שיווק באמצעות וידאו",
+    "שיווק לעסקים מקומיים",
+  ],
+  "עיצוב אתרים": [
+    "עיצוב דפי נחיתה",
+    "עיצוב אתרי מסחר",
+    "עיצוב אתרי תדמית",
+    "עיצוב UI/UX למובייל",
+    "עיצוב מערכות SaaS",
+  ],
+  "עריכת וידאו": [
+    "עריכת וידאו לרשתות חברתיות",
+    "עריכת סרטוני תדמית",
+    "עריכת וידאו ל-YouTube",
+    "עריכת סרטוני מוצר",
+    "אנימציה ומושן גרפיקס",
+  ],
+  "כתיבה שיווקית": [
+    "כתיבת דפי נחיתה",
+    "כתיבת מודעות ממומנות",
+    "כתיבת תוכן לבלוגים",
+    "כתיבת סקריפטים לוידאו",
+    "כתיבת ניוזלטרים",
+  ],
+  "קידום אורגני (SEO)": [
+    "SEO טכני",
+    "SEO מקומי (Local SEO)",
+    "SEO לאתרי מסחר",
+    "בניית קישורים (Link Building)",
+    "אסטרטגיית תוכן ל-SEO",
+  ],
+  "פיתוח אתרים": [
+    "פיתוח React / Next.js",
+    "פיתוח WordPress",
+    "פיתוח Shopify",
+    "פיתוח Full-Stack",
+    "פיתוח אפליקציות ווב",
+  ],
+  "עיצוב גרפי": [
+    "עיצוב לוגו ומיתוג",
+    "עיצוב חומרי שיווק",
+    "עיצוב אריזות",
+    "עיצוב לדפוס",
+    "עיצוב לדיגיטל",
+  ],
+  "צילום מקצועי": [
+    "צילום מוצרים",
+    "צילום תדמית",
+    "צילום אירועים עסקיים",
+    "צילום אוכל",
+    "צילום ראשי צוות",
+  ],
+  "ניהול קמפיינים": [
+    "קמפיינים ב-Google Ads",
+    "קמפיינים ב-Facebook / Instagram",
+    "קמפיינים ב-LinkedIn",
+    "קמפיינים ב-TikTok",
+    "קמפיינים רב-ערוציים",
+  ],
+  "אסטרטגיה דיגיטלית": [
+    "אסטרטגיית צמיחה דיגיטלית",
+    "אסטרטגיית תוכן",
+    "אסטרטגיית משפכי מכירות",
+    "אסטרטגיה למסחר אלקטרוני",
+    "אסטרטגיה לסטארטאפים",
+  ],
+};
 
 // ─── Course Types ───────────────────────────────────────
 export const COURSE_TYPES = [
@@ -104,16 +219,45 @@ export const COURSE_CATEGORIES = [
 // ─── Businesses ─────────────────────────────────────────
 export const BUSINESSES: Business[] = [
   // ── Freelancers / בעלי מקצוע עצמאים ──
-  { slug: "maya-social", name: "מאיה כהן — ניהול סושיאל", type: "freelancer", category: "שיווק וסושיאל", rating: 4.9, reviewCount: 87, description: "מנהלת שיווק ברשתות חברתיות עם 8 שנות ניסיון. מתמחה בבניית אסטרטגיית תוכן, ניהול קהילות וקמפיינים ב-Instagram, TikTok ו-Facebook.", website: "https://mayasocial.co.il", email: "maya@mayasocial.co.il", phone: "050-1234567" },
-  { slug: "oren-webdesign", name: "אורן לוי — עיצוב אתרים", type: "freelancer", category: "עיצוב אתרים", rating: 4.8, reviewCount: 63, description: "מעצב אתרים ו-UI/UX פרילנסר. מתמחה בעיצוב חוויית משתמש, דפי נחיתה, אתרי תדמית ואתרי מסחר. עובד עם Figma, Webflow ו-WordPress.", website: "https://orenlevy.design", email: "oren@orenlevy.design", phone: "052-9876543" },
-  { slug: "noa-video", name: "נועה שמש — עריכת וידאו", type: "freelancer", category: "עריכת וידאו", rating: 4.7, reviewCount: 52, description: "עורכת וידאו מקצועית לרשתות חברתיות, סרטוני תדמית, ריליס ו-YouTube. עבודה עם Premiere Pro, After Effects ו-DaVinci Resolve.", website: "https://noavideo.co.il", email: "noa@noavideo.co.il", phone: "054-5551234" },
-  { slug: "yoni-copywriting", name: "יוני אברהם — קופירייטינג", type: "freelancer", category: "כתיבה שיווקית", rating: 4.6, reviewCount: 41, description: "קופירייטר ומומחה כתיבה שיווקית. כתיבת מודעות, דפי נחיתה, סקריפטים לוידאו, ניוזלטרים ותוכן לאתרים. ניסיון עם מאות מותגים.", website: "https://yonicopy.co.il", email: "yoni@yonicopy.co.il", phone: "053-4445566" },
-  { slug: "tal-seo", name: "טל ברק — קידום אורגני", type: "freelancer", category: "קידום אורגני (SEO)", rating: 4.8, reviewCount: 73, description: "מומחה SEO עם ניסיון של 10 שנים. קידום אורגני בגוגל, בניית אסטרטגיית תוכן, מחקר מילות מפתח וטכני SEO.", website: "https://talseo.co.il", email: "tal@talseo.co.il", phone: "050-7778899" },
-  { slug: "lior-dev", name: "ליאור מזרחי — פיתוח אתרים", type: "freelancer", category: "פיתוח אתרים", rating: 4.5, reviewCount: 38, description: "מפתח Full-Stack פרילנסר. בניית אתרים, אפליקציות ווב, מערכות ניהול תוכן ואינטגרציות. React, Node.js, WordPress.", website: "https://liordev.co.il", email: "lior@liordev.co.il", phone: "052-1112233" },
-  { slug: "dana-graphics", name: "דנה רוזנברג — עיצוב גרפי", type: "freelancer", category: "עיצוב גרפי", rating: 4.9, reviewCount: 95, description: "מעצבת גרפית עם ניסיון של 12 שנה. מיתוג, לוגואים, עיצוב חומרי שיווק, עיצוב אריזות ועיצוב לדפוס ודיגיטל.", website: "https://danagraphics.co.il", email: "dana@danagraphics.co.il", phone: "054-3334455" },
-  { slug: "avi-photo", name: "אבי כץ — צילום מקצועי", type: "freelancer", category: "צילום מקצועי", rating: 4.7, reviewCount: 58, description: "צלם מקצועי לעסקים. צילום מוצרים, צילום תדמית, צילום אירועים עסקיים, ראשי צוות ותמונות לרשתות חברתיות.", website: "https://aviphoto.co.il", email: "avi@aviphoto.co.il", phone: "050-6667788" },
-  { slug: "shira-campaigns", name: "שירה גולן — ניהול קמפיינים", type: "freelancer", category: "ניהול קמפיינים", rating: 4.6, reviewCount: 44, description: "מנהלת קמפיינים דיגיטליים ב-Google Ads, Facebook Ads ו-LinkedIn. מתמחה ב-PPC, remarketing ואופטימיזציית המרות.", website: "https://shiracampaigns.co.il", email: "shira@shiracampaigns.co.il", phone: "053-8889900" },
-  { slug: "eran-strategy", name: "ערן דביר — אסטרטגיה דיגיטלית", type: "freelancer", category: "אסטרטגיה דיגיטלית", rating: 4.8, reviewCount: 36, description: "יועץ אסטרטגי לשיווק דיגיטלי. בניית תוכניות שיווק, אפיון קהלי יעד, בניית משפכי מכירות ואסטרטגיית צמיחה לעסקים.", website: "https://eranstrategy.co.il", email: "eran@eranstrategy.co.il", phone: "052-2223344" },
+  { slug: "maya-social", name: "מאיה כהן — ניהול סושיאל", type: "freelancer", category: "שיווק וסושיאל", subcategory: "שיווק ברשתות חברתיות", rating: 4.9, reviewCount: 87, description: "מנהלת שיווק ברשתות חברתיות עם 8 שנות ניסיון. מתמחה בבניית אסטרטגיית תוכן, ניהול קהילות וקמפיינים ב-Instagram, TikTok ו-Facebook.", website: "https://mayasocial.co.il", email: "maya@mayasocial.co.il", phone: "050-1234567" },
+  { slug: "oren-webdesign", name: "אורן לוי — עיצוב אתרים", type: "freelancer", category: "עיצוב אתרים", subcategory: "עיצוב אתרי תדמית", rating: 4.8, reviewCount: 63, description: "מעצב אתרים ו-UI/UX פרילנסר. מתמחה בעיצוב חוויית משתמש, דפי נחיתה, אתרי תדמית ואתרי מסחר. עובד עם Figma, Webflow ו-WordPress.", website: "https://orenlevy.design", email: "oren@orenlevy.design", phone: "052-9876543" },
+  { slug: "noa-video", name: "נועה שמש — עריכת וידאו", type: "freelancer", category: "עריכת וידאו", subcategory: "עריכת וידאו לרשתות חברתיות", rating: 4.7, reviewCount: 52, description: "עורכת וידאו מקצועית לרשתות חברתיות, סרטוני תדמית, ריליס ו-YouTube. עבודה עם Premiere Pro, After Effects ו-DaVinci Resolve.", website: "https://noavideo.co.il", email: "noa@noavideo.co.il", phone: "054-5551234" },
+  { slug: "yoni-copywriting", name: "יוני אברהם — קופירייטינג", type: "freelancer", category: "כתיבה שיווקית", subcategory: "כתיבת דפי נחיתה", rating: 4.6, reviewCount: 41, description: "קופירייטר ומומחה כתיבה שיווקית. כתיבת מודעות, דפי נחיתה, סקריפטים לוידאו, ניוזלטרים ותוכן לאתרים. ניסיון עם מאות מותגים.", website: "https://yonicopy.co.il", email: "yoni@yonicopy.co.il", phone: "053-4445566" },
+  { slug: "tal-seo", name: "טל ברק — קידום אורגני", type: "freelancer", category: "קידום אורגני (SEO)", subcategory: "SEO טכני", rating: 4.8, reviewCount: 73, description: "מומחה SEO עם ניסיון של 10 שנים. קידום אורגני בגוגל, בניית אסטרטגיית תוכן, מחקר מילות מפתח וטכני SEO.", website: "https://talseo.co.il", email: "tal@talseo.co.il", phone: "050-7778899" },
+  { slug: "lior-dev", name: "ליאור מזרחי — פיתוח אתרים", type: "freelancer", category: "פיתוח אתרים", subcategory: "פיתוח Full-Stack", rating: 4.5, reviewCount: 38, description: "מפתח Full-Stack פרילנסר. בניית אתרים, אפליקציות ווב, מערכות ניהול תוכן ואינטגרציות. React, Node.js, WordPress.", website: "https://liordev.co.il", email: "lior@liordev.co.il", phone: "052-1112233" },
+  { slug: "dana-graphics", name: "דנה רוזנברג — עיצוב גרפי", type: "freelancer", category: "עיצוב גרפי", subcategory: "עיצוב לוגו ומיתוג", rating: 4.9, reviewCount: 95, description: "מעצבת גרפית עם ניסיון של 12 שנה. מיתוג, לוגואים, עיצוב חומרי שיווק, עיצוב אריזות ועיצוב לדפוס ודיגיטל.", website: "https://danagraphics.co.il", email: "dana@danagraphics.co.il", phone: "054-3334455" },
+  { slug: "avi-photo", name: "אבי כץ — צילום מקצועי", type: "freelancer", category: "צילום מקצועי", subcategory: "צילום מוצרים", rating: 4.7, reviewCount: 58, description: "צלם מקצועי לעסקים. צילום מוצרים, צילום תדמית, צילום אירועים עסקיים, ראשי צוות ותמונות לרשתות חברתיות.", website: "https://aviphoto.co.il", email: "avi@aviphoto.co.il", phone: "050-6667788" },
+  { slug: "shira-campaigns", name: "שירה גולן — ניהול קמפיינים", type: "freelancer", category: "ניהול קמפיינים", subcategory: "קמפיינים ב-Google Ads", rating: 4.6, reviewCount: 44, description: "מנהלת קמפיינים דיגיטליים ב-Google Ads, Facebook Ads ו-LinkedIn. מתמחה ב-PPC, remarketing ואופטימיזציית המרות.", website: "https://shiracampaigns.co.il", email: "shira@shiracampaigns.co.il", phone: "053-8889900" },
+  { slug: "eran-strategy", name: "ערן דביר — אסטרטגיה דיגיטלית", type: "freelancer", category: "אסטרטגיה דיגיטלית", subcategory: "אסטרטגיית צמיחה דיגיטלית", rating: 4.8, reviewCount: 36, description: "יועץ אסטרטגי לשיווק דיגיטלי. בניית תוכניות שיווק, אפיון קהלי יעד, בניית משפכי מכירות ואסטרטגיית צמיחה לעסקים.", website: "https://eranstrategy.co.il", email: "eran@eranstrategy.co.il", phone: "052-2223344" },
+
+  // ── מנהלי סושיאל ──
+  { slug: "liat-social-smb", name: "ליאת אורן — מנהלת סושיאל לעסקים", type: "freelancer", category: "מנהל סושיאל", subcategory: "מנהל סושיאל לעסקים קטנים", rating: 4.8, reviewCount: 64, description: "ניהול רשתות חברתיות לעסקים קטנים ובינוניים. אסטרטגיית תוכן, לוח שנה שיווקי, יצירת תוכן וניהול קהילות.", website: "https://liatsocial.co.il", email: "liat@liatsocial.co.il", phone: "050-2223344" },
+  { slug: "gal-social-fashion", name: "גל שמעון — סושיאל מותגי אופנה", type: "freelancer", category: "מנהל סושיאל", subcategory: "מנהל סושיאל למותגי אופנה", rating: 4.7, reviewCount: 42, description: "מנהלת סושיאל המתמחה במותגי אופנה ולייפסטייל. שיתופי פעולה עם משפיעניות, צילום אופנה וקמפיינים ויראליים.", website: "https://galsocial.co.il", email: "gal@galsocial.co.il", phone: "052-5556677" },
+  { slug: "ron-social-food", name: "רון אביב — סושיאל מסעדות", type: "freelancer", category: "מנהל סושיאל", subcategory: "מנהל סושיאל למסעדות ופוד", rating: 4.9, reviewCount: 53, description: "ניהול סושיאל למסעדות, קפיטריות ועסקי אוכל. צילום מנות, ריליס, TikTok ואינסטגרם עם דגש על פוד קונטנט.", website: "https://ronfood.co.il", email: "ron@ronfood.co.il", phone: "054-7778899" },
+
+  // ── יועצים עסקיים ──
+  { slug: "avi-biz-startups", name: "אבי רוזנפלד — יועץ לסטארטאפים", type: "freelancer", category: "יועץ עסקי", subcategory: "יועץ עסקי לסטארטאפים", rating: 4.8, reviewCount: 39, description: "יועץ עסקי לסטארטאפים בתחילת הדרך. ליווי בבניית מודל עסקי, pitch deck, ואסטרטגיית כניסה לשוק.", website: "https://avibiz.co.il", email: "avi@avibiz.co.il", phone: "050-3334455" },
+  { slug: "michal-biz-smb", name: "מיכל דוד — יועצת לעסקים קטנים", type: "freelancer", category: "יועץ עסקי", subcategory: "יועץ עסקי לעסקים קטנים ובינוניים", rating: 4.7, reviewCount: 55, description: "ייעוץ עסקי לבעלי עסקים קטנים ובינוניים. תכנית עסקית, ייעול תהליכים, ניהול פיננסי ואסטרטגיית מכירות.", website: "https://michalbiz.co.il", email: "michal@michalbiz.co.il", phone: "053-4445566" },
+  { slug: "noam-biz-ecomm", name: "נועם לוי — יועץ מסחר אלקטרוני", type: "freelancer", category: "יועץ עסקי", subcategory: "יועץ עסקי למסחר אלקטרוני", rating: 4.6, reviewCount: 31, description: "ייעוץ אסטרטגי לחנויות אונליין ו-E-commerce. הקמת חנות, אופטימיזציה, שיפור המרות ופתרונות לוגיסטיים.", website: "https://noamecomm.co.il", email: "noam@noamecomm.co.il", phone: "052-6667788" },
+
+  // ── יועצי משכנתאות ──
+  { slug: "ori-mortgage-first", name: "אורי כהן — משכנתא לרוכשים ראשונים", type: "freelancer", category: "יועץ משכנתאות", subcategory: "יועץ משכנתאות לרוכשי דירה ראשונה", rating: 4.9, reviewCount: 72, description: "ליווי רוכשי דירה ראשונה בתהליך המשכנתא. השוואת הצעות, מו״מ מול הבנקים, וחיסכון של אלפי שקלים.", website: "https://orimortgage.co.il", email: "ori@orimortgage.co.il", phone: "050-8889900" },
+  { slug: "hadas-mortgage-refi", name: "הדס ברק — מחזור משכנתא", type: "freelancer", category: "יועץ משכנתאות", subcategory: "יועץ משכנתאות למחזרי משכנתא", rating: 4.8, reviewCount: 48, description: "מתמחה במחזור משכנתאות קיימות. ניתוח תיק משכנתא, הורדת ריבית ומיחזור חכם שחוסך עשרות אלפי שקלים.", website: "https://hadasmortgage.co.il", email: "hadas@hadasmortgage.co.il", phone: "054-1112233" },
+  { slug: "yossi-mortgage-invest", name: "יוסי שלום — משכנתא למשקיעים", type: "freelancer", category: "יועץ משכנתאות", subcategory: "יועץ משכנתאות למשקיעי נדל״ן", rating: 4.7, reviewCount: 35, description: "ייעוץ משכנתאות למשקיעי נדל״ן. מימון דירות להשקעה, מינוף, תכנון פיננסי ארוך טווח ואופטימיזציית מס.", website: "https://yossimortgage.co.il", email: "yossi@yossimortgage.co.il", phone: "052-3334455" },
+
+  // ── רואי חשבון ──
+  { slug: "rina-cpa-nostro", name: "רינה אדלר — רו״ח תיקי נוסטרו", type: "freelancer", category: "רואה חשבון", subcategory: "רואה חשבון מתמחה בתיקי נוסטרו", rating: 4.8, reviewCount: 61, description: "רואת חשבון מוסמכת המתמחה בניהול תיקי נוסטרו. דיווח שנתי, תכנון מס ואופטימיזציה מיסויית לעצמאים ושכירים.", website: "https://rinacpa.co.il", email: "rina@rinacpa.co.il", phone: "03-5551234" },
+  { slug: "eyal-cpa-stocks", name: "אייל כהן — רו״ח שוק ההון", type: "freelancer", category: "רואה חשבון", subcategory: "רואה חשבון שמבין בשוק ההון", rating: 4.7, reviewCount: 47, description: "רואה חשבון מומחה בשוק ההון. מיסוי מניות, אופציות, קריפטו, מסחר בינלאומי ודיווחי FATCA. חיסכון מיסים משמעותי.", website: "https://eyalcpa.co.il", email: "eyal@eyalcpa.co.il", phone: "03-6667788" },
+  { slug: "sara-cpa-realestate", name: "שרה גולד — רו״ח נדל״ן", type: "freelancer", category: "רואה חשבון", subcategory: "רואה חשבון שמבין בנדל״ן", rating: 4.9, reviewCount: 56, description: "רואת חשבון המתמחה בנדל״ן. מיסוי מקרקעין, מס שבח, מס רכישה, תכנון עסקאות ומבני החזקה אופטימליים.", website: "https://saracpa.co.il", email: "sara@saracpa.co.il", phone: "03-7778899" },
+  { slug: "moshe-cpa-exempt", name: "משה ברנר — רו״ח עוסק פטור", type: "freelancer", category: "רואה חשבון", subcategory: "רואה חשבון שמבין בעוסק פטור", rating: 4.6, reviewCount: 83, description: "רואה חשבון שמתמחה בליווי עוסקים פטורים ועוסקים מורשים חדשים. פתיחת תיק, דיווחים, ניהול הוצאות ומעבר בין סטטוסים.", website: "https://moshecpa.co.il", email: "moshe@moshecpa.co.il", phone: "03-8889900" },
+  { slug: "dina-cpa-ltd", name: "דינה רם — רו״ח חברות בע״מ", type: "freelancer", category: "רואה חשבון", subcategory: "רואה חשבון שעובד רק עם חברות בע״מ", rating: 4.8, reviewCount: 38, description: "רואת חשבון המתמחה בחברות בע״מ. דוחות כספיים, ביקורת, מיסוי חברות, חלוקת דיבידנדים ותכנון מס.", website: "https://dinacpa.co.il", email: "dina@dinacpa.co.il", phone: "03-1234567" },
+
+  // ── עורכי דין ──
+  { slug: "amit-law-realestate", name: "עו״ד עמית כהן — מקרקעין", type: "freelancer", category: "עורך דין", subcategory: "עורך דין מקרקעין ונדל״ן", rating: 4.8, reviewCount: 67, description: "עורך דין מומחה בנדל״ן ומקרקעין. ליווי עסקאות רכישה ומכירה, טאבו, רישום זכויות, הסכמי שכירות ותב״עות.", website: "https://amitlaw.co.il", email: "amit@amitlaw.co.il", phone: "03-2345678" },
+  { slug: "neta-law-labor", name: "עו״ד נטע ברון — דיני עבודה", type: "freelancer", category: "עורך דין", subcategory: "עורך דין דיני עבודה", rating: 4.7, reviewCount: 44, description: "עורכת דין בדיני עבודה. ייצוג עובדים ומעסיקים, תביעות פיצויים, הסכמי עבודה, פיטורין וזכויות עובדים.", website: "https://netalaw.co.il", email: "neta@netalaw.co.il", phone: "03-3456789" },
+  { slug: "ido-law-commercial", name: "עו״ד עידו אלון — מסחרי", type: "freelancer", category: "עורך דין", subcategory: "עורך דין מסחרי וחוזים", rating: 4.6, reviewCount: 39, description: "עורך דין מסחרי. ניסוח הסכמים, הסכמי שותפות, תנאי שימוש, הסכמי SaaS, ליווי עסקאות ויישוב סכסוכים מסחריים.", website: "https://idolaw.co.il", email: "ido@idolaw.co.il", phone: "03-4567890" },
+  { slug: "maya-law-tech", name: "עו״ד מאיה שפיר — היי-טק", type: "freelancer", category: "עורך דין", subcategory: "עורך דין היי-טק וקניין רוחני", rating: 4.9, reviewCount: 51, description: "עורכת דין להיי-טק וקניין רוחני. ליווי סטארטאפים, הסכמי השקעה, פטנטים, סימני מסחר והגנת קניין רוחני.", website: "https://mayalaw.co.il", email: "maya@mayalaw.co.il", phone: "03-5678901" },
+  { slug: "yaron-law-family", name: "עו״ד ירון דביר — משפחה", type: "freelancer", category: "עורך דין", subcategory: "עורך דין משפחה וגירושין", rating: 4.7, reviewCount: 58, description: "עורך דין למשפחה וגירושין. הסכמי גירושין, משמורת ילדים, מזונות, חלוקת רכוש וגישור משפחתי.", website: "https://yaronlaw.co.il", email: "yaron@yaronlaw.co.il", phone: "03-6789012" },
 
   // ── Course Providers / מוכרי קורסים ──
   { slug: "digital-marketing-academy", name: "אקדמיית שיווק דיגיטלי", type: "course-provider", category: "שיווק דיגיטלי", rating: 4.8, reviewCount: 124, description: "הפלטפורמה המובילה בישראל לחינוך שיווק דיגיטלי. קורסים מקיפים ב-SEO, רשתות חברתיות, Google Ads ואסטרטגיית תוכן.", logo: dmaLogo, website: "https://dma.co.il", email: "info@dma.co.il", phone: "03-1234567" },
@@ -230,6 +374,26 @@ export const REVIEWS: Review[] = [
     text: "יוני כתב לנו טקסטים לדף נחיתה והמרות קפצו ב-40%! מקצוען אמיתי שמבין שיווק ופסיכולוגיית מכירות.",
     courseName: "קופירייטינג", courseId: "freelancer-yoni", businessSlug: "yoni-copywriting",
     date: "25 פבר׳ 2026", purchaseDate: "2025-08-05", verified: true, anonymous: false
+  },
+  // ── Professional Reviews ──
+  {
+    id: "rev-15", reviewerName: "דני מ.", rating: 5,
+    text: "רינה ניהלה לי את התיק נוסטרו כבר 3 שנים. מקצועיות ברמה הכי גבוהה, חוסכת לי אלפי שקלים בשנה.",
+    courseName: "ייעוץ חשבונאי", courseId: "freelancer-rina", businessSlug: "rina-cpa-nostro",
+    date: "3 מרץ 2026", purchaseDate: "2023-01-15", verified: true, anonymous: false
+  },
+  {
+    id: "rev-16", reviewerName: "תמר א.", rating: 5,
+    text: "עו״ד עמית ליווה אותנו ברכישת דירה. מקצועי, זמין ומדויק. חסך לנו כאבי ראש רבים.",
+    courseName: "ליווי עסקת נדל״ן", courseId: "freelancer-amit", businessSlug: "amit-law-realestate",
+    date: "1 מרץ 2026", purchaseDate: "2025-08-01", verified: true, anonymous: false
+  },
+  {
+    id: "rev-17", reviewerName: "יואב ש.", rating: 5,
+    text: "אורי חסך לנו 180,000 ₪ על המשכנתא! מקצוען אמיתי שמבין לעומק את השוק ויודע לנהל מו״מ מול הבנקים.",
+    courseName: "ייעוץ משכנתא", courseId: "freelancer-ori", businessSlug: "ori-mortgage-first",
+    date: "27 פבר׳ 2026", purchaseDate: "2025-06-01", verified: true, anonymous: false,
+    ownerResponse: { text: "תודה יואב! שמח שהצלחנו לחסוך לכם סכום כזה משמעותי. בהצלחה בדירה החדשה!", date: "28 פבר׳ 2026" }
   },
 ];
 
