@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logoIcon from "@/assets/logo-icon-cropped.png";
 
 const BusinessFooter = () => (
   <footer className="border-t border-border/50 mt-20" dir="rtl">

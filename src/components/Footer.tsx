@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logoIcon from "@/assets/logo-icon-cropped.png";
 import { Youtube, Instagram, Linkedin, Twitter, Facebook } from "lucide-react";
 
 const TikTokIcon = ({ size = 16 }: { size?: number }) => (
