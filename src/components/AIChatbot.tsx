@@ -147,6 +147,27 @@ const AIChatbot = ({ context = "consumer" }: AIChatbotProps) => {
                   </div>
                 </motion.div>
               ))}
+
+              {/* Quick suggestion chips — show only after the initial message */}
+              {messages.length === 1 && !isLoading && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex flex-wrap gap-2 pt-1"
+                >
+                  {QUICK_SUGGESTIONS[context].map((q, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { sendMessage(q); }}
+                      className="text-xs px-3 py-1.5 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors whitespace-nowrap"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+
               {isLoading && messages[messages.length - 1]?.role === "user" && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-2">
                   <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
