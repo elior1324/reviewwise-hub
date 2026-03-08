@@ -322,6 +322,7 @@ const BusinessDashboard = () => {
         </Tabs>
       </div>
       <BusinessFooter />
+      <AIChatbot context="business" />
     </div>
   );
 };

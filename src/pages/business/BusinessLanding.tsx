@@ -364,6 +364,7 @@ const BusinessLanding = () => {
       </section>
 
       <BusinessFooter />
+      <AIChatbot context="business" />
     </div>
   );
 };
