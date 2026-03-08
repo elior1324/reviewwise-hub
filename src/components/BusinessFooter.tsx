@@ -29,6 +29,7 @@ const BusinessFooter = () => (
           <div className="space-y-2">
             <Link to="/business/resources/docs" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">תיעוד</Link>
             <Link to="/business/resources/blog" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">בלוג</Link>
+            <Link to="/business#faq" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">שאלות נפוצות</Link>
           </div>
         </div>
         <div>
