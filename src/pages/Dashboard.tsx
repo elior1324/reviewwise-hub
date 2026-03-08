@@ -72,7 +72,7 @@ const Dashboard = () => {
       // Reviews
       const { data: reviews } = await supabase
         .from("reviews")
-        .select("*, courses(name), profiles(display_name), business_responses(text, created_at)")
+        .select("*, courses(name), business_responses(text, created_at)")
         .eq("business_id", biz.id)
         .order("created_at", { ascending: false });
 
