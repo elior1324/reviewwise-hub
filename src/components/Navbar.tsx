@@ -117,9 +117,12 @@ const Navbar = () => {
           {user && <Link to="/business/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לוח בקרה עסקי</Link>}
           {!user && <Link to="/auth" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>התחברו / צרו חשבון</Link>}
           {user && (
-            <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-2 text-destructive">
-              התנתקו
-            </button>
+            <>
+              <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-2 text-destructive">
+                התנתקו
+              </button>
+              <DeleteAccountButton />
+            </>
           )}
         </div>
       )}
