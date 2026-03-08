@@ -100,6 +100,9 @@ const BusinessDashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass flex-wrap">
             <TabsTrigger value="overview">סקירה כללית</TabsTrigger>
+            <TabsTrigger value="invoices">
+              <FileText size={14} className="ml-1" /> קבלות ואימות
+            </TabsTrigger>
             <TabsTrigger value="clicks">קליקים והמרות</TabsTrigger>
             <TabsTrigger value="notifications">
               <Bell size={14} className="ml-1" /> התראות
