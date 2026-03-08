@@ -263,7 +263,76 @@ const BusinessDashboard = () => {
   const displayStats = isDemo ? DEMO_STATS : (realStats || DEMO_STATS);
   const displayClicks = isDemo ? DEMO_CLICKS : realClicks;
   const displayNotifications = isDemo ? DEMO_NOTIFICATIONS : realNotifications;
-  const aiReport = DEMO_AI_REPORT; // AI report is always demo for now
+  const aiReport = DEMO_AI_REPORT;
+
+  // Generate real AI report
+  const handleGenerateReport = async (type: "weekly" | "daily") => {
+    if (!businessId || generatingReport) return;
+    setGeneratingReport(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-ai-report", {
+        body: { business_id: businessId, report_type: type },
+      });
+      if (error) throw error;
+      if (data?.skipped) {
+        alert("אין ביקורות חדשות בתקופה הנבחרת.");
+      } else {
+        // Refresh reports
+        const { data: updated } = await supabase
+          .from("ai_reports")
+          .select("*")
+          .eq("business_id", businessId)
+          .order("created_at", { ascending: false })
+          .limit(10);
+        if (updated) setRealAiReports(updated);
+      }
+    } catch (e: any) {
+      console.error("Report generation error:", e);
+      alert("שגיאה ביצירת הדוח. נסו שוב מאוחר יותר.");
+    }
+    setGeneratingReport(false);
+  };
+
+  // Generate API key
+  const handleGenerateApiKey = async () => {
+    if (!businessId || generatingApiKey) return;
+    setGeneratingApiKey(true);
+    try {
+      // Generate random key
+      const array = new Uint8Array(32);
+      crypto.getRandomValues(array);
+      const rawKey = "rh_live_" + Array.from(array).map(b => b.toString(16).padStart(2, "0")).join("");
+      const prefix = rawKey.substring(0, 8);
+
+      // Hash it
+      const encoder = new TextEncoder();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(rawKey));
+      const keyHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+
+      const { error } = await supabase.from("api_keys").insert({
+        business_id: businessId,
+        key_hash: keyHash,
+        key_prefix: prefix,
+        name: `מפתח ${(realApiKeys.length || 0) + 1}`,
+      });
+      if (error) throw error;
+
+      // Show key to user (only time they see full key)
+      navigator.clipboard.writeText(rawKey);
+      alert(`מפתח ה-API שלכם הועתק ללוח:\n${rawKey}\n\nשימרו אותו — לא ניתן יהיה לראות אותו שוב!`);
+
+      // Refresh
+      const { data: updated } = await supabase
+        .from("api_keys")
+        .select("id, key_prefix, name, active, last_used_at, created_at")
+        .eq("business_id", businessId);
+      if (updated) setRealApiKeys(updated);
+    } catch (e: any) {
+      console.error("API key generation error:", e);
+      alert("שגיאה ביצירת מפתח API.");
+    }
+    setGeneratingApiKey(false);
+  };
 
   const totalClicks = isDemo ? 94 : displayClicks.reduce((s, c) => s + c.clicks, 0);
   const conversions = isDemo ? 25 : displayClicks.reduce((s, c) => s + c.conversions, 0);
