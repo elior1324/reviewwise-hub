@@ -70,7 +70,8 @@ const AffiliateRedirect = () => {
           <>
             <h1 className="font-display font-bold text-xl text-foreground">מעביר אותך לאתר הקורס...</h1>
             {courseName && <p className="text-muted-foreground">{courseName}</p>}
-            <p className="text-xs text-muted-foreground">מופנה דרך ReviewHub · עמלת שותפים 10%</p>
+            <p className="text-xs text-muted-foreground">מופנה דרך ReviewHub</p>
+            <p className="text-[10px] text-muted-foreground/70 mt-1">גילוי נאות: ReviewHub עשויה לקבל עמלה מרכישות דרך קישור זה</p>
           </>
         )}
       </div>

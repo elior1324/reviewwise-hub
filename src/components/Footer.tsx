@@ -28,12 +28,22 @@ const Footer = () => (
           <div className="space-y-2">
             <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות פרטיות</Link>
             <Link to="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">תנאי שימוש</Link>
+            <Link to="/refund-policy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות ביטולים והחזרים</Link>
             <Link to="/accessibility" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">הצהרת נגישות</Link>
           </div>
         </div>
       </div>
-      <div className="border-t border-border/50 mt-8 pt-8 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} ReviewHub. כל הזכויות שמורות.
+      <div className="border-t border-border/50 mt-8 pt-8">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-xs text-muted-foreground text-center md:text-right">
+            <p className="font-semibold text-foreground mb-1">ReviewHub בע"מ</p>
+            <p>תל אביב, ישראל</p>
+            <p>אימייל: <a href="mailto:support@reviewhub.co.il" className="text-primary hover:underline">support@reviewhub.co.il</a></p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} ReviewHub בע"מ. כל הזכויות שמורות.
+          </p>
+        </div>
       </div>
     </div>
   </footer>

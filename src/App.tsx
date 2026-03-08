@@ -26,6 +26,7 @@ import TrademarkGuidelines from "./pages/TrademarkGuidelines";
 import ModernSlaveryStatement from "./pages/ModernSlaveryStatement";
 import AccessibilityStatement from "./pages/AccessibilityStatement";
 import ComparePage from "./pages/ComparePage";
+import RefundPolicy from "./pages/RefundPolicy";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="/modern-slavery" element={<ModernSlaveryStatement />} />
             <Route path="/accessibility" element={<AccessibilityStatement />} />
             <Route path="/compare" element={<ComparePage />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />
