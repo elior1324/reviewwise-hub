@@ -822,6 +822,18 @@ const BusinessDashboard = () => {
               </Card>
             </LockedOverlay>
           </TabsContent>
+
+          {/* Embed Widget */}
+          <TabsContent value="widget">
+            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
+              <EmbedWidgetGenerator
+                businessSlug={isDemo ? "demo-business" : (businessId ? businessSlug : "demo-business")}
+                businessName={isDemo ? "העסק שלכם" : displayBusiness.name}
+                rating={isDemo ? 4.8 : (Number(displayStats[0]?.value) || 0)}
+                reviewCount={isDemo ? 124 : (Number(displayStats[1]?.value) || 0)}
+              />
+            </LockedOverlay>
+          </TabsContent>
         </Tabs>
       </div>
       <BusinessFooter />
