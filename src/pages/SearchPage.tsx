@@ -5,7 +5,7 @@ import CourseCard from "@/components/CourseCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown, Trophy, Star } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
