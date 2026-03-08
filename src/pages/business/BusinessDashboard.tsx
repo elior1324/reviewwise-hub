@@ -2,13 +2,14 @@ import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import AIChatbot from "@/components/AIChatbot";
 import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
+import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
-  Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText
+  Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video
 } from "lucide-react";
 import { REVIEWS, COURSES, AFFILIATE_CLICKS } from "@/data/mockData";
 
@@ -110,6 +111,9 @@ const BusinessDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="ai-report">
               <Brain size={14} className="ml-1" /> דוח AI שבועי
+            </TabsTrigger>
+            <TabsTrigger value="testimonials">
+              <Video size={14} className="ml-1" /> סרטוני לקוחות
             </TabsTrigger>
           </TabsList>
 
@@ -356,6 +360,18 @@ const BusinessDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Testimonials Tab */}
+          <TabsContent value="testimonials">
+            <div className="max-w-2xl">
+              <p className="text-muted-foreground text-sm mb-4">
+                העלו עד 5 סרטונים או תמונות של לקוחות מרוצים. ניתן להעלות קבצים ישירות או להוסיף קישורי YouTube / TikTok.
+                <br />
+                <span className="text-xs text-primary">זמין למנויי Professional ו-Premium בלבד.</span>
+              </p>
+              <TestimonialMediaUploader businessId="PLACEHOLDER_ID" maxItems={5} />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
