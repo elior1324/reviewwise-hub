@@ -420,16 +420,24 @@ const BusinessLanding = () => {
                 </div>
                 <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-                <AnimatePresence>
+                <AnimatePresence mode="wait">
                   {expandedFeature === title && preview && (
                     <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      initial={{ opacity: 0, height: 0, scale: 0.97 }}
+                      animate={{ opacity: 1, height: "auto", scale: 1 }}
+                      exit={{ opacity: 0, height: 0, scale: 0.97 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
                       className="overflow-hidden"
                     >
-                      <img src={preview} alt={`תצוגה מקדימה — ${title}`} className="mt-4 rounded-lg border border-border/30 w-full" loading="lazy" />
+                      <motion.img
+                        src={preview}
+                        alt={`תצוגה מקדימה — ${title}`}
+                        className="mt-4 rounded-lg border border-border/30 w-full"
+                        loading="lazy"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.08, duration: 0.2 }}
+                      />
                       <p className="text-[11px] text-muted-foreground mt-2 text-center">תצוגה מקדימה של הפיצ׳ר</p>
                     </motion.div>
                   )}
