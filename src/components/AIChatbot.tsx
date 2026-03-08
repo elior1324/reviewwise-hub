@@ -1,61 +1,42 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ReactMarkdown from "react-markdown";
-import { COURSES, BUSINESSES } from "@/data/mockData";
+import { useAIChat } from "@/hooks/useAIChat";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type ChatContext = "consumer" | "business";
 
-const INITIAL_MESSAGE: Msg = {
-  role: "assistant",
-  content: "שלום! 👋 אני העוזר החכם של ReviewHub. אני יכול לסייע לכם למצוא קורסים, לקרוא ביקורות ולקבל המלצות מותאמות אישית. במה אוכל לעזור לכם?",
+interface AIChatbotProps {
+  context?: ChatContext;
+}
+
+const INITIAL_MESSAGES: Record<ChatContext, string> = {
+  consumer: "שלום! 👋 אני העוזר החכם של ReviewHub. אני יכול לסייע לכם למצוא קורסים ופרילנסרים, לקרוא ביקורות ולקבל המלצות מותאמות אישית. במה אוכל לעזור?",
+  business: "שלום! 👋 אני היועץ העסקי של ReviewHub. אני יכול לסייע לכם בבחירת התוכנית המתאימה, הדרכה על הפיצ'רים, טיפים לקבלת ביקורות ועוד. במה אוכל לעזור?",
 };
 
-const getMockResponse = (input: string): string => {
-  const lower = input.toLowerCase();
-
-  // Course recommendations based on actual data
-  if (lower.includes("קורס") || lower.includes("course") || lower.includes("המלצ")) {
-    const topCourses = [...COURSES].sort((a, b) => b.rating - a.rating).slice(0, 4);
-    const list = topCourses.map(c => {
-      const biz = BUSINESSES.find(b => b.slug === c.businessSlug);
-      return `⭐ **${c.name}** (${c.rating}) - ₪${c.price.toLocaleString()}\n   ${biz?.name || ""} | ${c.verifiedPurchases} רכישות מאומתות`;
-    }).join("\n\n");
-    return `**הקורסים המומלצים ביותר:**\n\n${list}\n\nרוצים לדעת עוד על אחד מהם?`;
-  }
-
-  // Category-specific search
-  const categories = ["שיווק", "תכנות", "עיצוב", "מדעי נתונים", "עסקים"];
-  const matchedCat = categories.find(c => lower.includes(c));
-  if (matchedCat) {
-    const catCourses = COURSES.filter(c => c.category === matchedCat).sort((a, b) => b.rating - a.rating);
-    if (catCourses.length > 0) {
-      const list = catCourses.map(c => `⭐ **${c.name}** - דירוג ${c.rating} | ₪${c.price.toLocaleString()}`).join("\n");
-      return `**קורסי ${matchedCat} מומלצים:**\n\n${list}\n\nכל הקורסים כוללים ביקורות מאומתות מסטודנטים אמיתיים.`;
-    }
-  }
-
-  if (lower.includes("מחיר") || lower.includes("זול") || lower.includes("price")) {
-    const affordable = [...COURSES].sort((a, b) => a.price - b.price).slice(0, 3);
-    const list = affordable.map(c => `💰 **${c.name}** - ₪${c.price.toLocaleString()} (⭐ ${c.rating})`).join("\n");
-    return `**הקורסים במחיר הנגיש ביותר:**\n\n${list}`;
-  }
-
-  if (lower.includes("ביקורת") || lower.includes("review")) {
-    return "במערכת שלנו יש **מעל 12,400 ביקורות מאומתות**. כל ביקורת מקושרת לרכישה אמיתית, כך שתוכלו לסמוך על המידע. 🔒\n\nרוצים לחפש ביקורות על קורס מסוים?";
-  }
-
-  return "שמח לעזור! 😊 אני יכול לסייע לכם בנושאים הבאים:\n\n• 🔍 **חיפוש קורסים** — מצאו את הקורס המתאים לכם\n• ⭐ **ביקורות** — קראו חוויות של סטודנטים אמיתיים\n• 💡 **המלצות** — קבלו המלצות מותאמות לצרכים שלכם\n• 💰 **מחירים** — מצאו קורסים בטווח התקציב שלכם\n• 📊 **השוואה** — השוו בין קורסים שונים\n\nנסו לשאול על קורסי שיווק, תכנות, עיצוב ועוד!";
+const CHAT_TITLES: Record<ChatContext, string> = {
+  consumer: "עוזר ReviewHub",
+  business: "יועץ עסקי ReviewHub",
 };
 
-const AIChatbot = () => {
+const CHAT_SUBTITLES: Record<ChatContext, string> = {
+  consumer: "חיפוש, המלצות וביקורות",
+  business: "ייעוץ עסקי וטכני",
+};
+
+const CHAT_PLACEHOLDERS: Record<ChatContext, string> = {
+  consumer: "חפשו קורסים, פרילנסרים, או שאלו שאלה...",
+  business: "שאלו על תוכניות, פיצ'רים, אסטרטגיה...",
+};
+
+const AIChatbot = ({ context = "consumer" }: AIChatbotProps) => {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { messages, isLoading, sendMessage } = useAIChat(context, INITIAL_MESSAGES[context]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -63,18 +44,10 @@ const AIChatbot = () => {
     }
   }, [messages]);
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!input.trim() || isLoading) return;
-    const userMsg: Msg = { role: "user", content: input.trim() };
-    setMessages(prev => [...prev, userMsg]);
+    sendMessage(input.trim());
     setInput("");
-    setIsLoading(true);
-
-    setTimeout(() => {
-      const response = getMockResponse(userMsg.content);
-      setMessages(prev => [...prev, { role: "assistant", content: response }]);
-      setIsLoading(false);
-    }, 800 + Math.random() * 700);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -83,6 +56,9 @@ const AIChatbot = () => {
       handleSend();
     }
   };
+
+  const isBusiness = context === "business";
+  const IconComponent = isBusiness ? Building2 : Bot;
 
   return (
     <>
@@ -116,11 +92,11 @@ const AIChatbot = () => {
           >
             <div className="p-4 border-b border-border/50 flex items-center gap-3" style={{ background: "linear-gradient(135deg, hsl(160 100% 40% / 0.1), transparent)" }}>
               <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center">
-                <Bot size={18} className="text-primary" />
+                <IconComponent size={18} className="text-primary" />
               </div>
               <div>
-                <p className="font-display font-semibold text-sm">עוזר ReviewHub</p>
-                <p className="text-xs text-muted-foreground">מופעל על ידי AI</p>
+                <p className="font-display font-semibold text-sm">{CHAT_TITLES[context]}</p>
+                <p className="text-xs text-muted-foreground">{CHAT_SUBTITLES[context]}</p>
               </div>
             </div>
 
@@ -135,7 +111,7 @@ const AIChatbot = () => {
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
                     msg.role === "assistant" ? "bg-primary/20" : "bg-secondary"
                   }`}>
-                    {msg.role === "assistant" ? <Bot size={14} className="text-primary" /> : <User size={14} className="text-muted-foreground" />}
+                    {msg.role === "assistant" ? <IconComponent size={14} className="text-primary" /> : <User size={14} className="text-muted-foreground" />}
                   </div>
                   <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                     msg.role === "user"
@@ -143,7 +119,7 @@ const AIChatbot = () => {
                       : "bg-secondary text-foreground rounded-tr-sm"
                   }`}>
                     {msg.role === "assistant" ? (
-                      <div className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mt-1 [&>ul]:mb-2">
+                      <div className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mt-1 [&>ul]:mb-2 [&_a]:text-primary [&_a]:underline">
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
                       </div>
                     ) : (
@@ -152,10 +128,10 @@ const AIChatbot = () => {
                   </div>
                 </motion.div>
               ))}
-              {isLoading && (
+              {isLoading && messages[messages.length - 1]?.role === "user" && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-2">
                   <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
-                    <Bot size={14} className="text-primary" />
+                    <IconComponent size={14} className="text-primary" />
                   </div>
                   <div className="bg-secondary rounded-2xl rounded-tr-sm px-4 py-3">
                     <div className="flex gap-1">
@@ -171,7 +147,7 @@ const AIChatbot = () => {
             <div className="p-3 border-t border-border/50">
               <div className="flex gap-2">
                 <Input
-                  placeholder="שאלו אותי משהו..."
+                  placeholder={CHAT_PLACEHOLDERS[context]}
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
