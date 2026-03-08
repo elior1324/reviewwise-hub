@@ -228,8 +228,28 @@ const PrivacyPolicy = () => {
               <li>במקרים של הפרת חוק, הפרת הסכם, הפרת תנאי שימוש האתר, הפרת זכות קניין רוחני או כל ניסיון לאחד מאלו</li>
               <li>ככל שיתקבל צו שיפוטי מכל סוג שהוא, ומכל רשות ו/או ערכאה שיפוטית ו/או מוסד ממשלתי, המורה על מסירת פרטיכם האישיים</li>
               <li>בכל מחלוקת, טענה, תביעה ו/או כל הליך אחר שיתקיים ביניכם לבין ReviewHub או מפעיליה</li>
+              <li>לצורך הגנה משפטית על ReviewHub בכל הליך משפטי</li>
               <li>ככל ש-ReviewHub תתמזג עם גוף אחר ו/או תתפרק — ננקוט במירב המאמצים לעדכן אתכם בטרם נעשה כן</li>
             </ul>
+
+            <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/20">
+              <p className="flex items-center gap-2 font-semibold text-foreground mb-2">
+                <Server size={16} className="text-primary" /> ספקי טכנולוגיה ומעבדי מידע עיקריים
+              </p>
+              <p className="text-sm text-muted-foreground mb-2">
+                המידע שנמסר נשמר במאגרי המידע של ReviewHub המנוהלים באמצעות תשתיות מאובטחות. להלן פירוט ספקי הטכנולוגיה העיקריים:
+              </p>
+              <ul className="list-disc pr-6 space-y-1 text-sm text-muted-foreground">
+                <li><strong>תשתית אחסון ומסד נתונים:</strong> שירותי ענן מאובטחים עם הצפנה בהעברה ובמנוחה</li>
+                <li><strong>עיבוד תשלומים:</strong> Stripe — מעבד תשלומים מאובטח בתקן PCI-DSS</li>
+                <li><strong>ניתוח אתר:</strong> Google Analytics — לצורך אופטימיזציה של חוויית המשתמש</li>
+                <li><strong>שירותי AI:</strong> מודלים מבית Google ו-OpenAI — ללא העברת מידע אישי מזהה</li>
+                <li><strong>שירותי דוא"ל:</strong> לצורך שליחת הודעות שירות, חשבוניות ועדכונים</li>
+              </ul>
+              <p className="text-xs text-muted-foreground mt-2">
+                ReviewHub נוקטת באמצעי אבטחת מידע מתקדמים התואמים את התקנות בישראל. עם זאת, ReviewHub אינה אחראית לנזק שייגרם כתוצאה מחדירה בלתי מורשית שאינה בשליטתה המלאה.
+              </p>
+            </div>
             <div className="mt-4 p-4 rounded-xl bg-secondary/50 border border-border/50">
               <p className="flex items-center gap-2 font-semibold text-foreground mb-2">
                 <ExternalLink size={16} className="text-primary" /> קישורים חיצוניים
