@@ -12,7 +12,7 @@ const Footer = () => (
             </div>
             <span className="font-display font-bold text-lg gradient-text">ReviewHub</span>
           </div>
-          <p className="text-sm text-muted-foreground">הפלטפורמה שעוזרת לכם לבחור נכון — עם ביקורות אמיתיות מאנשים אמיתיים.</p>
+          <p className="text-sm text-muted-foreground">הפלטפורמה שעוזרת לכם לבחור נכון ולבנות את העתיד.</p>
         </div>
         <div>
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">פלטפורמה</h4>
