@@ -4,12 +4,12 @@ import BusinessCard from "@/components/BusinessCard";
 import CourseCard from "@/components/CourseCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, UserCheck, BookOpen } from "lucide-react";
+import { Search, UserCheck, BookOpen, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
-import { BUSINESSES, COURSES } from "@/data/mockData";
+import { BUSINESSES, COURSES, FREELANCER_SUBCATEGORIES } from "@/data/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { useCategories } from "@/hooks/useCategories";
@@ -19,6 +19,7 @@ const SearchPage = () => {
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const defaultTab = searchParams.get("tab") || "freelancers";
   const [selectedFreelancerCat, setSelectedFreelancerCat] = useState("הכל");
+  const [selectedSubcat, setSelectedSubcat] = useState<string | null>(null);
   const [selectedCourseCat, setSelectedCourseCat] = useState("הכל");
   const [minRating, setMinRating] = useState(0);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
@@ -28,12 +29,18 @@ const SearchPage = () => {
   const ALL_FREELANCER_CATS = ["הכל", ...freelancerCats.filter(c => c !== "אחר"), "אחר"];
   const ALL_COURSE_CATS = ["הכל", ...courseCats.filter(c => c !== "אחר"), "אחר"];
 
+  // Get subcategories for selected category
+  const currentSubcats = selectedFreelancerCat !== "הכל" 
+    ? FREELANCER_SUBCATEGORIES[selectedFreelancerCat] || [] 
+    : [];
+
   const freelancers = BUSINESSES.filter(b => {
     if (b.type !== "freelancer") return false;
-    const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query);
+    const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query) || (b.subcategory && b.subcategory.includes(query));
     const matchesCat = selectedFreelancerCat === "הכל" || b.category === selectedFreelancerCat;
+    const matchesSubcat = !selectedSubcat || b.subcategory === selectedSubcat;
     const matchesRating = b.rating >= minRating;
-    return matchesQuery && matchesCat && matchesRating;
+    return matchesQuery && matchesCat && matchesSubcat && matchesRating;
   });
 
   const courseProviders = BUSINESSES.filter(b => {
@@ -51,6 +58,11 @@ const SearchPage = () => {
     const matchesPrice = c.price >= priceRange[0] && c.price <= priceRange[1];
     return matchesQuery && matchesCat && matchesRating && matchesPrice;
   });
+
+  const handleCatSelect = (cat: string) => {
+    setSelectedFreelancerCat(cat);
+    setSelectedSubcat(null); // Reset sub when changing category
+  };
 
   return (
     <div className="min-h-screen bg-background noise-overlay">
@@ -92,13 +104,57 @@ const SearchPage = () => {
 
           {/* Freelancers Tab */}
           <TabsContent value="freelancers">
-            <div className="flex gap-2 flex-wrap mb-6">
+            {/* Main Categories */}
+            <div className="flex gap-2 flex-wrap mb-3">
               {ALL_FREELANCER_CATS.map(cat => (
-                <Button key={cat} variant={selectedFreelancerCat === cat ? "default" : "outline"} size="sm" onClick={() => setSelectedFreelancerCat(cat)}>
+                <Button 
+                  key={cat} 
+                  variant={selectedFreelancerCat === cat ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => handleCatSelect(cat)}
+                  className={selectedFreelancerCat === cat ? "" : ""}
+                >
                   {cat}
+                  {FREELANCER_SUBCATEGORIES[cat] && selectedFreelancerCat !== cat && (
+                    <ChevronDown size={12} className="mr-1 opacity-50" />
+                  )}
                 </Button>
               ))}
             </div>
+
+            {/* Sub-categories */}
+            {currentSubcats.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex gap-2 flex-wrap mb-6 pr-4 border-r-2 border-primary/30"
+              >
+                <Button
+                  variant={selectedSubcat === null ? "default" : "ghost"}
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => setSelectedSubcat(null)}
+                >
+                  כל ה{selectedFreelancerCat}
+                </Button>
+                {currentSubcats.map(sub => (
+                  <Button
+                    key={sub}
+                    variant={selectedSubcat === sub ? "default" : "ghost"}
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setSelectedSubcat(sub)}
+                  >
+                    {sub}
+                  </Button>
+                ))}
+              </motion.div>
+            )}
+
+            {currentSubcats.length === 0 && <div className="mb-6" />}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {freelancers.map((biz, i) => (
                 <motion.div key={biz.slug} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
