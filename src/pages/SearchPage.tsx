@@ -10,7 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
 import FloatingEarnCTA from "@/components/FloatingEarnCTA";
-import { BUSINESSES, COURSES, FREELANCER_SUBCATEGORIES } from "@/data/mockData";
+import { BUSINESSES, COURSES, FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL } from "@/data/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { useCategories } from "@/hooks/useCategories";
@@ -139,7 +139,7 @@ const SearchPage = () => {
                   className="h-7 text-xs"
                   onClick={() => setSelectedSubcat(null)}
                 >
-                  כל ה{selectedFreelancerCat}
+                  כל {CATEGORY_PLURAL[selectedFreelancerCat] || `ה${selectedFreelancerCat}`}
                 </Button>
                 {currentSubcats.map(sub => (
                   <Button
