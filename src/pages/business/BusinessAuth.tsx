@@ -143,7 +143,17 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
                   minLength={6}
                 />
               </div>
-              <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" disabled={loading}>
+              {mode === "signup" && (
+                <PrivacyConsentCheckbox
+                  checked={privacyConsent}
+                  onCheckedChange={setPrivacyConsent}
+                  className="mt-1"
+                />
+              )}
+
+              {mode === "login" && <FormPrivacyNotice className="mt-1" />}
+
+              <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" disabled={loading || (mode === "signup" && !privacyConsent)}>
                 {loading ? "..." : mode === "login" ? "התחברו" : "צרו חשבון"}
                 <ArrowLeft size={16} className="mr-2" />
               </Button>
