@@ -1,15 +1,18 @@
-import { Lock, Crown } from "lucide-react";
+import { Lock, Crown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 interface LockedOverlayProps {
   children: React.ReactNode;
   isLocked: boolean;
+  tier?: "pro" | "premium";
   onUpgrade?: () => void;
 }
 
-const LockedOverlay = ({ children, isLocked, onUpgrade }: LockedOverlayProps) => {
+const LockedOverlay = ({ children, isLocked, tier = "premium", onUpgrade }: LockedOverlayProps) => {
   if (!isLocked) return <>{children}</>;
+
+  const isPro = tier === "pro";
 
   return (
     <div className="relative">
@@ -28,20 +31,23 @@ const LockedOverlay = ({ children, isLocked, onUpgrade }: LockedOverlayProps) =>
           </div>
           <div>
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Crown size={16} className="text-primary" />
-              <span className="text-sm font-bold text-primary font-display">פיצ׳ר פרימיום</span>
+              {isPro ? <Sparkles size={16} className="text-primary" /> : <Crown size={16} className="text-primary" />}
+              <span className="text-sm font-bold text-primary font-display">
+                {isPro ? "פיצ׳ר מקצועי" : "פיצ׳ר פרימיום"}
+              </span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              פיצ׳ר זה זמין למנויי תוכנית פרימיום בלבד.
-              <br />
-              שדרגו כדי לקבל גישה מלאה לכל הכלים המתקדמים.
+              {isPro
+                ? <>פיצ׳ר זה זמין מתוכנית מקצועי ומעלה.<br />שדרגו כדי לקבל גישה לכלים מתקדמים.</>
+                : <>פיצ׳ר זה זמין למנויי תוכנית פרימיום בלבד.<br />שדרגו כדי לקבל גישה מלאה לכל הכלים המתקדמים.</>
+              }
             </p>
           </div>
           <Button
             onClick={onUpgrade}
             className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2"
           >
-            <Crown size={14} /> שדרגו לפרימיום
+            {isPro ? <><Sparkles size={14} /> שדרגו למקצועי</> : <><Crown size={14} /> שדרגו לפרימיום</>}
           </Button>
         </div>
       </motion.div>
