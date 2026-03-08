@@ -503,6 +503,25 @@ const Index = () => {
             </motion.p>
 
             <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.45, duration: 0.5 }}
+              className="mx-auto mb-10 max-w-sm"
+            >
+              <div className="relative rounded-xl border border-primary/20 bg-card/80 backdrop-blur-sm p-6 text-center overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+                <div className="relative">
+                  <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wider">קופת הקהילה החודשית</p>
+                  <p className="font-display font-bold text-4xl text-primary">
+                    ₪<AnimatedCounter value={String(Math.round(communityPool?.community_pool ?? 0))} duration={1500} />
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">מחכים לחלוקה בסוף החודש</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
