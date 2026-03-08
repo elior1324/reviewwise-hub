@@ -15,7 +15,7 @@ interface BusinessCardProps {
   logo?: string;
 }
 
-const BusinessCard = ({ slug, name, category, rating, reviewCount, description, logo }: BusinessCardProps) => (
+const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, description, logo }: BusinessCardProps) => (
   <Link to={`/biz/${slug}`}>
     <Card className="shadow-card hover:shadow-card-hover transition-all duration-500 group cursor-pointer h-full animated-border bg-card overflow-hidden relative">
       {/* Ambient glow on hover */}
