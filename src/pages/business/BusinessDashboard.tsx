@@ -206,10 +206,14 @@ const BusinessDashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass flex-wrap">
             <TabsTrigger value="overview">סקירה כללית</TabsTrigger>
-            <TabsTrigger value="invoices">
+            <TabsTrigger value="invoices" className="gap-1">
               <FileText size={14} className="ml-1" /> קבלות ואימות
+              {isFree && <ProBadge />}
             </TabsTrigger>
-            <TabsTrigger value="clicks">קליקים והמרות</TabsTrigger>
+            <TabsTrigger value="clicks" className="gap-1">
+              קליקים והמרות
+              {isFree && <ProBadge />}
+            </TabsTrigger>
             <TabsTrigger value="notifications">
               <Bell size={14} className="ml-1" /> התראות
               <span className="mr-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full">{notifications.length}</span>
@@ -218,8 +222,9 @@ const BusinessDashboard = () => {
               <Brain size={14} className="ml-1" /> דוח AI שבועי
               {!isPremium && <PremiumBadge />}
             </TabsTrigger>
-            <TabsTrigger value="testimonials">
+            <TabsTrigger value="testimonials" className="gap-1">
               <Video size={14} className="ml-1" /> סרטוני לקוחות
+              {isFree && <ProBadge />}
             </TabsTrigger>
             {/* Premium-only tabs */}
             <TabsTrigger value="crm" className="gap-1">
