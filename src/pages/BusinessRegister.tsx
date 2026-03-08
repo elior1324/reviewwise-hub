@@ -55,6 +55,10 @@ const BusinessRegister = () => {
       toast({ title: "אנא מלאו את כל השדות הנדרשים", variant: "destructive" });
       return;
     }
+    if (!privacyConsent) {
+      toast({ title: "יש לאשר את מדיניות הפרטיות ותנאי השימוש", variant: "destructive" });
+      return;
+    }
 
     if (!user) {
       toast({ title: "יש להתחבר כדי לרשום עסק", variant: "destructive" });
