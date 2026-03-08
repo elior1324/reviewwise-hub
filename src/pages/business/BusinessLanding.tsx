@@ -1,3 +1,4 @@
+import AnimatedCounter from "@/components/AnimatedCounter";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import BusinessFooter from "@/components/BusinessFooter";
@@ -323,7 +324,7 @@ const BusinessLanding = () => {
             { value: "98%", label: "שביעות רצון עסקית" },
           ].map(({ value, label }, i) => (
             <motion.div key={label} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-              <p className="font-display font-bold text-3xl md:text-4xl text-foreground">{value}</p>
+              <p className="font-display font-bold text-3xl md:text-4xl text-foreground"><AnimatedCounter value={value} /></p>
               <p className="text-sm text-muted-foreground mt-1">{label}</p>
             </motion.div>
           ))}
