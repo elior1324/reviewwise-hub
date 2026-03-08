@@ -16,13 +16,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useRef, useCallback, useEffect } from "react";
 
-import featureProfile from "@/assets/previews/feature-profile.jpg";
-import featureAnalytics from "@/assets/previews/feature-analytics.jpg";
-import featureAffiliate from "@/assets/previews/feature-affiliate.jpg";
-import featureAiReport from "@/assets/previews/feature-ai-report.jpg";
-import featureCrm from "@/assets/previews/feature-crm.jpg";
-import featureWidgets from "@/assets/previews/feature-widgets.jpg";
-import starterPreview from "@/assets/previews/starter-dashboard.jpg";
+// Preview images removed — uncomment and replace with real screenshots when ready
+// import featureProfile from "@/assets/previews/feature-profile.jpg";
+// import featureAnalytics from "@/assets/previews/feature-analytics.jpg";
+// import featureAffiliate from "@/assets/previews/feature-affiliate.jpg";
+// import featureAiReport from "@/assets/previews/feature-ai-report.jpg";
+// import featureCrm from "@/assets/previews/feature-crm.jpg";
+// import featureWidgets from "@/assets/previews/feature-widgets.jpg";
+// import starterPreview from "@/assets/previews/starter-dashboard.jpg";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
