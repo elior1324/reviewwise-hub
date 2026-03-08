@@ -119,6 +119,10 @@ const AIChatbot = ({ context = "consumer" }: AIChatbotProps) => {
               </div>
             </div>
 
+            <div className="px-3 py-1.5 text-[10px] text-muted-foreground bg-secondary/50 text-center border-b border-border/30">
+              🤖 תשובות נוצרות באמצעות AI ואינן מהוות ייעוץ מקצועי. ייתכנו אי-דיוקים.
+            </div>
+
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((msg, i) => (
                 <motion.div

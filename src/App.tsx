@@ -65,6 +65,7 @@ const App = () => (
             <Route path="/modern-slavery" element={<ModernSlaveryStatement />} />
             <Route path="/accessibility" element={<AccessibilityStatement />} />
             <Route path="/compare" element={<ComparePage />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />

@@ -334,6 +334,16 @@ const PrivacyPolicy = () => {
             </p>
           </Section>
 
+          {/* Database Registry */}
+          <Section icon={Database} title="רישום מאגר מידע">
+            <p>
+              בהתאם לחוק הגנת הפרטיות, התשמ"א-1981, מאגרי מידע העומדים בתנאים מסוימים חייבים ברישום אצל רשם מאגרי המידע. ReviewHub פועלת בהתאם לדרישות החוק ובוחנת באופן שוטף את חובת הרישום של מאגרי המידע שברשותה.
+            </p>
+            <p className="mt-3">
+              לפרטים נוספים על רישום מאגרי מידע או לבירור מספר רישום המאגר, ניתן לפנות אלינו בכתובת <a href="mailto:privacy@reviewhub.co.il" className="text-primary hover:underline">privacy@reviewhub.co.il</a>.
+            </p>
+          </Section>
+
           {/* Changes */}
           <Section icon={RefreshCw} title="שינויים במדיניות זו">
             <p>

@@ -355,6 +355,72 @@ const TermsAndConditions = () => {
             </ul>
           </Section>
 
+          {/* Cancellation & Refunds */}
+          <Section icon={CreditCard} title="ביטול עסקה והחזרים">
+            <p className="mb-3">
+              בהתאם לסעיף 14ג לחוק הגנת הצרכן, התשמ"א-1981, רשאים לבטל עסקה <strong>תוך 14 ימים</strong> מיום ביצוע העסקה או מיום קבלת מסמך הגילוי (המאוחר מביניהם), ובתנאי שלא החלתם לעשות שימוש בשירות.
+            </p>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
+              <li><strong>דמי ביטול:</strong> עד 5% מערך העסקה או 100 ש"ח — הנמוך מביניהם.</li>
+              <li><strong>ביטול לאחר תחילת שימוש:</strong> החזר יחסי (Pro Rata) עבור התקופה שלא נוצלה, בניכוי דמי ביטול.</li>
+              <li><strong>ביטול לאחר 14 ימים:</strong> לא יינתן החזר, אך המנוי לא יתחדש.</li>
+            </ul>
+            <p className="text-sm">
+              לפרטים מלאים ראו <a href="/refund-policy" className="text-primary hover:underline">מדיניות ביטולים והחזרים</a>.
+            </p>
+          </Section>
+
+          {/* DMCA / Content Removal */}
+          <Section icon={Shield} title="הסרת תוכן מפר זכויות יוצרים (DMCA)">
+            <p className="mb-3">
+              ReviewHub מכבדת זכויות קניין רוחני ופועלת בהתאם לנהלי Notice & Takedown. אם סבורים שתוכן בפלטפורמה מפר את זכויות היוצרים שלכם, אנא שלחו הודעה הכוללת:
+            </p>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
+              <li>זיהוי היצירה המוגנת שלטענתכם הופרה</li>
+              <li>זיהוי התוכן המפר והמיקום בפלטפורמה</li>
+              <li>פרטי הקשר שלכם (שם, כתובת, טלפון, אימייל)</li>
+              <li>הצהרה בתום לב כי השימוש בחומר לא הותר על ידי בעל הזכויות</li>
+              <li>הצהרה כי המידע בהודעה מדויק, תחת אחריות פלילית</li>
+              <li>חתימה (פיזית או אלקטרונית) של בעל הזכויות או מורשה מטעמו</li>
+            </ul>
+            <p>
+              הודעות יש לשלוח לכתובת: <a href="mailto:legal@reviewhub.co.il" className="text-primary hover:underline">legal@reviewhub.co.il</a>. ReviewHub תטפל בפניה תוך 7 ימי עסקים.
+            </p>
+          </Section>
+
+          {/* AI Service Disclaimer */}
+          <Section icon={AlertTriangle} title="שירותי בינה מלאכותית (AI) — הגבלת אחריות">
+            <p className="mb-3">
+              ReviewHub מפעילה שירותי AI שונים, כולל צ'אטבוט, ניתוח ביקורות, דוחות תובנות והשוואה חכמה. שירותים אלו מסופקים "כמות שהם" (AS IS) ובכפוף למגבלות הבאות:
+            </p>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
+              <li>תשובות ותוצרי ה-AI <strong>אינם מהווים ייעוץ מקצועי</strong> מכל סוג שהוא.</li>
+              <li>תוצרי ה-AI עלולים להכיל <strong>אי-דיוקים, טעויות או מידע לא מעודכן</strong>.</li>
+              <li>ReviewHub אינה אחראית לכל החלטה שתתקבל על בסיס תוצרי ה-AI.</li>
+              <li>המשתמש אחראי לאמת כל מידע שמתקבל משירותי ה-AI בטרם יסתמך עליו.</li>
+            </ul>
+            <p className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-foreground text-sm">
+              🤖 <strong>גילוי נאות:</strong> בכל מקום בפלטפורמה שבו תוכן נוצר או מנותח באמצעות AI, הדבר מצוין במפורש. לפרטים על עיבוד מידע באמצעות AI, ראו <a href="/privacy" className="text-primary hover:underline">מדיניות הפרטיות</a>.
+            </p>
+          </Section>
+
+          {/* Direct Marketing / Spam Law */}
+          <Section icon={Mail} title="דיוור ישיר — חוק התקשורת (חוק הספאם)">
+            <p className="mb-3">
+              בהתאם לסעיף 30א לחוק התקשורת (בזק ושידורים), התשמ"ב-1982 ("חוק הספאם"):
+            </p>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
+              <li><strong>הסכמה מפורשת (Opt-in):</strong> כל דיוור שיווקי שנשלח על ידי ReviewHub כפוף להסכמה מפורשת מראש של הנמען.</li>
+              <li><strong>זכות הסרה (Opt-out):</strong> כל הודעת דיוור שיווקי תכלול אפשרות הסרה מרשימת התפוצה בלחיצה אחת.</li>
+              <li><strong>ביצוע ההסרה:</strong> הסרה תתבצע תוך 3 ימי עסקים מרגע קבלת הבקשה.</li>
+              <li><strong>הודעות שירות:</strong> הודעות הקשורות לתפעול החשבון שלכם (כגון אישור הרשמה, חשבוניות, עדכוני אבטחה) אינן נחשבות לדיוור שיווקי ויישלחו ללא צורך בהסכמה נפרדת.</li>
+              <li><strong>הזמנות ביקורת:</strong> הזמנות ביקורת הנשלחות בשם בעלי עסקים — בעל העסק הוא השולח ונושא באחריות החוקית. ראו סעיף "אחריות מרכזית והנחיות".</li>
+            </ul>
+            <p>
+              להסרה מרשימת תפוצה, ניתן גם לפנות אלינו ישירות: <a href="mailto:unsubscribe@reviewhub.co.il" className="text-primary hover:underline">unsubscribe@reviewhub.co.il</a>
+            </p>
+          </Section>
+
           {/* Confidentiality */}
           <Section icon={Lock} title="סודיות">
             <p>
