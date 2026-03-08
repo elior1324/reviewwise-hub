@@ -294,11 +294,13 @@ const Index = () => {
 
       {/* Recent Reviews */}
       <section className="container py-20">
-        <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">ביקורות אחרונות</h2>
-        <p className="text-muted-foreground mb-10">משוב אמיתי מלקוחות מאומתים</p>
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}>
+          <motion.h2 variants={fadeUp} custom={0} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">ביקורות אחרונות</motion.h2>
+          <motion.p variants={fadeUp} custom={1} className="text-muted-foreground mb-10">משוב אמיתי מלקוחות מאומתים</motion.p>
+        </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {recentReviews.map((review, i) => (
-            <motion.div key={review.id} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+            <motion.div key={review.id} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={fadeUp} custom={i}>
               <ReviewCard {...review} />
             </motion.div>
           ))}

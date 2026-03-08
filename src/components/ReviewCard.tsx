@@ -80,6 +80,7 @@ const ReviewCard = ({ id, reviewerName, rating, text, courseName, date, purchase
       </div>
     </CardContent>
   </Card>
+  </motion.div>
 );
 
 export default ReviewCard;
