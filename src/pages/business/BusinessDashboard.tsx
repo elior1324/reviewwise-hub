@@ -3,21 +3,35 @@ import BusinessFooter from "@/components/BusinessFooter";
 import AIChatbot from "@/components/AIChatbot";
 import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
 import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
+import LockedOverlay from "@/components/LockedOverlay";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
-  Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle
+  Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
+  Crown, Lock, Webhook, Contact, CalendarClock
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { REVIEWS, COURSES, AFFILIATE_CLICKS } from "@/data/mockData";
+import { useState } from "react";
+import { useAuth, SubscriptionTier } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const BUSINESS_SLUG = "digital-marketing-academy";
 
+type DemoTier = "pro" | "premium";
+
 const BusinessDashboard = () => {
-  // Demo business identity
+  const navigate = useNavigate();
+  const { subscriptionTier } = useAuth();
+
+  // Demo tier selector — allows switching between tiers in demo mode
+  const [demoTier, setDemoTier] = useState<DemoTier>("pro");
+  const currentTier: SubscriptionTier = subscriptionTier !== "free" ? subscriptionTier : demoTier;
+  const isPremium = currentTier === "premium";
+
   const demoBusiness = {
     name: "Digital Marketing Academy",
     email: "admin@dma.co.il",
@@ -70,6 +84,16 @@ const BusinessDashboard = () => {
     { course: "אנליטיקס מתקדם", clicks: 8, conversions: 1, revenue: 1490 },
   ];
 
+  const handleUpgrade = () => {
+    navigate("/business/pricing");
+  };
+
+  const PremiumBadge = () => (
+    <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-[10px] px-1.5 py-0.5 rounded-full font-bold mr-1">
+      <Crown size={10} /> פרימיום
+    </span>
+  );
+
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
@@ -84,6 +108,36 @@ const BusinessDashboard = () => {
             <p className="text-xs text-muted-foreground">{demoBusiness.email}</p>
           </div>
           <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">מנהל</span>
+        </div>
+
+        {/* Demo Tier Selector */}
+        <div className="mb-6 flex items-center gap-3 rounded-lg border border-border/50 bg-muted/50 px-4 py-3">
+          <span className="text-xs text-muted-foreground font-medium">סימולציית חבילה:</span>
+          <div className="flex gap-1 rounded-lg bg-background p-1 border border-border/30">
+            <button
+              onClick={() => setDemoTier("pro")}
+              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
+                demoTier === "pro"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              מקצועי (Pro)
+            </button>
+            <button
+              onClick={() => setDemoTier("premium")}
+              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
+                demoTier === "premium"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              פרימיום (Premium)
+            </button>
+          </div>
+          <span className="text-[10px] text-muted-foreground/70">
+            {demoTier === "pro" ? "פיצ׳רים פרימיום יופיעו חסומים" : "כל הפיצ׳רים זמינים"}
+          </span>
         </div>
 
         <div className="flex items-center justify-between mb-8">
@@ -147,6 +201,19 @@ const BusinessDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="testimonials">
               <Video size={14} className="ml-1" /> סרטוני לקוחות
+            </TabsTrigger>
+            {/* Premium-only tabs */}
+            <TabsTrigger value="crm" className="gap-1">
+              <Contact size={14} className="ml-1" /> CRM ולידים
+              {!isPremium && <PremiumBadge />}
+            </TabsTrigger>
+            <TabsTrigger value="webhooks" className="gap-1">
+              <Webhook size={14} className="ml-1" /> Webhooks & API
+              {!isPremium && <PremiumBadge />}
+            </TabsTrigger>
+            <TabsTrigger value="daily-ai" className="gap-1">
+              <CalendarClock size={14} className="ml-1" /> דוחות AI יומיים
+              {!isPremium && <PremiumBadge />}
             </TabsTrigger>
           </TabsList>
 
@@ -437,6 +504,163 @@ const BusinessDashboard = () => {
               </p>
               <TestimonialMediaUploader businessId="PLACEHOLDER_ID" maxItems={5} />
             </div>
+          </TabsContent>
+
+          {/* ===== PREMIUM-ONLY TABS ===== */}
+
+          {/* CRM & Leads */}
+          <TabsContent value="crm">
+            <LockedOverlay isLocked={!isPremium} onUpgrade={handleUpgrade}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="shadow-card bg-card">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Contact size={18} className="text-primary" /> ניהול לידים
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      { name: "יוסי כהן", email: "yossi@gmail.com", course: "שיווק דיגיטלי", status: "חם", date: "היום" },
+                      { name: "מיכל לוי", email: "michal@company.co.il", course: "הסמכת Google Ads", status: "חדש", date: "אתמול" },
+                      { name: "דני אברהם", email: "dani@startup.io", course: "אנליטיקס מתקדם", status: "בטיפול", date: "לפני 3 ימים" },
+                      { name: "שירה גולן", email: "shira@agency.com", course: "יסודות SEO", status: "חם", date: "לפני שבוע" },
+                    ].map((lead, i) => (
+                      <div key={i} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
+                        <div>
+                          <p className="text-sm font-medium">{lead.name}</p>
+                          <p className="text-xs text-muted-foreground">{lead.email} · {lead.course}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                            lead.status === "חם" ? "bg-primary/10 text-primary" :
+                            lead.status === "חדש" ? "bg-accent/10 text-accent" :
+                            "bg-secondary text-muted-foreground"
+                          }`}>{lead.status}</span>
+                          <span className="text-[10px] text-muted-foreground">{lead.date}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-card bg-card">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Users size={18} className="text-primary" /> סטטיסטיקת לידים
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 rounded-lg bg-primary/5">
+                        <p className="font-display font-bold text-2xl text-primary">47</p>
+                        <p className="text-xs text-muted-foreground">לידים חדשים החודש</p>
+                      </div>
+                      <div className="text-center p-4 rounded-lg bg-accent/5">
+                        <p className="font-display font-bold text-2xl text-accent">23%</p>
+                        <p className="text-xs text-muted-foreground">אחוז המרה</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      מעקב אחר כל הלידים שמגיעים דרך הביקורות, דפי קורסים וקישורי אפיליאט. 
+                      סנכרנו עם ה-CRM שלכם או ייצאו ל-CSV.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </LockedOverlay>
+          </TabsContent>
+
+          {/* Webhooks & API */}
+          <TabsContent value="webhooks">
+            <LockedOverlay isLocked={!isPremium} onUpgrade={handleUpgrade}>
+              <Card className="shadow-card bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Webhook size={18} className="text-primary" /> Webhooks & API
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="text-sm font-display font-semibold mb-3">מפתח API</h3>
+                    <div className="bg-secondary rounded-lg p-4 flex items-center justify-between" dir="ltr">
+                      <code className="text-xs text-foreground/70">rh_live_sk_••••••••••••••••••••3f8a</code>
+                      <Button size="sm" variant="outline" className="text-xs">העתק</Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-display font-semibold mb-3">Webhooks פעילים</h3>
+                    <div className="space-y-2">
+                      {[
+                        { url: "https://your-crm.com/webhooks/review", event: "review.created", status: "פעיל" },
+                        { url: "https://zapier.com/hooks/catch/123", event: "conversion.completed", status: "פעיל" },
+                      ].map((wh, i) => (
+                        <div key={i} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
+                          <div>
+                            <p className="text-xs font-mono text-foreground/70" dir="ltr">{wh.url}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{wh.event}</p>
+                          </div>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{wh.status}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-display font-semibold mb-2">אינטגרציות זמינות</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {["Zapier", "Make", "HubSpot", "Salesforce", "Slack", "Google Sheets"].map(name => (
+                        <span key={name} className="text-xs bg-secondary px-3 py-1.5 rounded-full text-muted-foreground">{name}</span>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </LockedOverlay>
+          </TabsContent>
+
+          {/* Daily AI Reports */}
+          <TabsContent value="daily-ai">
+            <LockedOverlay isLocked={!isPremium} onUpgrade={handleUpgrade}>
+              <Card className="shadow-card bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <CalendarClock size={18} className="text-primary" /> דוחות AI יומיים
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    קבלו כל בוקר דוח AI מפורט עם ניתוח הביצועים של אתמול, שינויים במגמות, וצעדים מומלצים.
+                  </p>
+
+                  <div className="space-y-3">
+                    {[
+                      { date: "8 במרץ 2026", summary: "3 ביקורות חדשות, 2 המרות, עלייה של 5% בדירוג", read: false },
+                      { date: "7 במרץ 2026", summary: "ביקורת שלילית זוהתה, 4 קליקים חדשים, המלצה לעדכן תיאור קורס", read: true },
+                      { date: "6 במרץ 2026", summary: "יום שיא — 8 המרות, הכנסות של ₪19,920", read: true },
+                      { date: "5 במרץ 2026", summary: "2 ביקורות חשודות נחסמו, שיפור של 12% באמון", read: true },
+                    ].map((report, i) => (
+                      <div key={i} className="flex items-center justify-between py-3 border-b border-border/20 last:border-0">
+                        <div className="flex items-center gap-3">
+                          {!report.read && <div className="w-2 h-2 rounded-full bg-primary shrink-0" />}
+                          <div>
+                            <p className="text-sm font-medium">{report.date}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{report.summary}</p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="outline" className="text-xs">צפה בדוח</Button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-4 border-t border-border/30">
+                    <p className="text-xs text-muted-foreground">
+                      הדוחות נשלחים גם במייל כל בוקר בשעה 08:00. ניתן לשנות את שעת השליחה בהגדרות.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </LockedOverlay>
           </TabsContent>
         </Tabs>
       </div>
