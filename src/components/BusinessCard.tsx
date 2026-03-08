@@ -29,7 +29,7 @@ const BusinessCard = ({ slug, name, category, rating, reviewCount, description }
         </div>
         <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{description}</p>
         <div className="mt-4 flex items-center text-primary text-sm font-medium group-hover:gap-2 gap-1 transition-all">
-          צפה בביקורות <ArrowLeft size={14} />
+          צפו בביקורות <ArrowLeft size={14} />
         </div>
       </CardContent>
     </Card>

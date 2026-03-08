@@ -48,7 +48,7 @@ const SearchPage = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
       <div className="container py-10">
-        <h1 className="font-display font-bold text-3xl mb-6">עיון בקורסים ועסקים</h1>
+        <h1 className="font-display font-bold text-3xl mb-6">חפשו קורסים ועסקים</h1>
 
         {/* Search */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -106,7 +106,7 @@ const SearchPage = () => {
               ))}
             </div>
             {filteredCourses.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">לא נמצאו קורסים. נסו לשנות את החיפוש.</p>
+              <p className="text-center text-muted-foreground py-16">לא נמצאו קורסים התואמים לחיפוש. נסו לשנות את מילות החיפוש או הסינון.</p>
             )}
           </TabsContent>
 
@@ -119,7 +119,7 @@ const SearchPage = () => {
               ))}
             </div>
             {filteredBusinesses.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">לא נמצאו עסקים. נסו לשנות את החיפוש.</p>
+              <p className="text-center text-muted-foreground py-16">לא נמצאו עסקים התואמים לחיפוש. נסו לשנות את מילות החיפוש או הסינון.</p>
             )}
           </TabsContent>
         </Tabs>
