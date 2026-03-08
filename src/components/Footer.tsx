@@ -18,7 +18,8 @@ const Footer = () => (
           <div className="space-y-2">
             <Link to="/search" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">עיון בקורסים</Link>
             <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">אודות</Link>
-            <Link to="/dashboard" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">לבעלי עסקים</Link>
+            <Link to="/for-business" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">לחברות</Link>
+            <Link to="/dashboard" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">לוח בקרה</Link>
           </div>
         </div>
         <div>
