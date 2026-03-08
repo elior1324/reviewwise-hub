@@ -11,8 +11,9 @@ import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
-  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye
+  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2
 } from "lucide-react";
+import EmbedWidgetGenerator from "@/components/EmbedWidgetGenerator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { type Review, type Course } from "@/data/mockData";
 import { useState, useEffect } from "react";
