@@ -17,7 +17,8 @@ const Footer = () => (
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">פלטפורמה</h4>
           <div className="space-y-2">
             <Link to="/search" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">עיון בקורסים</Link>
-            <Link to="/dashboard" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">לעסקים</Link>
+            <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">אודות</Link>
+            <Link to="/dashboard" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">לבעלי עסקים</Link>
           </div>
         </div>
         <div>

@@ -19,8 +19,11 @@ const Navbar = () => {
           <Link to="/search" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             עיון בקורסים
           </Link>
+          <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            אודות
+          </Link>
           <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            לעסקים
+            לבעלי עסקים
           </Link>
           <Link to="/register" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             הרשמת עסק
@@ -34,7 +37,7 @@ const Navbar = () => {
           </Link>
           <Link to="/register" className="hidden md:block">
             <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary">
-              התחל עכשיו
+              התחילו עכשיו
             </Button>
           </Link>
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -45,7 +48,8 @@ const Navbar = () => {
       {mobileOpen && (
         <div className="md:hidden border-t border-border/50 p-4 space-y-3 glass">
           <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>עיון בקורסים</Link>
-          <Link to="/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לעסקים</Link>
+          <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
+          <Link to="/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לבעלי עסקים</Link>
           <Link to="/register" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>הרשמת עסק</Link>
         </div>
       )}
