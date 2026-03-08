@@ -815,31 +815,36 @@ const BusinessDashboard = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {isDemo ? (
-                      [
-                        { name: "יוסי כהן", email: "yossi@gmail.com", course: "שיווק דיגיטלי", status: "חם", date: "היום" },
-                        { name: "מיכל לוי", email: "michal@company.co.il", course: "הסמכת Google Ads", status: "חדש", date: "אתמול" },
-                        { name: "דני אברהם", email: "dani@startup.io", course: "אנליטיקס מתקדם", status: "בטיפול", date: "לפני 3 ימים" },
-                        { name: "שירה גולן", email: "shira@agency.com", course: "יסודות SEO", status: "חם", date: "לפני שבוע" },
-                      ].map((lead, i) => (
-                        <div key={i} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
+                    {(() => {
+                      const leadsToShow = isDemo ? [
+                        { id: "d1", customer_name: "יוסי כהן", customer_email: "yossi@gmail.com", source: "positive_review", status: "new", created_at: new Date().toISOString() },
+                        { id: "d2", customer_name: "מיכל לוי", customer_email: "michal@company.co.il", source: "positive_review", status: "new", created_at: new Date(Date.now() - 86400000).toISOString() },
+                        { id: "d3", customer_name: "דני אברהם", customer_email: "dani@startup.io", source: "positive_review", status: "contacted", created_at: new Date(Date.now() - 3 * 86400000).toISOString() },
+                      ] : realLeads;
+
+                      if (leadsToShow.length === 0) return <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין לידים. לידים נוצרים אוטומטית מביקורות חיוביות (4-5 כוכבים).</p>;
+
+                      const statusMap: Record<string, { label: string; cls: string }> = {
+                        new: { label: "חדש", cls: "bg-accent/10 text-accent" },
+                        contacted: { label: "בטיפול", cls: "bg-secondary text-muted-foreground" },
+                        converted: { label: "הומר", cls: "bg-primary/10 text-primary" },
+                      };
+
+                      return leadsToShow.map((lead: any) => (
+                        <div key={lead.id} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
                           <div>
-                            <p className="text-sm font-medium">{lead.name}</p>
-                            <p className="text-xs text-muted-foreground">{lead.email} · {lead.course}</p>
+                            <p className="text-sm font-medium">{lead.customer_name || "אנונימי"}</p>
+                            <p className="text-xs text-muted-foreground">{lead.customer_email || lead.source}</p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                              lead.status === "חם" ? "bg-primary/10 text-primary" :
-                              lead.status === "חדש" ? "bg-accent/10 text-accent" :
-                              "bg-secondary text-muted-foreground"
-                            }`}>{lead.status}</span>
-                            <span className="text-[10px] text-muted-foreground">{lead.date}</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusMap[lead.status]?.cls || "bg-secondary text-muted-foreground"}`}>
+                              {statusMap[lead.status]?.label || lead.status}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">{new Date(lead.created_at).toLocaleDateString("he-IL")}</span>
                           </div>
                         </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-muted-foreground py-4 text-center">פיצ׳ר CRM יהיה זמין בקרוב.</p>
-                    )}
+                      ));
+                    })()}
                   </CardContent>
                 </Card>
 
