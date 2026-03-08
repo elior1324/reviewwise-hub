@@ -4,68 +4,66 @@ import BusinessCard from "@/components/BusinessCard";
 import CourseCard from "@/components/CourseCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, UserCheck, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
-import { BUSINESSES, COURSES } from "@/data/mockData";
+import { BUSINESSES, COURSES, FREELANCER_CATEGORIES, COURSE_CATEGORIES } from "@/data/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 
-const CATEGORIES = ["הכל", "שיווק", "תכנות", "עיצוב", "מדעי נתונים", "עסקים"];
-const EXPERIENCE_OPTIONS = [
-  { value: 0, label: "הכל" },
-  { value: 3, label: "3+ חודשים" },
-  { value: 6, label: "6+ חודשים" },
-  { value: 12, label: "שנה+" },
-];
+const ALL_FREELANCER_CATS = ["הכל", ...FREELANCER_CATEGORIES];
+const ALL_COURSE_CATS = ["הכל", ...COURSE_CATEGORIES];
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
-  const [selectedCategory, setSelectedCategory] = useState("הכל");
+  const defaultTab = searchParams.get("tab") || "freelancers";
+  const [selectedFreelancerCat, setSelectedFreelancerCat] = useState("הכל");
+  const [selectedCourseCat, setSelectedCourseCat] = useState("הכל");
   const [minRating, setMinRating] = useState(0);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
-  const [minExperience, setMinExperience] = useState(0);
 
-  const filteredBusinesses = BUSINESSES.filter(b => {
+  const freelancers = BUSINESSES.filter(b => {
+    if (b.type !== "freelancer") return false;
     const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query);
-    const matchesCategory = selectedCategory === "הכל" || b.category === selectedCategory;
+    const matchesCat = selectedFreelancerCat === "הכל" || b.category === selectedFreelancerCat;
     const matchesRating = b.rating >= minRating;
-    return matchesQuery && matchesCategory && matchesRating;
+    return matchesQuery && matchesCat && matchesRating;
+  });
+
+  const courseProviders = BUSINESSES.filter(b => {
+    if (b.type !== "course-provider") return false;
+    const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query);
+    const matchesCat = selectedCourseCat === "הכל" || b.category === selectedCourseCat;
+    const matchesRating = b.rating >= minRating;
+    return matchesQuery && matchesCat && matchesRating;
   });
 
   const filteredCourses = COURSES.filter(c => {
     const matchesQuery = !query || c.name.toLowerCase().includes(query.toLowerCase()) || c.description.includes(query) || c.category.includes(query);
-    const matchesCategory = selectedCategory === "הכל" || c.category === selectedCategory;
+    const matchesCat = selectedCourseCat === "הכל" || c.category === selectedCourseCat;
     const matchesRating = c.rating >= minRating;
     const matchesPrice = c.price >= priceRange[0] && c.price <= priceRange[1];
-    return matchesQuery && matchesCategory && matchesRating && matchesPrice;
+    return matchesQuery && matchesCat && matchesRating && matchesPrice;
   });
 
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
       <div className="container py-10">
-        <h1 className="font-display font-bold text-3xl mb-6">חפשו קורסים ועסקים</h1>
+        <h1 className="font-display font-bold text-3xl mb-6">חפשו בעלי מקצוע וקורסים</h1>
 
         {/* Search */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="חיפוש..." className="pr-10 h-11 glass border-border/50" value={query} onChange={e => setQuery(e.target.value)} />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {CATEGORIES.map(cat => (
-              <Button key={cat} variant={selectedCategory === cat ? "default" : "outline"} size="sm" onClick={() => setSelectedCategory(cat)}>
-                {cat}
-              </Button>
-            ))}
+            <Input placeholder="חיפוש פרילנסרים, קורסים, קטגוריות..." className="pr-10 h-11 glass border-border/50" value={query} onChange={e => setQuery(e.target.value)} />
           </div>
         </div>
 
-        {/* Rating + Price + Experience Filters */}
+        {/* Rating Filter */}
         <div className="flex flex-wrap gap-4 mb-6 items-end">
           <div className="flex gap-2 items-center">
             <span className="text-xs text-muted-foreground">דירוג:</span>
@@ -75,29 +73,71 @@ const SearchPage = () => {
               </Button>
             ))}
           </div>
-          <div className="flex gap-2 items-center">
-            <span className="text-xs text-muted-foreground">מחיר עד: ₪{priceRange[1].toLocaleString()}</span>
-            <div className="w-40">
-              <Slider min={0} max={20000} step={500} value={[priceRange[1]]} onValueChange={v => setPriceRange([0, v[0]])} />
-            </div>
-          </div>
-          <div className="flex gap-2 items-center">
-            <span className="text-xs text-muted-foreground">ניסיון:</span>
-            {EXPERIENCE_OPTIONS.map(opt => (
-              <Button key={opt.value} variant={minExperience === opt.value ? "default" : "outline"} size="sm" onClick={() => setMinExperience(opt.value)}>
-                {opt.label}
-              </Button>
-            ))}
-          </div>
         </div>
 
-        <Tabs defaultValue="courses" className="space-y-6">
+        <Tabs defaultValue={defaultTab} className="space-y-6">
           <TabsList className="glass">
-            <TabsTrigger value="courses">קורסים ({filteredCourses.length})</TabsTrigger>
-            <TabsTrigger value="businesses">עסקים ({filteredBusinesses.length})</TabsTrigger>
+            <TabsTrigger value="freelancers" className="flex items-center gap-1.5">
+              <UserCheck size={14} />
+              בעלי מקצוע ({freelancers.length})
+            </TabsTrigger>
+            <TabsTrigger value="courses" className="flex items-center gap-1.5">
+              <BookOpen size={14} />
+              קורסים והכשרות ({filteredCourses.length})
+            </TabsTrigger>
           </TabsList>
 
+          {/* Freelancers Tab */}
+          <TabsContent value="freelancers">
+            <div className="flex gap-2 flex-wrap mb-6">
+              {ALL_FREELANCER_CATS.map(cat => (
+                <Button key={cat} variant={selectedFreelancerCat === cat ? "default" : "outline"} size="sm" onClick={() => setSelectedFreelancerCat(cat)}>
+                  {cat}
+                </Button>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {freelancers.map((biz, i) => (
+                <motion.div key={biz.slug} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                  <BusinessCard {...biz} />
+                </motion.div>
+              ))}
+            </div>
+            {freelancers.length === 0 && (
+              <p className="text-center text-muted-foreground py-16">לא נמצאו בעלי מקצוע התואמים לחיפוש.</p>
+            )}
+          </TabsContent>
+
+          {/* Courses Tab */}
           <TabsContent value="courses">
+            <div className="flex gap-2 flex-wrap mb-4">
+              {ALL_COURSE_CATS.map(cat => (
+                <Button key={cat} variant={selectedCourseCat === cat ? "default" : "outline"} size="sm" onClick={() => setSelectedCourseCat(cat)}>
+                  {cat}
+                </Button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-4 mb-6 items-center">
+              <span className="text-xs text-muted-foreground">מחיר עד: ₪{priceRange[1].toLocaleString()}</span>
+              <div className="w-40">
+                <Slider min={0} max={20000} step={500} value={[priceRange[1]]} onValueChange={v => setPriceRange([0, v[0]])} />
+              </div>
+            </div>
+
+            {/* Course Providers */}
+            <h3 className="font-display font-semibold text-lg text-foreground mb-4 flex items-center gap-2">
+              <BookOpen size={18} className="text-primary" /> ספקי קורסים ({courseProviders.length})
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+              {courseProviders.map((biz, i) => (
+                <motion.div key={biz.slug} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                  <BusinessCard {...biz} />
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Courses List */}
+            <h3 className="font-display font-semibold text-lg text-foreground mb-4">קורסים וסדנאות ({filteredCourses.length})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCourses.map((course, i) => (
                 <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
@@ -105,21 +145,8 @@ const SearchPage = () => {
                 </motion.div>
               ))}
             </div>
-            {filteredCourses.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">לא נמצאו קורסים התואמים לחיפוש. נסו לשנות את מילות החיפוש או הסינון.</p>
-            )}
-          </TabsContent>
-
-          <TabsContent value="businesses">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredBusinesses.map((biz, i) => (
-                <motion.div key={biz.slug} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <BusinessCard {...biz} />
-                </motion.div>
-              ))}
-            </div>
-            {filteredBusinesses.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">לא נמצאו עסקים התואמים לחיפוש. נסו לשנות את מילות החיפוש או הסינון.</p>
+            {filteredCourses.length === 0 && courseProviders.length === 0 && (
+              <p className="text-center text-muted-foreground py-16">לא נמצאו קורסים או ספקים התואמים לחיפוש.</p>
             )}
           </TabsContent>
         </Tabs>
