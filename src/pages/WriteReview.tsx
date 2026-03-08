@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldCheck, Star } from "lucide-react";
+import { ShieldCheck, Star, DollarSign, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -35,10 +35,31 @@ const WriteReview = () => {
       <Navbar />
       <div className="container py-10 max-w-2xl">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-2 text-trust-green text-sm font-medium mb-6">
+          <div className="flex items-center gap-2 text-trust-green text-sm font-medium mb-4">
             <ShieldCheck size={18} />
             ביקורת רכישה מאומתת
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="rounded-xl p-4 mb-6 border border-primary/20 bg-primary/5 backdrop-blur-sm"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <Sparkles size={18} className="text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-display font-semibold text-foreground">
+                  ביקורת מאומתת = הכנסה פאסיבית 💰
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  כשמישהו רוכש בזכות הביקורת שלכם — אתם מרוויחים חלק מההכנסות. בלי מאמץ נוסף.
+                </p>
+              </div>
+            </div>
+          </motion.div>
 
           <Card className="shadow-card animated-border bg-card">
             <CardHeader>
