@@ -8,6 +8,7 @@ interface BusinessCardProps {
   slug: string;
   name: string;
   category: string;
+  subcategory?: string;
   rating: number;
   reviewCount: number;
   description: string;
