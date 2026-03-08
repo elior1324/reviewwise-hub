@@ -451,7 +451,7 @@ const Index = () => {
               className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6"
             >
               <DollarSign size={16} />
-              תוכנית שותפים
+              תוכנית שותפים 50/50
             </motion.div>
 
             <motion.h2
@@ -461,7 +461,7 @@ const Index = () => {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="font-display font-bold text-3xl md:text-5xl text-foreground mb-4"
             >
-              הדעה שלכם שווה כסף 💰
+              אנחנו מחלקים את הרווחים 50/50 💰
             </motion.h2>
             
             <motion.p
@@ -471,8 +471,8 @@ const Index = () => {
               transition={{ delay: 0.3, duration: 0.5 }}
               className="text-lg text-muted-foreground mb-3 max-w-2xl mx-auto"
             >
-              כתבו ביקורת מאומתת על קורס, הכשרה או בעל מקצוע — 
-              <span className="text-foreground font-semibold"> והתחילו להרוויח 0.01% מההכנסות שמגיעות בעקבותיכם.</span>
+              <span className="text-foreground font-semibold">50% מכלל העמלות של ReviewHub הולכים ישירות לקהילה.</span>
+              {" "}כתבו ביקורת מאומתת, צברו לייקים, וקחו את הנתח שלכם מהקופה.
             </motion.p>
 
             <motion.p
@@ -482,8 +482,8 @@ const Index = () => {
               transition={{ delay: 0.4, duration: 0.5 }}
               className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto"
             >
-              על כל 10 לייקים שהביקורת שלכם מקבלת — מתווסף עוד 0.01%, עד מקסימום 1%.
-              <span className="text-primary font-medium"> ככל שהביקורת שלכם טובה יותר — אתם מרוויחים יותר. 🚀</span>
+              כל ביקורת = 100 נקודות. כל 10 לייקים = מכפיל x2 (עד x10).
+              <span className="text-primary font-medium"> ככל שהביקורת שלכם טובה יותר — הנתח שלכם מהקופה גדל. 🚀</span>
             </motion.p>
 
             <motion.div
@@ -494,9 +494,9 @@ const Index = () => {
               className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-10"
             >
               {[
-                { step: "01", title: "כתבו ביקורת", desc: "שתפו חוויה אמיתית ותתחילו עם 0.01%" },
-                { step: "02", title: "צברו לייקים", desc: "כל 10 לייקים = עוד 0.01% עמלה" },
-                { step: "03", title: "הרוויחו עד 1%", desc: "מכל רכישה שהגיעה בזכות הביקורת שלכם" },
+                { step: "01", title: "כתבו ביקורת", desc: "קבלו 100 נקודות בסיס על כל ביקורת מאומתת" },
+                { step: "02", title: "צברו לייקים", desc: "כל 10 לייקים = מכפיל x2 לנקודות (עד x10)" },
+                { step: "03", title: "קחו את הנתח שלכם", desc: "הרווח = (הנקודות שלכם / סה״כ) × 50% מהעמלות" },
               ].map(({ step, title, desc }, i) => (
                 <motion.div
                   key={step}
@@ -519,9 +519,9 @@ const Index = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.7, duration: 0.5 }}
             >
-              <Link to="/auth">
+              <Link to="/partner">
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-base glow-primary px-10">
-                  הירשמו והתחילו להרוויח
+                  גלו כמה אתם יכולים להרוויח
                 </Button>
               </Link>
             </motion.div>
