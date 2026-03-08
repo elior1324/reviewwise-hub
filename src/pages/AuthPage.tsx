@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
@@ -49,8 +50,8 @@ const AuthPage = () => {
       <div className="container flex items-center justify-center py-20">
         <Card className="w-full max-w-md elegant-card">
           <CardHeader className="text-center space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-primary glow-primary flex items-center justify-center mx-auto mb-2">
-              <span className="text-primary-foreground font-display font-bold text-xl">R</span>
+            <div className="w-14 h-14 rounded-2xl overflow-hidden mx-auto mb-2">
+              <img src={logoIcon} alt="ReviewHub" className="w-full h-full object-cover" />
             </div>
             <CardTitle className="font-display text-2xl">
               {mode === "login" ? "התחברו ל-ReviewHub" : "הצטרפו ל-ReviewHub"}
