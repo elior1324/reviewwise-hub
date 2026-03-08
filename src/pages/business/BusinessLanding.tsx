@@ -445,7 +445,7 @@ const BusinessLanding = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">חברו את ReviewHub לכל המערכות שלכם והפכו ביקורות ללידים</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {PREMIUM_FEATURES.map(({ icon: Icon, title, desc, preview }, i) => (
+            {PREMIUM_FEATURES.map(({ icon: Icon, title, desc, preview, tooltip }, i) => (
               <motion.div
                 key={title}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
@@ -455,7 +455,21 @@ const BusinessLanding = () => {
                 }`}
                 onClick={() => preview && toggleFeature(title)}
               >
-                <div className="absolute top-4 left-4">
+                <div className="absolute top-4 left-4 flex items-center gap-2">
+                  {tooltip && (
+                    <TooltipProvider delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <button className="w-6 h-6 rounded-full bg-muted/60 hover:bg-primary/15 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                            <HelpCircle size={14} />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[250px] text-sm leading-relaxed text-right" dir="rtl">
+                          {tooltip}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   <div className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
                     <Lock size={10} /> פרימיום
                   </div>
