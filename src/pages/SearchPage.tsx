@@ -4,7 +4,7 @@ import BusinessCard from "@/components/BusinessCard";
 import CourseCard from "@/components/CourseCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown } from "lucide-react";
+import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown, Trophy, Star } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -64,6 +64,14 @@ const SearchPage = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
   const [sortOption, setSortOption] = useState<SortOption>("default");
 
+  const top5Overall = useMemo(() => 
+    [...BUSINESSES]
+      .filter(b => b.rating >= 4.0)
+      .sort((a, b) => b.reviewCount - a.reviewCount || b.rating - a.rating)
+      .slice(0, 5),
+    []
+  );
+
   const { data: freelancerCats = [] } = useCategories("freelancer");
   const { data: courseCats = [] } = useCategories("course");
   const ALL_FREELANCER_CATS = ["הכל", ...freelancerCats.filter(c => c !== "אחר"), "אחר"];
@@ -120,6 +128,48 @@ const SearchPage = () => {
             <Input placeholder="חיפוש פרילנסרים, קורסים, קטגוריות..." className="pr-10 h-11 glass border-border/50" value={query} onChange={e => setQuery(e.target.value)} />
           </div>
         </div>
+
+        {/* Top 5 Most Reviewed */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-8 rounded-xl border border-border/50 bg-card/50 p-5"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Trophy size={20} className="text-primary" />
+            <h2 className="font-display font-bold text-lg text-foreground">טופ 5 — הכי הרבה ביקורות חיוביות</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {top5Overall.map((biz, i) => (
+              <motion.div
+                key={biz.slug}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.06 }}
+              >
+                <div className="relative">
+                  {i === 0 && (
+                    <div className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shadow-md">
+                      🥇
+                    </div>
+                  )}
+                  {i === 1 && (
+                    <div className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full bg-muted flex items-center justify-center text-foreground text-xs font-bold shadow-md">
+                      🥈
+                    </div>
+                  )}
+                  {i === 2 && (
+                    <div className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-xs font-bold shadow-md">
+                      🥉
+                    </div>
+                  )}
+                  <BusinessCard {...biz} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
         {/* Rating Filter + Sort */}
         <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
