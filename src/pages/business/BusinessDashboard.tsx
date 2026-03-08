@@ -236,16 +236,27 @@ const BusinessDashboard = () => {
 
           {/* Clicks & Conversions */}
           <TabsContent value="clicks">
+            <TooltipProvider delayDuration={200}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card className="shadow-card bg-card">
                 <CardContent className="p-5 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <MousePointerClick size={20} className="text-primary" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-display font-bold text-xl">{totalClicks}</p>
                     <p className="text-xs text-muted-foreground">סה״כ קליקים</p>
                   </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                        <HelpCircle size={14} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                      מספר הפעמים שמשתמשים לחצו על קישור האפיליאט שלכם. כל קליק מייצג לקוח פוטנציאלי שהגיע מ-ReviewHub.
+                    </TooltipContent>
+                  </Tooltip>
                 </CardContent>
               </Card>
               <Card className="shadow-card bg-card">
@@ -253,10 +264,20 @@ const BusinessDashboard = () => {
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <TrendingUp size={20} className="text-primary" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-display font-bold text-xl">{conversions}</p>
                     <p className="text-xs text-muted-foreground">המרות ({totalClicks > 0 ? Math.round(conversions / totalClicks * 100) : 0}%)</p>
                   </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                        <HelpCircle size={14} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                      כמה מהקליקים הפכו לרכישה בפועל. אחוז המרה גבוה מעיד על ביקורות אמינות שמשכנעות לקוחות לקנות.
+                    </TooltipContent>
+                  </Tooltip>
                 </CardContent>
               </Card>
               <Card className="shadow-card bg-card">
@@ -264,13 +285,24 @@ const BusinessDashboard = () => {
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <DollarSign size={20} className="text-primary" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-display font-bold text-xl">₪{totalRevenue.toLocaleString()}</p>
                     <p className="text-xs text-muted-foreground">סה״כ הכנסות</p>
                   </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                        <HelpCircle size={14} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                      סך ההכנסות שנוצרו מרכישות דרך ReviewHub. זה הכסף שהביקורות המאומתות שלכם הניבו ישירות.
+                    </TooltipContent>
+                  </Tooltip>
                 </CardContent>
               </Card>
             </div>
+            </TooltipProvider>
 
             <Card className="shadow-card bg-card">
               <CardHeader>
