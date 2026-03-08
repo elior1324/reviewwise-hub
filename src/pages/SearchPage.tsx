@@ -179,7 +179,7 @@ const SearchPage = () => {
           {isAiRanked && top5Month && (
             <p className="text-xs text-muted-foreground mb-3 mr-7">דירוג חודשי מבוסס AI — עודכן לאחרונה ב-{top5Month}</p>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {top5Overall.map((biz, i) => (
               <motion.div
                 key={biz.slug}
