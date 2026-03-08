@@ -5,6 +5,7 @@ import ReviewResponse from "./ReviewResponse";
 import ReportReviewDialog from "./ReportReviewDialog";
 import { User, Clock, Pencil } from "lucide-react";
 import { getTimeSincePurchase } from "@/data/mockData";
+import { motion } from "framer-motion";
 
 interface ReviewCardProps {
   id?: string;
