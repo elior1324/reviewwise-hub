@@ -10,31 +10,126 @@ import { Star, MessageSquare, Link2, Upload, TrendingUp, Users, BarChart3, Send,
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { REVIEWS, COURSES, AFFILIATE_CLICKS } from "@/data/mockData";
-
-const BUSINESS_SLUG = "digital-marketing-academy";
-
-const STATS = [
-  { icon: Star, label: "דירוג ממוצע", value: "4.8" },
-  { icon: MessageSquare, label: "סה״כ ביקורות", value: "124" },
-  { icon: TrendingUp, label: "אחוז מענה", value: "92%" },
-  { icon: Users, label: "בקשות שנשלחו", value: "180" },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { type Review, type Course, FREELANCER_CATEGORIES } from "@/data/mockData";
 
 const Dashboard = () => {
   const { toast } = useToast();
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [responseText, setResponseText] = useState("");
+  const [businessReviews, setBusinessReviews] = useState<Review[]>([]);
+  const [businessCourses, setBusinessCourses] = useState<Course[]>([]);
+  const [flaggedReviews, setFlaggedReviews] = useState<Review[]>([]);
+  const [affiliateStats, setAffiliateStats] = useState({ clicks: 0, conversions: 0, revenue: 0 });
+  const [recentClicks, setRecentClicks] = useState<any[]>([]);
+  const [stats, setStats] = useState({ rating: "0", reviews: "0", responseRate: "0%", requests: "0" });
 
-  const businessReviews = REVIEWS.filter(r => r.businessSlug === BUSINESS_SLUG);
-  const businessCourses = COURSES.filter(c => c.businessSlug === BUSINESS_SLUG);
-  const flaggedReviews = REVIEWS.filter(r => r.flagged);
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-  const totalClicks = AFFILIATE_CLICKS.length;
-  const conversions = AFFILIATE_CLICKS.filter(c => c.converted).length;
-  const totalRevenue = AFFILIATE_CLICKS.filter(c => c.converted).reduce((s, c) => s + (c.revenue || 0), 0);
+      // Get user's business
+      const { data: biz } = await supabase
+        .from("businesses")
+        .select("*")
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+      if (!biz) return;
+
+      // Stats
+      setStats({
+        rating: (Number(biz.rating) || 0).toFixed(1),
+        reviews: (biz.review_count || 0).toString(),
+        responseRate: "—",
+        requests: "—",
+      });
+
+      // Courses
+      const { data: courses } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("business_id", biz.id);
+
+      if (courses) {
+        setBusinessCourses(courses.map((c: any) => ({
+          id: c.id,
+          businessSlug: biz.slug,
+          name: c.name,
+          price: Number(c.price) || 0,
+          description: c.description || "",
+          affiliateUrl: c.affiliate_url || "",
+          category: c.category || "",
+          rating: Number(c.rating) || 0,
+          reviewCount: c.review_count || 0,
+          verifiedPurchases: c.verified_purchases || 0,
+        })));
+      }
+
+      // Reviews
+      const { data: reviews } = await supabase
+        .from("reviews")
+        .select("*, courses(name), profiles(display_name), business_responses(text, created_at)")
+        .eq("business_id", biz.id)
+        .order("created_at", { ascending: false });
+
+      if (reviews) {
+        const mapped: Review[] = reviews.map((r: any) => ({
+          id: r.id,
+          reviewerName: r.anonymous ? "אנונימי" : (r.profiles?.display_name || "משתמש"),
+          rating: r.rating,
+          text: r.text,
+          courseName: r.courses?.name || "",
+          courseId: r.course_id,
+          businessSlug: biz.slug,
+          date: new Date(r.created_at).toLocaleDateString("he-IL"),
+          purchaseDate: r.created_at,
+          verified: r.verified || false,
+          anonymous: r.anonymous || false,
+          flagged: r.flagged || false,
+          flagReason: r.flag_reason || undefined,
+          ownerResponse: r.business_responses?.[0] ? {
+            text: r.business_responses[0].text,
+            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
+          } : undefined,
+        }));
+        setBusinessReviews(mapped);
+        setFlaggedReviews(mapped.filter(r => r.flagged));
+      }
+
+      // Affiliate clicks
+      const { data: clicks } = await supabase
+        .from("affiliate_clicks")
+        .select("*, courses(name)")
+        .order("clicked_at", { ascending: false })
+        .limit(10);
+
+      if (clicks) {
+        const totalClicks = clicks.length;
+        const conversions = clicks.filter((c: any) => c.converted).length;
+        const revenue = clicks.filter((c: any) => c.converted).reduce((s: number, c: any) => s + (Number(c.revenue) || 0), 0);
+        setAffiliateStats({ clicks: totalClicks, conversions, revenue });
+        setRecentClicks(clicks.slice(0, 5).map((c: any) => ({
+          name: c.courses?.name || c.course_id,
+          date: new Date(c.clicked_at).toLocaleDateString("he-IL"),
+          converted: c.converted,
+          revenue: Number(c.revenue) || 0,
+        })));
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  const STATS = [
+    { icon: Star, label: "דירוג ממוצע", value: stats.rating },
+    { icon: MessageSquare, label: "סה״כ ביקורות", value: stats.reviews },
+    { icon: TrendingUp, label: "אחוז מענה", value: stats.responseRate },
+    { icon: Users, label: "בקשות שנשלחו", value: stats.requests },
+  ];
 
   const handleRespond = (reviewId: string) => {
     if (!responseText.trim()) return;
@@ -77,35 +172,37 @@ const Dashboard = () => {
             <TabsTrigger value="widgets">וידג׳טים</TabsTrigger>
           </TabsList>
 
-          {/* Reviews with respond */}
           <TabsContent value="reviews">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {businessReviews.map((r, i) => (
-                <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <ReviewCard {...r} />
-                  {!r.ownerResponse && (
-                    <div className="mt-2">
-                      {respondingTo === r.id ? (
-                        <div className="space-y-2">
-                          <Textarea placeholder="כתבו תגובה..." value={responseText} onChange={e => setResponseText(e.target.value)} className="glass border-border/50" rows={2} />
-                          <div className="flex gap-2">
-                            <Button size="sm" onClick={() => handleRespond(r.id)} className="bg-primary text-primary-foreground">שלח תגובה</Button>
-                            <Button size="sm" variant="outline" onClick={() => setRespondingTo(null)}>ביטול</Button>
+            {businessReviews.length === 0 ? (
+              <p className="text-center text-muted-foreground py-10">עדיין אין ביקורות.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {businessReviews.map((r, i) => (
+                  <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                    <ReviewCard {...r} />
+                    {!r.ownerResponse && (
+                      <div className="mt-2">
+                        {respondingTo === r.id ? (
+                          <div className="space-y-2">
+                            <Textarea placeholder="כתבו תגובה..." value={responseText} onChange={e => setResponseText(e.target.value)} className="glass border-border/50" rows={2} />
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => handleRespond(r.id)} className="bg-primary text-primary-foreground">שלח תגובה</Button>
+                              <Button size="sm" variant="outline" onClick={() => setRespondingTo(null)}>ביטול</Button>
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <Button size="sm" variant="outline" onClick={() => setRespondingTo(r.id)} className="gap-1">
-                          <MessageSquare size={14} /> הגב לביקורת
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </motion.div>
-              ))}
-            </div>
+                        ) : (
+                          <Button size="sm" variant="outline" onClick={() => setRespondingTo(r.id)} className="gap-1">
+                            <MessageSquare size={14} /> הגב לביקורת
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
-          {/* Course Management */}
           <TabsContent value="courses">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-display font-semibold text-lg">הקורסים שלכם ({businessCourses.length} קורסים)</h2>
@@ -113,16 +210,19 @@ const Dashboard = () => {
                 <Plus size={14} /> הוסף קורס
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {businessCourses.map((course, i) => (
-                <motion.div key={course.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <CourseCard {...course} />
-                </motion.div>
-              ))}
-            </div>
+            {businessCourses.length === 0 ? (
+              <p className="text-center text-muted-foreground py-10">עדיין לא הוספתם קורסים.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {businessCourses.map((course, i) => (
+                  <motion.div key={course.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                    <CourseCard {...course} />
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
-          {/* Flagged Reviews */}
           <TabsContent value="flagged">
             <Card className="shadow-card animated-border bg-card mb-4">
               <CardHeader>
@@ -131,22 +231,22 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">ביקורות שזוהו על ידי מערכת ה-AI כחשודות בזיוף או בספאם. בדקו אותן ופעלו בהתאם.</p>
+                <p className="text-sm text-muted-foreground mb-4">ביקורות שזוהו על ידי מערכת ה-AI כחשודות בזיוף או בספאם.</p>
               </CardContent>
             </Card>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {flaggedReviews.map((r, i) => (
-                <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <ReviewCard {...r} />
-                </motion.div>
-              ))}
-            </div>
-            {flaggedReviews.length === 0 && (
+            {flaggedReviews.length === 0 ? (
               <p className="text-center text-muted-foreground py-10">אין ביקורות חשודות כרגע 🎉</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {flaggedReviews.map((r, i) => (
+                  <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                    <ReviewCard {...r} />
+                  </motion.div>
+                ))}
+              </div>
             )}
           </TabsContent>
 
-          {/* Affiliate Stats */}
           <TabsContent value="affiliate">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card className="shadow-card bg-card">
@@ -155,7 +255,7 @@ const Dashboard = () => {
                     <MousePointerClick size={20} className="text-primary" />
                   </div>
                   <div>
-                    <p className="font-display font-bold text-xl">{totalClicks}</p>
+                    <p className="font-display font-bold text-xl">{affiliateStats.clicks}</p>
                     <p className="text-xs text-muted-foreground">קליקים</p>
                   </div>
                 </CardContent>
@@ -166,8 +266,8 @@ const Dashboard = () => {
                     <TrendingUp size={20} className="text-primary" />
                   </div>
                   <div>
-                    <p className="font-display font-bold text-xl">{conversions}</p>
-                    <p className="text-xs text-muted-foreground">המרות ({totalClicks > 0 ? Math.round(conversions / totalClicks * 100) : 0}%)</p>
+                    <p className="font-display font-bold text-xl">{affiliateStats.conversions}</p>
+                    <p className="text-xs text-muted-foreground">המרות ({affiliateStats.clicks > 0 ? Math.round(affiliateStats.conversions / affiliateStats.clicks * 100) : 0}%)</p>
                   </div>
                 </CardContent>
               </Card>
@@ -177,7 +277,7 @@ const Dashboard = () => {
                     <DollarSign size={20} className="text-primary" />
                   </div>
                   <div>
-                    <p className="font-display font-bold text-xl">₪{totalRevenue.toLocaleString()}</p>
+                    <p className="font-display font-bold text-xl">₪{affiliateStats.revenue.toLocaleString()}</p>
                     <p className="text-xs text-muted-foreground">הכנסות</p>
                   </div>
                 </CardContent>
@@ -188,12 +288,13 @@ const Dashboard = () => {
                 <CardTitle className="text-base">קליקים אחרונים</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {AFFILIATE_CLICKS.slice(0, 5).map((click, i) => {
-                    const course = COURSES.find(c => c.id === click.courseId);
-                    return (
+                {recentClicks.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-6">עדיין אין קליקים.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {recentClicks.map((click, i) => (
                       <div key={i} className="flex items-center justify-between text-sm py-2 border-b border-border/30 last:border-0">
-                        <span>{course?.name || click.courseId}</span>
+                        <span>{click.name}</span>
                         <div className="flex items-center gap-3">
                           <span className="text-xs text-muted-foreground">{click.date}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full ${click.converted ? "bg-trust-green-light text-trust-green" : "bg-secondary text-muted-foreground"}`}>
@@ -201,9 +302,9 @@ const Dashboard = () => {
                           </span>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -241,10 +342,6 @@ const Dashboard = () => {
                   <Input placeholder="לדוגמה: שיווק דיגיטלי מאסטרקלאס" className="glass border-border/50" />
                 </div>
                 <Button className="bg-primary text-primary-foreground gap-2 glow-primary"><Send size={16} /> יצירה ושליחה</Button>
-                <div className="mt-4 p-4 bg-secondary rounded-lg">
-                  <p className="text-xs text-muted-foreground mb-1">קישור שנוצר:</p>
-                  <code className="text-sm text-foreground" dir="ltr">reviewhub.co.il/review/abc123-token</code>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>

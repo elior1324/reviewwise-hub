@@ -10,7 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import AIChatbot from "@/components/AIChatbot";
 import FloatingEarnCTA from "@/components/FloatingEarnCTA";
-import { BUSINESSES, COURSES, FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, Business } from "@/data/mockData";
+import { FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, FREELANCER_CATEGORIES, type Business, type Course } from "@/data/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { useCategories } from "@/hooks/useCategories";
@@ -65,19 +65,62 @@ const SearchPage = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
   const [sortOption, setSortOption] = useState<SortOption>("default");
 
-  // Fallback mock top 5
-  const mockTop5 = useMemo(() => 
-    [...BUSINESSES]
-      .filter(b => b.rating >= 4.0)
-      .sort((a, b) => b.reviewCount - a.reviewCount || b.rating - a.rating)
-      .slice(0, 5),
-    []
-  );
-
-  // Fetch AI-generated monthly top 5 from DB
+  const [allBusinesses, setAllBusinesses] = useState<Business[]>([]);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [dbTop5, setDbTop5] = useState<any[] | null>(null);
   const [top5Month, setTop5Month] = useState("");
 
+  // Fetch businesses from DB
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: bizData } = await supabase
+        .from("businesses")
+        .select("*")
+        .order("rating", { ascending: false });
+
+      if (bizData) {
+        const mapped: Business[] = bizData.map((b: any) => ({
+          slug: b.slug,
+          name: b.name,
+          type: FREELANCER_CATEGORIES.includes(b.category) ? "freelancer" as const : "course-provider" as const,
+          category: b.category,
+          rating: Number(b.rating) || 0,
+          reviewCount: b.review_count || 0,
+          description: b.description || "",
+          logo: b.logo_url || undefined,
+          website: b.website || undefined,
+          email: b.email || undefined,
+          phone: b.phone || undefined,
+          socialLinks: b.social_links as any || undefined,
+        }));
+        setAllBusinesses(mapped);
+      }
+
+      const { data: courseData } = await supabase
+        .from("courses")
+        .select("*, businesses(slug)")
+        .order("rating", { ascending: false });
+
+      if (courseData) {
+        const mapped: Course[] = courseData.map((c: any) => ({
+          id: c.id,
+          businessSlug: c.businesses?.slug || "",
+          name: c.name,
+          price: Number(c.price) || 0,
+          description: c.description || "",
+          affiliateUrl: c.affiliate_url || "",
+          category: c.category || "",
+          rating: Number(c.rating) || 0,
+          reviewCount: c.review_count || 0,
+          verifiedPurchases: c.verified_purchases || 0,
+        }));
+        setAllCourses(mapped);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Fetch AI-generated monthly top 5 from DB
   useEffect(() => {
     const fetchTop5 = async () => {
       const now = new Date();
@@ -91,18 +134,25 @@ const SearchPage = () => {
 
       if (data && data.length > 0) {
         setTop5Month(monthYear);
-        // Map DB rankings to mock business data for BusinessCard display
         const mapped = data.map((item: any) => {
-          const biz = BUSINESSES.find(b => b.slug === item.business_slug);
+          const biz = allBusinesses.find(b => b.slug === item.business_slug);
           return biz ? { ...biz, _aiReasoning: item.ai_reasoning } : null;
         }).filter(Boolean);
         if (mapped.length > 0) setDbTop5(mapped);
       }
     };
-    fetchTop5();
-  }, []);
+    if (allBusinesses.length > 0) fetchTop5();
+  }, [allBusinesses]);
 
-  const top5Overall = dbTop5 || mockTop5;
+  const top5Fallback = useMemo(() => 
+    [...allBusinesses]
+      .filter(b => b.rating >= 4.0)
+      .sort((a, b) => b.reviewCount - a.reviewCount || b.rating - a.rating)
+      .slice(0, 5),
+    [allBusinesses]
+  );
+
+  const top5Overall = dbTop5 || top5Fallback;
   const isAiRanked = dbTop5 !== null;
 
   const { data: freelancerCats = [] } = useCategories("freelancer");
@@ -110,12 +160,11 @@ const SearchPage = () => {
   const ALL_FREELANCER_CATS = ["הכל", ...freelancerCats.filter(c => c !== "אחר"), "אחר"];
   const ALL_COURSE_CATS = ["הכל", ...courseCats.filter(c => c !== "אחר"), "אחר"];
 
-  // Get subcategories for selected category
   const currentSubcats = selectedFreelancerCat !== "הכל" 
     ? FREELANCER_SUBCATEGORIES[selectedFreelancerCat] || [] 
     : [];
 
-  const freelancersFiltered = BUSINESSES.filter(b => {
+  const freelancersFiltered = allBusinesses.filter(b => {
     if (b.type !== "freelancer") return false;
     const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query) || (b.subcategory && b.subcategory.includes(query));
     const matchesCat = selectedFreelancerCat === "הכל" || b.category === selectedFreelancerCat;
@@ -126,7 +175,7 @@ const SearchPage = () => {
 
   const freelancers = useMemo(() => sortBusinesses(freelancersFiltered, sortOption), [freelancersFiltered, sortOption]);
 
-  const courseProviders = BUSINESSES.filter(b => {
+  const courseProviders = allBusinesses.filter(b => {
     if (b.type !== "course-provider") return false;
     const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query);
     const matchesCat = selectedCourseCat === "הכל" || b.category === selectedCourseCat;
@@ -134,7 +183,7 @@ const SearchPage = () => {
     return matchesQuery && matchesCat && matchesRating;
   });
 
-  const filteredCourses = COURSES.filter(c => {
+  const filteredCourses = allCourses.filter(c => {
     const matchesQuery = !query || c.name.toLowerCase().includes(query.toLowerCase()) || c.description.includes(query) || c.category.includes(query);
     const matchesCat = selectedCourseCat === "הכל" || c.category === selectedCourseCat;
     const matchesRating = c.rating >= minRating;
@@ -163,47 +212,49 @@ const SearchPage = () => {
         </div>
 
         {/* Top 5 Most Reviewed */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-8 rounded-xl border border-border/50 bg-card/50 p-5"
-        >
-          <div className="flex items-center gap-2 mb-1">
-            <Trophy size={20} className="text-primary" />
-            <h2 className="font-display font-bold text-lg text-foreground">טופ 5 — הכי הרבה ביקורות חיוביות</h2>
-            {isAiRanked && (
-              <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">🤖 AI מעודכן</span>
+        {top5Overall.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-8 rounded-xl border border-border/50 bg-card/50 p-5"
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <Trophy size={20} className="text-primary" />
+              <h2 className="font-display font-bold text-lg text-foreground">טופ 5 — הכי הרבה ביקורות חיוביות</h2>
+              {isAiRanked && (
+                <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">🤖 AI מעודכן</span>
+              )}
+            </div>
+            {isAiRanked && top5Month && (
+              <p className="text-xs text-muted-foreground mb-3 mr-7">דירוג חודשי מבוסס AI — עודכן לאחרונה ב-{top5Month}</p>
             )}
-          </div>
-          {isAiRanked && top5Month && (
-            <p className="text-xs text-muted-foreground mb-3 mr-7">דירוג חודשי מבוסס AI — עודכן לאחרונה ב-{top5Month}</p>
-          )}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 auto-rows-fr">
-            {top5Overall.map((biz, i) => (
-              <motion.div
-                key={biz.slug}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.06 }}
-                className="h-full"
-              >
-                <div className="relative h-full">
-                  {i < 3 && (
-                    <div className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-md"
-                      style={{
-                        background: i === 0 ? 'hsl(var(--primary))' : i === 1 ? 'hsl(220 10% 45%)' : 'hsl(25 30% 35%)',
-                      }}
-                    >
-                      {["🥇", "🥈", "🥉"][i]}
-                    </div>
-                  )}
-                  <BusinessCard {...biz} />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 auto-rows-fr">
+              {top5Overall.map((biz, i) => (
+                <motion.div
+                  key={biz.slug}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.06 }}
+                  className="h-full"
+                >
+                  <div className="relative h-full">
+                    {i < 3 && (
+                      <div className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-md"
+                        style={{
+                          background: i === 0 ? 'hsl(var(--primary))' : i === 1 ? 'hsl(220 10% 45%)' : 'hsl(25 30% 35%)',
+                        }}
+                      >
+                        {["🥇", "🥈", "🥉"][i]}
+                      </div>
+                    )}
+                    <BusinessCard {...biz} />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Rating Filter + Sort */}
         <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
@@ -252,7 +303,6 @@ const SearchPage = () => {
 
           {/* Freelancers Tab */}
           <TabsContent value="freelancers">
-            {/* Main Categories */}
             <div className="flex gap-2 flex-wrap mb-3">
               {ALL_FREELANCER_CATS.map(cat => (
                 <Button 
@@ -269,7 +319,6 @@ const SearchPage = () => {
               ))}
             </div>
 
-            {/* Sub-categories */}
             {currentSubcats.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}

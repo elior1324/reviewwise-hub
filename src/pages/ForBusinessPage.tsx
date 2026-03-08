@@ -6,14 +6,12 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Star, TrendingUp, Users, Zap, BarChart3, Code, Award, ArrowLeft, CheckCircle, X, Crown, Sparkles } from "lucide-react";
-import { BUSINESSES } from "@/data/mockData";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.6, ease: "easeOut" as const } }),
 };
 
-// Logos / Social proof businesses that "use" ReviewHub
 const TRUSTED_COMPANIES = [
   { name: "אקדמיית שיווק דיגיטלי", logo: "DMA", rating: 4.8, reviews: 124 },
   { name: "Code Masters IL", logo: "CM", rating: 4.6, reviews: 89 },
@@ -116,7 +114,7 @@ const ForBusinessPage = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
 
-      {/* Hero — Trustpilot-style */}
+      {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
         <div className="absolute top-20 left-1/3 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl animate-float" />
@@ -132,7 +130,7 @@ const ForBusinessPage = () => {
                   <span className="gradient-text glow-text">ביקורות מאומתות</span>
                 </motion.h1>
                 <motion.p variants={fadeUp} custom={2} className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                  הצטרפו למאות עסקים בישראל שמשתמשים ב-ReviewHub כדי לאסוף ביקורות מאומתות, לבנות מוניטין ולהגדיל מכירות.
+                  הצטרפו לעסקים בישראל שמשתמשים ב-ReviewHub כדי לאסוף ביקורות מאומתות, לבנות מוניטין ולהגדיל מכירות.
                 </motion.p>
                 <motion.div variants={fadeUp} custom={3} className="flex gap-3 flex-wrap">
                   <Link to="/register">
@@ -148,7 +146,6 @@ const ForBusinessPage = () => {
                 </motion.div>
               </div>
               <motion.div variants={fadeUp} custom={2} className="hidden md:block">
-                {/* Stats preview card */}
                 <div className="rounded-2xl p-6 bg-card border border-border/50 shadow-card space-y-4">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-xl overflow-hidden">
@@ -161,20 +158,16 @@ const ForBusinessPage = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { label: "דירוג ממוצע", value: "4.8 ⭐" },
-                      { label: "ביקורות החודש", value: "+23" },
-                      { label: "אחוז מענה", value: "92%" },
-                      { label: "קליקי אפיליאט", value: "1,240" },
+                      { label: "דירוג ממוצע", value: "— ⭐" },
+                      { label: "ביקורות החודש", value: "—" },
+                      { label: "אחוז מענה", value: "—" },
+                      { label: "קליקי אפיליאט", value: "—" },
                     ].map(({ label, value }) => (
                       <div key={label} className="rounded-lg bg-secondary p-3">
                         <p className="text-xs text-muted-foreground">{label}</p>
                         <p className="font-display font-bold text-foreground">{value}</p>
                       </div>
                     ))}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-primary">
-                    <TrendingUp size={14} />
-                    <span>ההמרות עלו ב-34% החודש</span>
                   </div>
                 </div>
               </motion.div>
@@ -183,7 +176,7 @@ const ForBusinessPage = () => {
         </div>
       </section>
 
-      {/* Social Proof — LOI: Companies using ReviewHub */}
+      {/* Social Proof */}
       <section className="border-y border-border/50 glass">
         <div className="container py-12">
           <p className="text-center text-sm text-muted-foreground mb-8 font-medium">חברות ועסקים שכבר סומכים על ReviewHub</p>
@@ -210,23 +203,6 @@ const ForBusinessPage = () => {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="container py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { value: "850+", label: "עסקים רשומים" },
-            { value: "12,400+", label: "ביקורות מאומתות" },
-            { value: "34%", label: "עלייה ממוצעת בהמרות" },
-            { value: "98%", label: "שביעות רצון עסקית" },
-          ].map(({ value, label }, i) => (
-            <motion.div key={label} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-              <p className="font-display font-bold text-3xl md:text-4xl text-foreground">{value}</p>
-              <p className="text-sm text-muted-foreground mt-1">{label}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
       {/* Features */}
       <section className="border-y border-border/50">
         <div className="container py-20">
@@ -249,148 +225,4 @@ const ForBusinessPage = () => {
                   <Icon size={22} className="text-primary" />
                 </div>
                 <h3 className="font-display font-semibold text-lg text-foreground mb-2">{title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials from business owners */}
-      <section className="container py-20">
-        <div className="text-center mb-12">
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">מה בעלי עסקים אומרים</h2>
-          <p className="text-muted-foreground">חברות שכבר משתמשות ב-ReviewHub משתפות את החוויה שלהן</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t, i) => (
-            <motion.div
-              key={t.name}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeUp}
-              custom={i}
-              className="rounded-xl p-6 bg-card border border-border/50"
-            >
-              <div className="flex gap-0.5 mb-4">
-                {Array.from({ length: t.rating }, (_, j) => (
-                  <Star key={j} size={16} className="fill-star text-star" />
-                ))}
-              </div>
-              <p className="text-sm text-foreground/80 leading-relaxed mb-4">"{t.text}"</p>
-              <div>
-                <p className="font-display font-semibold text-sm text-foreground">{t.name}</p>
-                <p className="text-xs text-muted-foreground">{t.role}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section className="border-y border-border/50">
-        <div className="container py-20">
-          <div className="text-center mb-12">
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">תוכניות ומחירים</h2>
-            <p className="text-muted-foreground">בחרו את התוכנית המתאימה לעסק שלכם</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
-            {PLANS.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                custom={i}
-                className={`rounded-xl p-6 border ${
-                  plan.highlighted
-                    ? "bg-card border-primary/50 shadow-card-hover relative scale-[1.03]"
-                    : (plan as any).premium
-                    ? "bg-gradient-to-b from-card to-primary/5 border-primary/30 relative"
-                    : "bg-card border-border/50"
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                    <Sparkles size={12} /> הכי פופולרי
-                  </div>
-                )}
-                {(plan as any).premium && (
-                  <div className="absolute -top-3 right-4 bg-foreground text-background text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                    <Crown size={12} /> הכל כולל הכל
-                  </div>
-                )}
-                <h3 className="font-display font-bold text-xl text-foreground mb-1">{plan.name}</h3>
-                <div className="mb-1">
-                  {(plan as any).originalPrice && (
-                    <span className="text-sm text-muted-foreground line-through ml-2">{(plan as any).originalPrice}</span>
-                  )}
-                  <span className="font-display font-bold text-3xl text-primary">{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{plan.period}</span>
-                </div>
-                <div className="mb-4" />
-                <ul className="space-y-2 mb-4">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
-                      <CheckCircle size={14} className="text-primary shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                {(plan as any).excluded && (plan as any).excluded.length > 0 && (
-                  <ul className="space-y-1.5 mb-4 opacity-50">
-                    {(plan as any).excluded.map((f: string) => (
-                      <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground line-through">
-                        <X size={14} className="shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <Link to="/register">
-                  <Button className={`w-full ${
-                    plan.highlighted
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
-                      : (plan as any).premium
-                      ? "bg-foreground text-background hover:bg-foreground/90"
-                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                  }`}>
-                    {plan.cta}
-                  </Button>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-          <p className="text-center text-xs text-muted-foreground mt-8">כל התוכניות כוללות SSL, גיבוי יומי ואבטחת מידע מלאה. ביטול בכל עת.</p>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="container py-20">
-        <div className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border" style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}>
-          <div className="absolute inset-0 bg-primary/5 blur-3xl" />
-          <div className="relative">
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
-              מוכנים לבנות אמון אמיתי?
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-              הצטרפו למאות עסקים שכבר משתמשים ב-ReviewHub. התחילו בחינם ושדרגו כשתהיו מוכנים.
-            </p>
-            <Link to="/register">
-              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary gap-2">
-                צרו חשבון בחינם <ArrowLeft size={16} />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
-      <AIChatbot />
-    </div>
-  );
-};
-
-export default ForBusinessPage;
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</

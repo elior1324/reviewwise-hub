@@ -14,9 +14,10 @@ import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
 import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import AnimatedCounter from "@/components/AnimatedCounter";
-import { useState, useRef } from "react";
-import { BUSINESSES, REVIEWS, FREELANCER_CATEGORIES, COURSE_CATEGORIES } from "@/data/mockData";
+import { useState, useRef, useEffect } from "react";
+import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, type Business, type Review } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
+import { supabase } from "@/integrations/supabase/client";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -52,30 +53,131 @@ const AUDIENCE_TYPES = [
   { icon: BarChart3, label: "יזמים", desc: "Growth וניהול סטארטאפ" },
 ];
 
-const FREELANCER_CATS_DISPLAY = FREELANCER_CATEGORIES.slice(0, 8).map(cat => ({
-  label: cat,
-  query: cat,
-  count: BUSINESSES.filter(b => b.type === "freelancer" && b.category === cat).reduce((s, b) => s + b.reviewCount, 0),
-})).filter(c => c.count > 0);
-
-const COURSE_CATS_DISPLAY = COURSE_CATEGORIES.map(cat => ({
-  label: cat,
-  query: cat,
-  count: BUSINESSES.filter(b => b.type === "course-provider" && b.category === cat).reduce((s, b) => s + b.reviewCount, 0),
-}));
-
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const [topFreelancers, setTopFreelancers] = useState<Business[]>([]);
+  const [topCourseProviders, setTopCourseProviders] = useState<Business[]>([]);
+  const [recentReviews, setRecentReviews] = useState<Review[]>([]);
+  const [freelancerCatCounts, setFreelancerCatCounts] = useState<Record<string, number>>({});
+  const [courseCatCounts, setCourseCatCounts] = useState<Record<string, number>>({});
+  const [stats, setStats] = useState({ reviews: 0, businesses: 0 });
+
+  useEffect(() => {
+    // Fetch top freelancers
+    supabase
+      .from("businesses")
+      .select("*")
+      .eq("category", "freelancer")
+      .order("rating", { ascending: false })
+      .limit(4)
+      .then(({ data }) => {
+        // Try matching by category field being a freelancer category
+      });
+
+    // Fetch all businesses and map to Business type
+    const fetchBusinesses = async () => {
+      const { data: allBiz } = await supabase
+        .from("businesses")
+        .select("*")
+        .order("rating", { ascending: false });
+
+      if (!allBiz) return;
+
+      const mapped: Business[] = allBiz.map((b: any) => ({
+        slug: b.slug,
+        name: b.name,
+        type: FREELANCER_CATEGORIES.includes(b.category) ? "freelancer" as const : "course-provider" as const,
+        category: b.category,
+        rating: Number(b.rating) || 0,
+        reviewCount: b.review_count || 0,
+        description: b.description || "",
+        logo: b.logo_url || undefined,
+        website: b.website || undefined,
+        email: b.email || undefined,
+        phone: b.phone || undefined,
+        socialLinks: b.social_links as any || undefined,
+      }));
+
+      const freelancers = mapped.filter(b => b.type === "freelancer").slice(0, 4);
+      const courseProvs = mapped.filter(b => b.type === "course-provider").slice(0, 4);
+      setTopFreelancers(freelancers);
+      setTopCourseProviders(courseProvs);
+
+      // Category counts
+      const fCounts: Record<string, number> = {};
+      const cCounts: Record<string, number> = {};
+      mapped.forEach(b => {
+        if (b.type === "freelancer") {
+          fCounts[b.category] = (fCounts[b.category] || 0) + b.reviewCount;
+        } else {
+          cCounts[b.category] = (cCounts[b.category] || 0) + b.reviewCount;
+        }
+      });
+      setFreelancerCatCounts(fCounts);
+      setCourseCatCounts(cCounts);
+
+      setStats(prev => ({ ...prev, businesses: allBiz.length }));
+    };
+
+    const fetchReviews = async () => {
+      const { data } = await supabase
+        .from("reviews")
+        .select("*, courses(name), profiles(display_name)")
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+      if (data) {
+        const mapped: Review[] = data.map((r: any) => ({
+          id: r.id,
+          reviewerName: r.anonymous ? "אנונימי" : (r.profiles?.display_name || "משתמש"),
+          rating: r.rating,
+          text: r.text,
+          courseName: r.courses?.name || "",
+          courseId: r.course_id,
+          businessSlug: "",
+          date: new Date(r.created_at).toLocaleDateString("he-IL"),
+          purchaseDate: r.created_at,
+          verified: r.verified || false,
+          anonymous: r.anonymous || false,
+          updatedAt: r.updated_at !== r.created_at ? new Date(r.updated_at).toLocaleDateString("he-IL") : undefined,
+          flagged: r.flagged || false,
+          flagReason: r.flag_reason || undefined,
+        }));
+        setRecentReviews(mapped);
+        setStats(prev => ({ ...prev, reviews: data.length }));
+      }
+    };
+
+    // Fetch total review count
+    const fetchTotalReviews = async () => {
+      const { count } = await supabase
+        .from("reviews")
+        .select("*", { count: "exact", head: true });
+      if (count !== null) setStats(prev => ({ ...prev, reviews: count }));
+    };
+
+    fetchBusinesses();
+    fetchReviews();
+    fetchTotalReviews();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
-  const topFreelancers = BUSINESSES.filter(b => b.type === "freelancer").sort((a, b) => b.rating - a.rating).slice(0, 4);
-  const topCourseProviders = BUSINESSES.filter(b => b.type === "course-provider").sort((a, b) => b.rating - a.rating).slice(0, 4);
-  const recentReviews = REVIEWS.slice(0, 3);
+  const FREELANCER_CATS_DISPLAY = FREELANCER_CATEGORIES.slice(0, 8).map(cat => ({
+    label: cat,
+    query: cat,
+    count: freelancerCatCounts[cat] || 0,
+  })).filter(c => c.count > 0);
+
+  const COURSE_CATS_DISPLAY = COURSE_CATEGORIES.map(cat => ({
+    label: cat,
+    query: cat,
+    count: courseCatCounts[cat] || 0,
+  }));
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -171,44 +273,50 @@ const Index = () => {
             <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {topFreelancers.map((biz, i) => (
-            <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-              <BusinessCard {...biz} />
-            </motion.div>
-          ))}
-        </div>
+        {topFreelancers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topFreelancers.map((biz, i) => (
+              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <BusinessCard {...biz} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-10">עדיין אין בעלי מקצוע רשומים. היו הראשונים!</p>
+        )}
       </section>
 
       {/* Freelancer Categories */}
-      <section className="border-y border-border/50 glass">
-        <div className="container py-12">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-60px" }}
-          >
-            <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2 mb-2">
-              <UserCheck size={20} className="text-primary" />
-              <h2 className="font-display font-bold text-xl text-foreground">בעלי מקצוע עצמאים</h2>
+      {FREELANCER_CATS_DISPLAY.length > 0 && (
+        <section className="border-y border-border/50 glass">
+          <div className="container py-12">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+            >
+              <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2 mb-2">
+                <UserCheck size={20} className="text-primary" />
+                <h2 className="font-display font-bold text-xl text-foreground">בעלי מקצוע עצמאים</h2>
+              </motion.div>
+              <motion.p variants={fadeUp} custom={1} className="text-sm text-muted-foreground mb-5">מנהלי סושיאל, מעצבי אתרים, עורכי וידאו, כותבים שיווקיים ועוד</motion.p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                {FREELANCER_CATS_DISPLAY.map(({ label, query, count }, i) => (
+                  <motion.div key={label} variants={fadeUp} custom={2 + i * 0.3}>
+                    <Link
+                      to={`/search?q=${encodeURIComponent(query)}&tab=freelancers`}
+                      className="block rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 text-center group"
+                    >
+                      <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
-            <motion.p variants={fadeUp} custom={1} className="text-sm text-muted-foreground mb-5">מנהלי סושיאל, מעצבי אתרים, עורכי וידאו, כותבים שיווקיים ועוד</motion.p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {FREELANCER_CATS_DISPLAY.map(({ label, query, count }, i) => (
-                <motion.div key={label} variants={fadeUp} custom={2 + i * 0.3}>
-                  <Link
-                    to={`/search?q=${encodeURIComponent(query)}&tab=freelancers`}
-                    className="block rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 text-center group"
-                  >
-                    <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       {/* Top Course Providers */}
       <section className="container py-20">
@@ -224,44 +332,50 @@ const Index = () => {
             <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {topCourseProviders.map((biz, i) => (
-            <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-              <BusinessCard {...biz} />
-            </motion.div>
-          ))}
-        </div>
+        {topCourseProviders.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topCourseProviders.map((biz, i) => (
+              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <BusinessCard {...biz} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-10">עדיין אין ספקי קורסים רשומים. היו הראשונים!</p>
+        )}
       </section>
 
       {/* Course Categories */}
-      <section className="border-y border-border/50 glass">
-        <div className="container py-12">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-60px" }}
-          >
-            <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2 mb-2">
-              <BookOpen size={20} className="text-primary" />
-              <h2 className="font-display font-bold text-xl text-foreground">קורסים, סדנאות והכשרות</h2>
+      {COURSE_CATS_DISPLAY.some(c => c.count > 0) && (
+        <section className="border-y border-border/50 glass">
+          <div className="container py-12">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+            >
+              <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2 mb-2">
+                <BookOpen size={20} className="text-primary" />
+                <h2 className="font-display font-bold text-xl text-foreground">קורסים, סדנאות והכשרות</h2>
+              </motion.div>
+              <motion.p variants={fadeUp} custom={1} className="text-sm text-muted-foreground mb-5">קורסים, סדנאות, הרצאות, לימודים, תעודות הכשרה ועוד</motion.p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                {COURSE_CATS_DISPLAY.filter(c => c.count > 0).map(({ label, query, count }, i) => (
+                  <motion.div key={label} variants={fadeUp} custom={2 + i * 0.3}>
+                    <Link
+                      to={`/search?q=${encodeURIComponent(query)}&tab=courses`}
+                      className="block rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 text-center group"
+                    >
+                      <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
-            <motion.p variants={fadeUp} custom={1} className="text-sm text-muted-foreground mb-5">קורסים, סדנאות, הרצאות, לימודים, תעודות הכשרה ועוד</motion.p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {COURSE_CATS_DISPLAY.map(({ label, query, count }, i) => (
-                <motion.div key={label} variants={fadeUp} custom={2 + i * 0.3}>
-                  <Link
-                    to={`/search?q=${encodeURIComponent(query)}&tab=courses`}
-                    className="block rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 text-center group"
-                  >
-                    <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       {/* Stats */}
       <section className="border-b border-border/50">
@@ -274,10 +388,10 @@ const Index = () => {
             variants={staggerContainer}
           >
             {[
-              { icon: Star, label: "ביקורות", value: "12,400+" },
-              { icon: Users, label: "עסקים ופרילנסרים", value: "850+" },
-              { icon: ShieldCheck, label: "מאומתות", value: "98%" },
-              { icon: TrendingUp, label: "מבקרים בחודש", value: "45K+" },
+              { icon: Star, label: "ביקורות", value: stats.reviews > 0 ? stats.reviews.toLocaleString() : "0" },
+              { icon: Users, label: "עסקים ופרילנסרים", value: stats.businesses > 0 ? stats.businesses.toLocaleString() : "0" },
+              { icon: ShieldCheck, label: "מאומתות", value: "100%" },
+              { icon: TrendingUp, label: "פלטפורמה חדשה", value: "🚀" },
             ].map(({ icon: Icon, label, value }) => (
               <motion.div key={label} variants={scaleIn}>
                 <motion.div
@@ -285,7 +399,7 @@ const Index = () => {
                 >
                   <Icon size={24} className="mx-auto mb-2 text-primary" />
                   <p className="font-display font-bold text-2xl text-foreground">
-                    <AnimatedCounter value={value} />
+                    {value}
                   </p>
                   <p className="text-sm text-muted-foreground">{label}</p>
                 </motion.div>
@@ -301,13 +415,17 @@ const Index = () => {
           <motion.h2 variants={fadeUp} custom={0} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">ביקורות אחרונות</motion.h2>
           <motion.p variants={fadeUp} custom={1} className="text-muted-foreground mb-10">משוב אמיתי מלקוחות מאומתים</motion.p>
         </motion.div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {recentReviews.map((review, i) => (
-            <motion.div key={review.id} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={fadeUp} custom={i}>
-              <ReviewCard {...review} />
-            </motion.div>
-          ))}
-        </div>
+        {recentReviews.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {recentReviews.map((review, i) => (
+              <motion.div key={review.id} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={fadeUp} custom={i}>
+                <ReviewCard {...review} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-10">עדיין אין ביקורות. היו הראשונים לכתוב!</p>
+        )}
       </section>
 
       {/* Earn Money CTA */}
@@ -475,36 +593,12 @@ const Index = () => {
           </motion.div>
           <div className="max-w-3xl mx-auto space-y-3">
             {[
-              { q: "מה זה ReviewHub?", a: "ReviewHub היא פלטפורמת ביקורות מאומתות מובילה בישראל. רק מי שרכש בפועל קורס או שירות יכול לכתוב ביקורת — כך אנחנו מבטיחים אמינות של 98%." },
+              { q: "מה זה ReviewHub?", a: "ReviewHub היא פלטפורמת ביקורות מאומתות מובילה בישראל. רק מי שרכש בפועל קורס או שירות יכול לכתוב ביקורת — כך אנחנו מבטיחים אמינות מוחלטת." },
               { q: "איך אני יודע שהביקורות אמיתיות?", a: "כל ביקורת עוברת תהליך אימות — אנחנו מוודאים שהכותב אכן רכש את הקורס או השירות. ביקורות מאומתות מסומנות בתג ✅ \"רכישה מאומתת\"." },
               { q: "האם השימוש באתר עולה כסף?", a: "לא! השימוש באתר לצרכנים הוא חינמי לחלוטין — קריאת ביקורות, חיפוש, השוואות וכתיבת ביקורות. ללא עלויות נסתרות." },
               { q: "איך כותבים ביקורת?", a: "הירשמו לאתר (חינם), ואז תוכלו לכתוב ביקורת על קורס או שירות שרכשתם — דרך קישור ייעודי שתקבלו מהספק, או דרך עמוד הקורס/הפרילנסר באתר." },
               { q: "אפשר לכתוב ביקורת בעילום שם?", a: "כן! בעת כתיבת ביקורת תוכלו לסמן \"ביקורת אנונימית\". שמכם לא יוצג, אך האימות שרכשתם את המוצר עדיין נשמר כדי לשמור על אמינות." },
-              { q: "מה ההבדל בין פרילנסר לקורס?", a: "פרילנסר מספק שירות אישי (למשל עיצוב אתר, ניהול סושיאל), בעוד קורס הוא תוכנית לימודים שאפשר ללמוד ממנה בעצמכם. שניהם מופיעים באתר עם ביקורות מאומתות." },
-              { q: "איך מוצאים קורס טוב בשיווק דיגיטלי?", a: "גשו לעמוד החיפוש וסננו לפי \"שיווק דיגיטלי\". אקדמיית שיווק דיגיטלי היא הפופולרית ביותר עם ⭐4.8 ו-124 ביקורות מאומתות, עם קורסים מ-₪990 ועד ₪2,490." },
-              { q: "מי הפרילנסר הכי מומלץ?", a: "זה תלוי בתחום! למשל: מאיה כהן מובילה בניהול סושיאל (⭐4.9), דנה רוזנברג בעיצוב גרפי (⭐4.9), וטל ברק בקידום אורגני (⭐4.8). גשו לחיפוש ובחרו קטגוריה." },
-              { q: "איך משווים בין שני קורסים?", a: "גשו לעמודי הקורסים וקראו את הביקורות. שימו לב לדירוג הכולל, מספר הביקורות, ותוכן הביקורות עצמן. גם הצ'אטבוט שלנו (למטה) יכול לעזור לכם להשוות!" },
-              { q: "כמה עולים הקורסים?", a: "המחירים משתנים: קורסים קצרים מ-₪990, קורסים מלאים ₪2,000-₪5,000, ובוטקמפים מקיפים עד ₪14,900. המחיר מופיע בעמוד כל קורס." },
-              { q: "איך נרשמים לאתר?", a: "לחצו על \"התחברו / הרשמו\" בתפריט העליון. תוכלו להירשם עם אימייל וסיסמה, או להתחבר מהר עם חשבון Google." },
-              { q: "שכחתי את הסיסמה, מה עושים?", a: "בעמוד ההתחברות יש אפשרות \"שכחתי סיסמה\". תזינו את כתובת המייל ותקבלו קישור לאיפוס." },
-              { q: "מה זה ביקורת \"מאומתת\"?", a: "ביקורת מאומתת (✅) מסמנת שהמערכת שלנו אימתה שהכותב אכן רכש את הקורס או השירות — דרך חשבונית, אישור רכישה, או אימות ישיר מול הספק." },
-              { q: "אפשר לדווח על ביקורת בעייתית?", a: "בהחלט! ליד כל ביקורת יש כפתור דיווח (🚩). תוכלו לדווח על ביקורות לא רלוונטיות, פוגעניות, או חשודות כמזויפות. הצוות שלנו בודק כל דיווח." },
-              { q: "אפשר לערוך ביקורת אחרי שפרסמתי?", a: "כן, תוכלו לערוך את הביקורת מלוח הבקרה שלכם. שימו לב שעריכות עשויות לדרוש אימות מחדש." },
-              { q: "מה עושים אם עסק מגיב לביקורת שלי?", a: "זה דבר חיובי! הספק קורא את המשוב שלכם ומגיב. תוכלו לראות את התגובה מתחת לביקורת. אם יש בעיה עם התגובה, תוכלו לדווח עליה." },
-              { q: "איך בוחרים בין כמה פרילנסרים באותו תחום?", a: "שימו לב ל: (1) דירוג כולל וכמות ביקורות, (2) תוכן הביקורות — מה אומרים הלקוחות, (3) ההתמחות הספציפית. גם הצ'אטבוט שלנו יכול לעזור להשוות!" },
               { q: "מה זה תוכנית השותפים (אפיליאט)?", a: "כשתכתבו ביקורת מאומתת, אתם הופכים לשותפים! אם מישהו רוכש קורס או שירות בזכות הביקורת שלכם, אתם מרוויחים עמלה מכל מכירה — הכנסה פאסיבית." },
-              { q: "איך מרוויחים כסף מביקורות?", a: "שלושה שלבים: (1) כתבו ביקורת אמיתית על מוצר שרכשתם, (2) אנחנו מאמתים את הרכישה, (3) כשמישהו רוכש בזכותכם — אתם מקבלים עמלה. ככה פשוט!" },
-              { q: "איזה קורס תכנות מומלץ למתחילים?", a: "Code Masters IL מציעים בוטקמפ Full-Stack (⭐4.6, 89 ביקורות) שמתאים גם למתחילים. עלות: ₪14,900. יש להם גם קורס React מתקדם למי שכבר מכיר תכנות." },
-              { q: "האתר זמין גם במובייל?", a: "כן! האתר מותאם לחלוטין לטלפון נייד, טאבלט ומחשב. תוכלו לגלוש, לחפש ולכתוב ביקורות מכל מכשיר." },
-              { q: "איך מוצאים קורס UI/UX טוב?", a: "בית הספר לעיצוב ת\"א מוביל עם ⭐4.9 ו-67 ביקורות. הקורס \"יסודות עיצוב UI/UX\" עולה ₪3,990. גשו לחיפוש וסננו לפי \"עיצוב UI/UX\"." },
-              { q: "יש קורסים במדעי נתונים?", a: "כן! מרכז מדעי הנתונים מוביל עם ⭐4.7 ו-156 ביקורות. הם מציעים קורס Python (₪2,990) וקורס למידת מכונה מתקדמת (₪4,990)." },
-              { q: "איך אני יודע איזה קורס שווה את המחיר?", a: "קראו את הביקורות המאומתות — לקוחות אמיתיים כותבים על החוויה שלהם, כולל יחס מחיר-ערך. שימו לב לדירוג, כמות הביקורות, והמלצות ספציפיות." },
-              { q: "מה קורה אם לא מרוצה מקורס שרכשתי?", a: "מדיניות ההחזרים תלויה בספק הספציפי. מומלץ לבדוק את תנאי ההחזר לפני הרכישה. כתיבת ביקורת כנה תעזור ללקוחות עתידיים לקבל החלטה מושכלת." },
-              { q: "אפשר לראות ביקורות רק של אנשים ספציפיים?", a: "כרגע אפשר לסנן ביקורות לפי דירוג, תאריך וסטטוס אימות. בעתיד נוסיף אפשרויות סינון נוספות." },
-              { q: "האם ReviewHub שייכת לחברה ישראלית?", a: "כן! ReviewHub היא פלטפורמה ישראלית עם ממשק מלא בעברית, שמתמקדת בשוק החינוך הדיגיטלי ובעלי המקצוע בישראל." },
-              { q: "איך יוצרים קשר עם הצוות?", a: "תוכלו לפנות דרך עמוד אודות, דרך הצ'אטבוט (הכפתור למטה), או דרך עמוד יצירת קשר. אנחנו כאן לכל שאלה! 😊" },
-              { q: "יש אפליקציה לטלפון?", a: "כרגע אין אפליקציה ייעודית, אך האתר מותאם לחלוטין למובייל ועובד מצוין מהדפדפן בטלפון. אפשר גם להוסיף אותו למסך הבית." },
-              { q: "מה מבטיח שהביקורות לא נכתבות על ידי העסק עצמו?", a: "תהליך האימות שלנו מוודא שרק לקוחות שרכשו בפועל כותבים ביקורות. בנוסף, מערכת AI שלנו סורקת ומזהה ביקורות חשודות. שיטה זו מבטיחה אמינות של 98%." },
             ].map(({ q, a }, i) => (
               <motion.div
                 key={i}
