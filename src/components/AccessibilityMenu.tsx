@@ -18,6 +18,7 @@ type AccessibilitySettings = {
   bigCursor: boolean;
   grayscale: boolean;
   textSpacing: boolean;
+  invertColors: boolean;
 };
 
 const defaults: AccessibilitySettings = {
@@ -29,6 +30,7 @@ const defaults: AccessibilitySettings = {
   bigCursor: false,
   grayscale: false,
   textSpacing: false,
+  invertColors: false,
 };
 
 const fontSizeLabels = ["רגיל", "גדול", "גדול מאוד"];
