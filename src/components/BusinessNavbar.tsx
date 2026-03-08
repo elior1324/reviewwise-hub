@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, User } from "lucide-react";
+import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -215,6 +216,7 @@ const BusinessNavbar = () => {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
+          <AccessibilityMenu />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -238,13 +240,8 @@ const BusinessNavbar = () => {
           ) : (
             <div className="hidden md:flex items-center gap-2">
               <Link to="/business/login">
-                <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground font-medium">
-                  התחברו
-                </Button>
-              </Link>
-              <Link to="/business/signup">
                 <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary font-medium">
-                  צרו חשבון בחינם
+                  התחברו / הרשמו
                 </Button>
               </Link>
             </div>
@@ -297,10 +294,7 @@ const BusinessNavbar = () => {
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודותינו</Link>
           <div className="border-t border-border/30 my-2" />
           {!user && (
-            <>
-              <Link to="/business/login" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>התחברו</Link>
-              <Link to="/business/signup" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>צרו חשבון בחינם</Link>
-            </>
+            <Link to="/business/login" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>התחברו / הרשמו</Link>
           )}
           {user && (
             <>
