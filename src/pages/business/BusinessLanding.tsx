@@ -7,6 +7,10 @@ import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
   Award, ArrowLeft, CheckCircle, Users, X, Crown, Sparkles
 } from "lucide-react";
+import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -92,6 +96,29 @@ const TRUSTED = [
 ];
 
 const BusinessLanding = () => {
+  const { user, subscriptionTier } = useAuth();
+  const { toast } = useToast();
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
+  const handleCheckout = async (tier: "pro" | "premium") => {
+    if (!user) {
+      toast({ title: "יש להתחבר תחילה", variant: "destructive" });
+      return;
+    }
+    setCheckoutLoading(tier);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: STRIPE_TIERS[tier].price_id },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
@@ -288,17 +315,27 @@ const BusinessLanding = () => {
                   ))}
                 </ul>
               )}
-              <Link to="/business/signup">
-                <Button className={`w-full ${
-                  plan.highlighted
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
-                    : (plan as any).premium
-                    ? "bg-foreground text-background hover:bg-foreground/90"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}>
-                  {plan.cta}
+              {plan.tier === "free" ? (
+                <Link to="/business/signup">
+                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                    {plan.cta}
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  onClick={() => handleCheckout(plan.tier as "pro" | "premium")}
+                  disabled={checkoutLoading === plan.tier || subscriptionTier === plan.tier}
+                  className={`w-full ${
+                    plan.highlighted
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
+                      : plan.premium
+                      ? "bg-foreground text-background hover:bg-foreground/90"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  }`}
+                >
+                  {subscriptionTier === plan.tier ? "✓ התוכנית הנוכחית" : checkoutLoading === plan.tier ? "טוען..." : plan.cta}
                 </Button>
-              </Link>
+              )}
             </motion.div>
           ))}
         </div>
