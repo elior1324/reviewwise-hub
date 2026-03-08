@@ -216,6 +216,7 @@ const BusinessNavbar = () => {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
+          <AccessibilityMenu />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
