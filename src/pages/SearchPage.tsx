@@ -169,10 +169,16 @@ const SearchPage = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mb-8 rounded-xl border border-border/50 bg-card/50 p-5"
         >
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-1">
             <Trophy size={20} className="text-primary" />
             <h2 className="font-display font-bold text-lg text-foreground">טופ 5 — הכי הרבה ביקורות חיוביות</h2>
+            {isAiRanked && (
+              <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">🤖 AI מעודכן</span>
+            )}
           </div>
+          {isAiRanked && top5Month && (
+            <p className="text-xs text-muted-foreground mb-3 mr-7">דירוג חודשי מבוסס AI — עודכן לאחרונה ב-{top5Month}</p>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {top5Overall.map((biz, i) => (
               <motion.div
