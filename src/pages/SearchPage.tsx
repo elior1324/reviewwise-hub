@@ -27,8 +27,6 @@ const SearchPage = () => {
   const { data: courseCats = [] } = useCategories("course");
   const ALL_FREELANCER_CATS = ["הכל", ...freelancerCats.filter(c => c !== "אחר"), "אחר"];
   const ALL_COURSE_CATS = ["הכל", ...courseCats.filter(c => c !== "אחר"), "אחר"];
-  const [minRating, setMinRating] = useState(0);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
 
   const freelancers = BUSINESSES.filter(b => {
     if (b.type !== "freelancer") return false;
