@@ -20,42 +20,39 @@ const BusinessDashboard = () => {
   const totalRevenue = AFFILIATE_CLICKS.filter(c => c.converted).reduce((s, c) => s + (c.revenue || 0), 0);
 
   const STATS = [
-    { icon: Star, label: "Avg. Rating", value: "4.8", change: "+0.2", up: true },
-    { icon: MessageSquare, label: "Total Reviews", value: "124", change: "+12", up: true },
-    { icon: MousePointerClick, label: "Site Clicks", value: totalClicks.toString(), change: "+23%", up: true },
-    { icon: DollarSign, label: "Revenue via ReviewHub", value: `₪${totalRevenue.toLocaleString()}`, change: "+18%", up: true },
+    { icon: Star, label: "דירוג ממוצע", value: "4.8", change: "+0.2", up: true },
+    { icon: MessageSquare, label: "סה״כ ביקורות", value: "124", change: "+12", up: true },
+    { icon: MousePointerClick, label: "קליקים לאתר", value: totalClicks.toString(), change: "+23%", up: true },
+    { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: `₪${totalRevenue.toLocaleString()}`, change: "+18%", up: true },
   ];
 
-  // Mock AI weekly report
   const aiReport = {
-    date: "March 1-7, 2026",
+    date: "1-7 במרץ 2026",
     strengths: [
-      "Customer satisfaction increased by 12% this week",
-      "Response time to reviews improved — avg 4 hours",
-      "\"שיווק דיגיטלי מאסטרקלאס\" received 5 new 5-star reviews",
+      "שביעות רצון הלקוחות עלתה ב-12% השבוע",
+      "זמן התגובה לביקורות השתפר — ממוצע 4 שעות",
+      "הקורס ״שיווק דיגיטלי מאסטרקלאס״ קיבל 5 ביקורות חדשות של 5 כוכבים",
     ],
     weaknesses: [
-      "\"אנליטיקס מתקדם\" course saw a 15% drop in enrollments",
-      "2 negative reviews mention pace being too fast for beginners",
-      "Affiliate click-through rate dropped 8% vs last week",
+      "הקורס ״אנליטיקס מתקדם״ ראה ירידה של 15% בהרשמות",
+      "2 ביקורות שליליות מציינות שהקצב מהיר מדי למתחילים",
+      "אחוז הקליקים באפיליאט ירד ב-8% לעומת השבוע הקודם",
     ],
     recommendations: [
-      "Consider adding a beginner-friendly track for Analytics course",
-      "Respond to the 2 pending negative reviews within 24 hours",
-      "Update affiliate landing page — current bounce rate is 45%",
+      "שקלו להוסיף מסלול למתחילים בקורס האנליטיקס",
+      "הגיבו ל-2 הביקורות השליליות הממתינות תוך 24 שעות",
+      "עדכנו את דף הנחיתה של האפיליאט — אחוז הנטישה הנוכחי הוא 45%",
     ],
   };
 
-  // Mock notifications
   const notifications = [
-    { id: 1, type: "review", text: "שרה ל. left a 5-star review on שיווק דיגיטלי מאסטרקלאס", time: "2 hours ago" },
-    { id: 2, type: "review", text: "New 3-star review on אנליטיקס מתקדם needs your response", time: "5 hours ago" },
-    { id: 3, type: "conversion", text: "New purchase via affiliate link — ₪2,490 revenue", time: "Yesterday" },
-    { id: 4, type: "alert", text: "AI flagged a suspicious review on יסודות SEO", time: "Yesterday" },
-    { id: 5, type: "report", text: "Weekly AI report is ready for review", time: "2 days ago" },
+    { id: 1, type: "review", text: "שרה ל. השאירה ביקורת של 5 כוכבים על שיווק דיגיטלי מאסטרקלאס", time: "לפני שעתיים" },
+    { id: 2, type: "review", text: "ביקורת חדשה של 3 כוכבים על אנליטיקס מתקדם מחכה לתגובתכם", time: "לפני 5 שעות" },
+    { id: 3, type: "conversion", text: "רכישה חדשה דרך קישור אפיליאט — הכנסה של ₪2,490", time: "אתמול" },
+    { id: 4, type: "alert", text: "מערכת ה-AI זיהתה ביקורת חשודה על יסודות SEO", time: "אתמול" },
+    { id: 5, type: "report", text: "דוח ה-AI השבועי מוכן לצפייה", time: "לפני יומיים" },
   ];
 
-  // Mock recent clicks data
   const recentClicks = [
     { course: "שיווק דיגיטלי מאסטרקלאס", clicks: 45, conversions: 12, revenue: 29880 },
     { course: "יסודות SEO", clicks: 23, conversions: 5, revenue: 4950 },
@@ -64,16 +61,16 @@ const BusinessDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background noise-overlay" dir="ltr">
+    <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
       <div className="container py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-display font-bold text-3xl">Business Dashboard</h1>
-            <p className="text-muted-foreground">Track your reviews, clicks, conversions, and AI insights.</p>
+            <h1 className="font-display font-bold text-3xl">לוח בקרה עסקי</h1>
+            <p className="text-muted-foreground">עקבו אחר ביקורות, קליקים, המרות ותובנות AI.</p>
           </div>
           <Button className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary">
-            <BarChart3 size={16} className="mr-2" /> Export Report
+            <BarChart3 size={16} className="ml-2" /> ייצוא דוח
           </Button>
         </div>
 
@@ -100,25 +97,24 @@ const BusinessDashboard = () => {
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass flex-wrap">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="clicks">Clicks & Conversions</TabsTrigger>
+            <TabsTrigger value="overview">סקירה כללית</TabsTrigger>
+            <TabsTrigger value="clicks">קליקים והמרות</TabsTrigger>
             <TabsTrigger value="notifications">
-              <Bell size={14} className="mr-1" /> Notifications
-              <span className="ml-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full">{notifications.length}</span>
+              <Bell size={14} className="ml-1" /> התראות
+              <span className="mr-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full">{notifications.length}</span>
             </TabsTrigger>
             <TabsTrigger value="ai-report">
-              <Brain size={14} className="mr-1" /> AI Weekly Report
+              <Brain size={14} className="ml-1" /> דוח AI שבועי
             </TabsTrigger>
           </TabsList>
 
           {/* Overview */}
           <TabsContent value="overview">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent reviews */}
               <Card className="shadow-card bg-card">
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
-                    <MessageSquare size={18} /> Recent Reviews
+                    <MessageSquare size={18} /> ביקורות אחרונות
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -138,11 +134,10 @@ const BusinessDashboard = () => {
                 </CardContent>
               </Card>
 
-              {/* Course performance */}
               <Card className="shadow-card bg-card">
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
-                    <TrendingUp size={18} /> Course Performance
+                    <TrendingUp size={18} /> ביצועי קורסים
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -150,7 +145,7 @@ const BusinessDashboard = () => {
                     <div key={c.id} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
                       <div>
                         <p className="text-sm font-medium">{c.name}</p>
-                        <p className="text-xs text-muted-foreground">{c.reviewCount} reviews · {c.verifiedPurchases} purchases</p>
+                        <p className="text-xs text-muted-foreground">{c.reviewCount} ביקורות · {c.verifiedPurchases} רכישות</p>
                       </div>
                       <div className="flex items-center gap-1">
                         <Star size={12} className="fill-star text-star" />
@@ -173,7 +168,7 @@ const BusinessDashboard = () => {
                   </div>
                   <div>
                     <p className="font-display font-bold text-xl">{totalClicks}</p>
-                    <p className="text-xs text-muted-foreground">Total Clicks</p>
+                    <p className="text-xs text-muted-foreground">סה״כ קליקים</p>
                   </div>
                 </CardContent>
               </Card>
@@ -184,7 +179,7 @@ const BusinessDashboard = () => {
                   </div>
                   <div>
                     <p className="font-display font-bold text-xl">{conversions}</p>
-                    <p className="text-xs text-muted-foreground">Conversions ({totalClicks > 0 ? Math.round(conversions / totalClicks * 100) : 0}%)</p>
+                    <p className="text-xs text-muted-foreground">המרות ({totalClicks > 0 ? Math.round(conversions / totalClicks * 100) : 0}%)</p>
                   </div>
                 </CardContent>
               </Card>
@@ -195,7 +190,7 @@ const BusinessDashboard = () => {
                   </div>
                   <div>
                     <p className="font-display font-bold text-xl">₪{totalRevenue.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Total Revenue</p>
+                    <p className="text-xs text-muted-foreground">סה״כ הכנסות</p>
                   </div>
                 </CardContent>
               </Card>
@@ -203,15 +198,15 @@ const BusinessDashboard = () => {
 
             <Card className="shadow-card bg-card">
               <CardHeader>
-                <CardTitle className="text-base">Clicks by Course</CardTitle>
+                <CardTitle className="text-base">קליקים לפי קורס</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
                   <div className="grid grid-cols-4 text-xs text-muted-foreground font-medium py-2 border-b border-border/30">
-                    <span>Course</span>
-                    <span className="text-center">Clicks</span>
-                    <span className="text-center">Conversions</span>
-                    <span className="text-right">Revenue</span>
+                    <span>קורס</span>
+                    <span className="text-center">קליקים</span>
+                    <span className="text-center">המרות</span>
+                    <span className="text-left">הכנסות</span>
                   </div>
                   {recentClicks.map((row, i) => (
                     <div key={i} className="grid grid-cols-4 text-sm py-3 border-b border-border/20 last:border-0 items-center">
@@ -222,7 +217,7 @@ const BusinessDashboard = () => {
                           {row.conversions} ({Math.round(row.conversions / row.clicks * 100)}%)
                         </span>
                       </span>
-                      <span className="text-right font-display font-bold">₪{row.revenue.toLocaleString()}</span>
+                      <span className="text-left font-display font-bold">₪{row.revenue.toLocaleString()}</span>
                     </div>
                   ))}
                 </div>
@@ -235,7 +230,7 @@ const BusinessDashboard = () => {
             <Card className="shadow-card bg-card">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Bell size={18} /> Recent Notifications
+                  <Bell size={18} /> התראות אחרונות
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-1">
@@ -267,15 +262,14 @@ const BusinessDashboard = () => {
             <Card className="shadow-card bg-card mb-6">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Brain size={18} className="text-primary" /> AI Weekly Report
-                  <span className="text-xs text-muted-foreground font-normal ml-2">{aiReport.date}</span>
+                  <Brain size={18} className="text-primary" /> דוח AI שבועי
+                  <span className="text-xs text-muted-foreground font-normal mr-2">{aiReport.date}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Strengths */}
                 <div>
                   <h3 className="text-sm font-display font-semibold text-primary flex items-center gap-2 mb-3">
-                    <ArrowUpRight size={16} /> Strengths
+                    <ArrowUpRight size={16} /> חוזקות
                   </h3>
                   <ul className="space-y-2">
                     {aiReport.strengths.map((s, i) => (
@@ -287,10 +281,9 @@ const BusinessDashboard = () => {
                   </ul>
                 </div>
 
-                {/* Weaknesses */}
                 <div>
                   <h3 className="text-sm font-display font-semibold text-destructive flex items-center gap-2 mb-3">
-                    <ArrowDownRight size={16} /> Areas for Improvement
+                    <ArrowDownRight size={16} /> נקודות לשיפור
                   </h3>
                   <ul className="space-y-2">
                     {aiReport.weaknesses.map((w, i) => (
@@ -302,10 +295,9 @@ const BusinessDashboard = () => {
                   </ul>
                 </div>
 
-                {/* Recommendations */}
                 <div>
                   <h3 className="text-sm font-display font-semibold text-accent flex items-center gap-2 mb-3">
-                    <Brain size={16} /> AI Recommendations
+                    <Brain size={16} /> המלצות AI
                   </h3>
                   <ul className="space-y-2">
                     {aiReport.recommendations.map((r, i) => (
@@ -319,8 +311,8 @@ const BusinessDashboard = () => {
 
                 <div className="pt-4 border-t border-border/30">
                   <p className="text-xs text-muted-foreground">
-                    This report is generated by AI based on your review data, click analytics, and conversion trends. 
-                    AI-powered real-time analysis coming soon.
+                    דוח זה נוצר על ידי AI על בסיס נתוני הביקורות, אנליטיקת הקליקים ומגמות ההמרה שלכם.
+                    ניתוח AI בזמן אמת — בקרוב.
                   </p>
                 </div>
               </CardContent>

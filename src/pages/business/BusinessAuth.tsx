@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Mail, Lock, User, ArrowLeft } from "lucide-react";
 
 interface BusinessAuthProps {
   mode: "login" | "signup";
@@ -29,81 +29,81 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
       if (mode === "signup") {
         const { error } = await signUp(email, password, name);
         if (error) throw error;
-        toast({ title: "Account created!", description: "Please check your email to verify your account." });
+        toast({ title: "החשבון נוצר בהצלחה!", description: "בדקו את האימייל שלכם לאימות החשבון." });
       } else {
         const { error } = await signIn(email, password);
         if (error) throw error;
         navigate("/business/dashboard");
       }
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background noise-overlay" dir="ltr">
+    <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
       <div className="container py-20 flex justify-center">
         <Card className="w-full max-w-md shadow-card animated-border bg-card">
           <CardHeader className="text-center">
             <CardTitle className="font-display text-2xl">
-              {mode === "login" ? "Welcome Back" : "Create Your Business Account"}
+              {mode === "login" ? "ברוכים השבים" : "צרו חשבון עסקי"}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
               {mode === "login"
-                ? "Sign in to manage your reviews and analytics"
-                : "Start collecting verified reviews today"}
+                ? "התחברו כדי לנהל את הביקורות והנתונים שלכם"
+                : "התחילו לאסוף ביקורות מאומתות עוד היום"}
             </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {mode === "signup" && (
                 <div className="relative">
-                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <User size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Business / Full Name"
+                    placeholder="שם העסק / שם מלא"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="pl-10 glass border-border/50"
+                    className="pr-10 glass border-border/50"
                     required
                   />
                 </div>
               )}
               <div className="relative">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Mail size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="email"
-                  placeholder="Email address"
+                  placeholder="כתובת אימייל"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 glass border-border/50"
+                  className="pr-10 glass border-border/50"
                   required
                 />
               </div>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Lock size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="password"
-                  placeholder="Password"
+                  placeholder="סיסמה"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 glass border-border/50"
+                  className="pr-10 glass border-border/50"
                   required
                   minLength={6}
                 />
               </div>
               <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" disabled={loading}>
-                {loading ? "..." : mode === "login" ? "Sign In" : "Create Account"}
-                <ArrowRight size={16} className="ml-2" />
+                {loading ? "..." : mode === "login" ? "התחברו" : "צרו חשבון"}
+                <ArrowLeft size={16} className="mr-2" />
               </Button>
             </form>
             <p className="text-center text-sm text-muted-foreground mt-4">
               {mode === "login" ? (
-                <>Don't have an account? <a href="/business/signup" className="text-primary hover:underline">Sign up</a></>
+                <>אין לכם חשבון? <a href="/business/signup" className="text-primary hover:underline">הירשמו</a></>
               ) : (
-                <>Already have an account? <a href="/business/login" className="text-primary hover:underline">Sign in</a></>
+                <>כבר יש לכם חשבון? <a href="/business/login" className="text-primary hover:underline">התחברו</a></>
               )}
             </p>
           </CardContent>

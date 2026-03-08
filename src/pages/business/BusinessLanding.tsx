@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
-  Award, ArrowRight, CheckCircle, Users
+  Award, ArrowLeft, CheckCircle, Users
 } from "lucide-react";
 
 const fadeUp = {
@@ -14,84 +14,84 @@ const fadeUp = {
 };
 
 const FEATURES = [
-  { icon: ShieldCheck, title: "Verified Reviews", desc: "Only customers with verified purchases can leave reviews. 100% authentic." },
-  { icon: BarChart3, title: "Advanced Dashboard", desc: "Track ratings, trends, new reviews, and response rates in real time." },
-  { icon: Code, title: "Embeddable Widgets", desc: "Display reviews and ratings on your website with a single line of code." },
-  { icon: Zap, title: "Automated Review Requests", desc: "Send customers unique review links or upload a CSV of purchases." },
-  { icon: TrendingUp, title: "Affiliate System", desc: "Create referral links with click, conversion, and revenue tracking." },
-  { icon: Award, title: "AI-Powered Insights", desc: "Weekly AI reports identify strengths, weaknesses, and growth opportunities." },
+  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת ללא פשרות." },
+  { icon: BarChart3, title: "דאשבורד מתקדם", desc: "עקבו אחר דירוגים, מגמות, ביקורות חדשות ואחוזי מענה בזמן אמת." },
+  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת בלבד." },
+  { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו ללקוחות קישורי ביקורת ייחודיים או העלו CSV של רכישות." },
+  { icon: TrendingUp, title: "מערכת אפיליאט", desc: "צרו קישורי הפניה עם מעקב קליקים, המרות והכנסות." },
+  { icon: Award, title: "תובנות AI חכמות", desc: "דוחות AI שבועיים שמזהים חוזקות, חולשות והזדמנויות לצמיחה." },
 ];
 
 const PLANS = [
   {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    features: ["Public business profile", "Up to 50 reviews", "Basic rating badge", "Review responses"],
-    cta: "Get Started Free",
+    name: "בסיסי",
+    price: "חינם",
+    period: "לתמיד",
+    features: ["פרופיל עסקי ציבורי", "עד 50 ביקורות", "תג דירוג בסיסי", "תגובות לביקורות"],
+    cta: "התחילו בחינם",
     highlighted: false,
   },
   {
-    name: "Pro",
-    price: "$49",
-    period: "/month",
-    features: ["Unlimited reviews", "Embeddable widgets", "Automated review requests", "Advanced dashboard", "Affiliate system", "AI summaries"],
-    cta: "Start Free Trial",
+    name: "מקצועי",
+    price: "₪179",
+    period: "/חודש",
+    features: ["ביקורות ללא הגבלה", "וידג׳טים להטמעה", "בקשות ביקורת אוטומטיות", "דאשבורד מתקדם", "מערכת אפיליאט", "סיכומי AI"],
+    cta: "התחילו תקופת ניסיון",
     highlighted: true,
   },
   {
-    name: "Enterprise",
-    price: "Custom",
+    name: "ארגוני",
+    price: "בהתאמה",
     period: "",
-    features: ["Everything in Pro", "Full API access", "Custom integrations", "Dedicated account manager", "Google Ads Review Stars", "Advanced reporting"],
-    cta: "Contact Sales",
+    features: ["הכל מהמקצועי", "גישת API מלאה", "אינטגרציות מותאמות", "מנהל חשבון אישי", "Google Ads Review Stars", "דוחות מתקדמים"],
+    cta: "דברו איתנו",
     highlighted: false,
   },
 ];
 
 const TRUSTED = [
-  { name: "Digital Marketing Academy", initials: "DMA" },
+  { name: "אקדמיית שיווק דיגיטלי", initials: "DMA" },
   { name: "Code Masters IL", initials: "CM" },
-  { name: "Design School TLV", initials: "DS" },
-  { name: "Data Science Hub", initials: "DH" },
+  { name: "בית הספר לעיצוב ת״א", initials: "DS" },
+  { name: "מרכז מדעי הנתונים", initials: "DH" },
   { name: "Hebrew Tech", initials: "HT" },
-  { name: "Growth Academy", initials: "GA" },
+  { name: "אקדמיית צמיחה", initials: "GA" },
   { name: "TechPro Academy", initials: "TP" },
   { name: "LearnX Israel", initials: "LX" },
 ];
 
 const BusinessLanding = () => {
   return (
-    <div className="min-h-screen bg-background noise-overlay" dir="ltr">
+    <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
 
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
-        <div className="absolute top-20 right-1/3 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl animate-float" />
+        <div className="absolute top-20 left-1/3 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl animate-float" />
         <div className="container py-24 md:py-36 relative">
           <motion.div className="max-w-4xl mx-auto" initial="hidden" animate="visible">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
               <div>
                 <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
-                  <Zap size={16} /> For Business Owners
+                  <Zap size={16} /> לבעלי עסקים
                 </motion.div>
                 <motion.h1 variants={fadeUp} custom={1} className="text-3xl md:text-5xl font-display font-bold text-foreground leading-tight mb-6">
-                  Build Real Trust with{" "}
-                  <span className="gradient-text glow-text">Verified Reviews</span>
+                  בנו אמון אמיתי עם{" "}
+                  <span className="gradient-text glow-text">ביקורות מאומתות</span>
                 </motion.h1>
                 <motion.p variants={fadeUp} custom={2} className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                  Join hundreds of businesses in Israel using ReviewHub to collect verified reviews, build reputation, and increase sales.
+                  הצטרפו למאות עסקים בישראל שמשתמשים ב-ReviewHub כדי לאסוף ביקורות מאומתות, לבנות מוניטין ולהגדיל מכירות.
                 </motion.p>
                 <motion.div variants={fadeUp} custom={3} className="flex gap-3 flex-wrap">
                   <Link to="/business/signup">
                     <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
-                      Create Free Account
+                      צרו חשבון בחינם
                     </Button>
                   </Link>
                   <Link to="/business/pricing">
                     <Button size="lg" variant="outline" className="border-border/50 font-semibold">
-                      View Pricing
+                      צפו במחירים
                     </Button>
                   </Link>
                 </motion.div>
@@ -103,16 +103,16 @@ const BusinessLanding = () => {
                       <span className="text-primary-foreground font-display font-bold text-sm">R</span>
                     </div>
                     <div>
-                      <p className="font-display font-semibold text-sm">ReviewHub Dashboard</p>
-                      <p className="text-xs text-muted-foreground">Preview</p>
+                      <p className="font-display font-semibold text-sm">דאשבורד ReviewHub</p>
+                      <p className="text-xs text-muted-foreground">תצוגה מקדימה</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { label: "Avg. Rating", value: "4.8 ⭐" },
-                      { label: "Reviews This Month", value: "+23" },
-                      { label: "Response Rate", value: "92%" },
-                      { label: "Affiliate Clicks", value: "1,240" },
+                      { label: "דירוג ממוצע", value: "4.8 ⭐" },
+                      { label: "ביקורות החודש", value: "+23" },
+                      { label: "אחוז מענה", value: "92%" },
+                      { label: "קליקי אפיליאט", value: "1,240" },
                     ].map(({ label, value }) => (
                       <div key={label} className="rounded-lg bg-secondary p-3">
                         <p className="text-xs text-muted-foreground">{label}</p>
@@ -122,7 +122,7 @@ const BusinessLanding = () => {
                   </div>
                   <div className="flex items-center gap-2 text-xs text-primary">
                     <TrendingUp size={14} />
-                    <span>Conversions up 34% this month</span>
+                    <span>ההמרות עלו ב-34% החודש</span>
                   </div>
                 </div>
               </motion.div>
@@ -131,10 +131,10 @@ const BusinessLanding = () => {
         </div>
       </section>
 
-      {/* Trusted Companies */}
+      {/* Social Proof */}
       <section className="border-y border-border/50 glass">
         <div className="container py-12">
-          <p className="text-center text-sm text-muted-foreground mb-8 font-medium">Trusted by leading education companies</p>
+          <p className="text-center text-sm text-muted-foreground mb-8 font-medium">חברות ועסקים שכבר סומכים על ReviewHub</p>
           <div className="flex flex-wrap justify-center gap-4">
             {TRUSTED.map((company) => (
               <div key={company.name} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/30">
@@ -152,10 +152,10 @@ const BusinessLanding = () => {
       <section className="container py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { value: "850+", label: "Registered Businesses" },
-            { value: "12,400+", label: "Verified Reviews" },
-            { value: "34%", label: "Average Conversion Increase" },
-            { value: "98%", label: "Business Satisfaction" },
+            { value: "850+", label: "עסקים רשומים" },
+            { value: "12,400+", label: "ביקורות מאומתות" },
+            { value: "34%", label: "עלייה ממוצעת בהמרות" },
+            { value: "98%", label: "שביעות רצון עסקית" },
           ].map(({ value, label }, i) => (
             <motion.div key={label} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
               <p className="font-display font-bold text-3xl md:text-4xl text-foreground">{value}</p>
@@ -169,8 +169,8 @@ const BusinessLanding = () => {
       <section className="border-y border-border/50">
         <div className="container py-20">
           <div className="text-center mb-12">
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">Everything You Need to Manage Your Reputation</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Professional tools built specifically for course creators and learning services</p>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">כל מה שצריך לניהול המוניטין שלכם</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">כלים מקצועיים שנבנו במיוחד עבור יוצרי קורסים ושירותי למידה בישראל</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {FEATURES.map(({ icon: Icon, title, desc }, i) => (
@@ -197,8 +197,8 @@ const BusinessLanding = () => {
       {/* Pricing */}
       <section className="container py-20" id="pricing">
         <div className="text-center mb-12">
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">Simple, Transparent Pricing</h2>
-          <p className="text-muted-foreground">Choose the plan that fits your business</p>
+          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">תוכניות ומחירים</h2>
+          <p className="text-muted-foreground">בחרו את התוכנית המתאימה לעסק שלכם</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {PLANS.map((plan, i) => (
@@ -216,8 +216,8 @@ const BusinessLanding = () => {
               }`}
             >
               {plan.highlighted && (
-                <div className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-                  Most Popular
+                <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                  הכי פופולרי
                 </div>
               )}
               <h3 className="font-display font-bold text-xl text-foreground mb-1">{plan.name}</h3>
@@ -253,14 +253,14 @@ const BusinessLanding = () => {
           <div className="absolute inset-0 bg-primary/5 blur-3xl" />
           <div className="relative">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
-              Ready to Build Real Trust?
+              מוכנים לבנות אמון אמיתי?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-              Join hundreds of businesses already using ReviewHub. Start free and upgrade when you're ready.
+              הצטרפו למאות עסקים שכבר משתמשים ב-ReviewHub. התחילו בחינם ושדרגו כשתהיו מוכנים.
             </p>
             <Link to="/business/signup">
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary gap-2">
-                Create Free Account <ArrowRight size={16} />
+                צרו חשבון בחינם <ArrowLeft size={16} />
               </Button>
             </Link>
           </div>

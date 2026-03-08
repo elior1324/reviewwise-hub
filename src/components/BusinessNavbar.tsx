@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, ChevronDown } from "lucide-react";
+import { Menu, X, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -28,7 +28,7 @@ const BusinessNavbar = () => {
   };
 
   return (
-    <nav className="glass sticky top-0 z-50 border-b border-border/50" dir="ltr">
+    <nav className="glass sticky top-0 z-50 border-b border-border/50" dir="rtl">
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
         <Link to="/business" className="flex items-center gap-2">
@@ -36,7 +36,7 @@ const BusinessNavbar = () => {
             <span className="text-primary-foreground font-display font-bold text-sm">R</span>
           </div>
           <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
-          <span className="text-xs text-muted-foreground font-medium border border-border/50 rounded px-1.5 py-0.5">for Business</span>
+          <span className="text-xs text-muted-foreground font-medium border border-border/50 rounded px-1.5 py-0.5">לעסקים</span>
         </Link>
 
         {/* Center nav */}
@@ -45,21 +45,21 @@ const BusinessNavbar = () => {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent text-sm text-muted-foreground hover:text-foreground">
-                  Solutions
+                  פתרונות
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="w-[400px] p-4 grid gap-3">
                     <Link to="/business/solutions/reviews" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">Verified Reviews</p>
-                      <p className="text-xs text-muted-foreground">Collect authentic reviews from real customers</p>
+                      <p className="font-display font-semibold text-sm">ביקורות מאומתות</p>
+                      <p className="text-xs text-muted-foreground">אספו ביקורות אותנטיות מלקוחות אמיתיים</p>
                     </Link>
                     <Link to="/business/solutions/widgets" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">Embeddable Widgets</p>
-                      <p className="text-xs text-muted-foreground">Show reviews on your website with one line of code</p>
+                      <p className="font-display font-semibold text-sm">וידג׳טים להטמעה</p>
+                      <p className="text-xs text-muted-foreground">הציגו ביקורות באתר שלכם בשורת קוד אחת</p>
                     </Link>
                     <Link to="/business/solutions/analytics" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">Analytics & Insights</p>
-                      <p className="text-xs text-muted-foreground">AI-powered weekly reports and performance tracking</p>
+                      <p className="font-display font-semibold text-sm">אנליטיקס ותובנות</p>
+                      <p className="text-xs text-muted-foreground">דוחות AI שבועיים ומעקב ביצועים</p>
                     </Link>
                   </div>
                 </NavigationMenuContent>
@@ -67,21 +67,21 @@ const BusinessNavbar = () => {
 
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent text-sm text-muted-foreground hover:text-foreground">
-                  Features
+                  יכולות
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="w-[400px] p-4 grid gap-3">
                     <Link to="/business/features/affiliate" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">Affiliate Tracking</p>
-                      <p className="text-xs text-muted-foreground">Track clicks, conversions and revenue</p>
+                      <p className="font-display font-semibold text-sm">מעקב אפיליאט</p>
+                      <p className="text-xs text-muted-foreground">עקבו אחר קליקים, המרות והכנסות</p>
                     </Link>
                     <Link to="/business/features/ai-insights" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">AI Weekly Reports</p>
-                      <p className="text-xs text-muted-foreground">Automated insights on strengths and weaknesses</p>
+                      <p className="font-display font-semibold text-sm">דוחות AI שבועיים</p>
+                      <p className="text-xs text-muted-foreground">תובנות אוטומטיות על חוזקות וחולשות</p>
                     </Link>
                     <Link to="/business/features/review-requests" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">Review Requests</p>
-                      <p className="text-xs text-muted-foreground">Send automated review links to customers</p>
+                      <p className="font-display font-semibold text-sm">בקשות ביקורת</p>
+                      <p className="text-xs text-muted-foreground">שלחו קישורי ביקורת אוטומטיים ללקוחות</p>
                     </Link>
                   </div>
                 </NavigationMenuContent>
@@ -89,23 +89,23 @@ const BusinessNavbar = () => {
 
               <NavigationMenuItem>
                 <Link to="/business/pricing" className="text-sm text-muted-foreground hover:text-foreground px-3 py-2 inline-block">
-                  Pricing
+                  מחירים
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent text-sm text-muted-foreground hover:text-foreground">
-                  Resources
+                  משאבים
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="w-[300px] p-4 grid gap-3">
                     <Link to="/business/resources/docs" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">Documentation</p>
-                      <p className="text-xs text-muted-foreground">API docs and widget guides</p>
+                      <p className="font-display font-semibold text-sm">תיעוד</p>
+                      <p className="text-xs text-muted-foreground">תיעוד API ומדריכי וידג׳טים</p>
                     </Link>
                     <Link to="/business/resources/blog" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">Blog</p>
-                      <p className="text-xs text-muted-foreground">Tips and best practices</p>
+                      <p className="font-display font-semibold text-sm">בלוג</p>
+                      <p className="text-xs text-muted-foreground">טיפים ומתודולוגיות מומלצות</p>
                     </Link>
                   </div>
                 </NavigationMenuContent>
@@ -113,17 +113,17 @@ const BusinessNavbar = () => {
 
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent text-sm text-muted-foreground hover:text-foreground">
-                  Company
+                  אודות
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="w-[300px] p-4 grid gap-3">
                     <Link to="/about" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">About Us</p>
-                      <p className="text-xs text-muted-foreground">Our mission and team</p>
+                      <p className="font-display font-semibold text-sm">אודותינו</p>
+                      <p className="text-xs text-muted-foreground">המשימה והצוות שלנו</p>
                     </Link>
                     <Link to="/business/contact" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">Contact</p>
-                      <p className="text-xs text-muted-foreground">Get in touch with our team</p>
+                      <p className="font-display font-semibold text-sm">צרו קשר</p>
+                      <p className="text-xs text-muted-foreground">דברו עם הצוות שלנו</p>
                     </Link>
                   </div>
                 </NavigationMenuContent>
@@ -141,16 +141,16 @@ const BusinessNavbar = () => {
                   <User size={18} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem className="text-xs text-muted-foreground cursor-default">
                   {user.email}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/business/dashboard")}>
-                  Dashboard
+                  לוח בקרה
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-                  <LogOut size={14} className="mr-2" />
-                  Sign Out
+                  <LogOut size={14} className="ml-2" />
+                  התנתקו
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -158,12 +158,12 @@ const BusinessNavbar = () => {
             <div className="hidden md:flex items-center gap-2">
               <Link to="/business/login">
                 <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground font-medium">
-                  Login
+                  התחברו
                 </Button>
               </Link>
               <Link to="/business/signup">
                 <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary font-medium">
-                  Create Free Account
+                  צרו חשבון בחינם
                 </Button>
               </Link>
             </div>
@@ -177,29 +177,29 @@ const BusinessNavbar = () => {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-border/50 p-4 space-y-3 glass" dir="ltr">
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Solutions</p>
-          <Link to="/business/solutions/reviews" className="block text-sm py-1 pl-3" onClick={() => setMobileOpen(false)}>Verified Reviews</Link>
-          <Link to="/business/solutions/widgets" className="block text-sm py-1 pl-3" onClick={() => setMobileOpen(false)}>Embeddable Widgets</Link>
-          <Link to="/business/solutions/analytics" className="block text-sm py-1 pl-3" onClick={() => setMobileOpen(false)}>Analytics & Insights</Link>
+        <div className="lg:hidden border-t border-border/50 p-4 space-y-3 glass">
+          <p className="text-xs text-muted-foreground font-medium">פתרונות</p>
+          <Link to="/business/solutions/reviews" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ביקורות מאומתות</Link>
+          <Link to="/business/solutions/widgets" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>וידג׳טים להטמעה</Link>
+          <Link to="/business/solutions/analytics" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>אנליטיקס ותובנות</Link>
           <div className="border-t border-border/30 my-2" />
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Features</p>
-          <Link to="/business/features/affiliate" className="block text-sm py-1 pl-3" onClick={() => setMobileOpen(false)}>Affiliate Tracking</Link>
-          <Link to="/business/features/ai-insights" className="block text-sm py-1 pl-3" onClick={() => setMobileOpen(false)}>AI Weekly Reports</Link>
+          <p className="text-xs text-muted-foreground font-medium">יכולות</p>
+          <Link to="/business/features/affiliate" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>מעקב אפיליאט</Link>
+          <Link to="/business/features/ai-insights" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>דוחות AI שבועיים</Link>
           <div className="border-t border-border/30 my-2" />
-          <Link to="/business/pricing" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>Pricing</Link>
-          <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>About Us</Link>
+          <Link to="/business/pricing" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>מחירים</Link>
+          <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודותינו</Link>
           <div className="border-t border-border/30 my-2" />
           {!user && (
             <>
-              <Link to="/business/login" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>Login</Link>
-              <Link to="/business/signup" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>Create Free Account</Link>
+              <Link to="/business/login" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>התחברו</Link>
+              <Link to="/business/signup" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>צרו חשבון בחינם</Link>
             </>
           )}
           {user && (
             <>
-              <Link to="/business/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>Dashboard</Link>
-              <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-2 text-destructive">Sign Out</button>
+              <Link to="/business/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לוח בקרה</Link>
+              <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-2 text-destructive">התנתקו</button>
             </>
           )}
         </div>
