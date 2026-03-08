@@ -421,6 +421,29 @@ const TermsAndConditions = () => {
             </p>
           </Section>
 
+          {/* Purpose Limitation */}
+          <Section icon={Shield} title="עיקרון צמידות המטרה">
+            <p className="mb-3">
+              בהתאם לחוק הגנת הפרטיות ולתיקון 13, ReviewHub פועלת לפי עיקרון <strong>צמידות המטרה</strong>: מידע אישי שנאסף לצורך מסוים ישמש אך ורק לאותה מטרה שלגביה ניתנה הסכמת המשתמש.
+            </p>
+            <p className="mb-3">
+              כל שימוש במידע למטרה שונה מזו שלשמה נאסף מחייב קבלת הסכמה חדשה ונפרדת מנושא המידע. עיקרון זה חל הן על ReviewHub והן על בעלי עסקים המשתמשים בפלטפורמה.
+            </p>
+          </Section>
+
+          {/* Management Liability */}
+          <Section icon={AlertTriangle} title="אחריות נושאי משרה — תיקון 13">
+            <p className="mb-3">
+              תיקון 13 לחוק הגנת הפרטיות מטיל <strong>אחריות ישירה על נושאי משרה בכירים</strong> בארגונים (מנכ"ל, סמנכ"לים, דירקטורים ובעלי תפקידי ניהול) בנוגע לעמידה בדרישות הגנת הפרטיות.
+            </p>
+            <p className="mb-3">
+              בעלי עסקים המשתמשים בפלטפורמת ReviewHub נדרשים להיות מודעים לכך שהתעלמות מנושאי פרטיות — כולל עקרון "פרטיות כנקודת מוצא" (Privacy by Default) ו"פרטיות בעיצוב" (Privacy by Design) — עלולה לחשוף גם את ההנהלה לאחריות אישית.
+            </p>
+            <p className="p-3 rounded-lg bg-secondary/50 border border-border/50 text-foreground text-sm">
+              ⚖️ <strong>סנקציות:</strong> הפרת חוק הגנת הפרטיות עלולה לגרור עיצומים כספיים של עד 5% ממחזור העסקאות השנתי, פיצויים אזרחיים (גם ללא הוכחת נזק), ואף אחריות פלילית בהתאם לסוג ההפרה וחומרתה.
+            </p>
+          </Section>
+
           {/* Confidentiality */}
           <Section icon={Lock} title="סודיות">
             <p>
