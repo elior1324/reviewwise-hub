@@ -12,6 +12,7 @@ import ReviewCard from "@/components/ReviewCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
+import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { useState, useRef } from "react";
 import { BUSINESSES, REVIEWS, FREELANCER_CATEGORIES, COURSE_CATEGORIES } from "@/data/mockData";
