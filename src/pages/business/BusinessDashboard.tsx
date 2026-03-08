@@ -11,80 +11,221 @@ import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
-  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles
+  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { type Review, type Course, type AffiliateClick } from "@/data/mockData";
-import { useState } from "react";
+import { type Review, type Course } from "@/data/mockData";
+import { useState, useEffect } from "react";
 import { useAuth, SubscriptionTier } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
-const BUSINESS_SLUG = "digital-marketing-academy";
+// ─── Demo sample data (shown to visitors) ────────────────
+const DEMO_BUSINESS = { name: "העסק שלכם", email: "you@example.com" };
+
+const DEMO_STATS = [
+  { icon: Star, label: "דירוג ממוצע", value: "4.8", change: "+0.2", up: true, tooltip: "הציון הממוצע שלקוחות נתנו לכל הקורסים שלכם." },
+  { icon: MessageSquare, label: "סה״כ ביקורות", value: "124", change: "+12", up: true, tooltip: "מספר הביקורות שנכתבו על הקורסים שלכם." },
+  { icon: MousePointerClick, label: "קליקים לאתר", value: "94", change: "+23%", up: true, tooltip: "כמה אנשים לחצו על הקישור לאתר שלכם." },
+  { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: "₪48,850", change: "+18%", up: true, tooltip: "סך ההכנסות מרכישות שהגיעו דרך קישורי האפיליאט." },
+];
+
+const DEMO_REVIEWS: Review[] = [
+  { id: "d1", reviewerName: "שרה ל.", rating: 5, text: "קורס מעולה! למדתי המון דברים חדשים שיישמתי מיד בעבודה.", courseName: "שיווק דיגיטלי מאסטרקלאס", courseId: "dc1", businessSlug: "demo", date: "היום", purchaseDate: "2026-01-01", verified: true, anonymous: false },
+  { id: "d2", reviewerName: "דני א.", rating: 4, text: "תוכן מצוין, היה נהדר אם היו יותר תרגולים מעשיים.", courseName: "יסודות SEO", courseId: "dc2", businessSlug: "demo", date: "אתמול", purchaseDate: "2026-02-01", verified: true, anonymous: false },
+  { id: "d3", reviewerName: "מיכל כ.", rating: 5, text: "המרצה מעולה, הסברים ברורים ודוגמאות מהעולם האמיתי.", courseName: "הסמכת Google Ads", courseId: "dc3", businessSlug: "demo", date: "לפני 3 ימים", purchaseDate: "2026-01-15", verified: true, anonymous: false },
+  { id: "d4", reviewerName: "יוסי מ.", rating: 3, text: "הקורס טוב אבל הקצב מהיר מדי למתחילים.", courseName: "אנליטיקס מתקדם", courseId: "dc4", businessSlug: "demo", date: "לפני שבוע", purchaseDate: "2025-12-01", verified: false, anonymous: false },
+];
+
+const DEMO_COURSES: Course[] = [
+  { id: "dc1", businessSlug: "demo", name: "שיווק דיגיטלי מאסטרקלאס", price: 2490, description: "", affiliateUrl: "", category: "", rating: 4.9, reviewCount: 67, verifiedPurchases: 234 },
+  { id: "dc2", businessSlug: "demo", name: "יסודות SEO", price: 990, description: "", affiliateUrl: "", category: "", rating: 4.6, reviewCount: 34, verifiedPurchases: 156 },
+  { id: "dc3", businessSlug: "demo", name: "הסמכת Google Ads", price: 1790, description: "", affiliateUrl: "", category: "", rating: 4.8, reviewCount: 23, verifiedPurchases: 89 },
+];
+
+const DEMO_CLICKS = [
+  { course: "שיווק דיגיטלי מאסטרקלאס", clicks: 45, conversions: 12, revenue: 29880 },
+  { course: "יסודות SEO", clicks: 23, conversions: 5, revenue: 4950 },
+  { course: "הסמכת Google Ads", clicks: 18, conversions: 7, revenue: 12530 },
+  { course: "אנליטיקס מתקדם", clicks: 8, conversions: 1, revenue: 1490 },
+];
+
+const DEMO_NOTIFICATIONS = [
+  { id: 1, type: "review", text: "שרה ל. השאירה ביקורת של 5 כוכבים על שיווק דיגיטלי מאסטרקלאס", time: "לפני שעתיים" },
+  { id: 2, type: "review", text: "ביקורת חדשה של 3 כוכבים על אנליטיקס מתקדם מחכה לתגובתכם", time: "לפני 5 שעות" },
+  { id: 3, type: "conversion", text: "רכישה חדשה דרך קישור אפיליאט — הכנסה של ₪2,490", time: "אתמול" },
+  { id: 4, type: "alert", text: "מערכת ה-AI זיהתה ביקורת חשודה על יסודות SEO", time: "אתמול" },
+  { id: 5, type: "report", text: "דוח ה-AI השבועי מוכן לצפייה", time: "לפני יומיים" },
+];
+
+const DEMO_AI_REPORT = {
+  date: "1-7 במרץ 2026",
+  strengths: [
+    "שביעות רצון הלקוחות עלתה ב-12% השבוע",
+    "זמן התגובה לביקורות השתפר — ממוצע 4 שעות",
+    "הקורס ״שיווק דיגיטלי מאסטרקלאס״ קיבל 5 ביקורות חדשות של 5 כוכבים",
+  ],
+  weaknesses: [
+    "הקורס ״אנליטיקס מתקדם״ ראה ירידה של 15% בהרשמות",
+    "2 ביקורות שליליות מציינות שהקצב מהיר מדי למתחילים",
+    "אחוז הקליקים באפיליאט ירד ב-8% לעומת השבוע הקודם",
+  ],
+  recommendations: [
+    "שקלו להוסיף מסלול למתחילים בקורס האנליטיקס",
+    "הגיבו ל-2 הביקורות השליליות הממתינות תוך 24 שעות",
+    "עדכנו את דף הנחיתה של האפיליאט — אחוז הנטישה הנוכחי הוא 45%",
+  ],
+};
 
 type DemoTier = "free" | "pro" | "premium";
 
 const BusinessDashboard = () => {
   const navigate = useNavigate();
-  const { subscriptionTier } = useAuth();
+  const { user, subscriptionTier } = useAuth();
 
-  // Demo tier selector — allows switching between tiers in demo mode
+  // Demo tier selector
   const [demoTier, setDemoTier] = useState<DemoTier>("pro");
-  const currentTier: SubscriptionTier = subscriptionTier !== "free" ? subscriptionTier : demoTier;
+
+  // Real data state
+  const [isDemo, setIsDemo] = useState(true);
+  const [loadingData, setLoadingData] = useState(true);
+  const [businessId, setBusinessId] = useState<string | null>(null);
+  const [businessInfo, setBusinessInfo] = useState<{ name: string; email: string } | null>(null);
+  const [realReviews, setRealReviews] = useState<Review[]>([]);
+  const [realCourses, setRealCourses] = useState<Course[]>([]);
+  const [realStats, setRealStats] = useState<typeof DEMO_STATS | null>(null);
+  const [realClicks, setRealClicks] = useState<typeof DEMO_CLICKS>([]);
+  const [realNotifications, setRealNotifications] = useState<typeof DEMO_NOTIFICATIONS>([]);
+
+  // Determine tier
+  const currentTier: SubscriptionTier = !isDemo && subscriptionTier !== "free" ? subscriptionTier : demoTier;
   const isPremium = currentTier === "premium";
   const isPro = currentTier === "pro";
   const isFree = currentTier === "free";
 
-  const demoBusiness = {
-    name: "Digital Marketing Academy",
-    email: "admin@dma.co.il",
-  };
+  // Fetch real data if user is logged in and owns a business
+  useEffect(() => {
+    const fetchBusinessData = async () => {
+      if (!user) {
+        setIsDemo(true);
+        setLoadingData(false);
+        return;
+      }
 
-  const businessReviews: Review[] = [];
-  const businessCourses: Course[] = [];
-  const totalClicks = 0;
-  const conversions = 0;
-  const totalRevenue = 0;
+      // Check if user owns a business
+      const { data: biz } = await supabase
+        .from("businesses")
+        .select("*")
+        .eq("owner_id", user.id)
+        .maybeSingle();
 
-  const STATS = [
-    { icon: Star, label: "דירוג ממוצע", value: "4.8", change: "+0.2", up: true, tooltip: "הציון הממוצע שלקוחות נתנו לכל הקורסים שלכם. דירוג גבוה מגביר אמון ומושך לקוחות חדשים." },
-    { icon: MessageSquare, label: "סה״כ ביקורות", value: "124", change: "+12", up: true, tooltip: "מספר הביקורות שנכתבו על הקורסים שלכם. יותר ביקורות = יותר הוכחה חברתית ונראות בפלטפורמה." },
-    { icon: MousePointerClick, label: "קליקים לאתר", value: totalClicks.toString(), change: "+23%", up: true, tooltip: "כמה אנשים לחצו על הקישור לאתר שלכם מתוך דף הביקורות. מדד ישיר לתנועה שמגיעה אליכם מ-ReviewHub." },
-    { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: `₪${totalRevenue.toLocaleString()}`, change: "+18%", up: true, tooltip: "סך ההכנסות מרכישות שהגיעו דרך קישורי האפיליאט שלכם. כסף אמיתי שנכנס הודות לביקורות." },
-  ];
+      if (!biz) {
+        setIsDemo(true);
+        setLoadingData(false);
+        return;
+      }
 
-  const aiReport = {
-    date: "1-7 במרץ 2026",
-    strengths: [
-      "שביעות רצון הלקוחות עלתה ב-12% השבוע",
-      "זמן התגובה לביקורות השתפר — ממוצע 4 שעות",
-      "הקורס ״שיווק דיגיטלי מאסטרקלאס״ קיבל 5 ביקורות חדשות של 5 כוכבים",
-    ],
-    weaknesses: [
-      "הקורס ״אנליטיקס מתקדם״ ראה ירידה של 15% בהרשמות",
-      "2 ביקורות שליליות מציינות שהקצב מהיר מדי למתחילים",
-      "אחוז הקליקים באפיליאט ירד ב-8% לעומת השבוע הקודם",
-    ],
-    recommendations: [
-      "שקלו להוסיף מסלול למתחילים בקורס האנליטיקס",
-      "הגיבו ל-2 הביקורות השליליות הממתינות תוך 24 שעות",
-      "עדכנו את דף הנחיתה של האפיליאט — אחוז הנטישה הנוכחי הוא 45%",
-    ],
-  };
+      // User has a business — switch to real mode
+      setIsDemo(false);
+      setBusinessId(biz.id);
+      setBusinessInfo({ name: biz.name, email: biz.email || user.email || "" });
 
-  const notifications = [
-    { id: 1, type: "review", text: "שרה ל. השאירה ביקורת של 5 כוכבים על שיווק דיגיטלי מאסטרקלאס", time: "לפני שעתיים" },
-    { id: 2, type: "review", text: "ביקורת חדשה של 3 כוכבים על אנליטיקס מתקדם מחכה לתגובתכם", time: "לפני 5 שעות" },
-    { id: 3, type: "conversion", text: "רכישה חדשה דרך קישור אפיליאט — הכנסה של ₪2,490", time: "אתמול" },
-    { id: 4, type: "alert", text: "מערכת ה-AI זיהתה ביקורת חשודה על יסודות SEO", time: "אתמול" },
-    { id: 5, type: "report", text: "דוח ה-AI השבועי מוכן לצפייה", time: "לפני יומיים" },
-  ];
+      // Fetch reviews
+      const { data: reviewData } = await supabase
+        .from("reviews")
+        .select("*, courses(name), profiles(display_name)")
+        .eq("business_id", biz.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
 
-  const recentClicks = [
-    { course: "שיווק דיגיטלי מאסטרקלאס", clicks: 45, conversions: 12, revenue: 29880 },
-    { course: "יסודות SEO", clicks: 23, conversions: 5, revenue: 4950 },
-    { course: "הסמכת Google Ads", clicks: 18, conversions: 7, revenue: 12530 },
-    { course: "אנליטיקס מתקדם", clicks: 8, conversions: 1, revenue: 1490 },
-  ];
+      if (reviewData) {
+        setRealReviews(reviewData.map((r: any) => ({
+          id: r.id,
+          reviewerName: r.anonymous ? "אנונימי" : (r.profiles?.display_name || "משתמש"),
+          rating: r.rating,
+          text: r.text,
+          courseName: r.courses?.name || "",
+          courseId: r.course_id,
+          businessSlug: biz.slug,
+          date: new Date(r.created_at).toLocaleDateString("he-IL"),
+          purchaseDate: r.created_at,
+          verified: r.verified || false,
+          anonymous: r.anonymous || false,
+        })));
+      }
+
+      // Fetch courses
+      const { data: courseData } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("business_id", biz.id);
+
+      if (courseData) {
+        setRealCourses(courseData.map((c: any) => ({
+          id: c.id,
+          businessSlug: biz.slug,
+          name: c.name,
+          price: Number(c.price) || 0,
+          description: c.description || "",
+          affiliateUrl: c.affiliate_url || "",
+          category: c.category || "",
+          rating: Number(c.rating) || 0,
+          reviewCount: c.review_count || 0,
+          verifiedPurchases: c.verified_purchases || 0,
+        })));
+      }
+
+      // Fetch affiliate clicks
+      const { data: clickData } = await supabase
+        .from("affiliate_clicks")
+        .select("*, courses(name)")
+        .eq("courses.business_id", biz.id);
+
+      // Aggregate clicks by course
+      if (clickData && clickData.length > 0) {
+        const clickMap: Record<string, { course: string; clicks: number; conversions: number; revenue: number }> = {};
+        clickData.forEach((c: any) => {
+          const name = c.courses?.name || "קורס";
+          if (!clickMap[name]) clickMap[name] = { course: name, clicks: 0, conversions: 0, revenue: 0 };
+          clickMap[name].clicks++;
+          if (c.converted) {
+            clickMap[name].conversions++;
+            clickMap[name].revenue += Number(c.revenue) || 0;
+          }
+        });
+        setRealClicks(Object.values(clickMap));
+      }
+
+      // Build real stats
+      const totalClicks = clickData?.length || 0;
+      const totalConversions = clickData?.filter((c: any) => c.converted).length || 0;
+      const totalRevenue = clickData?.filter((c: any) => c.converted).reduce((s: number, c: any) => s + (Number(c.revenue) || 0), 0) || 0;
+
+      setRealStats([
+        { icon: Star, label: "דירוג ממוצע", value: (Number(biz.rating) || 0).toFixed(1), change: "", up: true, tooltip: "הציון הממוצע שלקוחות נתנו לכל הקורסים שלכם." },
+        { icon: MessageSquare, label: "סה״כ ביקורות", value: String(biz.review_count || 0), change: "", up: true, tooltip: "מספר הביקורות שנכתבו על הקורסים שלכם." },
+        { icon: MousePointerClick, label: "קליקים לאתר", value: String(totalClicks), change: "", up: true, tooltip: "כמה אנשים לחצו על הקישור לאתר שלכם." },
+        { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: `₪${totalRevenue.toLocaleString()}`, change: "", up: true, tooltip: "סך ההכנסות מרכישות שהגיעו דרך קישורי האפיליאט." },
+      ]);
+
+      setLoadingData(false);
+    };
+
+    fetchBusinessData();
+  }, [user]);
+
+  // Choose data source
+  const displayBusiness = isDemo ? DEMO_BUSINESS : (businessInfo || DEMO_BUSINESS);
+  const displayReviews = isDemo ? DEMO_REVIEWS : realReviews;
+  const displayCourses = isDemo ? DEMO_COURSES : realCourses;
+  const displayStats = isDemo ? DEMO_STATS : (realStats || DEMO_STATS);
+  const displayClicks = isDemo ? DEMO_CLICKS : realClicks;
+  const displayNotifications = isDemo ? DEMO_NOTIFICATIONS : realNotifications;
+  const aiReport = DEMO_AI_REPORT; // AI report is always demo for now
+
+  const totalClicks = isDemo ? 94 : displayClicks.reduce((s, c) => s + c.clicks, 0);
+  const conversions = isDemo ? 25 : displayClicks.reduce((s, c) => s + c.conversions, 0);
+  const totalRevenue = isDemo ? 48850 : displayClicks.reduce((s, c) => s + c.revenue, 0);
 
   const handleUpgrade = () => {
     navigate("/business/pricing");
@@ -102,61 +243,75 @@ const BusinessDashboard = () => {
     </span>
   );
 
+  if (loadingData && user) {
+    return (
+      <div className="min-h-screen bg-background noise-overlay" dir="rtl">
+        <BusinessNavbar />
+        <div className="container py-20 text-center">
+          <p className="text-muted-foreground">טוען נתונים...</p>
+        </div>
+        <BusinessFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
       <div className="container py-10">
-        {/* Demo logged-in banner */}
-        <div className="mb-6 flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
-          <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-            DM
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-foreground">מחובר כ: {demoBusiness.name}</p>
-            <p className="text-xs text-muted-foreground">{demoBusiness.email}</p>
-          </div>
-          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">מנהל</span>
-        </div>
 
-        {/* Demo Tier Selector */}
-        <div className="mb-6 flex items-center gap-3 rounded-lg border border-border/50 bg-muted/50 px-4 py-3">
-          <span className="text-xs text-muted-foreground font-medium">סימולציית חבילה:</span>
-          <div className="flex gap-1 rounded-lg bg-background p-1 border border-border/30">
-            <button
-              onClick={() => setDemoTier("free")}
-              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
-                demoTier === "free"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              סטארטר (חינם)
-            </button>
-            <button
-              onClick={() => setDemoTier("pro")}
-              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
-                demoTier === "pro"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              מקצועי (Pro)
-            </button>
-            <button
-              onClick={() => setDemoTier("premium")}
-              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
-                demoTier === "premium"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              פרימיום (Premium)
-            </button>
+        {/* Demo Banner */}
+        {isDemo && (
+          <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 px-5 py-4">
+            <div className="flex items-center gap-3 mb-2">
+              <Eye size={20} className="text-primary" />
+              <p className="font-display font-semibold text-foreground">🎯 מצב דמו — כך ייראה לוח הבקרה שלכם אחרי ההרשמה</p>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">כל הנתונים כאן הם לדוגמה בלבד. הירשמו כדי לראות את הנתונים האמיתיים שלכם.</p>
+            <Button onClick={() => navigate("/business/auth")} className="bg-primary text-primary-foreground hover:bg-primary/90">
+              הירשמו עכשיו — חינם
+            </Button>
           </div>
-          <span className="text-[10px] text-muted-foreground/70">
-            {demoTier === "free" ? "רוב הפיצ׳רים חסומים" : demoTier === "pro" ? "פיצ׳רים פרימיום חסומים" : "כל הפיצ׳רים זמינים"}
-          </span>
-        </div>
+        )}
+
+        {/* Real mode: logged-in banner */}
+        {!isDemo && (
+          <div className="mb-6 flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+            <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+              {displayBusiness.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">מחובר כ: {displayBusiness.name}</p>
+              <p className="text-xs text-muted-foreground">{displayBusiness.email}</p>
+            </div>
+            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">מנהל</span>
+          </div>
+        )}
+
+        {/* Demo Tier Selector — always visible for demo, hidden for real users */}
+        {isDemo && (
+          <div className="mb-6 flex items-center gap-3 rounded-lg border border-border/50 bg-muted/50 px-4 py-3">
+            <span className="text-xs text-muted-foreground font-medium">סימולציית חבילה:</span>
+            <div className="flex gap-1 rounded-lg bg-background p-1 border border-border/30">
+              {(["free", "pro", "premium"] as DemoTier[]).map((tier) => (
+                <button
+                  key={tier}
+                  onClick={() => setDemoTier(tier)}
+                  className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
+                    demoTier === tier
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tier === "free" ? "סטארטר (חינם)" : tier === "pro" ? "מקצועי (Pro)" : "פרימיום (Premium)"}
+                </button>
+              ))}
+            </div>
+            <span className="text-[10px] text-muted-foreground/70">
+              {demoTier === "free" ? "רוב הפיצ׳רים חסומים" : demoTier === "pro" ? "פיצ׳רים פרימיום חסומים" : "כל הפיצ׳רים זמינים"}
+            </span>
+          </div>
+        )}
 
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -171,7 +326,7 @@ const BusinessDashboard = () => {
         {/* Stats Grid */}
         <TooltipProvider delayDuration={200}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {STATS.map(({ icon: Icon, label, value, change, up, tooltip }) => (
+          {displayStats.map(({ icon: Icon, label, value, change, up, tooltip }) => (
             <Card key={label} className="shadow-card animated-border bg-card">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -189,10 +344,12 @@ const BusinessDashboard = () => {
                         {tooltip}
                       </TooltipContent>
                     </Tooltip>
-                    <div className={`flex items-center gap-1 text-xs font-medium ${up ? "text-primary" : "text-destructive"}`}>
-                      {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                      {change}
-                    </div>
+                    {change && (
+                      <div className={`flex items-center gap-1 text-xs font-medium ${up ? "text-primary" : "text-destructive"}`}>
+                        {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                        {change}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <p className="font-display font-bold text-2xl">{value}</p>
@@ -205,13 +362,11 @@ const BusinessDashboard = () => {
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass flex-wrap">
-            {/* סטארטר — חינם */}
             <TabsTrigger value="overview">סקירה כללית</TabsTrigger>
             <TabsTrigger value="notifications">
               <Bell size={14} className="ml-1" /> התראות
-              <span className="mr-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full">{notifications.length}</span>
+              <span className="mr-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full">{displayNotifications.length}</span>
             </TabsTrigger>
-            {/* מקצועי */}
             <TabsTrigger value="invoices" className="gap-1">
               <FileText size={14} className="ml-1" /> קבלות ואימות
               {isFree && <ProBadge />}
@@ -224,7 +379,6 @@ const BusinessDashboard = () => {
               <Video size={14} className="ml-1" /> סרטוני לקוחות
               {isFree && <ProBadge />}
             </TabsTrigger>
-            {/* פרימיום */}
             <TabsTrigger value="ai-report" className="gap-1">
               <Brain size={14} className="ml-1" /> דוח AI שבועי
               {!isPremium && <PremiumBadge />}
@@ -253,19 +407,23 @@ const BusinessDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {businessReviews.slice(0, 4).map((r) => (
-                    <div key={r.id} className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
-                      <div className="flex gap-0.5 shrink-0 mt-0.5">
-                        {Array.from({ length: r.rating }, (_, i) => (
-                          <Star key={i} size={10} className="fill-star text-star" />
-                        ))}
+                  {displayReviews.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין ביקורות. שתפו את הפרופיל שלכם כדי להתחיל לקבל ביקורות!</p>
+                  ) : (
+                    displayReviews.slice(0, 4).map((r) => (
+                      <div key={r.id} className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
+                        <div className="flex gap-0.5 shrink-0 mt-0.5">
+                          {Array.from({ length: r.rating }, (_, i) => (
+                            <Star key={i} size={10} className="fill-star text-star" />
+                          ))}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm truncate">{r.text}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{r.reviewerName} · {r.courseName}</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm truncate">{r.text}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{r.reviewerName} · {r.courseName}</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </CardContent>
               </Card>
 
@@ -276,18 +434,22 @@ const BusinessDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {businessCourses.map((c) => (
-                    <div key={c.id} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
-                      <div>
-                        <p className="text-sm font-medium">{c.name}</p>
-                        <p className="text-xs text-muted-foreground">{c.reviewCount} ביקורות · {c.verifiedPurchases} רכישות</p>
+                  {displayCourses.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין קורסים. הוסיפו קורס ראשון בהגדרות הפרופיל.</p>
+                  ) : (
+                    displayCourses.map((c) => (
+                      <div key={c.id} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                        <div>
+                          <p className="text-sm font-medium">{c.name}</p>
+                          <p className="text-xs text-muted-foreground">{c.reviewCount} ביקורות · {c.verifiedPurchases} רכישות</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star size={12} className="fill-star text-star" />
+                          <span className="text-sm font-display font-bold">{c.rating}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Star size={12} className="fill-star text-star" />
-                        <span className="text-sm font-display font-bold">{c.rating}</span>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -297,7 +459,7 @@ const BusinessDashboard = () => {
           <TabsContent value="invoices">
             <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <InvoiceTemplateUploader businessId="mock-business-id" />
+              <InvoiceTemplateUploader businessId={businessId || "demo"} />
               <Card className="shadow-card bg-card">
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
@@ -306,22 +468,17 @@ const BusinessDashboard = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3 text-sm text-muted-foreground">
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">1</div>
-                      <p>העלו דוגמאות של חשבוניות/קבלות שלכם (PDF, תמונה או CSV)</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">2</div>
-                      <p>ה-AI ינתח את המבנה ויזהה פרטים מזהים (לוגו, שם העסק, מספרי מסמך)</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">3</div>
-                      <p>כשלקוח מעלה קבלה בטופס הביקורת, ה-AI ישווה אותה מול התבניות שלכם</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">4</div>
-                      <p>רוב הקבלות יאומתו אוטומטית. מקרים חריגים יועברו לבדיקה ידנית</p>
-                    </div>
+                    {[
+                      "העלו דוגמאות של חשבוניות/קבלות שלכם (PDF, תמונה או CSV)",
+                      "ה-AI ינתח את המבנה ויזהה פרטים מזהים (לוגו, שם העסק, מספרי מסמך)",
+                      "כשלקוח מעלה קבלה בטופס הביקורת, ה-AI ישווה אותה מול התבניות שלכם",
+                      "רוב הקבלות יאומתו אוטומטית. מקרים חריגים יועברו לבדיקה ידנית",
+                    ].map((step, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">{i + 1}</div>
+                        <p>{step}</p>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -334,69 +491,31 @@ const BusinessDashboard = () => {
             <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <TooltipProvider delayDuration={200}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <Card className="shadow-card bg-card">
-                <CardContent className="p-5 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <MousePointerClick size={20} className="text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-display font-bold text-xl">{totalClicks}</p>
-                    <p className="text-xs text-muted-foreground">סה״כ קליקים</p>
-                  </div>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
-                        <HelpCircle size={14} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-                      מספר הפעמים שמשתמשים לחצו על קישור האפיליאט שלכם. כל קליק מייצג לקוח פוטנציאלי שהגיע מ-ReviewHub.
-                    </TooltipContent>
-                  </Tooltip>
-                </CardContent>
-              </Card>
-              <Card className="shadow-card bg-card">
-                <CardContent className="p-5 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <TrendingUp size={20} className="text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-display font-bold text-xl">{conversions}</p>
-                    <p className="text-xs text-muted-foreground">המרות ({totalClicks > 0 ? Math.round(conversions / totalClicks * 100) : 0}%)</p>
-                  </div>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
-                        <HelpCircle size={14} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-                      כמה מהקליקים הפכו לרכישה בפועל. אחוז המרה גבוה מעיד על ביקורות אמינות שמשכנעות לקוחות לקנות.
-                    </TooltipContent>
-                  </Tooltip>
-                </CardContent>
-              </Card>
-              <Card className="shadow-card bg-card">
-                <CardContent className="p-5 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <DollarSign size={20} className="text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-display font-bold text-xl">₪{totalRevenue.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">סה״כ הכנסות</p>
-                  </div>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
-                        <HelpCircle size={14} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-                      סך ההכנסות שנוצרו מרכישות דרך ReviewHub. זה הכסף שהביקורות המאומתות שלכם הניבו ישירות.
-                    </TooltipContent>
-                  </Tooltip>
-                </CardContent>
-              </Card>
+              {[
+                { icon: MousePointerClick, value: totalClicks, label: "סה״כ קליקים", tip: "מספר הפעמים שמשתמשים לחצו על קישור האפיליאט שלכם." },
+                { icon: TrendingUp, value: conversions, label: `המרות (${totalClicks > 0 ? Math.round(conversions / totalClicks * 100) : 0}%)`, tip: "כמה מהקליקים הפכו לרכישה בפועל." },
+                { icon: DollarSign, value: `₪${totalRevenue.toLocaleString()}`, label: "סה״כ הכנסות", tip: "סך ההכנסות שנוצרו מרכישות דרך ReviewHub." },
+              ].map(({ icon: Icon, value, label, tip }, i) => (
+                <Card key={i} className="shadow-card bg-card">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon size={20} className="text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-display font-bold text-xl">{value}</p>
+                      <p className="text-xs text-muted-foreground">{label}</p>
+                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                          <HelpCircle size={14} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">{tip}</TooltipContent>
+                    </Tooltip>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
             </TooltipProvider>
 
@@ -412,18 +531,22 @@ const BusinessDashboard = () => {
                     <span className="text-center">המרות</span>
                     <span className="text-left">הכנסות</span>
                   </div>
-                  {recentClicks.map((row, i) => (
-                    <div key={i} className="grid grid-cols-4 text-sm py-3 border-b border-border/20 last:border-0 items-center">
-                      <span className="truncate">{row.course}</span>
-                      <span className="text-center font-display font-bold">{row.clicks}</span>
-                      <span className="text-center">
-                        <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full font-medium">
-                          {row.conversions} ({Math.round(row.conversions / row.clicks * 100)}%)
+                  {displayClicks.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין קליקים. שתפו קישורי אפיליאט כדי להתחיל.</p>
+                  ) : (
+                    displayClicks.map((row, i) => (
+                      <div key={i} className="grid grid-cols-4 text-sm py-3 border-b border-border/20 last:border-0 items-center">
+                        <span className="truncate">{row.course}</span>
+                        <span className="text-center font-display font-bold">{row.clicks}</span>
+                        <span className="text-center">
+                          <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full font-medium">
+                            {row.conversions} ({row.clicks > 0 ? Math.round(row.conversions / row.clicks * 100) : 0}%)
+                          </span>
                         </span>
-                      </span>
-                      <span className="text-left font-display font-bold">₪{row.revenue.toLocaleString()}</span>
-                    </div>
-                  ))}
+                        <span className="text-left font-display font-bold">₪{row.revenue.toLocaleString()}</span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -439,25 +562,29 @@ const BusinessDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-1">
-                {notifications.map((n) => (
-                  <div key={n.id} className="flex items-start gap-3 py-3 border-b border-border/20 last:border-0">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                      n.type === "review" ? "bg-primary/10" :
-                      n.type === "conversion" ? "bg-accent/10" :
-                      n.type === "alert" ? "bg-destructive/10" :
-                      "bg-secondary"
-                    }`}>
-                      {n.type === "review" && <MessageSquare size={14} className="text-primary" />}
-                      {n.type === "conversion" && <DollarSign size={14} className="text-accent" />}
-                      {n.type === "alert" && <AlertTriangle size={14} className="text-destructive" />}
-                      {n.type === "report" && <Brain size={14} className="text-muted-foreground" />}
+                {displayNotifications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">אין התראות חדשות.</p>
+                ) : (
+                  displayNotifications.map((n) => (
+                    <div key={n.id} className="flex items-start gap-3 py-3 border-b border-border/20 last:border-0">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                        n.type === "review" ? "bg-primary/10" :
+                        n.type === "conversion" ? "bg-accent/10" :
+                        n.type === "alert" ? "bg-destructive/10" :
+                        "bg-secondary"
+                      }`}>
+                        {n.type === "review" && <MessageSquare size={14} className="text-primary" />}
+                        {n.type === "conversion" && <DollarSign size={14} className="text-accent" />}
+                        {n.type === "alert" && <AlertTriangle size={14} className="text-destructive" />}
+                        {n.type === "report" && <Brain size={14} className="text-muted-foreground" />}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm">{n.text}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{n.time}</p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm">{n.text}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{n.time}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -485,7 +612,6 @@ const BusinessDashboard = () => {
                     ))}
                   </ul>
                 </div>
-
                 <div>
                   <h3 className="text-sm font-display font-semibold text-destructive flex items-center gap-2 mb-3">
                     <ArrowDownRight size={16} /> נקודות לשיפור
@@ -499,7 +625,6 @@ const BusinessDashboard = () => {
                     ))}
                   </ul>
                 </div>
-
                 <div>
                   <h3 className="text-sm font-display font-semibold text-accent flex items-center gap-2 mb-3">
                     <Brain size={16} /> המלצות AI
@@ -513,11 +638,9 @@ const BusinessDashboard = () => {
                     ))}
                   </ul>
                 </div>
-
                 <div className="pt-4 border-t border-border/30">
                   <p className="text-xs text-muted-foreground">
                     דוח זה נוצר על ידי AI על בסיס נתוני הביקורות, אנליטיקת הקליקים ומגמות ההמרה שלכם.
-                    ניתוח AI בזמן אמת — בקרוב.
                   </p>
                 </div>
               </CardContent>
@@ -534,7 +657,7 @@ const BusinessDashboard = () => {
                 <br />
                 <span className="text-xs text-primary">זמין למנויי Professional ו-Premium בלבד.</span>
               </p>
-              <TestimonialMediaUploader businessId="PLACEHOLDER_ID" maxItems={5} />
+              <TestimonialMediaUploader businessId={businessId || "demo"} maxItems={5} />
             </div>
             </LockedOverlay>
           </TabsContent>
@@ -552,27 +675,31 @@ const BusinessDashboard = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {[
-                      { name: "יוסי כהן", email: "yossi@gmail.com", course: "שיווק דיגיטלי", status: "חם", date: "היום" },
-                      { name: "מיכל לוי", email: "michal@company.co.il", course: "הסמכת Google Ads", status: "חדש", date: "אתמול" },
-                      { name: "דני אברהם", email: "dani@startup.io", course: "אנליטיקס מתקדם", status: "בטיפול", date: "לפני 3 ימים" },
-                      { name: "שירה גולן", email: "shira@agency.com", course: "יסודות SEO", status: "חם", date: "לפני שבוע" },
-                    ].map((lead, i) => (
-                      <div key={i} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
-                        <div>
-                          <p className="text-sm font-medium">{lead.name}</p>
-                          <p className="text-xs text-muted-foreground">{lead.email} · {lead.course}</p>
+                    {isDemo ? (
+                      [
+                        { name: "יוסי כהן", email: "yossi@gmail.com", course: "שיווק דיגיטלי", status: "חם", date: "היום" },
+                        { name: "מיכל לוי", email: "michal@company.co.il", course: "הסמכת Google Ads", status: "חדש", date: "אתמול" },
+                        { name: "דני אברהם", email: "dani@startup.io", course: "אנליטיקס מתקדם", status: "בטיפול", date: "לפני 3 ימים" },
+                        { name: "שירה גולן", email: "shira@agency.com", course: "יסודות SEO", status: "חם", date: "לפני שבוע" },
+                      ].map((lead, i) => (
+                        <div key={i} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
+                          <div>
+                            <p className="text-sm font-medium">{lead.name}</p>
+                            <p className="text-xs text-muted-foreground">{lead.email} · {lead.course}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                              lead.status === "חם" ? "bg-primary/10 text-primary" :
+                              lead.status === "חדש" ? "bg-accent/10 text-accent" :
+                              "bg-secondary text-muted-foreground"
+                            }`}>{lead.status}</span>
+                            <span className="text-[10px] text-muted-foreground">{lead.date}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                            lead.status === "חם" ? "bg-primary/10 text-primary" :
-                            lead.status === "חדש" ? "bg-accent/10 text-accent" :
-                            "bg-secondary text-muted-foreground"
-                          }`}>{lead.status}</span>
-                          <span className="text-[10px] text-muted-foreground">{lead.date}</span>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground py-4 text-center">פיצ׳ר CRM יהיה זמין בקרוב.</p>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -585,17 +712,16 @@ const BusinessDashboard = () => {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 rounded-lg bg-primary/5">
-                        <p className="font-display font-bold text-2xl text-primary">47</p>
+                        <p className="font-display font-bold text-2xl text-primary">{isDemo ? "47" : "0"}</p>
                         <p className="text-xs text-muted-foreground">לידים חדשים החודש</p>
                       </div>
                       <div className="text-center p-4 rounded-lg bg-accent/5">
-                        <p className="font-display font-bold text-2xl text-accent">23%</p>
+                        <p className="font-display font-bold text-2xl text-accent">{isDemo ? "23%" : "0%"}</p>
                         <p className="text-xs text-muted-foreground">אחוז המרה</p>
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      מעקב אחר כל הלידים שמגיעים דרך הביקורות, דפי קורסים וקישורי אפיליאט. 
-                      סנכרנו עם ה-CRM שלכם או ייצאו ל-CSV.
+                      מעקב אחר כל הלידים שמגיעים דרך הביקורות, דפי קורסים וקישורי אפיליאט.
                     </p>
                   </CardContent>
                 </Card>
@@ -620,7 +746,6 @@ const BusinessDashboard = () => {
                       <Button size="sm" variant="outline" className="text-xs">העתק</Button>
                     </div>
                   </div>
-
                   <div>
                     <h3 className="text-sm font-display font-semibold mb-3">Webhooks פעילים</h3>
                     <div className="space-y-2">
@@ -638,7 +763,6 @@ const BusinessDashboard = () => {
                       ))}
                     </div>
                   </div>
-
                   <div>
                     <h3 className="text-sm font-display font-semibold mb-2">אינטגרציות זמינות</h3>
                     <div className="flex flex-wrap gap-2">
@@ -665,7 +789,6 @@ const BusinessDashboard = () => {
                   <p className="text-sm text-muted-foreground">
                     קבלו כל בוקר דוח AI מפורט עם ניתוח הביצועים של אתמול, שינויים במגמות, וצעדים מומלצים.
                   </p>
-
                   <div className="space-y-3">
                     {[
                       { date: "8 במרץ 2026", summary: "3 ביקורות חדשות, 2 המרות, עלייה של 5% בדירוג", read: false },
@@ -685,7 +808,6 @@ const BusinessDashboard = () => {
                       </div>
                     ))}
                   </div>
-
                   <div className="pt-4 border-t border-border/30">
                     <p className="text-xs text-muted-foreground">
                       הדוחות נשלחים גם במייל כל בוקר בשעה 08:00. ניתן לשנות את שעת השליחה בהגדרות.
