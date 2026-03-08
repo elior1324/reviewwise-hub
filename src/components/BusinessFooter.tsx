@@ -13,7 +13,7 @@ const BusinessFooter = () => (
             <span className="font-display font-bold text-lg gradient-text">ReviewHub</span>
             <span className="text-xs text-muted-foreground">לעסקים</span>
           </div>
-          <p className="text-sm text-muted-foreground">ביקורות מאומתות לחינוך דיגיטלי בישראל.</p>
+          <p className="text-sm text-muted-foreground">הפלטפורמה שעוזרת לכם לבחור נכון ולבנות את העתיד.</p>
         </div>
         <div>
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">מוצר</h4>
@@ -36,7 +36,7 @@ const BusinessFooter = () => (
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">חברה</h4>
           <div className="space-y-2">
             <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">אודות</Link>
-            <Link to="/business/contact" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">צרו קשר</Link>
+            <a href="mailto:reviewhub.il@gmail.com" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">צרו קשר</a>
             <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות פרטיות</Link>
             <Link to="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">תנאי שימוש</Link>
           </div>

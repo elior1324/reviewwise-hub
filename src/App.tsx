@@ -69,7 +69,6 @@ const App = () => (
             <Route path="/business/signup" element={<BusinessAuth mode="signup" />} />
             <Route path="/business/dashboard" element={<BusinessDashboard />} />
             <Route path="/business/pricing" element={<BusinessLanding />} />
-            <Route path="/business/contact" element={<BusinessLanding />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
