@@ -37,10 +37,6 @@ const Navbar = () => {
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             עמוד הבית
           </Link>
-          <Link to="/write-review" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
-            <PenLine size={14} />
-            כתבו ביקורת
-          </Link>
           <Link to="/search" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             קטגוריות
           </Link>
