@@ -21,6 +21,12 @@ interface CompareItem {
   description?: string;
   type: "freelancer" | "course";
   slug?: string;
+  yearsExperience?: number;
+  difficultyLevel?: string;
+  targetAudience?: string;
+  location?: string;
+  duration?: string;
+  format?: string;
 }
 
 interface SearchResult {
