@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { Shield, Mail, Lock, Eye, Trash2, FileText, Users, Globe, Database, Cookie, Baby, RefreshCw, CheckCircle, ExternalLink, MessageSquare, Server } from "lucide-react";
+import { Shield, Mail, Lock, Eye, Trash2, FileText, Users, Globe, Database, Cookie, Baby, RefreshCw, CheckCircle, ExternalLink, MessageSquare, Server, AlertTriangle } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -315,6 +315,25 @@ const PrivacyPolicy = () => {
             </div>
           </Section>
 
+          {/* GDPR */}
+          <Section icon={Globe} title="תאימות לתקנות האירופיות (GDPR)">
+            <p className="mb-3">
+              ReviewHub מכירה בכך שתחולת התקנות האירופיות להגנת מידע (GDPR) היא רחבה ומשפיעה גם על עסקים הפועלים בישראל, במיוחד כאשר הם מעבדים מידע של תושבי האיחוד האירופי או מציעים להם שירותים.
+            </p>
+            <p className="mb-3">
+              ככל שאתם משתמשים בפלטפורמה מתוך מדינות האיחוד האירופי או האזור הכלכלי האירופי (EEA), עומדות לכם זכויות נוספות בהתאם ל-GDPR, כולל:
+            </p>
+            <ul className="list-disc pr-6 space-y-1 text-muted-foreground mb-3">
+              <li>זכות לניידות מידע (Data Portability) — לקבל את המידע האישי שלכם בפורמט מובנה וקריא</li>
+              <li>זכות להגבלת עיבוד — לבקש שנגביל את עיבוד המידע שלכם</li>
+              <li>זכות התנגדות לעיבוד אוטומטי — לבקש שהחלטות לא יתקבלו רק על בסיס עיבוד אוטומטי</li>
+              <li>זכות להגיש תלונה לרשות פיקוח אירופית (Supervisory Authority)</li>
+            </ul>
+            <p className="text-muted-foreground">
+              ReviewHub פועלת בהתאם לעקרונות ה-GDPR ומיישמת אמצעי הגנה מתאימים, כולל חוזי עיבוד מידע (DPA) עם ספקי צד שלישי, הערכות השפעה על פרטיות (DPIA) בעת הצורך, ועמידה בעקרון "פרטיות בעיצוב" (Privacy by Design).
+            </p>
+          </Section>
+
           {/* International Transfer */}
           <Section icon={Globe} title="העברת מידע בינלאומית">
             <p>
@@ -327,20 +346,69 @@ const PrivacyPolicy = () => {
             </ul>
           </Section>
 
+          {/* Purpose Limitation */}
+          <Section icon={Shield} title="עיקרון צמידות המטרה">
+            <p className="mb-3">
+              בהתאם לחוק הגנת הפרטיות ולתיקון 13, ReviewHub מחויבת לעיקרון <strong>צמידות המטרה</strong> — כלומר, מידע אישי שנאסף לצורך מסוים ישמש אך ורק לאותה מטרה שלשמה נאסף ושלגביה ניתנה הסכמת המשתמש.
+            </p>
+            <p className="mb-3">
+              כך למשל, מידע שנאסף לצורך יצירת חשבון לא ישמש לדיוור שיווקי — אלא אם ניתנה הסכמה מפורשת ונפרדת לכך. אי-עמידה בעיקרון זה עלולה לגרור סנקציות משפטיות.
+            </p>
+          </Section>
+
+          {/* DPO */}
+          <Section icon={Users} title="ממונה הגנת הפרטיות">
+            <p className="mb-3">
+              בהתאם לתיקון 13 לחוק הגנת הפרטיות (שנכנס לתוקף באוגוסט 2025), ReviewHub בוחנת באופן שוטף את חובתה למנות ממונה הגנת פרטיות בהתאם לקריטריונים שנקבעו בחוק.
+            </p>
+            <p className="mb-3">
+              תפקיד הממונה כולל ייעוץ והדרכה לעובדי הארגון, מעקב ובקרה על עמידה בהוראות החוק, הבטחת זכויות נושאי המידע, ושמירה על קשר עם הרשות להגנת הפרטיות.
+            </p>
+            <p>
+              לפניות בנושא הגנת פרטיות, ניתן לפנות אלינו: <a href="mailto:privacy@reviewhub.co.il" className="text-primary hover:underline">privacy@reviewhub.co.il</a>
+            </p>
+          </Section>
+
+          {/* Sanctions */}
+          <Section icon={AlertTriangle} title="סנקציות והליכי אכיפה">
+            <p className="mb-3">
+              ReviewHub מודעת לכך שהפרה של חוק הגנת הפרטיות עלולה לגרור עיצומים כספיים שעשויים להגיע עד ל-5% ממחזור העסקאות השנתי, פיצויים אזרחיים (גם ללא הוכחת נזק), ואף אחריות פלילית בהתאם לתיקון 13.
+            </p>
+            <p className="mb-3">
+              לפיכך, ReviewHub מתחייבת לנקוט בכל האמצעים הנדרשים כדי לעמוד בדרישות החוק הישראלי והאירופי, ומבצעת סקירות תקופתיות לבחינת עמידתה ברגולציה.
+            </p>
+          </Section>
+
+          {/* Database Registry - Updated */}
+          <Section icon={Database} title="רישום מאגרי מידע">
+            <p className="mb-3">
+              במסגרת תיקון 13 לחוק הגנת הפרטיות, <strong>חובת הרישום של מאגרי מידע בוטלה</strong>. עם זאת, ביטול הרישום אינו מפחית מחובות אבטחת המידע והגנת הפרטיות — חובות אלו <strong>נותרו בעינן ואף הורחבו</strong>.
+            </p>
+            <p className="mb-3">
+              ReviewHub ממשיכה לעמוד בכל דרישות אבטחת המידע והגנת הפרטיות, כולל תקנות אבטחת מידע, מינוי ממונה (ככל שנדרש), ודיווח על אירועי אבטחה — ללא קשר לביטול חובת הרישום.
+            </p>
+          </Section>
+
+          {/* Analytics Compliance */}
+          <Section icon={Eye} title="שימוש באנליטיקס ופיקסלים שיווקיים">
+            <p className="mb-3">
+              ReviewHub משתמשת בכלי ניתוח אתרים (כגון Google Analytics) ועשויה להשתמש בפיקסלים שיווקיים. בהתאם לתיקון 13:
+            </p>
+            <ul className="list-disc pr-6 space-y-1 text-muted-foreground mb-3">
+              <li>עוגיות אנליטיקס ושיווק <strong>לא יופעלו לפני קבלת הסכמת המשתמש</strong> באמצעות באנר ההסכמה לעוגיות</li>
+              <li>עוגיות הכרחיות בלבד (אימות, אבטחה) יפעלו ללא צורך בהסכמה</li>
+              <li>המידע הנאסף באמצעות כלי אנליטיקס משמש לצורך ניתוחים סטטיסטיים ושיפור השירות בלבד</li>
+              <li>ReviewHub אינה מבצעת זיהוי אישי של גולשים באמצעות כלי אנליטיקס</li>
+            </ul>
+            <p className="p-3 rounded-lg bg-secondary/50 border border-border/50 text-foreground text-sm">
+              ℹ️ <strong>הבהרה:</strong> למרות שהחוק הישראלי אינו מחייב באופן ישיר "חומת עוגיות" (cookie wall), ReviewHub בחרה ליישם באנר הסכמה מקיף המאפשר לכם שליטה מלאה על סוגי העוגיות הפועלות בעת הגלישה, בהתאם לרוח החוק ולעקרונות ה-GDPR.
+            </p>
+          </Section>
+
           {/* Children */}
           <Section icon={Baby} title="מידע על קטינים">
             <p>
               הפלטפורמה שלנו אינה מיועדת לילדים מתחת לגיל 18, ואיננו אוספים ביודעין מידע אישי מקטינים. אם נודע לכם שקטין מסר לנו מידע אישי, אנא צרו קשר עמנו ונמחק את המידע.
-            </p>
-          </Section>
-
-          {/* Database Registry */}
-          <Section icon={Database} title="רישום מאגר מידע">
-            <p>
-              בהתאם לחוק הגנת הפרטיות, התשמ"א-1981, מאגרי מידע העומדים בתנאים מסוימים חייבים ברישום אצל רשם מאגרי המידע. ReviewHub פועלת בהתאם לדרישות החוק ובוחנת באופן שוטף את חובת הרישום של מאגרי המידע שברשותה.
-            </p>
-            <p className="mt-3">
-              לפרטים נוספים על רישום מאגרי מידע או לבירור מספר רישום המאגר, ניתן לפנות אלינו בכתובת <a href="mailto:privacy@reviewhub.co.il" className="text-primary hover:underline">privacy@reviewhub.co.il</a>.
             </p>
           </Section>
 
