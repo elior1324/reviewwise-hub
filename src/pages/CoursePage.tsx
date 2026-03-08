@@ -175,11 +175,12 @@ const CoursePage = () => {
                   <div>
                     <Link to={`/go/${course.id}`} target="_blank">
                       <Button size="sm" className="bg-primary text-primary-foreground gap-2 glow-primary">
-                      <ExternalLink size={14} /> לאתר הקורס
-                    </Button>
-                  </Link>
+                        <ExternalLink size={14} /> לאתר הקורס
+                      </Button>
+                    </Link>
+                    <p className="text-xs text-muted-foreground mt-1.5">* קישור שותפים — ReviewHub עשויה לקבל עמלה מרכישה זו</p>
+                  </div>
                 )}
-              </div>
             </div>
           </div>
         </motion.div>
