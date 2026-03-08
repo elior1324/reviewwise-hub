@@ -579,6 +579,50 @@ export type Database = {
           },
         ]
       }
+      testimonial_media: {
+        Row: {
+          business_id: string
+          created_at: string
+          external_url: string | null
+          file_path: string
+          file_type: string
+          id: string
+          media_type: string
+          sort_order: number
+          title: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          external_url?: string | null
+          file_path: string
+          file_type?: string
+          id?: string
+          media_type?: string
+          sort_order?: number
+          title?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          external_url?: string | null
+          file_path?: string
+          file_type?: string
+          id?: string
+          media_type?: string
+          sort_order?: number
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "testimonial_media_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
