@@ -10,8 +10,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import DeleteAccountButton from "./DeleteAccountButton";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -75,9 +77,15 @@ const Navbar = () => {
                 <DropdownMenuItem onClick={() => navigate("/business/dashboard")}>
                   לוח בקרה עסקי
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut size={14} className="ml-2" />
                   התנתקו
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="p-0">
+                  <div>
+                    <DeleteAccountButton />
+                  </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -109,9 +117,12 @@ const Navbar = () => {
           {user && <Link to="/business/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לוח בקרה עסקי</Link>}
           {!user && <Link to="/auth" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>התחברו / צרו חשבון</Link>}
           {user && (
-            <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-2 text-destructive">
-              התנתקו
-            </button>
+            <>
+              <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-2 text-destructive">
+                התנתקו
+              </button>
+              <DeleteAccountButton />
+            </>
           )}
         </div>
       )}
