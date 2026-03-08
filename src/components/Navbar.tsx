@@ -85,12 +85,7 @@ const Navbar = () => {
             <div className="hidden md:flex items-center gap-2">
               <Link to="/auth">
                 <Button size="sm" variant="outline" className="border-primary/40 text-primary hover:bg-primary/10 font-medium">
-                  התחברו
-                </Button>
-              </Link>
-              <Link to="/auth?tab=signup">
-                <Button size="sm" variant="ghost" className="text-xs text-muted-foreground hover:text-foreground">
-                  צרו חשבון
+                  התחברו / הרשמו
                 </Button>
               </Link>
             </div>
