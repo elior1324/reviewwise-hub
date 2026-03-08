@@ -119,6 +119,15 @@ const InvoiceTemplateUploader = ({ businessId }: InvoiceTemplateUploaderProps) =
             className="hidden"
             id="invoice-upload"
           />
+          {/* Camera input for mobile */}
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleUpload}
+            className="hidden"
+            id="invoice-camera"
+          />
           <label htmlFor="invoice-upload" className="cursor-pointer">
             {uploading ? (
               <Loader2 size={28} className="mx-auto mb-2 text-primary animate-spin" />
@@ -129,9 +138,14 @@ const InvoiceTemplateUploader = ({ businessId }: InvoiceTemplateUploaderProps) =
               {uploading ? "מעלה..." : "העלו קובץ קבלה/חשבונית"}
             </p>
             <p className="text-xs text-muted-foreground">
-              PDF, תמונה (JPG/PNG) או CSV — עד {MAX_SIZE_MB}MB
+              PDF, תמונה, גלריה, iCloud/Google Drive או CSV — עד {MAX_SIZE_MB}MB
             </p>
           </label>
+          {!uploading && (
+            <label htmlFor="invoice-camera" className="inline-flex items-center gap-1.5 mt-3 text-xs text-primary font-medium cursor-pointer hover:underline">
+              📷 צלמו חשבונית עם המצלמה
+            </label>
+          )}
         </div>
 
         {/* Uploaded templates list */}
