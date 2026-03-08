@@ -119,16 +119,7 @@ const PLANS = [
   },
 ];
 
-const TRUSTED = [
-  { name: "אקדמיית שיווק דיגיטלי", initials: "DMA" },
-  { name: "Code Masters IL", initials: "CM" },
-  { name: "בית הספר לעיצוב ת״א", initials: "DS" },
-  { name: "מרכז מדעי הנתונים", initials: "DH" },
-  { name: "Hebrew Tech", initials: "HT" },
-  { name: "אקדמיית צמיחה", initials: "GA" },
-  { name: "TechPro Academy", initials: "TP" },
-  { name: "LearnX Israel", initials: "LX" },
-];
+// Trusted companies — fetched from DB (verified businesses with good ratings)
 // Smooth collapsible with measured height
 const SmoothCollapse = ({ isOpen, preview, title }: { isOpen: boolean; preview?: string; title: string }) => {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -167,6 +158,26 @@ const BusinessLanding = () => {
   const { toast } = useToast();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
+  const [trustedCompanies, setTrustedCompanies] = useState<{ name: string; initials: string }[]>([]);
+
+  useEffect(() => {
+    const fetchTrusted = async () => {
+      const { data } = await supabase
+        .from("businesses")
+        .select("name")
+        .eq("verified", true)
+        .gte("rating", 4)
+        .order("review_count", { ascending: false })
+        .limit(8);
+      if (data && data.length > 0) {
+        setTrustedCompanies(data.map(b => ({
+          name: b.name,
+          initials: b.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase(),
+        })));
+      }
+    };
+    fetchTrusted();
+  }, []);
 
   const toggleFeature = (title: string) => {
     setExpandedFeature(prev => prev === title ? null : title);
@@ -271,22 +282,24 @@ const BusinessLanding = () => {
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="border-y border-border/50 glass">
-        <div className="container py-12">
-          <p className="text-center text-sm text-muted-foreground mb-8 font-medium">חברות ועסקים שכבר סומכים על ReviewHub</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            {TRUSTED.map((company) => (
-              <div key={company.name} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/30">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-xs">
-                  {company.initials}
+      {/* Social Proof — only shown when real verified businesses exist */}
+      {trustedCompanies.length > 0 && (
+        <section className="border-y border-border/50 glass">
+          <div className="container py-12">
+            <p className="text-center text-sm text-muted-foreground mb-8 font-medium">חברות ועסקים שכבר סומכים על ReviewHub</p>
+            <div className="flex flex-wrap justify-center gap-4">
+              {trustedCompanies.map((company) => (
+                <div key={company.name} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/30">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-xs">
+                    {company.initials}
+                  </div>
+                  <span className="text-xs text-foreground font-medium">{company.name}</span>
                 </div>
-                <span className="text-xs text-foreground font-medium">{company.name}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Demo CTA Banner */}
       <section className="bg-primary/5 border-y border-primary/20">
