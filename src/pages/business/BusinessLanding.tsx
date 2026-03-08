@@ -282,22 +282,24 @@ const BusinessLanding = () => {
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="border-y border-border/50 glass">
-        <div className="container py-12">
-          <p className="text-center text-sm text-muted-foreground mb-8 font-medium">חברות ועסקים שכבר סומכים על ReviewHub</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            {TRUSTED.map((company) => (
-              <div key={company.name} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/30">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-xs">
-                  {company.initials}
+      {/* Social Proof — only shown when real verified businesses exist */}
+      {trustedCompanies.length > 0 && (
+        <section className="border-y border-border/50 glass">
+          <div className="container py-12">
+            <p className="text-center text-sm text-muted-foreground mb-8 font-medium">חברות ועסקים שכבר סומכים על ReviewHub</p>
+            <div className="flex flex-wrap justify-center gap-4">
+              {trustedCompanies.map((company) => (
+                <div key={company.name} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/30">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-xs">
+                    {company.initials}
+                  </div>
+                  <span className="text-xs text-foreground font-medium">{company.name}</span>
                 </div>
-                <span className="text-xs text-foreground font-medium">{company.name}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Demo CTA Banner */}
       <section className="bg-primary/5 border-y border-primary/20">
