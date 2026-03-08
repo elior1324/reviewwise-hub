@@ -28,7 +28,7 @@ const FloatingEarnCTA = () => {
           navigate("/#earn-money");
         }
       }}
-      className="fixed top-1/3 left-0 z-40 cursor-pointer"
+      className="fixed top-1/4 left-0 z-40 cursor-pointer"
     >
       <div className="flex items-center bg-primary/90 backdrop-blur-sm text-primary-foreground pl-3 pr-2 py-1.5 md:py-2 rounded-l-none rounded-r-full shadow-md hover:shadow-primary/20 transition-all duration-300 hover:pr-3 md:hover:pr-4">
         <DollarSign size={14} className="ml-1.5 shrink-0 animate-pulse" />
