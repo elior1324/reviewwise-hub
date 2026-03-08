@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { DollarSign, TrendingUp, Trophy, Star, ThumbsUp, Wallet, Users, Award, ArrowLeft, Crown, Sparkles } from "lucide-react";
+import { DollarSign, TrendingUp, Trophy, Star, ThumbsUp, Wallet, Users, Award, Crown, Sparkles, Timer, Gift } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useSeasonInfo } from "@/hooks/useSeasonInfo";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -37,7 +38,7 @@ interface LeaderboardEntry {
 const PartnerDashboard = () => {
   const { user, loading } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const season = useSeasonInfo();
 
   const [rewards, setRewards] = useState<RewardEntry[]>([]);
   const [poolData, setPoolData] = useState({ communityPool: 0, totalPoints: 0, myPoints: 0 });
@@ -47,21 +48,18 @@ const PartnerDashboard = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [withdrawLoading, setWithdrawLoading] = useState(false);
 
-  const currentMonth = new Date().toISOString().slice(0, 7); // '2026-03'
-
   useEffect(() => {
     if (!user) return;
 
     const fetchData = async () => {
-      // 1. Fetch user's rewards for current month
+      // Fetch rewards for ALL months in the current season
       const { data: rewardsData } = await supabase
         .from("rewards_log")
         .select("*")
         .eq("user_id", user.id)
-        .eq("month_year", currentMonth);
+        .in("month_year", season.seasonMonths);
 
       if (rewardsData) {
-        // Get review details
         const reviewIds = rewardsData.map((r: any) => r.review_id);
         const { data: reviews } = await supabase
           .from("reviews")
@@ -85,24 +83,22 @@ const PartnerDashboard = () => {
         setRewards(mapped);
       }
 
-      // 2. Fetch pool data
-      const { data: pool } = await supabase
+      // Pool data aggregated across season months
+      const { data: poolRows } = await supabase
         .from("rewards_pool")
         .select("*")
-        .eq("month_year", currentMonth)
-        .maybeSingle();
+        .in("month_year", season.seasonMonths);
 
-      const communityPool = pool ? Number(pool.community_pool) : 0;
-      const totalPlatformPoints = pool ? Number(pool.total_points) : 0;
+      const communityPool = (poolRows || []).reduce((s: number, p: any) => s + Number(p.community_pool), 0);
+      const totalPlatformPoints = (poolRows || []).reduce((s: number, p: any) => s + Number(p.total_points), 0);
       const myTotalPoints = (rewardsData || []).reduce((s: number, r: any) => s + Number(r.total_points), 0);
 
       setPoolData({ communityPool, totalPoints: totalPlatformPoints, myPoints: myTotalPoints });
 
-      // Calculate earnings
       const earnings = totalPlatformPoints > 0 ? (myTotalPoints / totalPlatformPoints) * communityPool : 0;
       setMyEarnings(earnings);
 
-      // 3. Fetch total historical earnings
+      // Total historical earnings
       const { data: profile } = await supabase
         .from("profiles")
         .select("total_earnings")
@@ -110,7 +106,7 @@ const PartnerDashboard = () => {
         .maybeSingle();
       setTotalEarnings(Number(profile?.total_earnings) || 0);
 
-      // 4. Fetch payouts
+      // Payouts
       const { data: payoutsData } = await supabase
         .from("reward_payouts")
         .select("*")
@@ -118,11 +114,11 @@ const PartnerDashboard = () => {
         .order("requested_at", { ascending: false });
       setPayouts(payoutsData || []);
 
-      // 5. Fetch leaderboard (top earners this month)
+      // Leaderboard for current season
       const { data: allRewards } = await supabase
         .from("rewards_log")
         .select("user_id, total_points")
-        .eq("month_year", currentMonth);
+        .in("month_year", season.seasonMonths);
 
       if (allRewards) {
         const userPoints: Record<string, number> = {};
@@ -152,7 +148,7 @@ const PartnerDashboard = () => {
     };
 
     fetchData();
-  }, [user, currentMonth]);
+  }, [user, season.seasonMonths]);
 
   const handleWithdraw = async () => {
     if (myEarnings < 100) {
@@ -161,6 +157,7 @@ const PartnerDashboard = () => {
     }
     setWithdrawLoading(true);
     try {
+      const currentMonth = new Date().toISOString().slice(0, 7);
       const { error } = await supabase.from("reward_payouts").insert({
         user_id: user!.id,
         month_year: currentMonth,
@@ -194,13 +191,14 @@ const PartnerDashboard = () => {
     );
   }
 
-  // Calculate next multiplier progress
+  // Multiplier progress
   const bestReview = rewards.length > 0 ? rewards.reduce((a, b) => a.likeCount > b.likeCount ? a : b) : null;
   const nextMultiplierLikes = bestReview ? (Math.floor(bestReview.likeCount / 10) + 1) * 10 : 10;
   const likesToNext = bestReview ? nextMultiplierLikes - bestReview.likeCount : 10;
   const progressToNext = bestReview ? ((bestReview.likeCount % 10) / 10) * 100 : 0;
   const currentMultiplier = bestReview ? bestReview.multiplier : 1;
 
+  const currentMonth = new Date().toISOString().slice(0, 7);
   const pendingPayout = payouts.find(p => p.month_year === currentMonth && p.status === "pending");
 
   return (
@@ -219,21 +217,71 @@ const PartnerDashboard = () => {
               הרווחים שלכם 💰
             </motion.h1>
             <motion.p variants={fadeUp} custom={2} className="text-muted-foreground text-lg">
-              אנחנו מחלקים 50% מהעמלות שלנו עם הקהילה. כתבו ביקורות איכותיות, צברו לייקים, והרוויחו.
+              אנחנו מחלקים 50% מהעמלות שלנו עם הקהילה. כתבו ביקורות, צברו לייקים, והרוויחו — עונה אחר עונה.
             </motion.p>
           </motion.div>
         </div>
       </section>
 
       <div className="container py-10">
+        {/* Season Banner + Countdown */}
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8">
+          <Card className="shadow-card bg-card border-primary/20 overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.06), transparent 60%)" }} />
+            <CardContent className="p-6 relative">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Timer size={24} className="text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="font-display font-bold text-lg text-foreground">{season.seasonLabel}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {season.daysLeft > 0
+                        ? `נותרו ${season.daysLeft} ימים ו-${season.hoursLeft} שעות לסיום העונה`
+                        : "העונה מסתיימת היום!"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex-1 max-w-xs">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                    <span>התקדמות העונה</span>
+                    <span>{Math.round(season.progressPercent)}%</span>
+                  </div>
+                  <Progress value={season.progressPercent} className="h-2.5" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Prize Banner */}
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="mb-8">
+          <div className="rounded-xl p-5 border border-accent/20" style={{ background: "linear-gradient(135deg, hsl(var(--accent) / 0.1), hsl(var(--accent) / 0.03))" }}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-accent/15 flex items-center justify-center shrink-0">
+                <Gift size={20} className="text-accent" />
+              </div>
+              <div>
+                <p className="font-display font-bold text-foreground">
+                  🏆 השותף המוביל בעונה זוכה ב-40% הנחה על כל קורס!
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  הביקורת שלכם יכולה להפוך אתכם למוביל העונה. צברו נקודות וטפסו בלידרבורד.
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Main Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {/* Live Earnings Estimate */}
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
             <Card className="shadow-card bg-card border-primary/20">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Wallet size={16} className="text-primary" /> הערכת רווח חודשי
+                  <Wallet size={16} className="text-primary" /> הערכת רווח עונתי
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -253,11 +301,11 @@ const PartnerDashboard = () => {
           </motion.div>
 
           {/* Community Pool Status */}
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2}>
             <Card className="shadow-card bg-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Users size={16} className="text-primary" /> קופת הקהילה
+                  <Users size={16} className="text-primary" /> קופת העונה
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -278,7 +326,7 @@ const PartnerDashboard = () => {
           </motion.div>
 
           {/* Likes to Next Multiplier */}
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2}>
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
             <Card className="shadow-card bg-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
@@ -299,7 +347,7 @@ const PartnerDashboard = () => {
         </div>
 
         {/* Withdraw Button */}
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mb-8">
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4} className="mb-8">
           <Card className="shadow-card bg-card">
             <CardContent className="p-5 flex items-center justify-between flex-wrap gap-4">
               <div>
@@ -329,13 +377,13 @@ const PartnerDashboard = () => {
           {/* My Reviews & Points */}
           <div className="lg:col-span-2 space-y-4">
             <h2 className="font-display font-bold text-xl text-foreground flex items-center gap-2">
-              <Star size={20} className="text-primary" /> הביקורות שלי החודש
+              <Star size={20} className="text-primary" /> הביקורות שלי בעונה
             </h2>
             {rewards.length === 0 ? (
               <Card className="shadow-card bg-card">
                 <CardContent className="p-10 text-center">
                   <Star size={40} className="mx-auto mb-4 text-muted-foreground/30" />
-                  <p className="text-muted-foreground mb-4">עדיין אין ביקורות החודש. כתבו ביקורת מאומתת כדי להתחיל לצבור נקודות!</p>
+                  <p className="text-muted-foreground mb-4">עדיין אין ביקורות בעונה הנוכחית. כתבו ביקורת מאומתת כדי להתחיל לצבור נקודות!</p>
                   <Link to="/search">
                     <Button variant="outline" className="gap-2">
                       <Star size={14} /> מצאו קורס לכתוב עליו ביקורת
@@ -345,7 +393,7 @@ const PartnerDashboard = () => {
               </Card>
             ) : (
               rewards.map((r, i) => (
-                <motion.div key={r.reviewId} initial="hidden" animate="visible" variants={fadeUp} custom={i + 4}>
+                <motion.div key={r.reviewId} initial="hidden" animate="visible" variants={fadeUp} custom={i + 5}>
                   <Card className="shadow-card bg-card">
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between mb-3">
@@ -375,23 +423,24 @@ const PartnerDashboard = () => {
             )}
           </div>
 
-          {/* Leaderboard */}
+          {/* Sidebar */}
           <div className="space-y-4">
+            {/* Leaderboard */}
             <h2 className="font-display font-bold text-xl text-foreground flex items-center gap-2">
-              <Trophy size={20} className="text-primary" /> מובילי החודש
+              <Trophy size={20} className="text-primary" /> מובילי העונה
             </h2>
             <Card className="shadow-card bg-card">
               <CardContent className="p-5">
                 {leaderboard.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-6 text-sm">עוד אין נתוני לידרבורד החודש</p>
+                  <p className="text-center text-muted-foreground py-6 text-sm">עוד אין נתוני לידרבורד לעונה הנוכחית</p>
                 ) : (
                   <div className="space-y-3">
                     {leaderboard.map((entry, i) => (
                       <div key={i} className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${entry.rank <= 3 ? "bg-primary/5" : "bg-secondary/50"}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-display font-bold text-sm ${
-                          entry.rank === 1 ? "bg-yellow-500/20 text-yellow-600" :
-                          entry.rank === 2 ? "bg-gray-300/30 text-gray-500" :
-                          entry.rank === 3 ? "bg-orange-400/20 text-orange-500" :
+                          entry.rank === 1 ? "bg-accent/20 text-accent" :
+                          entry.rank === 2 ? "bg-muted text-muted-foreground" :
+                          entry.rank === 3 ? "bg-accent/10 text-accent/70" :
                           "bg-secondary text-muted-foreground"
                         }`}>
                           {entry.rank <= 3 ? ["🥇", "🥈", "🥉"][entry.rank - 1] : entry.rank}
@@ -400,7 +449,7 @@ const PartnerDashboard = () => {
                           <p className="font-display font-semibold text-sm text-foreground truncate flex items-center gap-1">
                             {entry.displayName}
                             {entry.badge === "elite" && (
-                              <Crown size={12} className="text-yellow-500" />
+                              <Crown size={12} className="text-accent" />
                             )}
                           </p>
                         </div>
@@ -430,14 +479,18 @@ const PartnerDashboard = () => {
                 </div>
                 <div className="flex gap-2">
                   <span className="text-primary font-bold">3.</span>
-                  <span><strong className="text-foreground">50%</strong> מכלל העמלות של האתר הולכים לקופה משותפת</span>
+                  <span><strong className="text-foreground">50%</strong> מכלל העמלות הולכים לקופה משותפת</span>
                 </div>
                 <div className="flex gap-2">
                   <span className="text-primary font-bold">4.</span>
                   <span>הרווח שלכם = <strong className="text-foreground">(הנקודות שלכם / סה״כ נקודות) × הקופה</strong></span>
                 </div>
+                <div className="flex gap-2">
+                  <span className="text-primary font-bold">5.</span>
+                  <span>הנקודות <strong className="text-foreground">מתאפסות כל עונה</strong> (4 חודשים) — הלייקים נשארים!</span>
+                </div>
                 <div className="pt-2 border-t border-border/30">
-                  <p className="text-primary font-medium">ככל שהביקורת שלכם טובה יותר ומקבלת יותר לייקים — אתם מרוויחים יותר! 🚀</p>
+                  <p className="text-primary font-medium">ככל שהביקורת שלכם טובה יותר — אתם מרוויחים יותר! 🚀</p>
                 </div>
               </CardContent>
             </Card>
@@ -483,7 +536,7 @@ const PartnerDashboard = () => {
               ההשפעה שלכם = ההכנסה שלכם 💪
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-              אנחנו מחלקים את הרווחים שלנו 50/50 עם הקהילה. ביקורת איכותית אחת יכולה להניב לכם הכנסה פאסיבית חודש אחרי חודש.
+              אנחנו מחלקים את הרווחים שלנו 50/50 עם הקהילה. ביקורת איכותית אחת יכולה להניב לכם הכנסה פאסיבית עונה אחר עונה.
             </p>
             <Link to="/search">
               <Button size="lg" className="bg-primary text-primary-foreground font-bold glow-primary px-10">
