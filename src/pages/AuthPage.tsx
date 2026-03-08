@@ -12,6 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { lovable } from "@/integrations/lovable/index";
+import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
+import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 
 const AuthPage = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
