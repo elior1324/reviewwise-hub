@@ -31,13 +31,18 @@ const BusinessNavbar = () => {
     <nav className="glass sticky top-0 z-50 border-b border-border/50" dir="rtl">
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
-        <Link to="/business" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-primary glow-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-display font-bold text-sm">R</span>
-          </div>
-          <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
-          <span className="text-xs text-muted-foreground font-medium border border-border/50 rounded px-1.5 py-0.5">לעסקים</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link to="/business" className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl bg-primary glow-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-display font-bold text-sm">R</span>
+            </div>
+            <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
+            <span className="text-xs text-muted-foreground font-medium border border-border/50 rounded px-1.5 py-0.5">לעסקים</span>
+          </Link>
+          <Link to="/" className="text-xs text-muted-foreground hover:text-primary transition-colors font-medium border border-border/50 rounded px-2 py-1 hover:border-primary/50">
+            ← לאישי
+          </Link>
+        </div>
 
         {/* Center nav */}
         <div className="hidden lg:flex items-center gap-1">
