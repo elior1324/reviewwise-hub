@@ -115,6 +115,7 @@ const Navbar = () => {
           <Link to="/" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>עמוד הבית</Link>
           
           <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>קטגוריות</Link>
+          <Link to="/partner" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>שותפים</Link>
           <Link to="/compare" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>השוואה חכמה</Link>
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
           <Link to="/business" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>לעסקים</Link>
