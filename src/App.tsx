@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import CompanyGuidelines from "./pages/CompanyGuidelines";
+import TrademarkGuidelines from "./pages/TrademarkGuidelines";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
