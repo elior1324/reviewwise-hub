@@ -218,6 +218,38 @@ const BusinessDashboard = () => {
         { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: `₪${totalRevenue.toLocaleString()}`, change: "", up: true, tooltip: "סך ההכנסות מרכישות שהגיעו דרך קישורי האפיליאט." },
       ]);
 
+      // Fetch leads
+      const { data: leadsData } = await supabase
+        .from("leads")
+        .select("*")
+        .eq("business_id", biz.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (leadsData) setRealLeads(leadsData);
+
+      // Fetch webhooks
+      const { data: webhooksData } = await supabase
+        .from("business_webhooks")
+        .select("*")
+        .eq("business_id", biz.id);
+      if (webhooksData) setRealWebhooks(webhooksData);
+
+      // Fetch API keys
+      const { data: apiKeysData } = await supabase
+        .from("api_keys")
+        .select("id, key_prefix, name, active, last_used_at, created_at")
+        .eq("business_id", biz.id);
+      if (apiKeysData) setRealApiKeys(apiKeysData);
+
+      // Fetch AI reports
+      const { data: aiReportsData } = await supabase
+        .from("ai_reports")
+        .select("*")
+        .eq("business_id", biz.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (aiReportsData) setRealAiReports(aiReportsData);
+
       setLoadingData(false);
     };
 
