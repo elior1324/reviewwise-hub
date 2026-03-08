@@ -65,13 +65,45 @@ const SearchPage = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
   const [sortOption, setSortOption] = useState<SortOption>("default");
 
-  const top5Overall = useMemo(() => 
+  // Fallback mock top 5
+  const mockTop5 = useMemo(() => 
     [...BUSINESSES]
       .filter(b => b.rating >= 4.0)
       .sort((a, b) => b.reviewCount - a.reviewCount || b.rating - a.rating)
       .slice(0, 5),
     []
   );
+
+  // Fetch AI-generated monthly top 5 from DB
+  const [dbTop5, setDbTop5] = useState<any[] | null>(null);
+  const [top5Month, setTop5Month] = useState("");
+
+  useEffect(() => {
+    const fetchTop5 = async () => {
+      const now = new Date();
+      const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      
+      const { data } = await supabase
+        .from("monthly_top5")
+        .select("*")
+        .eq("month_year", monthYear)
+        .order("rank", { ascending: true });
+
+      if (data && data.length > 0) {
+        setTop5Month(monthYear);
+        // Map DB rankings to mock business data for BusinessCard display
+        const mapped = data.map((item: any) => {
+          const biz = BUSINESSES.find(b => b.slug === item.business_slug);
+          return biz ? { ...biz, _aiReasoning: item.ai_reasoning } : null;
+        }).filter(Boolean);
+        if (mapped.length > 0) setDbTop5(mapped);
+      }
+    };
+    fetchTop5();
+  }, []);
+
+  const top5Overall = dbTop5 || mockTop5;
+  const isAiRanked = dbTop5 !== null;
 
   const { data: freelancerCats = [] } = useCategories("freelancer");
   const { data: courseCats = [] } = useCategories("course");
