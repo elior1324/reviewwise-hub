@@ -5,6 +5,7 @@ import ReviewResponse from "./ReviewResponse";
 import ReportReviewDialog from "./ReportReviewDialog";
 import { User, Clock, Pencil } from "lucide-react";
 import { getTimeSincePurchase } from "@/data/mockData";
+import { motion } from "framer-motion";
 
 interface ReviewCardProps {
   id?: string;
@@ -26,6 +27,7 @@ interface ReviewCardProps {
 }
 
 const ReviewCard = ({ id, reviewerName, rating, text, courseName, date, purchaseDate, verified, anonymous, updatedAt, ownerResponse, flagged, flagReason }: ReviewCardProps) => (
+  <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.2, ease: "easeOut" }}>
   <Card className={`shadow-card hover:shadow-card-hover transition-all duration-500 animated-border bg-card ${flagged ? "border-destructive/30" : ""}`}>
     <CardContent className="p-6">
       <div className="flex items-start justify-between mb-3">
@@ -78,6 +80,7 @@ const ReviewCard = ({ id, reviewerName, rating, text, courseName, date, purchase
       </div>
     </CardContent>
   </Card>
+  </motion.div>
 );
 
 export default ReviewCard;

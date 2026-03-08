@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,13 +12,32 @@ import ReviewCard from "@/components/ReviewCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
-import { useState } from "react";
+import AnimatedCounter from "@/components/AnimatedCounter";
+import { useState, useRef } from "react";
 import { BUSINESSES, REVIEWS, FREELANCER_CATEGORIES, COURSE_CATEGORIES } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.6, ease: "easeOut" as const } }),
+  hidden: { opacity: 0, y: 24 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  }),
+};
+
+const staggerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06 } },
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.92 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  },
 };
 
 const AUDIENCE_TYPES = [
@@ -57,16 +76,21 @@ const Index = () => {
   const topCourseProviders = BUSINESSES.filter(b => b.type === "course-provider").sort((a, b) => b.rating - a.rating).slice(0, 4);
   const recentReviews = REVIEWS.slice(0, 3);
 
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0.3]);
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 40]);
+
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
 
       {/* Hero — Audience-First */}
-      <section className="relative overflow-hidden">
+      <section ref={heroRef} className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
         <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl animate-float" />
         <div className="absolute bottom-10 right-1/4 w-64 h-64 rounded-full bg-accent/5 blur-3xl animate-float" style={{ animationDelay: "3s" }} />
-        <div className="container py-16 md:py-24 relative">
+        <motion.div className="container py-16 md:py-24 relative" style={{ opacity: heroOpacity, y: heroY }}>
           <motion.div className="max-w-4xl mx-auto text-center" initial="hidden" animate="visible">
             <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
               <ShieldCheck size={16} /> רק ביקורות מאומתות
@@ -102,6 +126,7 @@ const Index = () => {
             className="max-w-5xl mx-auto"
             initial="hidden"
             animate="visible"
+            variants={staggerContainer}
           >
             <motion.p variants={fadeUp} custom={4} className="text-center text-sm text-muted-foreground mb-6 font-medium">
               מי אתם? מצאו מה שמתאים לכם
@@ -112,7 +137,9 @@ const Index = () => {
                   key={label}
                   variants={fadeUp}
                   custom={5 + i * 0.5}
-                  className="group cursor-pointer rounded-xl p-4 bg-card/60 border border-border/40 hover:border-primary/40 hover:bg-card transition-all duration-300"
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  whileTap={{ scale: 0.97 }}
+                  className="group cursor-pointer rounded-xl p-4 bg-card/60 border border-border/40 hover:border-primary/40 hover:bg-card transition-colors duration-300"
                   onClick={() => navigate(`/search?audience=${encodeURIComponent(label)}`)}
                 >
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
@@ -124,73 +151,96 @@ const Index = () => {
               ))}
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Two Category Sections */}
       <section className="border-y border-border/50 glass">
         <div className="container py-12">
           {/* Freelancers */}
-          <div className="mb-10">
-            <div className="flex items-center gap-2 mb-2">
+          <motion.div
+            className="mb-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+          >
+            <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2 mb-2">
               <UserCheck size={20} className="text-primary" />
               <h2 className="font-display font-bold text-xl text-foreground">בעלי מקצוע עצמאים</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-5">מנהלי סושיאל, מעצבי אתרים, עורכי וידאו, כותבים שיווקיים ועוד</p>
+            </motion.div>
+            <motion.p variants={fadeUp} custom={1} className="text-sm text-muted-foreground mb-5">מנהלי סושיאל, מעצבי אתרים, עורכי וידאו, כותבים שיווקיים ועוד</motion.p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {FREELANCER_CATS_DISPLAY.map(({ label, query, count }) => (
-                <Link
-                  key={label}
-                  to={`/search?q=${encodeURIComponent(query)}&tab=freelancers`}
-                  className="rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 transition-all duration-300 text-center group"
-                >
-                  <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
-                </Link>
+              {FREELANCER_CATS_DISPLAY.map(({ label, query, count }, i) => (
+                <motion.div key={label} variants={fadeUp} custom={2 + i * 0.3}>
+                  <Link
+                    to={`/search?q=${encodeURIComponent(query)}&tab=freelancers`}
+                    className="block rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 text-center group"
+                  >
+                    <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
+                  </Link>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Course Providers */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+          >
+            <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2 mb-2">
               <BookOpen size={20} className="text-primary" />
               <h2 className="font-display font-bold text-xl text-foreground">קורסים, סדנאות והכשרות</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-5">קורסים, סדנאות, הרצאות, לימודים, תעודות הכשרה ועוד</p>
+            </motion.div>
+            <motion.p variants={fadeUp} custom={1} className="text-sm text-muted-foreground mb-5">קורסים, סדנאות, הרצאות, לימודים, תעודות הכשרה ועוד</motion.p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {COURSE_CATS_DISPLAY.map(({ label, query, count }) => (
-                <Link
-                  key={label}
-                  to={`/search?q=${encodeURIComponent(query)}&tab=courses`}
-                  className="rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 transition-all duration-300 text-center group"
-                >
-                  <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
-                </Link>
+              {COURSE_CATS_DISPLAY.map(({ label, query, count }, i) => (
+                <motion.div key={label} variants={fadeUp} custom={2 + i * 0.3}>
+                  <Link
+                    to={`/search?q=${encodeURIComponent(query)}&tab=courses`}
+                    className="block rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 text-center group"
+                  >
+                    <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
+                  </Link>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Stats */}
       <section className="border-b border-border/50">
         <div className="container py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={staggerContainer}
+          >
             {[
               { icon: Star, label: "ביקורות", value: "12,400+" },
               { icon: Users, label: "עסקים ופרילנסרים", value: "850+" },
               { icon: ShieldCheck, label: "מאומתות", value: "98%" },
               { icon: TrendingUp, label: "מבקרים בחודש", value: "45K+" },
             ].map(({ icon: Icon, label, value }) => (
-              <div key={label}>
-                <Icon size={24} className="mx-auto mb-2 text-primary" />
-                <p className="font-display font-bold text-2xl text-foreground">{value}</p>
-                <p className="text-sm text-muted-foreground">{label}</p>
-              </div>
+              <motion.div key={label} variants={scaleIn}>
+                <motion.div
+                  whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+                >
+                  <Icon size={24} className="mx-auto mb-2 text-primary" />
+                  <p className="font-display font-bold text-2xl text-foreground">
+                    <AnimatedCounter value={value} />
+                  </p>
+                  <p className="text-sm text-muted-foreground">{label}</p>
+                </motion.div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -244,11 +294,13 @@ const Index = () => {
 
       {/* Recent Reviews */}
       <section className="container py-20">
-        <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">ביקורות אחרונות</h2>
-        <p className="text-muted-foreground mb-10">משוב אמיתי מלקוחות מאומתים</p>
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}>
+          <motion.h2 variants={fadeUp} custom={0} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">ביקורות אחרונות</motion.h2>
+          <motion.p variants={fadeUp} custom={1} className="text-muted-foreground mb-10">משוב אמיתי מלקוחות מאומתים</motion.p>
+        </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {recentReviews.map((review, i) => (
-            <motion.div key={review.id} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+            <motion.div key={review.id} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={fadeUp} custom={i}>
               <ReviewCard {...review} />
             </motion.div>
           ))}
@@ -257,16 +309,41 @@ const Index = () => {
 
       {/* About CTA */}
       <section className="container pb-20">
-        <div className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border" style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border"
+          style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}
+        >
           <div className="absolute inset-0 bg-primary/5 blur-3xl" />
           <div className="relative">
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4"
+            >
               בעלי מקצוע ויוצרי קורסים? הצטרפו עכשיו
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.25, duration: 0.5 }}
+              className="text-muted-foreground mb-8 max-w-lg mx-auto"
+            >
               בנו אמון אמיתי עם ביקורות מאומתות והגדילו את העסק שלכם.
-            </p>
-            <div className="flex gap-3 justify-center flex-wrap">
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.35, duration: 0.5 }}
+              className="flex gap-3 justify-center flex-wrap"
+            >
               <Link to="/business">
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
                   גלו את הפלטפורמה לעסקים
@@ -277,9 +354,9 @@ const Index = () => {
                   קראו עוד על ReviewHub
                 </Button>
               </Link>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <Footer />
