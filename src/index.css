@@ -44,6 +44,48 @@
   line-height: 1.8 !important;
 }
 
+.a11y-invert-colors {
+  --background: 0 0% 97% !important;
+  --foreground: 0 0% 10% !important;
+  --card: 0 0% 100% !important;
+  --card-foreground: 0 0% 10% !important;
+  --popover: 0 0% 100% !important;
+  --popover-foreground: 0 0% 10% !important;
+  --primary: 168 45% 28% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --secondary: 0 0% 93% !important;
+  --secondary-foreground: 0 0% 20% !important;
+  --muted: 0 0% 93% !important;
+  --muted-foreground: 0 0% 40% !important;
+  --accent: 40 95% 48% !important;
+  --accent-foreground: 0 0% 5% !important;
+  --destructive: 0 72% 51% !important;
+  --destructive-foreground: 0 0% 100% !important;
+  --border: 0 0% 85% !important;
+  --input: 0 0% 85% !important;
+  --ring: 168 45% 28% !important;
+  --star: 38 100% 50% !important;
+  --star-empty: 0 0% 80% !important;
+  --trust-green: 168 45% 28% !important;
+  --trust-green-light: 168 30% 90% !important;
+  --glow-primary: 168 45% 28% !important;
+  --glow-accent: 168 35% 40% !important;
+  --hero-gradient: linear-gradient(135deg, hsl(168 45% 28% / 0.08), hsl(168 35% 40% / 0.04), transparent) !important;
+  --card-gradient: linear-gradient(145deg, hsl(0 0% 100%), hsl(0 0% 97%)) !important;
+  --card-shadow: 0 1px 3px hsl(0 0% 0% / 0.08), 0 1px 2px hsl(0 0% 0% / 0.05) !important;
+  --card-shadow-hover: 0 8px 30px hsl(0 0% 0% / 0.1), 0 0 20px hsl(168 45% 28% / 0.07) !important;
+  --glass-bg: hsl(0 0% 100% / 0.85) !important;
+  --glass-border: hsl(0 0% 85% / 0.6) !important;
+  --sidebar-background: 0 0% 98% !important;
+  --sidebar-foreground: 0 0% 10% !important;
+  --sidebar-primary: 168 45% 28% !important;
+  --sidebar-primary-foreground: 0 0% 100% !important;
+  --sidebar-accent: 0 0% 93% !important;
+  --sidebar-accent-foreground: 0 0% 10% !important;
+  --sidebar-border: 0 0% 85% !important;
+  --sidebar-ring: 168 45% 28% !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 4%;

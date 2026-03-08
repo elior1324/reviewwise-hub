@@ -147,6 +147,12 @@ const AccessibilityMenu = () => {
             {isActive("textSpacing") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => toggle("invertColors")}>
+          <span className="flex items-center justify-between w-full">
+            <span>הפיכת צבעים</span>
+            {isActive("invertColors") && <span className="text-xs text-primary">✓</span>}
+          </span>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={resetAll} className="text-muted-foreground">
           <span className="flex items-center gap-2">
