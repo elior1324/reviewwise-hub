@@ -18,6 +18,7 @@ import { useState, useRef, useEffect } from "react";
 import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, type Business, type Review } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -62,6 +63,21 @@ const Index = () => {
   const [freelancerCatCounts, setFreelancerCatCounts] = useState<Record<string, number>>({});
   const [courseCatCounts, setCourseCatCounts] = useState<Record<string, number>>({});
   const [stats, setStats] = useState({ reviews: 0, businesses: 0 });
+
+  const { data: communityPool } = useQuery({
+    queryKey: ["community-pool-homepage"],
+    queryFn: async () => {
+      const now = new Date();
+      const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      const { data } = await supabase
+        .from("rewards_pool")
+        .select("community_pool, total_points")
+        .eq("month_year", monthYear)
+        .maybeSingle();
+      return data ?? { community_pool: 0, total_points: 0 };
+    },
+    refetchInterval: 30000,
+  });
 
   useEffect(() => {
     // Fetch top freelancers
@@ -485,6 +501,25 @@ const Index = () => {
               כל ביקורת = 100 נקודות. כל 10 לייקים = מכפיל x2 (עד x10).
               <span className="text-primary font-medium"> ככל שהביקורת שלכם טובה יותר — הנתח שלכם מהקופה גדל. 🚀</span>
             </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.45, duration: 0.5 }}
+              className="mx-auto mb-10 max-w-sm"
+            >
+              <div className="relative rounded-xl border border-primary/20 bg-card/80 backdrop-blur-sm p-6 text-center overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+                <div className="relative">
+                  <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wider">קופת הקהילה החודשית</p>
+                  <p className="font-display font-bold text-4xl text-primary">
+                    ₪<AnimatedCounter value={String(Math.round(communityPool?.community_pool ?? 0))} duration={1500} />
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">מחכים לחלוקה בסוף החודש</p>
+                </div>
+              </div>
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
