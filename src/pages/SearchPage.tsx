@@ -14,6 +14,7 @@ import { BUSINESSES, COURSES, FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, Busines
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { useCategories } from "@/hooks/useCategories";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
