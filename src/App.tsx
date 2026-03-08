@@ -24,6 +24,7 @@ import CompanyGuidelines from "./pages/CompanyGuidelines";
 import TrademarkGuidelines from "./pages/TrademarkGuidelines";
 import ModernSlaveryStatement from "./pages/ModernSlaveryStatement";
 import AccessibilityStatement from "./pages/AccessibilityStatement";
+import ComparePage from "./pages/ComparePage";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/trademark" element={<TrademarkGuidelines />} />
             <Route path="/modern-slavery" element={<ModernSlaveryStatement />} />
             <Route path="/accessibility" element={<AccessibilityStatement />} />
+            <Route path="/compare" element={<ComparePage />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />
