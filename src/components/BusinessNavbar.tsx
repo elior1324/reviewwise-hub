@@ -92,19 +92,74 @@ const BusinessNavbar = () => {
                   יכולות
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="w-[400px] p-4 grid gap-3">
-                    <Link to="/business/features/affiliate" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">מעקב אפיליאט</p>
-                      <p className="text-xs text-muted-foreground">עקבו אחר קליקים, המרות והכנסות</p>
-                    </Link>
-                    <Link to="/business/features/ai-insights" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">דוחות AI שבועיים</p>
-                      <p className="text-xs text-muted-foreground">תובנות אוטומטיות על חוזקות וחולשות</p>
-                    </Link>
-                    <Link to="/business/features/review-requests" className="block rounded-lg p-3 hover:bg-secondary transition-colors">
-                      <p className="font-display font-semibold text-sm">בקשות ביקורת</p>
-                      <p className="text-xs text-muted-foreground">שלחו קישורי ביקורת אוטומטיים ללקוחות</p>
-                    </Link>
+                  <div className="w-[680px] p-5 grid grid-cols-4 gap-5">
+                    <div>
+                      <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-3">הזמנת ביקורות</p>
+                      <div className="space-y-1">
+                        <Link to="/business/features/service-reviews" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">ביקורות שירות</p>
+                        </Link>
+                        <Link to="/business/features/product-reviews" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">ביקורות מוצר</p>
+                        </Link>
+                        <Link to="/business/features/location-reviews" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">ביקורות מיקום</p>
+                        </Link>
+                        <Link to="/business/features/review-invitations" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">הזמנות ביקורת</p>
+                        </Link>
+                      </div>
+                      <div className="border-t border-border/30 my-3" />
+                      <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-3">ניהול משוב</p>
+                      <div className="space-y-1">
+                        <Link to="/business/features/profile-page" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">דף פרופיל</p>
+                        </Link>
+                        <Link to="/business/features/respond-reviews" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">תגובה לביקורות</p>
+                        </Link>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-3">האצת המרות</p>
+                      <div className="space-y-1">
+                        <Link to="/business/features/review-seo" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">SEO ביקורות וגילוי AI</p>
+                        </Link>
+                        <Link to="/business/features/widgets" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">וידג׳טים להטמעה</p>
+                        </Link>
+                        <Link to="/business/features/social-media" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">כלי רשתות חברתיות</p>
+                        </Link>
+                        <Link to="/business/features/marketing-assets" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">נכסים שיווקיים</p>
+                        </Link>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-3">שיפור עם תובנות</p>
+                      <div className="space-y-1">
+                        <Link to="/business/features/review-spotlight" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">זרקור ביקורות</p>
+                        </Link>
+                        <Link to="/business/features/market-insights" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">תובנות שוק</p>
+                        </Link>
+                        <Link to="/business/features/review-insights" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">תובנות ביקורות</p>
+                        </Link>
+                        <Link to="/business/features/analytics" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">נתונים ואנליטיקס</p>
+                        </Link>
+                        <Link to="/business/features/review-tagging" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">תיוג ביקורות</p>
+                        </Link>
+                        <Link to="/business/features/visitor-insights" className="block rounded-lg p-2 hover:bg-secondary transition-colors">
+                          <p className="font-display font-semibold text-[13px]">תובנות מבקרים</p>
+                        </Link>
+                      </div>
+                    </div>
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
@@ -210,9 +265,29 @@ const BusinessNavbar = () => {
           <Link to="/business/solutions/small-business" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>עסקים קטנים וצומחים</Link>
           <Link to="/business/solutions/enterprise" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ארגונים וחברות גדולות</Link>
           <div className="border-t border-border/30 my-2" />
-          <p className="text-xs text-muted-foreground font-medium">יכולות</p>
-          <Link to="/business/features/affiliate" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>מעקב אפיליאט</Link>
-          <Link to="/business/features/ai-insights" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>דוחות AI שבועיים</Link>
+          <p className="text-xs text-muted-foreground font-medium">יכולות — הזמנת ביקורות</p>
+          <Link to="/business/features/service-reviews" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ביקורות שירות</Link>
+          <Link to="/business/features/product-reviews" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ביקורות מוצר</Link>
+          <Link to="/business/features/location-reviews" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>ביקורות מיקום</Link>
+          <Link to="/business/features/review-invitations" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>הזמנות ביקורת</Link>
+          <div className="border-t border-border/30 my-2" />
+          <p className="text-xs text-muted-foreground font-medium">יכולות — ניהול משוב</p>
+          <Link to="/business/features/profile-page" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>דף פרופיל</Link>
+          <Link to="/business/features/respond-reviews" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>תגובה לביקורות</Link>
+          <div className="border-t border-border/30 my-2" />
+          <p className="text-xs text-muted-foreground font-medium">יכולות — האצת המרות</p>
+          <Link to="/business/features/review-seo" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>SEO ביקורות וגילוי AI</Link>
+          <Link to="/business/features/widgets" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>וידג׳טים להטמעה</Link>
+          <Link to="/business/features/social-media" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>כלי רשתות חברתיות</Link>
+          <Link to="/business/features/marketing-assets" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>נכסים שיווקיים</Link>
+          <div className="border-t border-border/30 my-2" />
+          <p className="text-xs text-muted-foreground font-medium">יכולות — שיפור עם תובנות</p>
+          <Link to="/business/features/review-spotlight" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>זרקור ביקורות</Link>
+          <Link to="/business/features/market-insights" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>תובנות שוק</Link>
+          <Link to="/business/features/review-insights" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>תובנות ביקורות</Link>
+          <Link to="/business/features/analytics" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>נתונים ואנליטיקס</Link>
+          <Link to="/business/features/review-tagging" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>תיוג ביקורות</Link>
+          <Link to="/business/features/visitor-insights" className="block text-sm py-1 pr-3" onClick={() => setMobileOpen(false)}>תובנות מבקרים</Link>
           <div className="border-t border-border/30 my-2" />
           <Link to="/business/pricing" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>מחירים</Link>
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודותינו</Link>
