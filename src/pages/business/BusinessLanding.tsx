@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
-  Award, ArrowLeft, CheckCircle, Users, X, Crown, Sparkles
+  Award, ArrowLeft, CheckCircle, Users, X, Crown, Sparkles,
+  Lock, MessageSquare, FileText, Webhook, LineChart, Headphones,
+  UserCheck, Globe
 } from "lucide-react";
 import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,13 +20,30 @@ const fadeUp = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.6, ease: "easeOut" as const } }),
 };
 
-const FEATURES = [
-  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת ללא פשרות." },
-  { icon: BarChart3, title: "דאשבורד מתקדם", desc: "עקבו אחר דירוגים, מגמות, ביקורות חדשות ואחוזי מענה בזמן אמת." },
-  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת בלבד." },
-  { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו ללקוחות קישורי ביקורת ייחודיים או העלו CSV של רכישות." },
-  { icon: TrendingUp, title: "מערכת אפיליאט", desc: "צרו קישורי הפניה עם מעקב קליקים, המרות והכנסות." },
-  { icon: Award, title: "תובנות AI חכמות", desc: "דוחות AI שבועיים שמזהים חוזקות, חולשות והזדמנויות לצמיחה." },
+// ─── Features organized by tier ───────────────────────────
+const FREE_FEATURES = [
+  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת." },
+  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור." },
+  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח." },
+  { icon: Star, title: "תג דירוג בסיסי", desc: "הציגו את הדירוג שלכם עם תג אמינות ReviewHub." },
+];
+
+const PRO_FEATURES = [
+  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת." },
+  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת." },
+  { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות." },
+  { icon: TrendingUp, title: "מערכת אפיליאט", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות." },
+  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור." },
+  { icon: Headphones, title: "תמיכה בעדיפות", desc: "תמיכה מהירה עם מענה תוך 4 שעות בימי עבודה." },
+];
+
+const PREMIUM_FEATURES = [
+  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true },
+  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true },
+  { icon: Webhook, title: "Webhook למערכות חיצוניות", desc: "חברו ל-Zapier, Make ולכל מערכת עם webhook.", locked: true },
+  { icon: Globe, title: "Google Ads Review Stars ⭐", desc: "הציגו כוכבי דירוג ישירות במודעות Google שלכם.", locked: true },
+  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true },
+  { icon: Code, title: "גישת API מלאה", desc: "בנו אינטגרציות מותאמות אישית עם ה-API שלנו.", locked: true },
 ];
 
 const PLANS = [
@@ -32,14 +51,14 @@ const PLANS = [
     name: "סטארטר",
     price: "חינם",
     period: "לתמיד",
-    tier: "free",
+    tier: "free" as const,
     features: [
       "פרופיל עסקי ציבורי",
       "עד 10 ביקורות בחודש",
       "תג דירוג בסיסי",
       "תגובות לביקורות",
     ],
-    excluded: ["וידג׳טים להטמעה", "בקשות ביקורת אוטומטיות", "חיבור CRM ולידים", "דוחות AI"],
+    excluded: ["דאשבורד אנליטיקס", "וידג׳טים להטמעה", "בקשות ביקורת אוטומטיות", "חיבור CRM ולידים", "דוחות AI"],
     cta: "התחילו בחינם",
     highlighted: false,
   },
@@ -47,7 +66,7 @@ const PLANS = [
     name: "מקצועי",
     price: "₪189",
     period: "/חודש",
-    tier: "pro",
+    tier: "pro" as const,
     originalPrice: "₪249",
     savings: "חסכו ₪60/חודש",
     features: [
@@ -59,7 +78,7 @@ const PLANS = [
       "סיכומי AI שבועיים",
       "תמיכה בעדיפות",
     ],
-    excluded: ["חיבור CRM ולידים", "Google Ads Review Stars"],
+    excluded: ["חיבור CRM ולידים", "Google Ads Review Stars", "דוחות AI יומיים"],
     cta: "התחילו 14 ימי ניסיון",
     highlighted: true,
   },
@@ -67,7 +86,7 @@ const PLANS = [
     name: "פרימיום",
     price: "₪389",
     period: "/חודש",
-    tier: "premium",
+    tier: "premium" as const,
     features: [
       "הכל מהמקצועי, ועוד:",
       "חיבור CRM — HubSpot, Salesforce ועוד",
@@ -143,16 +162,26 @@ const BusinessLanding = () => {
                   הצטרפו למאות עסקים בישראל שמשתמשים ב-ReviewHub כדי לאסוף ביקורות מאומתות, לבנות מוניטין ולהגדיל מכירות.
                 </motion.p>
                 <motion.div variants={fadeUp} custom={3} className="flex gap-3 flex-wrap">
-                  <Link to="/business/signup">
-                    <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
-                      צרו חשבון בחינם
-                    </Button>
-                  </Link>
-                  <Link to="/business/pricing">
-                    <Button size="lg" variant="outline" className="border-border/50 font-semibold">
-                      צפו במחירים
-                    </Button>
-                  </Link>
+                  {user ? (
+                    <Link to="/business/dashboard">
+                      <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
+                        לדאשבורד שלי
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link to="/business/signup">
+                      <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
+                        צרו חשבון בחינם
+                      </Button>
+                    </Link>
+                  )}
+                  {!user && (
+                    <Link to="/business/login">
+                      <Button size="lg" variant="outline" className="border-border/50 font-semibold">
+                        כבר יש לי חשבון
+                      </Button>
+                    </Link>
+                  )}
                 </motion.div>
               </div>
               <motion.div variants={fadeUp} custom={2} className="hidden md:block">
@@ -224,28 +253,28 @@ const BusinessLanding = () => {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Free Features */}
       <section className="border-y border-border/50">
         <div className="container py-20">
           <div className="text-center mb-12">
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">כל מה שצריך לניהול המוניטין שלכם</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">כלים מקצועיים שנבנו במיוחד עבור יוצרי קורסים ושירותי למידה בישראל</p>
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+              חינם לתמיד
+            </div>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">התחילו ללא עלות</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">כל הכלים הבסיסיים שצריך כדי להתחיל לאסוף ביקורות מאומתות</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map(({ icon: Icon, title, desc }, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {FREE_FEATURES.map(({ icon: Icon, title, desc }, i) => (
               <motion.div
                 key={title}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                custom={i}
+                initial="hidden" whileInView="visible" viewport={{ once: true }}
+                variants={fadeUp} custom={i}
                 className="rounded-xl p-6 bg-card border border-border/50 hover:border-primary/30 transition-all duration-300 group"
               >
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <Icon size={22} className="text-primary" />
                 </div>
-                <h3 className="font-display font-semibold text-lg text-foreground mb-2">{title}</h3>
+                <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
               </motion.div>
             ))}
@@ -253,115 +282,208 @@ const BusinessLanding = () => {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section className="container py-20" id="pricing">
+      {/* Pro Features — visible to all but clearly labeled */}
+      <section className="container py-20">
         <div className="text-center mb-12">
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">תוכניות ומחירים</h2>
-          <p className="text-muted-foreground">בחרו את התוכנית המתאימה לעסק שלכם</p>
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+            <Sparkles size={14} /> תוכנית מקצועי — ₪189/חודש
+          </div>
+          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">כלים מתקדמים לצמיחה</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה ואפיליאט — הכל בחבילה אחת</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
-          {PLANS.map((plan, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {PRO_FEATURES.map(({ icon: Icon, title, desc }, i) => (
             <motion.div
-              key={plan.name}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeUp}
-              custom={i}
-              className={`rounded-xl p-6 border ${
-                plan.highlighted
-                  ? "bg-card border-primary/50 shadow-card-hover relative scale-[1.03]"
-                  : (plan as any).premium
-                  ? "bg-gradient-to-b from-card to-primary/5 border-primary/30 relative"
-                  : "bg-card border-border/50"
-              }`}
+              key={title}
+              initial="hidden" whileInView="visible" viewport={{ once: true }}
+              variants={fadeUp} custom={i}
+              className="rounded-xl p-6 bg-card border border-primary/20 hover:border-primary/40 transition-all duration-300 group"
             >
-              {plan.highlighted && (
-                <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                  <Sparkles size={12} /> הכי פופולרי
-                </div>
-              )}
-              {(plan as any).premium && (
-                <div className="absolute -top-3 right-4 bg-foreground text-background text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                  <Crown size={12} /> הכל כולל הכל
-                </div>
-              )}
-              <h3 className="font-display font-bold text-xl text-foreground mb-1">{plan.name}</h3>
-              <div className="mb-1">
-                {(plan as any).originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through ml-2">{(plan as any).originalPrice}</span>
-                )}
-                <span className="font-display font-bold text-3xl text-primary">{plan.price}</span>
-                <span className="text-sm text-muted-foreground">{plan.period}</span>
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                <Icon size={22} className="text-primary" />
               </div>
-              {(plan as any).savings && (
-                <p className="text-xs text-primary font-semibold mb-3">{(plan as any).savings}</p>
-              )}
-              {!(plan as any).savings && <div className="mb-4" />}
-              <ul className="space-y-2 mb-4">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
-                    <CheckCircle size={14} className="text-primary shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              {(plan as any).excluded && (plan as any).excluded.length > 0 && (
-                <ul className="space-y-1.5 mb-4 opacity-50">
-                  {(plan as any).excluded.map((f: string) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground line-through">
-                      <X size={14} className="shrink-0" />
+              <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Premium Features — shown with lock icons */}
+      <section className="border-y border-border/50">
+        <div className="container py-20">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-foreground text-background text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+              <Crown size={14} /> תוכנית פרימיום — ₪389/חודש
+            </div>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">CRM, לידים ואינטגרציות</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">חברו את ReviewHub לכל המערכות שלכם והפכו ביקורות ללידים</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {PREMIUM_FEATURES.map(({ icon: Icon, title, desc }, i) => (
+              <motion.div
+                key={title}
+                initial="hidden" whileInView="visible" viewport={{ once: true }}
+                variants={fadeUp} custom={i}
+                className="rounded-xl p-6 bg-card border border-border/50 hover:border-primary/30 transition-all duration-300 group relative"
+              >
+                <div className="absolute top-4 left-4">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
+                    <Lock size={10} /> פרימיום
+                  </div>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <Icon size={22} className="text-primary" />
+                </div>
+                <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing — only visible to authenticated users */}
+      {user && (
+        <section className="container py-20" id="pricing">
+          <div className="text-center mb-12">
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">תוכניות ומחירים</h2>
+            <p className="text-muted-foreground">בחרו את התוכנית המתאימה לעסק שלכם</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
+            {PLANS.map((plan, i) => (
+              <motion.div
+                key={plan.name}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                custom={i}
+                className={`rounded-xl p-6 border ${
+                  plan.highlighted
+                    ? "bg-card border-primary/50 shadow-card-hover relative scale-[1.03]"
+                    : plan.premium
+                    ? "bg-gradient-to-b from-card to-primary/5 border-primary/30 relative"
+                    : "bg-card border-border/50"
+                }`}
+              >
+                {plan.highlighted && (
+                  <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                    <Sparkles size={12} /> הכי פופולרי
+                  </div>
+                )}
+                {plan.premium && (
+                  <div className="absolute -top-3 right-4 bg-foreground text-background text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                    <Crown size={12} /> הכל כולל הכל
+                  </div>
+                )}
+                <h3 className="font-display font-bold text-xl text-foreground mb-1">{plan.name}</h3>
+                <div className="mb-1">
+                  {plan.originalPrice && (
+                    <span className="text-sm text-muted-foreground line-through ml-2">{plan.originalPrice}</span>
+                  )}
+                  <span className="font-display font-bold text-3xl text-primary">{plan.price}</span>
+                  <span className="text-sm text-muted-foreground">{plan.period}</span>
+                </div>
+                {plan.savings && (
+                  <p className="text-xs text-primary font-semibold mb-3">{plan.savings}</p>
+                )}
+                {!plan.savings && <div className="mb-4" />}
+                <ul className="space-y-2 mb-4">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
+                      <CheckCircle size={14} className="text-primary shrink-0" />
                       {f}
                     </li>
                   ))}
                 </ul>
-              )}
-              {plan.tier === "free" ? (
+                {plan.excluded.length > 0 && (
+                  <ul className="space-y-1.5 mb-4 opacity-50">
+                    {plan.excluded.map((f: string) => (
+                      <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground line-through">
+                        <X size={14} className="shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {plan.tier === "free" ? (
+                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80" disabled={subscriptionTier === "free"}>
+                    {subscriptionTier === "free" ? "✓ התוכנית הנוכחית" : plan.cta}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => handleCheckout(plan.tier as "pro" | "premium")}
+                    disabled={checkoutLoading === plan.tier || subscriptionTier === plan.tier}
+                    className={`w-full ${
+                      plan.highlighted
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
+                        : plan.premium
+                        ? "bg-foreground text-background hover:bg-foreground/90"
+                        : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                    }`}
+                  >
+                    {subscriptionTier === plan.tier ? "✓ התוכנית הנוכחית" : checkoutLoading === plan.tier ? "טוען..." : plan.cta}
+                  </Button>
+                )}
+              </motion.div>
+            ))}
+          </div>
+          <p className="text-center text-xs text-muted-foreground mt-8">כל התוכניות כוללות SSL, גיבוי יומי ואבטחת מידע מלאה. ביטול בכל עת.</p>
+        </section>
+      )}
+
+      {/* CTA for non-authenticated — replaces pricing */}
+      {!user && (
+        <section className="container py-20">
+          <div className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border" style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}>
+            <div className="absolute inset-0 bg-primary/5 blur-3xl" />
+            <div className="relative">
+              <Lock size={32} className="mx-auto mb-4 text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
+                רוצים לראות מחירים ולהתחיל?
+              </h2>
+              <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+                צרו חשבון עסקי בחינם כדי לראות את כל התוכניות, המחירים והפיצ'רים המתקדמים. ההרשמה לוקחת פחות מדקה.
+              </p>
+              <div className="flex gap-3 justify-center flex-wrap">
                 <Link to="/business/signup">
-                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80">
-                    {plan.cta}
+                  <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary gap-2">
+                    צרו חשבון בחינם <ArrowLeft size={16} />
                   </Button>
                 </Link>
-              ) : (
-                <Button
-                  onClick={() => handleCheckout(plan.tier as "pro" | "premium")}
-                  disabled={checkoutLoading === plan.tier || subscriptionTier === plan.tier}
-                  className={`w-full ${
-                    plan.highlighted
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
-                      : plan.premium
-                      ? "bg-foreground text-background hover:bg-foreground/90"
-                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                  }`}
-                >
-                  {subscriptionTier === plan.tier ? "✓ התוכנית הנוכחית" : checkoutLoading === plan.tier ? "טוען..." : plan.cta}
-                </Button>
-              )}
-            </motion.div>
-          ))}
-        </div>
-        <p className="text-center text-xs text-muted-foreground mt-8">כל התוכניות כוללות SSL, גיבוי יומי ואבטחת מידע מלאה. ביטול בכל עת.</p>
-      </section>
-
-      {/* CTA */}
-      <section className="container py-20">
-        <div className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border" style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}>
-          <div className="absolute inset-0 bg-primary/5 blur-3xl" />
-          <div className="relative">
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
-              מוכנים לבנות אמון אמיתי?
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-              הצטרפו למאות עסקים שכבר משתמשים ב-ReviewHub. התחילו בחינם ושדרגו כשתהיו מוכנים.
-            </p>
-            <Link to="/business/signup">
-              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary gap-2">
-                צרו חשבון בחינם <ArrowLeft size={16} />
-              </Button>
-            </Link>
+                <Link to="/business/login">
+                  <Button size="lg" variant="outline" className="border-border/50 font-semibold">
+                    כבר יש לי חשבון
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* CTA for authenticated */}
+      {user && (
+        <section className="container py-20">
+          <div className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border" style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}>
+            <div className="absolute inset-0 bg-primary/5 blur-3xl" />
+            <div className="relative">
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
+                מוכנים לבנות אמון אמיתי?
+              </h2>
+              <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+                שדרגו את התוכנית שלכם ופתחו את כל הכלים המתקדמים.
+              </p>
+              <Link to="/business/dashboard">
+                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary gap-2">
+                  עברו לדאשבורד <ArrowLeft size={16} />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       <BusinessFooter />
       <AIChatbot context="business" />
