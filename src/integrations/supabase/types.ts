@@ -320,6 +320,48 @@ export type Database = {
           },
         ]
       }
+      monthly_top5: {
+        Row: {
+          ai_reasoning: string | null
+          business_name: string
+          business_slug: string
+          business_type: string
+          category: string
+          created_at: string
+          id: string
+          month_year: string
+          rank: number
+          rating: number
+          review_count: number
+        }
+        Insert: {
+          ai_reasoning?: string | null
+          business_name: string
+          business_slug: string
+          business_type: string
+          category: string
+          created_at?: string
+          id?: string
+          month_year: string
+          rank: number
+          rating?: number
+          review_count?: number
+        }
+        Update: {
+          ai_reasoning?: string | null
+          business_name?: string
+          business_slug?: string
+          business_type?: string
+          category?: string
+          created_at?: string
+          id?: string
+          month_year?: string
+          rank?: number
+          rating?: number
+          review_count?: number
+        }
+        Relationships: []
+      }
       pending_categories: {
         Row: {
           business_id: string | null
