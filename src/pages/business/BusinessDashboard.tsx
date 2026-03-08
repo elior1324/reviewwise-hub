@@ -1,3 +1,4 @@
+import ReactMarkdown from "react-markdown";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import AIChatbot from "@/components/AIChatbot";
@@ -99,6 +100,12 @@ const BusinessDashboard = () => {
   const [realStats, setRealStats] = useState<typeof DEMO_STATS | null>(null);
   const [realClicks, setRealClicks] = useState<typeof DEMO_CLICKS>([]);
   const [realNotifications, setRealNotifications] = useState<typeof DEMO_NOTIFICATIONS>([]);
+  const [realLeads, setRealLeads] = useState<any[]>([]);
+  const [realWebhooks, setRealWebhooks] = useState<any[]>([]);
+  const [realApiKeys, setRealApiKeys] = useState<any[]>([]);
+  const [realAiReports, setRealAiReports] = useState<any[]>([]);
+  const [generatingReport, setGeneratingReport] = useState(false);
+  const [generatingApiKey, setGeneratingApiKey] = useState(false);
 
   // Determine tier
   const currentTier: SubscriptionTier = !isDemo && subscriptionTier !== "free" ? subscriptionTier : demoTier;
@@ -212,6 +219,38 @@ const BusinessDashboard = () => {
         { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: `₪${totalRevenue.toLocaleString()}`, change: "", up: true, tooltip: "סך ההכנסות מרכישות שהגיעו דרך קישורי האפיליאט." },
       ]);
 
+      // Fetch leads
+      const { data: leadsData } = await supabase
+        .from("leads")
+        .select("*")
+        .eq("business_id", biz.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (leadsData) setRealLeads(leadsData);
+
+      // Fetch webhooks
+      const { data: webhooksData } = await supabase
+        .from("business_webhooks")
+        .select("*")
+        .eq("business_id", biz.id);
+      if (webhooksData) setRealWebhooks(webhooksData);
+
+      // Fetch API keys
+      const { data: apiKeysData } = await supabase
+        .from("api_keys")
+        .select("id, key_prefix, name, active, last_used_at, created_at")
+        .eq("business_id", biz.id);
+      if (apiKeysData) setRealApiKeys(apiKeysData);
+
+      // Fetch AI reports
+      const { data: aiReportsData } = await supabase
+        .from("ai_reports")
+        .select("*")
+        .eq("business_id", biz.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (aiReportsData) setRealAiReports(aiReportsData);
+
       setLoadingData(false);
     };
 
@@ -225,7 +264,76 @@ const BusinessDashboard = () => {
   const displayStats = isDemo ? DEMO_STATS : (realStats || DEMO_STATS);
   const displayClicks = isDemo ? DEMO_CLICKS : realClicks;
   const displayNotifications = isDemo ? DEMO_NOTIFICATIONS : realNotifications;
-  const aiReport = DEMO_AI_REPORT; // AI report is always demo for now
+  const aiReport = DEMO_AI_REPORT;
+
+  // Generate real AI report
+  const handleGenerateReport = async (type: "weekly" | "daily") => {
+    if (!businessId || generatingReport) return;
+    setGeneratingReport(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-ai-report", {
+        body: { business_id: businessId, report_type: type },
+      });
+      if (error) throw error;
+      if (data?.skipped) {
+        alert("אין ביקורות חדשות בתקופה הנבחרת.");
+      } else {
+        // Refresh reports
+        const { data: updated } = await supabase
+          .from("ai_reports")
+          .select("*")
+          .eq("business_id", businessId)
+          .order("created_at", { ascending: false })
+          .limit(10);
+        if (updated) setRealAiReports(updated);
+      }
+    } catch (e: any) {
+      console.error("Report generation error:", e);
+      alert("שגיאה ביצירת הדוח. נסו שוב מאוחר יותר.");
+    }
+    setGeneratingReport(false);
+  };
+
+  // Generate API key
+  const handleGenerateApiKey = async () => {
+    if (!businessId || generatingApiKey) return;
+    setGeneratingApiKey(true);
+    try {
+      // Generate random key
+      const array = new Uint8Array(32);
+      crypto.getRandomValues(array);
+      const rawKey = "rh_live_" + Array.from(array).map(b => b.toString(16).padStart(2, "0")).join("");
+      const prefix = rawKey.substring(0, 8);
+
+      // Hash it
+      const encoder = new TextEncoder();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(rawKey));
+      const keyHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+
+      const { error } = await supabase.from("api_keys").insert({
+        business_id: businessId,
+        key_hash: keyHash,
+        key_prefix: prefix,
+        name: `מפתח ${(realApiKeys.length || 0) + 1}`,
+      });
+      if (error) throw error;
+
+      // Show key to user (only time they see full key)
+      navigator.clipboard.writeText(rawKey);
+      alert(`מפתח ה-API שלכם הועתק ללוח:\n${rawKey}\n\nשימרו אותו — לא ניתן יהיה לראות אותו שוב!`);
+
+      // Refresh
+      const { data: updated } = await supabase
+        .from("api_keys")
+        .select("id, key_prefix, name, active, last_used_at, created_at")
+        .eq("business_id", businessId);
+      if (updated) setRealApiKeys(updated);
+    } catch (e: any) {
+      console.error("API key generation error:", e);
+      alert("שגיאה ביצירת מפתח API.");
+    }
+    setGeneratingApiKey(false);
+  };
 
   const totalClicks = isDemo ? 94 : displayClicks.reduce((s, c) => s + c.clicks, 0);
   const conversions = isDemo ? 25 : displayClicks.reduce((s, c) => s + c.conversions, 0);
@@ -604,49 +712,72 @@ const BusinessDashboard = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Brain size={18} className="text-primary" /> דוח AI שבועי
-                  <span className="text-xs text-muted-foreground font-normal mr-2">{aiReport.date}</span>
+                  {!isDemo && businessId && (
+                    <Button size="sm" variant="outline" className="mr-auto text-xs" onClick={() => handleGenerateReport("weekly")} disabled={generatingReport}>
+                      {generatingReport ? "מייצר..." : "צור דוח חדש"}
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div>
-                  <h3 className="text-sm font-display font-semibold text-primary flex items-center gap-2 mb-3">
-                    <ArrowUpRight size={16} /> חוזקות
-                  </h3>
-                  <ul className="space-y-2">
-                    {aiReport.strengths.map((s, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                        {s}
-                      </li>
+                {!isDemo && realAiReports.filter(r => r.report_type === "weekly").length > 0 ? (
+                  <div className="space-y-4">
+                    {realAiReports.filter(r => r.report_type === "weekly").map((report: any) => (
+                      <div key={report.id} className="border border-border/30 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs text-muted-foreground">{new Date(report.created_at).toLocaleDateString("he-IL")} | {report.period_start} — {report.period_end}</span>
+                        </div>
+                        <div className="prose prose-sm prose-invert max-w-none text-foreground/80" dir="rtl">
+                          <ReactMarkdown>{report.content}</ReactMarkdown>
+                        </div>
+                      </div>
                     ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-sm font-display font-semibold text-destructive flex items-center gap-2 mb-3">
-                    <ArrowDownRight size={16} /> נקודות לשיפור
-                  </h3>
-                  <ul className="space-y-2">
-                    {aiReport.weaknesses.map((w, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                        <div className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
-                        {w}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-sm font-display font-semibold text-accent flex items-center gap-2 mb-3">
-                    <Brain size={16} /> המלצות AI
-                  </h3>
-                  <ul className="space-y-2">
-                    {aiReport.recommendations.map((r, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                        <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                  </div>
+                ) : isDemo ? (
+                  <>
+                    <div>
+                      <h3 className="text-sm font-display font-semibold text-primary flex items-center gap-2 mb-3">
+                        <ArrowUpRight size={16} /> חוזקות
+                      </h3>
+                      <ul className="space-y-2">
+                        {aiReport.strengths.map((s, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                            {s}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-display font-semibold text-destructive flex items-center gap-2 mb-3">
+                        <ArrowDownRight size={16} /> נקודות לשיפור
+                      </h3>
+                      <ul className="space-y-2">
+                        {aiReport.weaknesses.map((w, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                            <div className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
+                            {w}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-display font-semibold text-accent flex items-center gap-2 mb-3">
+                        <Brain size={16} /> המלצות AI
+                      </h3>
+                      <ul className="space-y-2">
+                        {aiReport.recommendations.map((r, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                            <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
+                            {r}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין דוחות. לחצו "צור דוח חדש" כדי לייצר את הדוח הראשון.</p>
+                )}
                 <div className="pt-4 border-t border-border/30">
                   <p className="text-xs text-muted-foreground">
                     דוח זה נוצר על ידי AI על בסיס נתוני הביקורות, אנליטיקת הקליקים ומגמות ההמרה שלכם.
@@ -684,31 +815,36 @@ const BusinessDashboard = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {isDemo ? (
-                      [
-                        { name: "יוסי כהן", email: "yossi@gmail.com", course: "שיווק דיגיטלי", status: "חם", date: "היום" },
-                        { name: "מיכל לוי", email: "michal@company.co.il", course: "הסמכת Google Ads", status: "חדש", date: "אתמול" },
-                        { name: "דני אברהם", email: "dani@startup.io", course: "אנליטיקס מתקדם", status: "בטיפול", date: "לפני 3 ימים" },
-                        { name: "שירה גולן", email: "shira@agency.com", course: "יסודות SEO", status: "חם", date: "לפני שבוע" },
-                      ].map((lead, i) => (
-                        <div key={i} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
+                    {(() => {
+                      const leadsToShow = isDemo ? [
+                        { id: "d1", customer_name: "יוסי כהן", customer_email: "yossi@gmail.com", source: "positive_review", status: "new", created_at: new Date().toISOString() },
+                        { id: "d2", customer_name: "מיכל לוי", customer_email: "michal@company.co.il", source: "positive_review", status: "new", created_at: new Date(Date.now() - 86400000).toISOString() },
+                        { id: "d3", customer_name: "דני אברהם", customer_email: "dani@startup.io", source: "positive_review", status: "contacted", created_at: new Date(Date.now() - 3 * 86400000).toISOString() },
+                      ] : realLeads;
+
+                      if (leadsToShow.length === 0) return <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין לידים. לידים נוצרים אוטומטית מביקורות חיוביות (4-5 כוכבים).</p>;
+
+                      const statusMap: Record<string, { label: string; cls: string }> = {
+                        new: { label: "חדש", cls: "bg-accent/10 text-accent" },
+                        contacted: { label: "בטיפול", cls: "bg-secondary text-muted-foreground" },
+                        converted: { label: "הומר", cls: "bg-primary/10 text-primary" },
+                      };
+
+                      return leadsToShow.map((lead: any) => (
+                        <div key={lead.id} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
                           <div>
-                            <p className="text-sm font-medium">{lead.name}</p>
-                            <p className="text-xs text-muted-foreground">{lead.email} · {lead.course}</p>
+                            <p className="text-sm font-medium">{lead.customer_name || "אנונימי"}</p>
+                            <p className="text-xs text-muted-foreground">{lead.customer_email || lead.source}</p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                              lead.status === "חם" ? "bg-primary/10 text-primary" :
-                              lead.status === "חדש" ? "bg-accent/10 text-accent" :
-                              "bg-secondary text-muted-foreground"
-                            }`}>{lead.status}</span>
-                            <span className="text-[10px] text-muted-foreground">{lead.date}</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusMap[lead.status]?.cls || "bg-secondary text-muted-foreground"}`}>
+                              {statusMap[lead.status]?.label || lead.status}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">{new Date(lead.created_at).toLocaleDateString("he-IL")}</span>
                           </div>
                         </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-muted-foreground py-4 text-center">פיצ׳ר CRM יהיה זמין בקרוב.</p>
-                    )}
+                      ));
+                    })()}
                   </CardContent>
                 </Card>
 
@@ -721,11 +857,11 @@ const BusinessDashboard = () => {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 rounded-lg bg-primary/5">
-                        <p className="font-display font-bold text-2xl text-primary">{isDemo ? "47" : "0"}</p>
-                        <p className="text-xs text-muted-foreground">לידים חדשים החודש</p>
+                        <p className="font-display font-bold text-2xl text-primary">{isDemo ? "47" : realLeads.filter(l => l.status === "new").length}</p>
+                        <p className="text-xs text-muted-foreground">לידים חדשים</p>
                       </div>
                       <div className="text-center p-4 rounded-lg bg-accent/5">
-                        <p className="font-display font-bold text-2xl text-accent">{isDemo ? "23%" : "0%"}</p>
+                        <p className="font-display font-bold text-2xl text-accent">{isDemo ? "23%" : (realLeads.length > 0 ? Math.round(realLeads.filter(l => l.status === "converted").length / realLeads.length * 100) : 0) + "%"}</p>
                         <p className="text-xs text-muted-foreground">אחוז המרה</p>
                       </div>
                     </div>
@@ -749,27 +885,52 @@ const BusinessDashboard = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <h3 className="text-sm font-display font-semibold mb-3">מפתח API</h3>
-                    <div className="bg-secondary rounded-lg p-4 flex items-center justify-between" dir="ltr">
-                      <code className="text-xs text-foreground/70">rh_live_sk_••••••••••••••••••••3f8a</code>
-                      <Button size="sm" variant="outline" className="text-xs">העתק</Button>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-display font-semibold">מפתחות API</h3>
+                      {!isDemo && businessId && (
+                        <Button size="sm" variant="outline" className="text-xs" onClick={handleGenerateApiKey} disabled={generatingApiKey}>
+                          {generatingApiKey ? "מייצר..." : "צור מפתח חדש"}
+                        </Button>
+                      )}
                     </div>
+                    {!isDemo && realApiKeys.length > 0 ? (
+                      <div className="space-y-2">
+                        {realApiKeys.map((k: any) => (
+                          <div key={k.id} className="bg-secondary rounded-lg p-3 flex items-center justify-between" dir="ltr">
+                            <code className="text-xs text-foreground/70">{k.key_prefix}••••••••••••</code>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${k.active ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
+                              {k.active ? "פעיל" : "מושבת"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-secondary rounded-lg p-4" dir="ltr">
+                        <code className="text-xs text-foreground/70">{isDemo ? "rh_live_sk_••••••••••••••••••••3f8a" : "אין מפתחות עדיין"}</code>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <h3 className="text-sm font-display font-semibold mb-3">Webhooks פעילים</h3>
                     <div className="space-y-2">
-                      {[
-                        { url: "https://your-crm.com/webhooks/review", event: "review.created", status: "פעיל" },
-                        { url: "https://zapier.com/hooks/catch/123", event: "conversion.completed", status: "פעיל" },
-                      ].map((wh, i) => (
-                        <div key={i} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
-                          <div>
-                            <p className="text-xs font-mono text-foreground/70" dir="ltr">{wh.url}</p>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">{wh.event}</p>
+                      {(() => {
+                        const whList = isDemo ? [
+                          { id: "d1", url: "https://your-crm.com/webhooks/review", events: ["new_review"], active: true },
+                          { id: "d2", url: "https://zapier.com/hooks/catch/123", events: ["affiliate_conversion"], active: true },
+                        ] : realWebhooks;
+                        if (whList.length === 0) return <p className="text-sm text-muted-foreground py-2 text-center">אין webhooks מוגדרים.</p>;
+                        return whList.map((wh: any) => (
+                          <div key={wh.id} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
+                            <div>
+                              <p className="text-xs font-mono text-foreground/70" dir="ltr">{wh.url}</p>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">{(wh.events || []).join(", ")}</p>
+                            </div>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${wh.active ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
+                              {wh.active ? "פעיל" : "מושבת"}
+                            </span>
                           </div>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{wh.status}</span>
-                        </div>
-                      ))}
+                        ));
+                      })()}
                     </div>
                   </div>
                   <div>
@@ -792,6 +953,11 @@ const BusinessDashboard = () => {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <CalendarClock size={18} className="text-primary" /> דוחות AI יומיים
+                    {!isDemo && businessId && (
+                      <Button size="sm" variant="outline" className="mr-auto text-xs" onClick={() => handleGenerateReport("daily")} disabled={generatingReport}>
+                        {generatingReport ? "מייצר..." : "צור דוח יומי"}
+                      </Button>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -799,23 +965,26 @@ const BusinessDashboard = () => {
                     קבלו כל בוקר דוח AI מפורט עם ניתוח הביצועים של אתמול, שינויים במגמות, וצעדים מומלצים.
                   </p>
                   <div className="space-y-3">
-                    {[
-                      { date: "8 במרץ 2026", summary: "3 ביקורות חדשות, 2 המרות, עלייה של 5% בדירוג", read: false },
-                      { date: "7 במרץ 2026", summary: "ביקורת שלילית זוהתה, 4 קליקים חדשים, המלצה לעדכן תיאור קורס", read: true },
-                      { date: "6 במרץ 2026", summary: "יום שיא — 8 המרות, הכנסות של ₪19,920", read: true },
-                      { date: "5 במרץ 2026", summary: "2 ביקורות חשודות נחסמו, שיפור של 12% באמון", read: true },
-                    ].map((report, i) => (
-                      <div key={i} className="flex items-center justify-between py-3 border-b border-border/20 last:border-0">
-                        <div className="flex items-center gap-3">
-                          {!report.read && <div className="w-2 h-2 rounded-full bg-primary shrink-0" />}
-                          <div>
-                            <p className="text-sm font-medium">{report.date}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{report.summary}</p>
-                          </div>
+                    {(() => {
+                      const dailyReports = isDemo ? [
+                        { id: "d1", created_at: "2026-03-08", content: "3 ביקורות חדשות, 2 המרות, עלייה של 5% בדירוג" },
+                        { id: "d2", created_at: "2026-03-07", content: "ביקורת שלילית זוהתה, 4 קליקים חדשים" },
+                        { id: "d3", created_at: "2026-03-06", content: "יום שיא — 8 המרות, הכנסות של ₪19,920" },
+                      ] : realAiReports.filter(r => r.report_type === "daily");
+                      if (dailyReports.length === 0) return <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין דוחות יומיים. לחצו "צור דוח יומי" כדי להתחיל.</p>;
+                      return dailyReports.map((report: any) => (
+                        <div key={report.id} className="border border-border/20 rounded-lg p-4">
+                          <p className="text-xs text-muted-foreground mb-2">{new Date(report.created_at).toLocaleDateString("he-IL")}</p>
+                          {isDemo ? (
+                            <p className="text-sm text-foreground/80">{report.content}</p>
+                          ) : (
+                            <div className="prose prose-sm prose-invert max-w-none text-foreground/80">
+                              <ReactMarkdown>{report.content}</ReactMarkdown>
+                            </div>
+                          )}
                         </div>
-                        <Button size="sm" variant="outline" className="text-xs">צפה בדוח</Button>
-                      </div>
-                    ))}
+                      ));
+                    })()}
                   </div>
                   <div className="pt-4 border-t border-border/30">
                     <p className="text-xs text-muted-foreground">
