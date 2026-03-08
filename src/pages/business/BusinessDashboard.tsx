@@ -97,17 +97,30 @@ const BusinessDashboard = () => {
         </div>
 
         {/* Stats Grid */}
+        <TooltipProvider delayDuration={200}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {STATS.map(({ icon: Icon, label, value, change, up }) => (
+          {STATS.map(({ icon: Icon, label, value, change, up, tooltip }) => (
             <Card key={label} className="shadow-card animated-border bg-card">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Icon size={20} className="text-primary" />
                   </div>
-                  <div className={`flex items-center gap-1 text-xs font-medium ${up ? "text-primary" : "text-destructive"}`}>
-                    {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                    {change}
+                  <div className="flex items-center gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                          <HelpCircle size={14} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                        {tooltip}
+                      </TooltipContent>
+                    </Tooltip>
+                    <div className={`flex items-center gap-1 text-xs font-medium ${up ? "text-primary" : "text-destructive"}`}>
+                      {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                      {change}
+                    </div>
                   </div>
                 </div>
                 <p className="font-display font-bold text-2xl">{value}</p>
@@ -116,6 +129,7 @@ const BusinessDashboard = () => {
             </Card>
           ))}
         </div>
+        </TooltipProvider>
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass flex-wrap">
