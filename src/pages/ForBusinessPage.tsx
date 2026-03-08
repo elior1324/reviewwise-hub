@@ -4,7 +4,7 @@ import AIChatbot from "@/components/AIChatbot";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ShieldCheck, Star, TrendingUp, Users, Zap, BarChart3, Code, Award, ArrowLeft, CheckCircle, X, Crown, Sparkles, Plug } from "lucide-react";
+import { ShieldCheck, Star, TrendingUp, Users, Zap, BarChart3, Code, Award, ArrowLeft, CheckCircle } from "lucide-react";
 import { BUSINESSES } from "@/data/mockData";
 
 const fadeUp = {
@@ -80,66 +80,25 @@ const TESTIMONIALS = [
 
 const PLANS = [
   {
-    name: "סטארטר",
+    name: "בסיסי",
     price: "חינם",
-    priceNote: "לנצח",
-    badge: null,
-    features: [
-      { text: "פרופיל עסקי ציבורי", included: true },
-      { text: "עד 10 ביקורות בחודש", included: true },
-      { text: "תג דירוג בסיסי", included: true },
-      { text: "תגובות לביקורות", included: true },
-      { text: "וידג׳טים להטמעה", included: false },
-      { text: "בקשות ביקורת אוטומטיות", included: false },
-      { text: "דאשבורד מתקדם + אנליטיקס", included: false },
-      { text: "חיבור CRM ולידים", included: false },
-      { text: "מנהל חשבון אישי", included: false },
-    ],
+    features: ["פרופיל עסקי ציבורי", "עד 50 ביקורות", "תג דירוג בסיסי", "תגובות לביקורות"],
     cta: "התחילו בחינם",
     highlighted: false,
-    icon: Zap,
   },
   {
     name: "מקצועי",
-    price: "₪189",
-    priceNote: "לחודש",
-    badge: "הכי פופולרי 🔥",
-    features: [
-      { text: "פרופיל עסקי מתקדם", included: true },
-      { text: "ביקורות ללא הגבלה", included: true },
-      { text: "תג דירוג + Verified Badge", included: true },
-      { text: "תגובות לביקורות", included: true },
-      { text: "וידג׳טים להטמעה באתר", included: true },
-      { text: "בקשות ביקורת אוטומטיות", included: true },
-      { text: "דאשבורד מתקדם + אנליטיקס", included: true },
-      { text: "סיכום AI לביקורות", included: true },
-      { text: "חיבור CRM ולידים", included: false },
-      { text: "מנהל חשבון אישי", included: false },
-    ],
-    cta: "התחילו 14 ימי ניסיון חינם",
+    price: "₪199/חודש",
+    features: ["ביקורות ללא הגבלה", "וידג׳טים להטמעה", "בקשות ביקורת אוטומטיות", "דאשבורד מתקדם", "מערכת אפיליאט", "סיכום AI"],
+    cta: "התחילו תקופת ניסיון",
     highlighted: true,
-    icon: Sparkles,
   },
   {
-    name: "פרימיום",
-    price: "₪389",
-    priceNote: "לחודש",
-    badge: "הכל כולל הכל",
-    features: [
-      { text: "הכל מהמקצועי", included: true },
-      { text: "חיבור CRM + לידים אוטומטי", included: true },
-      { text: "Zapier / Make / Webhook", included: true },
-      { text: "גישת API מלאה", included: true },
-      { text: "Google Ads Review Stars", included: true },
-      { text: "מערכת אפיליאט מתקדמת", included: true },
-      { text: "דוחות מותאמים אישית", included: true },
-      { text: "מנהל חשבון אישי", included: true },
-      { text: "תמיכה בעדיפות 24/7", included: true },
-      { text: "הכשרה אישית + אונבורדינג", included: true },
-    ],
+    name: "ארגוני",
+    price: "צרו קשר",
+    features: ["הכל מהמקצועי", "גישת API מלאה", "אינטגרציות מותאמות", "מנהל חשבון אישי", "Google Ads Review Stars", "דוחות מתקדמים"],
     cta: "דברו איתנו",
     highlighted: false,
-    icon: Crown,
   },
 ];
 
@@ -321,94 +280,55 @@ const ForBusinessPage = () => {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="border-y border-border/50">
+      <section className="border-y border-border/50">
         <div className="container py-20">
-          <div className="text-center mb-4">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">תוכניות ומחירים</h2>
-              <p className="text-muted-foreground mb-2">בחרו את התוכנית המתאימה לעסק שלכם</p>
-              <p className="text-xs text-muted-foreground/70">ללא התחייבות • ביטול בכל עת • 14 ימי ניסיון חינם בחבילת מקצועי</p>
-            </motion.div>
+          <div className="text-center mb-12">
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">תוכניות ומחירים</h2>
+            <p className="text-muted-foreground">בחרו את התוכנית המתאימה לעסק שלכם</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch">
-            {PLANS.map((plan, i) => {
-              const Icon = plan.icon;
-              return (
-                <motion.div
-                  key={plan.name}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  variants={fadeUp}
-                  custom={i}
-                  className={`rounded-2xl p-6 border flex flex-col ${
-                    plan.highlighted
-                      ? "bg-card border-primary/50 shadow-card-hover relative scale-[1.03] md:scale-105 z-10"
-                      : "bg-card border-border/50"
-                  }`}
-                >
-                  {plan.badge && (
-                    <div className={`absolute -top-3 right-4 text-xs font-semibold px-3 py-1 rounded-full ${
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {PLANS.map((plan, i) => (
+              <motion.div
+                key={plan.name}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                custom={i}
+                className={`rounded-xl p-6 border ${
+                  plan.highlighted
+                    ? "bg-card border-primary/50 shadow-card-hover relative"
+                    : "bg-card border-border/50"
+                }`}
+              >
+                {plan.highlighted && (
+                  <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                    הכי פופולרי
+                  </div>
+                )}
+                <h3 className="font-display font-bold text-xl text-foreground mb-1">{plan.name}</h3>
+                <p className="font-display font-bold text-3xl text-primary mb-4">{plan.price}</p>
+                <ul className="space-y-2 mb-6">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
+                      <CheckCircle size={14} className="text-primary shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/register">
+                  <Button
+                    className={`w-full ${
                       plan.highlighted
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-accent text-accent-foreground"
-                    }`}>
-                      {plan.badge}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      plan.highlighted ? "bg-primary/20" : "bg-secondary"
-                    }`}>
-                      <Icon size={20} className={plan.highlighted ? "text-primary" : "text-muted-foreground"} />
-                    </div>
-                    <h3 className="font-display font-bold text-xl text-foreground">{plan.name}</h3>
-                  </div>
-                  <div className="mb-6">
-                    <span className="font-display font-bold text-4xl text-foreground">{plan.price}</span>
-                    <span className="text-sm text-muted-foreground mr-1">/{plan.priceNote}</span>
-                  </div>
-                  <ul className="space-y-3 mb-8 flex-1">
-                    {plan.features.map((f) => (
-                      <li key={f.text} className={`flex items-center gap-2 text-sm ${
-                        f.included ? "text-foreground/90" : "text-muted-foreground/50 line-through"
-                      }`}>
-                        {f.included ? (
-                          <CheckCircle size={15} className="text-primary shrink-0" />
-                        ) : (
-                          <X size={15} className="text-muted-foreground/30 shrink-0" />
-                        )}
-                        {f.text}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link to={plan.name === "פרימיום" ? "/business/contact" : "/register"}>
-                    <Button
-                      size="lg"
-                      className={`w-full font-semibold ${
-                        plan.highlighted
-                          ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
-                          : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                      }`}
-                    >
-                      {plan.cta}
-                    </Button>
-                  </Link>
-                  {plan.highlighted && (
-                    <p className="text-center text-xs text-muted-foreground mt-3">
-                      ✓ ללא כרטיס אשראי ל-14 ימים ראשונים
-                    </p>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Comparison note */}
-          <div className="text-center mt-10">
-            <p className="text-sm text-muted-foreground">
-              💡 <span className="font-medium text-foreground/80">טיפ:</span> רוב העסקים שלנו בוחרים בחבילת המקצועי ומשדרגים לפרימיום כשהם צריכים חיבור CRM
-            </p>
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
+                        : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                    }`}
+                  >
+                    {plan.cta}
+                  </Button>
+                </Link>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
