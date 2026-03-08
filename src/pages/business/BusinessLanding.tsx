@@ -394,16 +394,30 @@ const BusinessLanding = () => {
           <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה ואפיליאט — הכל בחבילה אחת</p>
         </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {PRO_FEATURES.map(({ icon: Icon, title, desc, preview }, i) => (
+            {PRO_FEATURES.map(({ icon: Icon, title, desc, preview, tooltip }, i) => (
               <motion.div
                 key={title}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp} custom={i}
-                className={`rounded-xl p-6 bg-card border transition-all duration-300 group cursor-pointer ${
+                className={`rounded-xl p-6 bg-card border transition-all duration-300 group cursor-pointer relative ${
                   expandedFeature === title ? "border-primary/50 shadow-card-hover" : "border-primary/20 hover:border-primary/40"
                 }`}
                 onClick={() => preview && toggleFeature(title)}
               >
+                {tooltip && (
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <button className="absolute top-4 left-4 w-6 h-6 rounded-full bg-muted/60 hover:bg-primary/15 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                          <HelpCircle size={14} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[250px] text-sm leading-relaxed text-right" dir="rtl">
+                        {tooltip}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
                 <div className="flex items-start justify-between">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                     <Icon size={22} className="text-primary" />
