@@ -27,7 +27,7 @@ const Navbar = () => {
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5">
-          <img src={logoIcon} alt="ReviewHub Logo" className="w-10 h-10 rounded-[22%] shadow-lg object-cover" />
+          <img src={logoIcon} alt="ReviewHub Logo" className="w-10 h-10 rounded-xl shadow-lg object-cover" />
           <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
         </Link>
 
