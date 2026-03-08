@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, User } from "lucide-react";
+import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -33,9 +34,7 @@ const BusinessNavbar = () => {
         {/* Logo */}
         <div className="flex items-center gap-3">
           <Link to="/business" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-primary glow-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display font-bold text-sm">R</span>
-            </div>
+            <img src={logoIcon} alt="ReviewHub Logo" className="w-10 h-10 rounded-xl shadow-lg object-cover" />
             <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
             <span className="text-xs text-muted-foreground font-medium border border-border/50 rounded px-1.5 py-0.5">לעסקים</span>
           </Link>
