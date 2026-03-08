@@ -294,10 +294,7 @@ const BusinessNavbar = () => {
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודותינו</Link>
           <div className="border-t border-border/30 my-2" />
           {!user && (
-            <>
-              <Link to="/business/login" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>התחברו</Link>
-              <Link to="/business/signup" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>צרו חשבון בחינם</Link>
-            </>
+            <Link to="/business/login" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>התחברו / הרשמו</Link>
           )}
           {user && (
             <>
