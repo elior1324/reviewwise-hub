@@ -18,7 +18,7 @@ interface UploadedTemplate {
   created_at: string;
 }
 
-const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png,.csv";
+const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,.csv,image/*,application/pdf";
 const MAX_SIZE_MB = 10;
 
 const InvoiceTemplateUploader = ({ businessId }: InvoiceTemplateUploaderProps) => {

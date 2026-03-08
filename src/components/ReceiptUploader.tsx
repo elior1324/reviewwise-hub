@@ -11,7 +11,7 @@ interface ReceiptUploaderProps {
   onVerified: (verified: boolean) => void;
 }
 
-const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png";
+const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,image/*,application/pdf";
 const MAX_SIZE_MB = 10;
 
 const ReceiptUploader = ({ businessId, courseId, onVerified }: ReceiptUploaderProps) => {
