@@ -17,7 +17,7 @@ interface AddReviewFormProps {
   isVerifiedPurchaser?: boolean;
 }
 
-const AddReviewForm = ({ businessSlug, businessName, isVerifiedPurchaser = false }: AddReviewFormProps) => {
+const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVerifiedPurchaser = false }: AddReviewFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +25,7 @@ const AddReviewForm = ({ businessSlug, businessName, isVerifiedPurchaser = false
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [receiptVerified, setReceiptVerified] = useState(isVerifiedPurchaser);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
