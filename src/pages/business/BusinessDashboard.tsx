@@ -1,5 +1,6 @@
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
+import AIChatbot from "@/components/AIChatbot";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -321,6 +322,7 @@ const BusinessDashboard = () => {
         </Tabs>
       </div>
       <BusinessFooter />
+      <AIChatbot context="business" />
     </div>
   );
 };
