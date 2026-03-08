@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { Shield, FileText, Users, CreditCard, Lock, AlertTriangle, Scale, Globe, RefreshCw, Mail, Ban, Handshake } from "lucide-react";
+import { Shield, FileText, Users, CreditCard, Lock, AlertTriangle, Scale, Globe, RefreshCw, Mail, Ban, Handshake, DollarSign } from "lucide-react";
 import { ReactNode } from "react";
 
 const fadeUp = {
