@@ -9,7 +9,7 @@ import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
   Award, ArrowLeft, CheckCircle, Users, X, Crown, Sparkles,
   Lock, MessageSquare, FileText, Webhook, LineChart, Headphones,
-  UserCheck, Globe, ChevronDown
+  UserCheck, Globe, ChevronDown, HelpCircle
 } from "lucide-react";
 import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
