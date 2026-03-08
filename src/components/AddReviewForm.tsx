@@ -162,6 +162,15 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                     <p className="text-xs text-muted-foreground mt-1 text-left">{reviewText.length} תווים</p>
                   </div>
 
+                  {/* Receipt upload for verification */}
+                  {businessId && !receiptVerified && (
+                    <ReceiptUploader
+                      businessId={businessId}
+                      courseId={courseId}
+                      onVerified={(verified) => setReceiptVerified(verified)}
+                    />
+                  )}
+
                   <Button
                     type="submit"
                     disabled={submitting}
