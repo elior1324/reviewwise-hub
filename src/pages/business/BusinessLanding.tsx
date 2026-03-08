@@ -119,16 +119,7 @@ const PLANS = [
   },
 ];
 
-const TRUSTED = [
-  { name: "אקדמיית שיווק דיגיטלי", initials: "DMA" },
-  { name: "Code Masters IL", initials: "CM" },
-  { name: "בית הספר לעיצוב ת״א", initials: "DS" },
-  { name: "מרכז מדעי הנתונים", initials: "DH" },
-  { name: "Hebrew Tech", initials: "HT" },
-  { name: "אקדמיית צמיחה", initials: "GA" },
-  { name: "TechPro Academy", initials: "TP" },
-  { name: "LearnX Israel", initials: "LX" },
-];
+// Trusted companies — fetched from DB (verified businesses with good ratings)
 // Smooth collapsible with measured height
 const SmoothCollapse = ({ isOpen, preview, title }: { isOpen: boolean; preview?: string; title: string }) => {
   const contentRef = useRef<HTMLDivElement>(null);
