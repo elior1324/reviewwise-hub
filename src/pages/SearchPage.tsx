@@ -192,7 +192,7 @@ const SearchPage = () => {
                   {i < 3 && (
                     <div className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-md"
                       style={{
-                        background: i === 0 ? 'hsl(var(--primary))' : i === 1 ? 'hsl(220 10% 58%)' : 'hsl(25 30% 35%)',
+                        background: i === 0 ? 'hsl(var(--primary))' : i === 1 ? 'hsl(220 10% 45%)' : 'hsl(25 30% 35%)',
                       }}
                     >
                       {["🥇", "🥈", "🥉"][i]}
