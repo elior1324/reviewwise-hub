@@ -396,6 +396,10 @@ const BusinessDashboard = () => {
               <CalendarClock size={14} className="ml-1" /> דוחות AI יומיים
               {!isPremium && <PremiumBadge />}
             </TabsTrigger>
+            <TabsTrigger value="widget" className="gap-1">
+              <Code2 size={14} className="ml-1" /> ווידג'ט להטמעה
+              {isFree && <ProBadge />}
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview */}
