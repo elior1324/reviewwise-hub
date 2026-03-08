@@ -26,10 +26,8 @@ const Navbar = () => {
     <nav className="glass sticky top-0 z-50 border-b border-border/50">
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-primary glow-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-display font-bold text-sm">R</span>
-          </div>
+        <Link to="/" className="flex items-center gap-2.5">
+          <img src={logoIcon} alt="ReviewHub Logo" className="w-10 h-10 rounded-xl shadow-lg object-cover" />
           <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
         </Link>
 
