@@ -17,6 +17,25 @@ const INITIAL_MESSAGES: Record<ChatContext, string> = {
   business: "שלום! 👋 אני היועץ העסקי של ReviewHub. אני יכול לסייע לכם בבחירת התוכנית המתאימה, הדרכה על הפיצ'רים, טיפים לקבלת ביקורות ועוד. במה אוכל לעזור?",
 };
 
+const QUICK_SUGGESTIONS: Record<ChatContext, string[]> = {
+  consumer: [
+    "מה זה ReviewHub?",
+    "איך אני יודע שהביקורות אמיתיות?",
+    "תמליץ על קורס שיווק דיגיטלי",
+    "מי הפרילנסר הכי טוב לעיצוב אתרים?",
+    "איך כותבים ביקורת?",
+    "כמה עולים הקורסים?",
+  ],
+  business: [
+    "מה ההבדל בין התוכניות?",
+    "כמה עולה תוכנית Pro?",
+    "איך מקבלים יותר ביקורות?",
+    "מה זה מערכת אפיליאט?",
+    "איך עובד הדאשבורד?",
+    "מה כולל דוח AI?",
+  ],
+};
+
 const CHAT_TITLES: Record<ChatContext, string> = {
   consumer: "עוזר ReviewHub",
   business: "יועץ עסקי ReviewHub",
