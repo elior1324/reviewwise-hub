@@ -21,12 +21,7 @@ const FloatingEarnCTA = () => {
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 2, duration: 0.5, ease: "easeOut" }}
       onClick={() => {
-        const el = document.getElementById("earn-money");
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth" });
-        } else {
-          navigate("/#earn-money");
-        }
+        navigate("/partner");
       }}
       className="fixed top-1/4 left-0 z-40 cursor-pointer"
     >
