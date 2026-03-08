@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, FileText, Trash2, CheckCircle, Loader2, AlertCircle } from "lucide-react";
@@ -21,7 +21,7 @@ interface UploadedTemplate {
 const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,.csv,image/*,application/pdf";
 const MAX_SIZE_MB = 10;
 
-const InvoiceTemplateUploader = ({ businessId }: InvoiceTemplateUploaderProps) => {
+const InvoiceTemplateUploader = forwardRef<HTMLDivElement, InvoiceTemplateUploaderProps>(({ businessId }, ref) => {
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [templates, setTemplates] = useState<UploadedTemplate[]>([]);
@@ -191,6 +191,8 @@ const InvoiceTemplateUploader = ({ businessId }: InvoiceTemplateUploaderProps) =
       </CardContent>
     </Card>
   );
-};
+});
+
+InvoiceTemplateUploader.displayName = "InvoiceTemplateUploader";
 
 export default InvoiceTemplateUploader;
