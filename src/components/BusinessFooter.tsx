@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logoIcon from "@/assets/logo-icon-cropped.png";
 
 const BusinessFooter = () => (
   <footer className="border-t border-border/50 mt-20" dir="rtl">
@@ -6,8 +7,8 @@ const BusinessFooter = () => (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display font-bold text-sm">R</span>
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={logoIcon} alt="ReviewHub" className="w-full h-full object-cover" />
             </div>
             <span className="font-display font-bold text-lg gradient-text">ReviewHub</span>
             <span className="text-xs text-muted-foreground">לעסקים</span>
