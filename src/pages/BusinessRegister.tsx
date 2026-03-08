@@ -40,6 +40,7 @@ const BusinessRegister = () => {
   });
 
   const [socialLinks, setSocialLinks] = useState<SocialLinksData>({});
+  const [privacyConsent, setPrivacyConsent] = useState(false);
 
   const categories = form.businessType === "freelancer" ? freelancerCats : courseCats;
   const filteredCategories = categories.filter(c => c !== "אחר");
