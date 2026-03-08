@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ReviewCard from "@/components/ReviewCard";
 import CourseCard from "@/components/CourseCard";
-import ReviewRequestForm from "@/components/ReviewRequestForm";
+
 import { Star, MessageSquare, Link2, Upload, TrendingUp, Users, BarChart3, Send, AlertTriangle, DollarSign, MousePointerClick, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
@@ -169,7 +169,7 @@ const Dashboard = () => {
             <TabsTrigger value="flagged">חשודות</TabsTrigger>
             <TabsTrigger value="affiliate">אפיליאט</TabsTrigger>
             <TabsTrigger value="upload">העלאת רכישות</TabsTrigger>
-            <TabsTrigger value="links">קישורי ביקורת</TabsTrigger>
+            
             <TabsTrigger value="widgets">וידג׳טים</TabsTrigger>
           </TabsList>
 
@@ -328,9 +328,6 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="links">
-            <ReviewRequestForm courses={businessCourses} />
-          </TabsContent>
 
           <TabsContent value="widgets">
             <Card className="shadow-card animated-border bg-card">
