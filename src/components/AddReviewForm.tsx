@@ -12,6 +12,8 @@ import ReceiptUploader from "@/components/ReceiptUploader";
 interface AddReviewFormProps {
   businessSlug: string;
   businessName: string;
+  businessId?: string;
+  courseId?: string;
   isVerifiedPurchaser?: boolean;
 }
 
