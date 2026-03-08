@@ -321,55 +321,94 @@ const ForBusinessPage = () => {
       </section>
 
       {/* Pricing */}
-      <section className="border-y border-border/50">
+      <section id="pricing" className="border-y border-border/50">
         <div className="container py-20">
-          <div className="text-center mb-12">
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">תוכניות ומחירים</h2>
-            <p className="text-muted-foreground">בחרו את התוכנית המתאימה לעסק שלכם</p>
+          <div className="text-center mb-4">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">תוכניות ומחירים</h2>
+              <p className="text-muted-foreground mb-2">בחרו את התוכנית המתאימה לעסק שלכם</p>
+              <p className="text-xs text-muted-foreground/70">ללא התחייבות • ביטול בכל עת • 14 ימי ניסיון חינם בחבילת מקצועי</p>
+            </motion.div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {PLANS.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                custom={i}
-                className={`rounded-xl p-6 border ${
-                  plan.highlighted
-                    ? "bg-card border-primary/50 shadow-card-hover relative"
-                    : "bg-card border-border/50"
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-                    הכי פופולרי
-                  </div>
-                )}
-                <h3 className="font-display font-bold text-xl text-foreground mb-1">{plan.name}</h3>
-                <p className="font-display font-bold text-3xl text-primary mb-4">{plan.price}</p>
-                <ul className="space-y-2 mb-6">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
-                      <CheckCircle size={14} className="text-primary shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link to="/register">
-                  <Button
-                    className={`w-full ${
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch">
+            {PLANS.map((plan, i) => {
+              const Icon = plan.icon;
+              return (
+                <motion.div
+                  key={plan.name}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={fadeUp}
+                  custom={i}
+                  className={`rounded-2xl p-6 border flex flex-col ${
+                    plan.highlighted
+                      ? "bg-card border-primary/50 shadow-card-hover relative scale-[1.03] md:scale-105 z-10"
+                      : "bg-card border-border/50"
+                  }`}
+                >
+                  {plan.badge && (
+                    <div className={`absolute -top-3 right-4 text-xs font-semibold px-3 py-1 rounded-full ${
                       plan.highlighted
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
-                        : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                    }`}
-                  >
-                    {plan.cta}
-                  </Button>
-                </Link>
-              </motion.div>
-            ))}
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-accent text-accent-foreground"
+                    }`}>
+                      {plan.badge}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      plan.highlighted ? "bg-primary/20" : "bg-secondary"
+                    }`}>
+                      <Icon size={20} className={plan.highlighted ? "text-primary" : "text-muted-foreground"} />
+                    </div>
+                    <h3 className="font-display font-bold text-xl text-foreground">{plan.name}</h3>
+                  </div>
+                  <div className="mb-6">
+                    <span className="font-display font-bold text-4xl text-foreground">{plan.price}</span>
+                    <span className="text-sm text-muted-foreground mr-1">/{plan.priceNote}</span>
+                  </div>
+                  <ul className="space-y-3 mb-8 flex-1">
+                    {plan.features.map((f) => (
+                      <li key={f.text} className={`flex items-center gap-2 text-sm ${
+                        f.included ? "text-foreground/90" : "text-muted-foreground/50 line-through"
+                      }`}>
+                        {f.included ? (
+                          <CheckCircle size={15} className="text-primary shrink-0" />
+                        ) : (
+                          <X size={15} className="text-muted-foreground/30 shrink-0" />
+                        )}
+                        {f.text}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link to={plan.name === "פרימיום" ? "/business/contact" : "/register"}>
+                    <Button
+                      size="lg"
+                      className={`w-full font-semibold ${
+                        plan.highlighted
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
+                          : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      }`}
+                    >
+                      {plan.cta}
+                    </Button>
+                  </Link>
+                  {plan.highlighted && (
+                    <p className="text-center text-xs text-muted-foreground mt-3">
+                      ✓ ללא כרטיס אשראי ל-14 ימים ראשונים
+                    </p>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Comparison note */}
+          <div className="text-center mt-10">
+            <p className="text-sm text-muted-foreground">
+              💡 <span className="font-medium text-foreground/80">טיפ:</span> רוב העסקים שלנו בוחרים בחבילת המקצועי ומשדרגים לפרימיום כשהם צריכים חיבור CRM
+            </p>
           </div>
         </div>
       </section>
