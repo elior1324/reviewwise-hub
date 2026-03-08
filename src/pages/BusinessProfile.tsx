@@ -17,6 +17,7 @@ const DEFAULT_KEY = "digital-marketing-academy";
 
 const BusinessProfile = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [filterRating, setFilterRating] = useState<number | null>(null);
 
   const business = getBusinessBySlug(slug || "") || getBusinessBySlug(DEFAULT_KEY)!;
