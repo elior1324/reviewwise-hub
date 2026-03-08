@@ -17,6 +17,25 @@ const INITIAL_MESSAGES: Record<ChatContext, string> = {
   business: "שלום! 👋 אני היועץ העסקי של ReviewHub. אני יכול לסייע לכם בבחירת התוכנית המתאימה, הדרכה על הפיצ'רים, טיפים לקבלת ביקורות ועוד. במה אוכל לעזור?",
 };
 
+const QUICK_SUGGESTIONS: Record<ChatContext, string[]> = {
+  consumer: [
+    "מה זה ReviewHub?",
+    "איך אני יודע שהביקורות אמיתיות?",
+    "תמליץ על קורס שיווק דיגיטלי",
+    "מי הפרילנסר הכי טוב לעיצוב אתרים?",
+    "איך כותבים ביקורת?",
+    "כמה עולים הקורסים?",
+  ],
+  business: [
+    "מה ההבדל בין התוכניות?",
+    "כמה עולה תוכנית Pro?",
+    "איך מקבלים יותר ביקורות?",
+    "מה זה מערכת אפיליאט?",
+    "איך עובד הדאשבורד?",
+    "מה כולל דוח AI?",
+  ],
+};
+
 const CHAT_TITLES: Record<ChatContext, string> = {
   consumer: "עוזר ReviewHub",
   business: "יועץ עסקי ReviewHub",
@@ -128,6 +147,27 @@ const AIChatbot = ({ context = "consumer" }: AIChatbotProps) => {
                   </div>
                 </motion.div>
               ))}
+
+              {/* Quick suggestion chips — show only after the initial message */}
+              {messages.length === 1 && !isLoading && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex flex-wrap gap-2 pt-1"
+                >
+                  {QUICK_SUGGESTIONS[context].map((q, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { sendMessage(q); }}
+                      className="text-xs px-3 py-1.5 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors whitespace-nowrap"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+
               {isLoading && messages[messages.length - 1]?.role === "user" && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-2">
                   <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
