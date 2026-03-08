@@ -72,8 +72,8 @@ const Navbar = () => {
                 <DropdownMenuItem className="text-xs text-muted-foreground cursor-default">
                   {user.email}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                  לוח בקרה
+                <DropdownMenuItem onClick={() => navigate("/business/dashboard")}>
+                  לוח בקרה עסקי
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut size={14} className="ml-2" />
@@ -105,7 +105,7 @@ const Navbar = () => {
           <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>קטגוריות</Link>
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
           <Link to="/business" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>לעסקים</Link>
-          {user && <Link to="/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לוח בקרה</Link>}
+          {user && <Link to="/business/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לוח בקרה עסקי</Link>}
           {!user && <Link to="/auth" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>התחברו / צרו חשבון</Link>}
           {user && (
             <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-2 text-destructive">

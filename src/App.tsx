@@ -49,7 +49,7 @@ const App = () => (
             <Route path="/biz/:slug" element={<BusinessProfile />} />
             <Route path="/course/:courseId" element={<CoursePage />} />
             <Route path="/search" element={<SearchPage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<BusinessDashboard />} />
             <Route path="/register" element={<BusinessRegister />} />
             <Route path="/review/:token" element={<WriteReview />} />
             <Route path="/go/:courseId" element={<AffiliateRedirect />} />
