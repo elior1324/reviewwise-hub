@@ -279,18 +279,40 @@ const BusinessLanding = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">כל הכלים הבסיסיים שצריך כדי להתחיל לאסוף ביקורות מאומתות</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FREE_FEATURES.map(({ icon: Icon, title, desc }, i) => (
+            {FREE_FEATURES.map(({ icon: Icon, title, desc, preview }, i) => (
               <motion.div
                 key={title}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp} custom={i}
-                className="rounded-xl p-6 bg-card border border-border/50 hover:border-primary/30 transition-all duration-300 group"
+                className={`rounded-xl p-6 bg-card border transition-all duration-300 group cursor-pointer ${
+                  expandedFeature === title ? "border-primary/50 shadow-card-hover" : "border-border/50 hover:border-primary/30"
+                }`}
+                onClick={() => preview && toggleFeature(title)}
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <Icon size={22} className="text-primary" />
+                <div className="flex items-start justify-between">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <Icon size={22} className="text-primary" />
+                  </div>
+                  {preview && (
+                    <ChevronDown size={16} className={`text-muted-foreground transition-transform duration-300 ${expandedFeature === title ? "rotate-180" : ""}`} />
+                  )}
                 </div>
                 <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                <AnimatePresence>
+                  {expandedFeature === title && preview && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <img src={preview} alt={`תצוגה מקדימה — ${title}`} className="mt-4 rounded-lg border border-border/30 w-full" loading="lazy" />
+                      <p className="text-[11px] text-muted-foreground mt-2 text-center">תצוגה מקדימה של הפיצ׳ר</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ))}
           </div>
