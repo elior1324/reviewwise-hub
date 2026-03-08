@@ -293,6 +293,7 @@ const BusinessDashboard = () => {
 
           {/* Invoices & Verification */}
           <TabsContent value="invoices">
+            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <InvoiceTemplateUploader businessId="mock-business-id" />
               <Card className="shadow-card bg-card">
@@ -323,6 +324,7 @@ const BusinessDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+            </LockedOverlay>
           </TabsContent>
 
           {/* Clicks & Conversions */}
