@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { Shield, Mail, Lock, Eye, Trash2, FileText, Users, Globe, Database, Cookie, Baby, RefreshCw } from "lucide-react";
+import { Shield, Mail, Lock, Eye, Trash2, FileText, Users, Globe, Database, Cookie, Baby, RefreshCw, CheckCircle, ExternalLink } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -44,6 +44,22 @@ const PrivacyPolicy = () => {
             </p>
             <p className="mt-3">
               כאשר אנו אומרים "אתר", "פלטפורמה" או "שירות" — אנו מתכוונים לכל אתרי ReviewHub, היישומים והשירותים הנלווים.
+            </p>
+          </Section>
+
+          {/* Consent */}
+          <Section icon={CheckCircle} title="הסכמתך">
+            <p>
+              הינך מבין כי לא חלה עליך חובה חוקית למסור מידע אישי, וכי אתה מוסר את המידע מרצונך החופשי ובהסכמתך המלאה. המידע נשמר במאגרי המידע של ReviewHub, בארץ ו/או בחו"ל, ו/או אצל מי מטעמה, לצורכי מתן שירות ו/או שליחת עדכונים מקצועיים ו/או שיווקיים, בכפוף לכל דין.
+            </p>
+            <p className="mt-3">
+              מסירת המידע האישי הנדרש לצורך יצירת חשבון וכתיבת ביקורות הינה תנאי הכרחי למתן השירות. ללא מידע זה, לצערנו, לא נוכל לספק את השירות המבוקש.
+            </p>
+            <p className="mt-3 font-semibold text-foreground">
+              אם אינך מסכים למדיניות פרטיות זו, אנא הפסק את השימוש בפלטפורמה לאלתר.
+            </p>
+            <p className="mt-3 text-muted-foreground">
+              המשך השימוש בפלטפורמה מהווה הסכמה מלאה לתנאי מדיניות פרטיות זו.
             </p>
           </Section>
 
@@ -150,13 +166,25 @@ const PrivacyPolicy = () => {
               לעובדי ReviewHub מסוימים תהיה גישה למידע שלכם כדי לסייע בתפעול השירותים. הגישה מוגבלת לאלו שיש להם צורך עסקי מוצדק.
             </p>
             <p className="font-semibold text-foreground mb-2">שיתוף עם צדדים שלישיים:</p>
-            <ul className="list-disc pr-6 space-y-1 text-muted-foreground">
-              <li>ספקי שירות שתומכים בתפעול הטכני של הפלטפורמה (מעבדי מידע)</li>
+            <p className="mb-3 text-muted-foreground">
+              ידוע לך כי המידע עשוי להימסר לצדדים שלישיים מהסיבות הבאות:
+            </p>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground">
+              <li>ספקי שירות שתומכים בתפעול הטכני של הפלטפורמה (מעבדי מידע), כגון מערכת הדואר האלקטרוני, שירותי אחסון ומחשוב, מערכות ניהול נתונים וכיו"ב</li>
               <li>עסקים שעליהם כתבתם ביקורת</li>
               <li>מנועי חיפוש ופלטפורמות מקוונות</li>
-              <li>רשויות אכיפת חוק ורגולטורים — כאשר נדרש על פי דין</li>
-              <li>צדדים שלישיים בקשר עם מיזוג, רכישה או מכירה של העסק</li>
+              <li>ככל שההגדרות במכשיר שלכם מאפשרות כך, עשוי להימסר מידע סטטיסטי לצדדים שלישיים לצורך שיפור השירות עבורכם</li>
+              <li>ככל שיתקבל צו שיפוטי מכל סוג שהוא, ומכל רשות ו/או ערכאה שיפוטית ו/או מוסד ממשלתי, המורה על מסירת פרטיכם האישיים</li>
+              <li>ככל ש-ReviewHub תתמזג עם גוף אחר ו/או תתפרק — ננקוט במירב המאמצים לעדכן אתכם בטרם נעשה כן</li>
             </ul>
+            <div className="mt-4 p-4 rounded-xl bg-secondary/50 border border-border/50">
+              <p className="flex items-center gap-2 font-semibold text-foreground mb-2">
+                <ExternalLink size={16} className="text-primary" /> קישורים חיצוניים
+              </p>
+              <p className="text-sm text-muted-foreground">
+                בעת גלישה בפלטפורמה עלולים להופיע קישורים חיצוניים שיובילו אתכם לאתרים אחרים. אנא קראו את מדיניות הפרטיות באותם אתרים לפני שאתם מזינים נתונים אישיים. ReviewHub אינה אחראית על המידע הנאסף אודותיכם באותם אתרים חיצוניים.
+              </p>
+            </div>
           </Section>
 
           {/* Data Storage */}
