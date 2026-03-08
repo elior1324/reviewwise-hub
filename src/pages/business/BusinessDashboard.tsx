@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
-  Crown, Lock, Webhook, Contact, CalendarClock
+  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { REVIEWS, COURSES, AFFILIATE_CLICKS } from "@/data/mockData";
@@ -21,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 
 const BUSINESS_SLUG = "digital-marketing-academy";
 
-type DemoTier = "pro" | "premium";
+type DemoTier = "free" | "pro" | "premium";
 
 const BusinessDashboard = () => {
   const navigate = useNavigate();
@@ -31,6 +31,8 @@ const BusinessDashboard = () => {
   const [demoTier, setDemoTier] = useState<DemoTier>("pro");
   const currentTier: SubscriptionTier = subscriptionTier !== "free" ? subscriptionTier : demoTier;
   const isPremium = currentTier === "premium";
+  const isPro = currentTier === "pro";
+  const isFree = currentTier === "free";
 
   const demoBusiness = {
     name: "Digital Marketing Academy",
@@ -94,6 +96,12 @@ const BusinessDashboard = () => {
     </span>
   );
 
+  const ProBadge = () => (
+    <span className="inline-flex items-center gap-1 bg-accent/10 text-accent text-[10px] px-1.5 py-0.5 rounded-full font-bold mr-1">
+      <Sparkles size={10} /> מקצועי
+    </span>
+  );
+
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
@@ -114,6 +122,16 @@ const BusinessDashboard = () => {
         <div className="mb-6 flex items-center gap-3 rounded-lg border border-border/50 bg-muted/50 px-4 py-3">
           <span className="text-xs text-muted-foreground font-medium">סימולציית חבילה:</span>
           <div className="flex gap-1 rounded-lg bg-background p-1 border border-border/30">
+            <button
+              onClick={() => setDemoTier("free")}
+              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
+                demoTier === "free"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              סטארטר (חינם)
+            </button>
             <button
               onClick={() => setDemoTier("pro")}
               className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
@@ -136,7 +154,7 @@ const BusinessDashboard = () => {
             </button>
           </div>
           <span className="text-[10px] text-muted-foreground/70">
-            {demoTier === "pro" ? "פיצ׳רים פרימיום יופיעו חסומים" : "כל הפיצ׳רים זמינים"}
+            {demoTier === "free" ? "רוב הפיצ׳רים חסומים" : demoTier === "pro" ? "פיצ׳רים פרימיום חסומים" : "כל הפיצ׳רים זמינים"}
           </span>
         </div>
 
@@ -188,10 +206,14 @@ const BusinessDashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass flex-wrap">
             <TabsTrigger value="overview">סקירה כללית</TabsTrigger>
-            <TabsTrigger value="invoices">
+            <TabsTrigger value="invoices" className="gap-1">
               <FileText size={14} className="ml-1" /> קבלות ואימות
+              {isFree && <ProBadge />}
             </TabsTrigger>
-            <TabsTrigger value="clicks">קליקים והמרות</TabsTrigger>
+            <TabsTrigger value="clicks" className="gap-1">
+              קליקים והמרות
+              {isFree && <ProBadge />}
+            </TabsTrigger>
             <TabsTrigger value="notifications">
               <Bell size={14} className="ml-1" /> התראות
               <span className="mr-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full">{notifications.length}</span>
@@ -200,8 +222,9 @@ const BusinessDashboard = () => {
               <Brain size={14} className="ml-1" /> דוח AI שבועי
               {!isPremium && <PremiumBadge />}
             </TabsTrigger>
-            <TabsTrigger value="testimonials">
+            <TabsTrigger value="testimonials" className="gap-1">
               <Video size={14} className="ml-1" /> סרטוני לקוחות
+              {isFree && <ProBadge />}
             </TabsTrigger>
             {/* Premium-only tabs */}
             <TabsTrigger value="crm" className="gap-1">
@@ -270,6 +293,7 @@ const BusinessDashboard = () => {
 
           {/* Invoices & Verification */}
           <TabsContent value="invoices">
+            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <InvoiceTemplateUploader businessId="mock-business-id" />
               <Card className="shadow-card bg-card">
@@ -300,10 +324,12 @@ const BusinessDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+            </LockedOverlay>
           </TabsContent>
 
           {/* Clicks & Conversions */}
           <TabsContent value="clicks">
+            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <TooltipProvider delayDuration={200}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card className="shadow-card bg-card">
@@ -399,6 +425,7 @@ const BusinessDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+            </LockedOverlay>
           </TabsContent>
 
           {/* Notifications */}
@@ -498,6 +525,7 @@ const BusinessDashboard = () => {
 
           {/* Testimonials Tab */}
           <TabsContent value="testimonials">
+            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <div className="max-w-2xl">
               <p className="text-muted-foreground text-sm mb-4">
                 העלו עד 5 סרטונים או תמונות של לקוחות מרוצים. ניתן להעלות קבצים ישירות או להוסיף קישורי YouTube / TikTok.
@@ -506,6 +534,7 @@ const BusinessDashboard = () => {
               </p>
               <TestimonialMediaUploader businessId="PLACEHOLDER_ID" maxItems={5} />
             </div>
+            </LockedOverlay>
           </TabsContent>
 
           {/* ===== PREMIUM-ONLY TABS ===== */}
