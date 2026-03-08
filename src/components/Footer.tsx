@@ -1,4 +1,20 @@
 import { Link } from "react-router-dom";
+import { Youtube, Instagram, Linkedin, Twitter, Facebook } from "lucide-react";
+
+const TikTokIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.87a8.16 8.16 0 004.76 1.52v-3.4a4.85 4.85 0 01-1-.3z"/>
+  </svg>
+);
+
+const REVIEWHUB_SOCIALS = [
+  { icon: Youtube, href: "#", label: "YouTube" },
+  { icon: Instagram, href: "#", label: "Instagram" },
+  { icon: TikTokIcon, href: "#", label: "TikTok" },
+  { icon: Linkedin, href: "#", label: "LinkedIn" },
+  { icon: Twitter, href: "#", label: "X" },
+  { icon: Facebook, href: "#", label: "Facebook" },
+];
 
 const Footer = () => (
   <footer className="border-t border-border/50 mt-20">
@@ -11,7 +27,21 @@ const Footer = () => (
             </div>
             <span className="font-display font-bold text-lg gradient-text">ReviewHub</span>
           </div>
-          <p className="text-sm text-muted-foreground">ביקורות מאומתות לחינוך דיגיטלי בישראל.</p>
+          <p className="text-sm text-muted-foreground mb-4">ביקורות מאומתות לחינוך דיגיטלי בישראל.</p>
+          <div className="flex gap-2 flex-wrap">
+            {REVIEWHUB_SOCIALS.map(({ icon: Icon, href, label }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={label}
+                className="w-8 h-8 rounded-lg bg-muted/50 hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-200"
+              >
+                <Icon size={15} />
+              </a>
+            ))}
+          </div>
         </div>
         <div>
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">פלטפורמה</h4>
