@@ -14,7 +14,7 @@ import {
   Crown, Lock, Webhook, Contact, CalendarClock, Sparkles
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { REVIEWS, COURSES, AFFILIATE_CLICKS } from "@/data/mockData";
+import { type Review, type Course, type AffiliateClick } from "@/data/mockData";
 import { useState } from "react";
 import { useAuth, SubscriptionTier } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
