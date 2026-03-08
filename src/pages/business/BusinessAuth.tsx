@@ -33,6 +33,11 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
     setLoading(true);
     try {
       if (mode === "signup") {
+        if (!privacyConsent) {
+          toast({ title: "יש לאשר את מדיניות הפרטיות ותנאי השימוש", variant: "destructive" });
+          setLoading(false);
+          return;
+        }
         const { error } = await signUp(email, password, name);
         if (error) throw error;
         toast({ title: "החשבון נוצר בהצלחה!", description: "בדקו את האימייל שלכם לאימות החשבון." });
