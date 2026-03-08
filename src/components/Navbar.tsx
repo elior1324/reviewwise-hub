@@ -5,6 +5,7 @@ import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationBell from "./NotificationBell";
+import AccessibilityMenu from "./AccessibilityMenu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,6 +51,7 @@ const Navbar = () => {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
+          <AccessibilityMenu />
           {user && <NotificationBell />}
 
           {/* לעסקים */}
