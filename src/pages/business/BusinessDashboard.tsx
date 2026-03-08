@@ -39,11 +39,11 @@ const BusinessDashboard = () => {
     email: "admin@dma.co.il",
   };
 
-  const businessReviews = REVIEWS.filter(r => r.businessSlug === BUSINESS_SLUG);
-  const businessCourses = COURSES.filter(c => c.businessSlug === BUSINESS_SLUG);
-  const totalClicks = AFFILIATE_CLICKS.length;
-  const conversions = AFFILIATE_CLICKS.filter(c => c.converted).length;
-  const totalRevenue = AFFILIATE_CLICKS.filter(c => c.converted).reduce((s, c) => s + (c.revenue || 0), 0);
+  const businessReviews: Review[] = [];
+  const businessCourses: Course[] = [];
+  const totalClicks = 0;
+  const conversions = 0;
+  const totalRevenue = 0;
 
   const STATS = [
     { icon: Star, label: "דירוג ממוצע", value: "4.8", change: "+0.2", up: true, tooltip: "הציון הממוצע שלקוחות נתנו לכל הקורסים שלכם. דירוג גבוה מגביר אמון ומושך לקוחות חדשים." },
