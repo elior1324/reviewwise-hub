@@ -32,31 +32,31 @@ const fadeUp = {
 };
 
 // ─── Features organized by tier ───────────────────────────
-type Feature = { icon: any; title: string; desc: string; preview?: string; locked?: boolean };
+type Feature = { icon: any; title: string; desc: string; preview?: string; locked?: boolean; tooltip?: string };
 const FREE_FEATURES: Feature[] = [
-  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת." },
-  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור." },
-  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח." },
-  { icon: Star, title: "תג דירוג בסיסי", desc: "הציגו את הדירוג שלכם עם תג אמינות ReviewHub." },
+  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת.", tooltip: "המערכת מוודאת שרק מי שרכש את המוצר יכול להשאיר ביקורת — כך כל ביקורת היא אמיתית ומהימנה." },
+  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור.", tooltip: "עמוד ייעודי לעסק שלכם שנגיש לכולם, כולל לוגו, תיאור, פרטי קשר ודירוג מצטבר." },
+  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח.", tooltip: "אפשרות להגיב לכל ביקורת ישירות מהדאשבורד — מראים ללקוחות שאכפת לכם." },
+  { icon: Star, title: "תג דירוג בסיסי", desc: "הציגו את הדירוג שלכם עם תג אמינות ReviewHub.", tooltip: "תג קטן עם הדירוג שלכם שאפשר לשתף או להציג, מעיד על אמינות העסק." },
 ];
 
 const PRO_FEATURES: Feature[] = [
-  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת." },
-  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת." },
-  { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות." },
-  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. עמלה של 10% על כל מכירה שנכנסת דרככם." },
-  { icon: Globe, title: "רשתות חברתיות ואתר", desc: "חברו YouTube, Instagram, TikTok, LinkedIn, Facebook ואתר האינטרנט שלכם לפרופיל העסקי." },
-  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור." },
-  { icon: Headphones, title: "תמיכה בעדיפות", desc: "תמיכה מהירה עם מענה תוך 4 שעות בימי עבודה." },
+  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת.", tooltip: "לוח בקרה עם גרפים ונתונים בזמן אמת — דירוגים, מגמות, ביקורות חדשות ואחוזי מענה." },
+  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת.", tooltip: "קוד קצר שמטמיע קרוסלת ביקורות או תג דירוג ישירות באתר שלכם — ללא מתכנת." },
+  { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות.", tooltip: "שלחו ללקוחות קישור אישי לכתיבת ביקורת, או העלו רשימת רכישות ותנו למערכת לעשות את השאר." },
+  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. עמלה של 10% על כל מכירה שנכנסת דרככם.", tooltip: "צרו קישורי הפניה ייחודיים ועקבו אחרי קליקים, המרות והכנסות — הרוויחו 10% מכל מכירה." },
+  { icon: Globe, title: "רשתות חברתיות ואתר", desc: "חברו YouTube, Instagram, TikTok, LinkedIn, Facebook ואתר האינטרנט שלכם לפרופיל העסקי.", tooltip: "הוסיפו קישורים לכל הרשתות החברתיות שלכם ולאתר — הכל מופיע בפרופיל העסקי." },
+  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור.", tooltip: "כל שבוע תקבלו דוח AI שמנתח את הביקורות, מזהה מגמות ונותן המלצות לשיפור." },
+  { icon: Headphones, title: "תמיכה בעדיפות", desc: "תמיכה מהירה עם מענה תוך 4 שעות בימי עבודה.", tooltip: "פניות שלכם מטופלות לפני כולם — מענה מובטח תוך 4 שעות בימי עבודה." },
 ];
 
 const PREMIUM_FEATURES: Feature[] = [
-  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true },
-  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true },
-  { icon: Webhook, title: "Webhook למערכות חיצוניות", desc: "חברו ל-Zapier, Make ולכל מערכת עם webhook.", locked: true },
-  { icon: Globe, title: "Google Ads Review Stars ⭐", desc: "הציגו כוכבי דירוג ישירות במודעות Google שלכם.", locked: true },
-  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true },
-  { icon: Code, title: "גישת API מלאה", desc: "בנו אינטגרציות מותאמות אישית עם ה-API שלנו.", locked: true },
+  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true, tooltip: "סנכרנו ביקורות ולידים ישירות למערכת ה-CRM שלכם — HubSpot, Salesforce ועוד." },
+  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true, tooltip: "ביקורת חיובית הופכת אוטומטית לליד — המערכת שולחת הפניה ללקוח המרוצה." },
+  { icon: Webhook, title: "Webhook למערכות חיצוניות", desc: "חברו ל-Zapier, Make ולכל מערכת עם webhook.", locked: true, tooltip: "כל אירוע (ביקורת חדשה, ליד וכו׳) נשלח אוטומטית ל-Zapier, Make או כל מערכת אחרת." },
+  { icon: Globe, title: "Google Ads Review Stars ⭐", desc: "הציגו כוכבי דירוג ישירות במודעות Google שלכם.", locked: true, tooltip: "כוכבי הדירוג שלכם מופיעים ישירות במודעות Google — מגדיל CTR ואמינות." },
+  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true, tooltip: "דוחות AI יומיים עם ניתוח מעמיק — מגמות, התרעות על ביקורות שליליות ותחזיות." },
+  { icon: Code, title: "גישת API מלאה", desc: "בנו אינטגרציות מותאמות אישית עם ה-API שלנו.", locked: true, tooltip: "גישה מלאה ל-API של ReviewHub — בנו אינטגרציות מותאמות לצרכים שלכם." },
 ];
 
 const PLANS = [
