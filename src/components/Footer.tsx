@@ -33,7 +33,7 @@ const Footer = () => (
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">משפטי</h4>
           <div className="space-y-2">
             <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות פרטיות</Link>
-            <span className="block text-sm text-muted-foreground">תנאי שימוש</span>
+            <Link to="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">תנאי שימוש</Link>
           </div>
         </div>
       </div>

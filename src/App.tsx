@@ -18,6 +18,7 @@ import AuthPage from "./pages/AuthPage";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/review/:token" element={<WriteReview />} />
             <Route path="/go/:courseId" element={<AffiliateRedirect />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />
