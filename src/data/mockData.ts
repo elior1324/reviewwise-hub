@@ -93,6 +93,7 @@ export const FREELANCER_CATEGORIES = [
   "יועץ משכנתאות",
   "רואה חשבון",
   "עורך דין",
+  "מאמן ספורט",
 ];
 
 // ─── Sub-specialties per category ───────────────────────
