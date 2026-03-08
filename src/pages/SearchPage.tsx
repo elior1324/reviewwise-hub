@@ -118,9 +118,20 @@ const SearchPage = () => {
               ))}
             </div>
             <div className="flex flex-wrap gap-4 mb-6 items-center">
-              <span className="text-xs text-muted-foreground">מחיר עד: ₪{priceRange[1].toLocaleString()}</span>
-              <div className="w-40">
-                <Slider min={0} max={20000} step={500} value={[priceRange[1]]} onValueChange={v => setPriceRange([0, v[0]])} />
+              <span className="text-sm font-medium text-foreground">מחיר עד: ₪{priceRange[1].toLocaleString()}</span>
+              <div className="w-52">
+                <Slider
+                  min={0}
+                  max={20000}
+                  step={500}
+                  value={[priceRange[1]]}
+                  onValueChange={v => {
+                    setPriceRange([0, v[0]]);
+                    if (navigator.vibrate) {
+                      navigator.vibrate(5);
+                    }
+                  }}
+                />
               </div>
             </div>
 
