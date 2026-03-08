@@ -33,6 +33,9 @@ const Navbar = () => {
 
         {/* Center nav links */}
         <div className="hidden md:flex items-center gap-6">
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            עמוד הבית
+          </Link>
           <Link to="/write-review" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
             <PenLine size={14} />
             כתבו ביקורת
@@ -100,6 +103,7 @@ const Navbar = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-border/50 p-4 space-y-3 glass">
+          <Link to="/" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>עמוד הבית</Link>
           <Link to="/write-review" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>כתבו ביקורת</Link>
           <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>קטגוריות</Link>
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
