@@ -117,6 +117,16 @@ const BusinessDashboard = () => {
           <span className="text-xs text-muted-foreground font-medium">סימולציית חבילה:</span>
           <div className="flex gap-1 rounded-lg bg-background p-1 border border-border/30">
             <button
+              onClick={() => setDemoTier("free")}
+              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
+                demoTier === "free"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              סטארטר (חינם)
+            </button>
+            <button
               onClick={() => setDemoTier("pro")}
               className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
                 demoTier === "pro"
@@ -138,7 +148,7 @@ const BusinessDashboard = () => {
             </button>
           </div>
           <span className="text-[10px] text-muted-foreground/70">
-            {demoTier === "pro" ? "פיצ׳רים פרימיום יופיעו חסומים" : "כל הפיצ׳רים זמינים"}
+            {demoTier === "free" ? "רוב הפיצ׳רים חסומים" : demoTier === "pro" ? "פיצ׳רים פרימיום חסומים" : "כל הפיצ׳רים זמינים"}
           </span>
         </div>
 
