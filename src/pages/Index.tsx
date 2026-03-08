@@ -86,11 +86,11 @@ const Index = () => {
       <Navbar />
 
       {/* Hero — Audience-First */}
-      <section className="relative overflow-hidden">
+      <section ref={heroRef} className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
         <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl animate-float" />
         <div className="absolute bottom-10 right-1/4 w-64 h-64 rounded-full bg-accent/5 blur-3xl animate-float" style={{ animationDelay: "3s" }} />
-        <div className="container py-16 md:py-24 relative">
+        <motion.div className="container py-16 md:py-24 relative" style={{ opacity: heroOpacity, y: heroY }}>
           <motion.div className="max-w-4xl mx-auto text-center" initial="hidden" animate="visible">
             <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
               <ShieldCheck size={16} /> רק ביקורות מאומתות
