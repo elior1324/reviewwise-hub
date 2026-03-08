@@ -52,6 +52,7 @@ const ComparePage = () => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isAILoading, setIsAILoading] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const [viewMode, setViewMode] = useState<"chat" | "table">("chat");
   const chatEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
