@@ -31,7 +31,8 @@ const fadeUp = {
 };
 
 // ─── Features organized by tier ───────────────────────────
-const FREE_FEATURES = [
+type Feature = { icon: any; title: string; desc: string; preview?: string; locked?: boolean };
+const FREE_FEATURES: Feature[] = [
   { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת." },
   { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור." },
   { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח." },
