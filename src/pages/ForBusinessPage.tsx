@@ -294,7 +294,7 @@ const ForBusinessPage = () => {
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">תוכניות ומחירים</h2>
             <p className="text-muted-foreground">בחרו את התוכנית המתאימה לעסק שלכם</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
             {PLANS.map((plan, i) => (
               <motion.div
                 key={plan.name}
@@ -305,18 +305,32 @@ const ForBusinessPage = () => {
                 custom={i}
                 className={`rounded-xl p-6 border ${
                   plan.highlighted
-                    ? "bg-card border-primary/50 shadow-card-hover relative"
+                    ? "bg-card border-primary/50 shadow-card-hover relative scale-[1.03]"
+                    : (plan as any).premium
+                    ? "bg-gradient-to-b from-card to-primary/5 border-primary/30 relative"
                     : "bg-card border-border/50"
                 }`}
               >
                 {plan.highlighted && (
-                  <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-                    הכי פופולרי
+                  <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                    <Sparkles size={12} /> הכי פופולרי
+                  </div>
+                )}
+                {(plan as any).premium && (
+                  <div className="absolute -top-3 right-4 bg-foreground text-background text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                    <Crown size={12} /> הכל כולל הכל
                   </div>
                 )}
                 <h3 className="font-display font-bold text-xl text-foreground mb-1">{plan.name}</h3>
-                <p className="font-display font-bold text-3xl text-primary mb-4">{plan.price}</p>
-                <ul className="space-y-2 mb-6">
+                <div className="mb-1">
+                  {(plan as any).originalPrice && (
+                    <span className="text-sm text-muted-foreground line-through ml-2">{(plan as any).originalPrice}</span>
+                  )}
+                  <span className="font-display font-bold text-3xl text-primary">{plan.price}</span>
+                  <span className="text-sm text-muted-foreground">{plan.period}</span>
+                </div>
+                <div className="mb-4" />
+                <ul className="space-y-2 mb-4">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
                       <CheckCircle size={14} className="text-primary shrink-0" />
@@ -324,20 +338,31 @@ const ForBusinessPage = () => {
                     </li>
                   ))}
                 </ul>
+                {(plan as any).excluded && (plan as any).excluded.length > 0 && (
+                  <ul className="space-y-1.5 mb-4 opacity-50">
+                    {(plan as any).excluded.map((f: string) => (
+                      <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground line-through">
+                        <X size={14} className="shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <Link to="/register">
-                  <Button
-                    className={`w-full ${
-                      plan.highlighted
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
-                        : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                    }`}
-                  >
+                  <Button className={`w-full ${
+                    plan.highlighted
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
+                      : (plan as any).premium
+                      ? "bg-foreground text-background hover:bg-foreground/90"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  }`}>
                     {plan.cta}
                   </Button>
                 </Link>
               </motion.div>
             ))}
           </div>
+          <p className="text-center text-xs text-muted-foreground mt-8">כל התוכניות כוללות SSL, גיבוי יומי ואבטחת מידע מלאה. ביטול בכל עת.</p>
         </div>
       </section>
 
