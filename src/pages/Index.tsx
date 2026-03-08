@@ -308,7 +308,7 @@ const Index = () => {
       </section>
 
       {/* Earn Money CTA */}
-      <section className="container py-20">
+      <section id="earn-money" className="container py-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
