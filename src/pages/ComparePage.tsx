@@ -81,8 +81,8 @@ const ComparePage = () => {
     setIsSearching(true);
     try {
       const [bizRes, courseRes] = await Promise.all([
-        supabase.from("businesses").select("id, name, slug, category, rating, review_count, description").ilike("name", `%${query}%`).limit(5),
-        supabase.from("courses").select("id, name, category, rating, review_count, price, description, business_id, businesses(name, slug)").ilike("name", `%${query}%`).limit(5),
+        supabase.from("businesses").select("id, name, slug, category, rating, review_count, description, years_experience, difficulty_level, target_audience, location").ilike("name", `%${query}%`).limit(5),
+        supabase.from("courses").select("id, name, category, rating, review_count, price, description, duration, difficulty_level, format, business_id, businesses(name, slug, years_experience, target_audience, location)").ilike("name", `%${query}%`).limit(5),
       ]);
 
       const results: SearchResult[] = [];
@@ -98,6 +98,10 @@ const ComparePage = () => {
             description: b.description || "",
             type: "freelancer",
             slug: b.slug,
+            yearsExperience: b.years_experience,
+            difficultyLevel: b.difficulty_level,
+            targetAudience: b.target_audience,
+            location: b.location,
           });
         });
       }
@@ -115,6 +119,12 @@ const ComparePage = () => {
             type: "course",
             businessName: c.businesses?.name,
             slug: c.businesses?.slug,
+            duration: c.duration,
+            difficultyLevel: c.difficulty_level,
+            format: c.format,
+            yearsExperience: c.businesses?.years_experience,
+            targetAudience: c.businesses?.target_audience,
+            location: c.businesses?.location,
           });
         });
       }
