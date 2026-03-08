@@ -27,6 +27,7 @@ import ModernSlaveryStatement from "./pages/ModernSlaveryStatement";
 import AccessibilityStatement from "./pages/AccessibilityStatement";
 import ComparePage from "./pages/ComparePage";
 import RefundPolicy from "./pages/RefundPolicy";
+import PartnerDashboard from "./pages/PartnerDashboard";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
