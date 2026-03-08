@@ -52,6 +52,30 @@ export type Database = {
           },
         ]
       }
+      approved_categories: {
+        Row: {
+          auto_approved: boolean
+          created_at: string
+          id: string
+          name: string
+          type: string
+        }
+        Insert: {
+          auto_approved?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          type: string
+        }
+        Update: {
+          auto_approved?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          type?: string
+        }
+        Relationships: []
+      }
       business_responses: {
         Row: {
           business_id: string
@@ -191,6 +215,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "courses_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pending_categories: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          id: string
+          suggested_name: string
+          type: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          suggested_name: string
+          type: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          suggested_name?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_categories_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
