@@ -368,17 +368,7 @@ const BusinessLanding = () => {
                 </div>
                 <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-                <div
-                  className="overflow-hidden transition-[max-height,opacity] duration-[450ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-                  style={{ maxHeight: expandedFeature === title && preview ? 500 : 0, opacity: expandedFeature === title && preview ? 1 : 0 }}
-                >
-                  {preview && (
-                    <div className="pt-4 pb-1">
-                      <img src={preview} alt={`תצוגה מקדימה — ${title}`} className="rounded-lg border border-border/30 w-full" loading="lazy" />
-                      <p className="text-[11px] text-muted-foreground mt-2 text-center">תצוגה מקדימה של הפיצ׳ר</p>
-                    </div>
-                  )}
-                </div>
+                <SmoothCollapse isOpen={expandedFeature === title} preview={preview} title={title} />
               </motion.div>
             ))}
           </div>
