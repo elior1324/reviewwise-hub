@@ -1,13 +1,14 @@
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import AIChatbot from "@/components/AIChatbot";
+import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
-  Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3
+  Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText
 } from "lucide-react";
 import { REVIEWS, COURSES, AFFILIATE_CLICKS } from "@/data/mockData";
 
@@ -99,6 +100,9 @@ const BusinessDashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass flex-wrap">
             <TabsTrigger value="overview">סקירה כללית</TabsTrigger>
+            <TabsTrigger value="invoices">
+              <FileText size={14} className="ml-1" /> קבלות ואימות
+            </TabsTrigger>
             <TabsTrigger value="clicks">קליקים והמרות</TabsTrigger>
             <TabsTrigger value="notifications">
               <Bell size={14} className="ml-1" /> התראות
@@ -154,6 +158,40 @@ const BusinessDashboard = () => {
                       </div>
                     </div>
                   ))}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Invoices & Verification */}
+          <TabsContent value="invoices">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <InvoiceTemplateUploader businessId="mock-business-id" />
+              <Card className="shadow-card bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Brain size={18} className="text-primary" /> איך זה עובד?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3 text-sm text-muted-foreground">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">1</div>
+                      <p>העלו דוגמאות של חשבוניות/קבלות שלכם (PDF, תמונה או CSV)</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">2</div>
+                      <p>ה-AI ינתח את המבנה ויזהה פרטים מזהים (לוגו, שם העסק, מספרי מסמך)</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">3</div>
+                      <p>כשלקוח מעלה קבלה בטופס הביקורת, ה-AI ישווה אותה מול התבניות שלכם</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">4</div>
+                      <p>רוב הקבלות יאומתו אוטומטית. מקרים חריגים יועברו לבדיקה ידנית</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>

@@ -228,6 +228,98 @@ export type Database = {
           },
         ]
       }
+      customer_receipts: {
+        Row: {
+          ai_analysis: Json | null
+          ai_match_score: number | null
+          business_id: string
+          course_id: string | null
+          created_at: string
+          file_path: string
+          file_type: string
+          id: string
+          reviewed_at: string | null
+          user_id: string
+          verification_status: string
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          ai_match_score?: number | null
+          business_id: string
+          course_id?: string | null
+          created_at?: string
+          file_path: string
+          file_type?: string
+          id?: string
+          reviewed_at?: string | null
+          user_id: string
+          verification_status?: string
+        }
+        Update: {
+          ai_analysis?: Json | null
+          ai_match_score?: number | null
+          business_id?: string
+          course_id?: string | null
+          created_at?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+          reviewed_at?: string | null
+          user_id?: string
+          verification_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_receipts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_receipts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_templates: {
+        Row: {
+          ai_extracted_data: Json | null
+          business_id: string
+          created_at: string
+          file_path: string
+          file_type: string
+          id: string
+        }
+        Insert: {
+          ai_extracted_data?: Json | null
+          business_id: string
+          created_at?: string
+          file_path: string
+          file_type?: string
+          id?: string
+        }
+        Update: {
+          ai_extracted_data?: Json | null
+          business_id?: string
+          created_at?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_templates_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pending_categories: {
         Row: {
           business_id: string | null

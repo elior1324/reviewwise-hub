@@ -7,14 +7,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import ReceiptUploader from "@/components/ReceiptUploader";
 
 interface AddReviewFormProps {
   businessSlug: string;
   businessName: string;
+  businessId?: string;
+  courseId?: string;
   isVerifiedPurchaser?: boolean;
 }
 
-const AddReviewForm = ({ businessSlug, businessName, isVerifiedPurchaser = false }: AddReviewFormProps) => {
+const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVerifiedPurchaser = false }: AddReviewFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +25,7 @@ const AddReviewForm = ({ businessSlug, businessName, isVerifiedPurchaser = false
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [receiptVerified, setReceiptVerified] = useState(isVerifiedPurchaser);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +44,7 @@ const AddReviewForm = ({ businessSlug, businessName, isVerifiedPurchaser = false
     
     toast({
       title: "הביקורת נשלחה בהצלחה! ✨",
-      description: isVerifiedPurchaser
+      description: receiptVerified
         ? "הביקורת שלכם תפורסם כביקורת רכישה מאומתת."
         : "הביקורת שלכם תפורסם ללא תג רכישה מאומתת.",
     });
@@ -100,11 +104,11 @@ const AddReviewForm = ({ businessSlug, businessName, isVerifiedPurchaser = false
                 </div>
                 {/* Verification status */}
                 <div className={`flex items-center gap-2 text-xs font-medium mt-2 px-3 py-1.5 rounded-lg w-fit ${
-                  isVerifiedPurchaser
+                  receiptVerified
                     ? "bg-trust-green-light text-trust-green"
                     : "bg-muted text-muted-foreground"
                 }`}>
-                  {isVerifiedPurchaser ? (
+                  {receiptVerified ? (
                     <>
                       <ShieldCheck size={14} />
                       רכישה מאומתת — הביקורת תסומן כמאומתת
@@ -112,7 +116,7 @@ const AddReviewForm = ({ businessSlug, businessName, isVerifiedPurchaser = false
                   ) : (
                     <>
                       <ShieldX size={14} />
-                      ביקורת ללא אימות רכישה
+                      ביקורת ללא אימות רכישה — העלו קבלה לאימות
                     </>
                   )}
                 </div>
@@ -157,6 +161,15 @@ const AddReviewForm = ({ businessSlug, businessName, isVerifiedPurchaser = false
                     />
                     <p className="text-xs text-muted-foreground mt-1 text-left">{reviewText.length} תווים</p>
                   </div>
+
+                  {/* Receipt upload for verification */}
+                  {businessId && !receiptVerified && (
+                    <ReceiptUploader
+                      businessId={businessId}
+                      courseId={courseId}
+                      onVerified={(verified) => setReceiptVerified(verified)}
+                    />
+                  )}
 
                   <Button
                     type="submit"
