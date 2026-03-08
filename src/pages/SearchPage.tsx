@@ -68,6 +68,7 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
+      <FloatingEarnCTA />
       <div className="container py-10">
         <h1 className="font-display font-bold text-3xl mb-6">חפשו בעלי מקצוע וקורסים</h1>
 
