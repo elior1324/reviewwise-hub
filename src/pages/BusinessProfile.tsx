@@ -21,12 +21,26 @@ const BusinessProfile = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [filterRating, setFilterRating] = useState<number | null>(null);
+  const [dbBusinessId, setDbBusinessId] = useState<string | null>(null);
 
   const business = getBusinessBySlug(slug || "") || getBusinessBySlug(DEFAULT_KEY)!;
   const courses = getCoursesByBusiness(business.slug);
   const reviews = getReviewsByBusiness(business.slug);
   const filteredReviews = filterRating ? reviews.filter(r => r.rating === filterRating) : reviews;
   const summary = generateReviewSummary(reviews);
+
+  // Fetch DB business ID by slug for testimonial media
+  useEffect(() => {
+    const fetchBusinessId = async () => {
+      const { data } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("slug", slug || business.slug)
+        .maybeSingle();
+      if (data) setDbBusinessId(data.id);
+    };
+    fetchBusinessId();
+  }, [slug, business.slug]);
 
   return (
     <div className="min-h-screen bg-background noise-overlay">
