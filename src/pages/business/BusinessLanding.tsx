@@ -8,15 +8,20 @@ import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
   Award, ArrowLeft, CheckCircle, Users, X, Crown, Sparkles,
   Lock, MessageSquare, FileText, Webhook, LineChart, Headphones,
-  UserCheck, Globe, Eye
+  UserCheck, Globe, ChevronDown
 } from "lucide-react";
 import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import featureProfile from "@/assets/previews/feature-profile.jpg";
+import featureAnalytics from "@/assets/previews/feature-analytics.jpg";
+import featureAffiliate from "@/assets/previews/feature-affiliate.jpg";
+import featureAiReport from "@/assets/previews/feature-ai-report.jpg";
+import featureCrm from "@/assets/previews/feature-crm.jpg";
+import featureWidgets from "@/assets/previews/feature-widgets.jpg";
 import starterPreview from "@/assets/previews/starter-dashboard.jpg";
-import proPreview from "@/assets/previews/pro-dashboard.jpg";
-import premiumPreview from "@/assets/previews/premium-dashboard.jpg";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -25,28 +30,28 @@ const fadeUp = {
 
 // ─── Features organized by tier ───────────────────────────
 const FREE_FEATURES = [
-  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת." },
-  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור." },
-  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח." },
+  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת.", preview: starterPreview },
+  { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור.", preview: featureProfile },
+  { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח.", preview: featureProfile },
   { icon: Star, title: "תג דירוג בסיסי", desc: "הציגו את הדירוג שלכם עם תג אמינות ReviewHub." },
 ];
 
 const PRO_FEATURES = [
-  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת." },
-  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת." },
+  { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת.", preview: featureAnalytics },
+  { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת.", preview: featureWidgets },
   { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות." },
-  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. עמלה של 10% על כל מכירה שנכנסת דרככם." },
+  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. עמלה של 10% על כל מכירה שנכנסת דרככם.", preview: featureAffiliate },
   { icon: Globe, title: "רשתות חברתיות ואתר", desc: "חברו YouTube, Instagram, TikTok, LinkedIn, Facebook ואתר האינטרנט שלכם לפרופיל העסקי." },
-  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור." },
+  { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור.", preview: featureAiReport },
   { icon: Headphones, title: "תמיכה בעדיפות", desc: "תמיכה מהירה עם מענה תוך 4 שעות בימי עבודה." },
 ];
 
 const PREMIUM_FEATURES = [
-  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true },
-  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true },
+  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true, preview: featureCrm },
+  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true, preview: featureCrm },
   { icon: Webhook, title: "Webhook למערכות חיצוניות", desc: "חברו ל-Zapier, Make ולכל מערכת עם webhook.", locked: true },
   { icon: Globe, title: "Google Ads Review Stars ⭐", desc: "הציגו כוכבי דירוג ישירות במודעות Google שלכם.", locked: true },
-  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true },
+  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true, preview: featureAiReport },
   { icon: Code, title: "גישת API מלאה", desc: "בנו אינטגרציות מותאמות אישית עם ה-API שלנו.", locked: true },
 ];
 
@@ -124,6 +129,11 @@ const BusinessLanding = () => {
   const { user, subscriptionTier } = useAuth();
   const { toast } = useToast();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
+
+  const toggleFeature = (title: string) => {
+    setExpandedFeature(prev => prev === title ? null : title);
+  };
 
   const handleCheckout = async (tier: "pro" | "premium") => {
     if (!user) {
@@ -269,18 +279,40 @@ const BusinessLanding = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">כל הכלים הבסיסיים שצריך כדי להתחיל לאסוף ביקורות מאומתות</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FREE_FEATURES.map(({ icon: Icon, title, desc }, i) => (
+            {FREE_FEATURES.map(({ icon: Icon, title, desc, preview }, i) => (
               <motion.div
                 key={title}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp} custom={i}
-                className="rounded-xl p-6 bg-card border border-border/50 hover:border-primary/30 transition-all duration-300 group"
+                className={`rounded-xl p-6 bg-card border transition-all duration-300 group cursor-pointer ${
+                  expandedFeature === title ? "border-primary/50 shadow-card-hover" : "border-border/50 hover:border-primary/30"
+                }`}
+                onClick={() => preview && toggleFeature(title)}
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <Icon size={22} className="text-primary" />
+                <div className="flex items-start justify-between">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <Icon size={22} className="text-primary" />
+                  </div>
+                  {preview && (
+                    <ChevronDown size={16} className={`text-muted-foreground transition-transform duration-300 ${expandedFeature === title ? "rotate-180" : ""}`} />
+                  )}
                 </div>
                 <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                <AnimatePresence>
+                  {expandedFeature === title && preview && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <img src={preview} alt={`תצוגה מקדימה — ${title}`} className="mt-4 rounded-lg border border-border/30 w-full" loading="lazy" />
+                      <p className="text-[11px] text-muted-foreground mt-2 text-center">תצוגה מקדימה של הפיצ׳ר</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ))}
           </div>
@@ -296,22 +328,44 @@ const BusinessLanding = () => {
           <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">כלים מתקדמים לצמיחה</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה ואפיליאט — הכל בחבילה אחת</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PRO_FEATURES.map(({ icon: Icon, title, desc }, i) => (
-            <motion.div
-              key={title}
-              initial="hidden" whileInView="visible" viewport={{ once: true }}
-              variants={fadeUp} custom={i}
-              className="rounded-xl p-6 bg-card border border-primary/20 hover:border-primary/40 transition-all duration-300 group"
-            >
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                <Icon size={22} className="text-primary" />
-              </div>
-              <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-            </motion.div>
-          ))}
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {PRO_FEATURES.map(({ icon: Icon, title, desc, preview }, i) => (
+              <motion.div
+                key={title}
+                initial="hidden" whileInView="visible" viewport={{ once: true }}
+                variants={fadeUp} custom={i}
+                className={`rounded-xl p-6 bg-card border transition-all duration-300 group cursor-pointer ${
+                  expandedFeature === title ? "border-primary/50 shadow-card-hover" : "border-primary/20 hover:border-primary/40"
+                }`}
+                onClick={() => preview && toggleFeature(title)}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <Icon size={22} className="text-primary" />
+                  </div>
+                  {preview && (
+                    <ChevronDown size={16} className={`text-muted-foreground transition-transform duration-300 ${expandedFeature === title ? "rotate-180" : ""}`} />
+                  )}
+                </div>
+                <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                <AnimatePresence>
+                  {expandedFeature === title && preview && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <img src={preview} alt={`תצוגה מקדימה — ${title}`} className="mt-4 rounded-lg border border-border/30 w-full" loading="lazy" />
+                      <p className="text-[11px] text-muted-foreground mt-2 text-center">תצוגה מקדימה של הפיצ׳ר</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
       </section>
 
       {/* Premium Features — shown with lock icons */}
@@ -325,153 +379,52 @@ const BusinessLanding = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">חברו את ReviewHub לכל המערכות שלכם והפכו ביקורות ללידים</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {PREMIUM_FEATURES.map(({ icon: Icon, title, desc }, i) => (
+            {PREMIUM_FEATURES.map(({ icon: Icon, title, desc, preview }, i) => (
               <motion.div
                 key={title}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp} custom={i}
-                className="rounded-xl p-6 bg-card border border-border/50 hover:border-primary/30 transition-all duration-300 group relative"
+                className={`rounded-xl p-6 bg-card border transition-all duration-300 group relative cursor-pointer ${
+                  expandedFeature === title ? "border-primary/50 shadow-card-hover" : "border-border/50 hover:border-primary/30"
+                }`}
+                onClick={() => preview && toggleFeature(title)}
               >
                 <div className="absolute top-4 left-4">
                   <div className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
                     <Lock size={10} /> פרימיום
                   </div>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <Icon size={22} className="text-primary" />
+                <div className="flex items-start justify-between">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <Icon size={22} className="text-primary" />
+                  </div>
+                  {preview && (
+                    <ChevronDown size={16} className={`text-muted-foreground transition-transform duration-300 mt-7 ${expandedFeature === title ? "rotate-180" : ""}`} />
+                  )}
                 </div>
                 <h3 className="font-display font-semibold text-foreground mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                <AnimatePresence>
+                  {expandedFeature === title && preview && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <img src={preview} alt={`תצוגה מקדימה — ${title}`} className="mt-4 rounded-lg border border-border/30 w-full" loading="lazy" />
+                      <p className="text-[11px] text-muted-foreground mt-2 text-center">תצוגה מקדימה של הפיצ׳ר</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Dashboard Previews by Tier */}
-      <section className="container py-20">
-        <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-            <Eye size={14} /> תצוגה מקדימה
-          </div>
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">
-            ככה זה נראה מבפנים
-          </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            הצצה לדאשבורד שתקבלו בכל חבילה — מהבסיסית ועד הפרימיום
-          </p>
-        </div>
 
-        <div className="space-y-20">
-          {/* Starter Preview */}
-          <motion.div
-            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}
-            variants={fadeUp} custom={0}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
-          >
-            <div>
-              <div className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground text-xs font-semibold px-3 py-1 rounded-full mb-4">
-                סטארטר — חינם
-              </div>
-              <h3 className="font-display font-bold text-xl text-foreground mb-3">פרופיל עסקי + ביקורות בסיסיות</h3>
-              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                התחילו עם פרופיל עסקי ציבורי, צפו בביקורות שהלקוחות שלכם כותבים, הגיבו להן ובנו נוכחות ראשונית.
-              </p>
-              <ul className="space-y-2">
-                {["פרופיל עסקי עם לוגו ותיאור", "עד 10 ביקורות בחודש", "תגובות לביקורות", "תג דירוג בסיסי"].map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
-                    <CheckCircle size={14} className="text-primary shrink-0" /> {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="relative group">
-              <div className="absolute -inset-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <img
-                src={starterPreview}
-                alt="תצוגה מקדימה של דאשבורד חבילת סטארטר"
-                className="relative rounded-2xl border border-border/50 shadow-card w-full"
-                loading="lazy"
-              />
-              <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm text-xs font-medium px-3 py-1.5 rounded-full border border-border/50">
-                חבילת סטארטר
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Pro Preview */}
-          <motion.div
-            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}
-            variants={fadeUp} custom={0}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
-          >
-            <div className="lg:order-2">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-4">
-                <Sparkles size={12} /> מקצועי — ₪189/חודש
-              </div>
-              <h3 className="font-display font-bold text-xl text-foreground mb-3">אנליטיקס, אפיליאט ו-AI</h3>
-              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                דאשבורד מלא עם גרפים, מעקב קליקים והמרות, דוחות AI שבועיים, וידג׳טים להטמעה ובקשות ביקורת אוטומטיות.
-              </p>
-              <ul className="space-y-2">
-                {["גרפי מגמות ונתוני אנליטיקס", "מעקב קליקים, המרות והכנסות", "דוחות AI שבועיים", "רשתות חברתיות בפרופיל", "וידג׳טים ובקשות ביקורת"].map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
-                    <CheckCircle size={14} className="text-primary shrink-0" /> {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="relative group lg:order-1">
-              <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 to-accent/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <img
-                src={proPreview}
-                alt="תצוגה מקדימה של דאשבורד חבילת מקצועי"
-                className="relative rounded-2xl border border-primary/30 shadow-card-hover w-full"
-                loading="lazy"
-              />
-              <div className="absolute bottom-3 right-3 bg-primary text-primary-foreground text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1">
-                <Sparkles size={10} /> חבילת מקצועי
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Premium Preview */}
-          <motion.div
-            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}
-            variants={fadeUp} custom={0}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
-          >
-            <div>
-              <div className="inline-flex items-center gap-2 bg-foreground text-background text-xs font-semibold px-3 py-1 rounded-full mb-4">
-                <Crown size={12} /> פרימיום — ₪389/חודש
-              </div>
-              <h3 className="font-display font-bold text-xl text-foreground mb-3">CRM, לידים, API ודוחות יומיים</h3>
-              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                חיבור ל-HubSpot ו-Salesforce, ניהול לידים אוטומטי, Google Ads Review Stars, גישת API מלאה ומנהל הצלחה אישי.
-              </p>
-              <ul className="space-y-2">
-                {["חיבור CRM — HubSpot, Salesforce", "Webhook ל-Zapier/Make", "Google Ads Review Stars ⭐", "דוחות AI מתקדמים יומיים", "גישת API מלאה", "מנהל הצלחה אישי"].map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
-                    <CheckCircle size={14} className="text-primary shrink-0" /> {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="relative group">
-              <div className="absolute -inset-2 bg-gradient-to-r from-foreground/10 to-primary/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <img
-                src={premiumPreview}
-                alt="תצוגה מקדימה של דאשבורד חבילת פרימיום"
-                className="relative rounded-2xl border border-foreground/20 shadow-card-hover w-full"
-                loading="lazy"
-              />
-              <div className="absolute bottom-3 right-3 bg-foreground text-background text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1">
-                <Crown size={10} /> חבילת פרימיום
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
 
       {/* Pricing — only visible to authenticated users */}
       {user && (
