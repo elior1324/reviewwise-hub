@@ -85,6 +85,20 @@ const Index = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
 
+      {/* Floating Earn CTA */}
+      <motion.button
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 1.5, duration: 0.6, ease: "easeOut" }}
+        onClick={() => document.getElementById("earn-money")?.scrollIntoView({ behavior: "smooth" })}
+        className="fixed top-1/3 left-0 z-40 group cursor-pointer"
+      >
+        <div className="flex items-center bg-primary text-primary-foreground pl-4 pr-3 py-2.5 rounded-l-none rounded-r-full shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:pr-5">
+          <DollarSign size={18} className="ml-2 shrink-0 animate-pulse" />
+          <span className="font-display font-bold text-sm whitespace-nowrap">רוצים להרוויח מביקורות?</span>
+        </div>
+      </motion.button>
+
       {/* Hero — Audience-First */}
       <section ref={heroRef} className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
@@ -308,7 +322,7 @@ const Index = () => {
       </section>
 
       {/* Earn Money CTA */}
-      <section className="container py-20">
+      <section id="earn-money" className="container py-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
