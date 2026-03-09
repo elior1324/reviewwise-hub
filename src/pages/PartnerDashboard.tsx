@@ -684,6 +684,11 @@ const PartnerDashboard = () => {
                         <span className="flex items-center gap-1">
                           <TrendingUp size={12} className="text-primary" /> מכפיל: {r.multiplier}x
                         </span>
+                        {r.isVerified && (
+                          <span className="flex items-center gap-1 text-emerald-600">
+                            <BadgeCheck size={12} /> מאומת 2x
+                          </span>
+                        )}
                         {r.isEarlyBird && (
                           <span className="flex items-center gap-1 text-accent">
                             <Zap size={12} /> EB 1.5x
