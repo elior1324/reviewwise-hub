@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +14,7 @@ import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { lovable } from "@/integrations/lovable/index";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 const AuthPage = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -24,6 +25,7 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -31,6 +33,10 @@ const AuthPage = () => {
     e.preventDefault();
     if (mode === "signup" && !privacyConsent) {
       toast.error("יש לאשר את מדיניות הפרטיות ותנאי השימוש כדי להירשם.");
+      return;
+    }
+    if (!turnstileToken) {
+      toast.error("אנא אמתו שאתם לא רובוט.");
       return;
     }
     setLoading(true);
@@ -179,7 +185,13 @@ const AuthPage = () => {
 
               {mode === "login" && <FormPrivacyNotice className="mt-1" />}
 
-              <Button type="submit" className="w-full bg-primary text-primary-foreground glow-primary" disabled={loading || (mode === "signup" && !privacyConsent)}>
+              <TurnstileWidget
+                onSuccess={(token) => setTurnstileToken(token)}
+                onError={() => setTurnstileToken(null)}
+                className="flex justify-center mt-2"
+              />
+
+              <Button type="submit" className="w-full bg-primary text-primary-foreground glow-primary" disabled={loading || (mode === "signup" && !privacyConsent) || !turnstileToken}>
                 {loading ? "טוען..." : mode === "login" ? "התחברו" : "הרשמו"}
               </Button>
             </form>

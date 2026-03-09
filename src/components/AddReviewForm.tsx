@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Tooltip,
@@ -69,6 +70,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [showFileDialog, setShowFileDialog] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -109,6 +111,10 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
     }
     if (!duration) {
       toast({ title: "אנא בחרו משך זמן בהכשרה", variant: "destructive" });
+      return;
+    }
+    if (!turnstileToken) {
+      toast({ title: "אנא אמתו שאתם לא רובוט", variant: "destructive" });
       return;
     }
 
@@ -433,9 +439,15 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
 
                   <FormPrivacyNotice className="mt-1" />
 
+                  <TurnstileWidget
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    onError={() => setTurnstileToken(null)}
+                    className="flex justify-center mt-2"
+                  />
+
                   <Button
                     type="submit"
-                    disabled={submitting || uploading}
+                    disabled={submitting || uploading || !turnstileToken}
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
                   >
                     {uploading ? "מעלה קבצים..." : submitting ? "שולח..." : "פרסום ביקורת"}
