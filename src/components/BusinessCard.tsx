@@ -34,7 +34,17 @@ interface BusinessCardProps {
   reviewCount: number;
   description: string;
   logo?: string;
-  socialLinks?: Record<string, string>;
+  socialLinks?: {
+    youtube?: string;
+    instagram?: string;
+    tiktok?: string;
+    linkedin?: string;
+    twitter?: string;
+    facebook?: string;
+    whatsapp?: string;
+    telegram?: string;
+    [key: string]: string | undefined;
+  };
 }
 
 const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, description, logo, socialLinks }: BusinessCardProps) => {
