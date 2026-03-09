@@ -36,7 +36,7 @@ const BusinessFooter = () => (
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">חברה</h4>
           <div className="space-y-2">
             <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">אודות</Link>
-            <a href="mailto:reviewhub.il@gmail.com" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">צרו קשר</a>
+            <a href="mailto:support@reviewshub.info" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">צרו קשר</a>
             <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות פרטיות</Link>
             <Link to="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">תנאי שימוש</Link>
           </div>
