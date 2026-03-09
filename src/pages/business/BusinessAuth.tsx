@@ -12,6 +12,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
+import { validatePassword } from "@/lib/password-validation";
 
 interface BusinessAuthProps {
   mode: "login" | "signup";
