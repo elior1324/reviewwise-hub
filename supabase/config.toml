@@ -25,3 +25,9 @@ project_id = "nrtyavfilrmnflikyzed"
     verify_jwt = false
   [functions.widget-data]
     verify_jwt = false
+  [functions.verify-invoice]
+    verify_jwt = false
+  [functions.daily-category-scan]
+    verify_jwt = false
+  [functions.manage-integrations]
+    verify_jwt = false
