@@ -254,12 +254,10 @@ const PartnerDashboard = () => {
     setWithdrawLoading(true);
     try {
       const currentMonth = new Date().toISOString().slice(0, 7);
+      // Only send user_id and month_year — server trigger calculates amount/points
       const { error } = await supabase.from("reward_payouts").insert({
         user_id: user!.id,
         month_year: currentMonth,
-        points: poolData.myPoints,
-        amount: myEarnings,
-        status: "pending",
       });
       if (error) throw error;
       toast({ title: "בקשת המשיכה נשלחה!", description: `₪${myEarnings.toFixed(2)} ממתינים לאישור.` });
