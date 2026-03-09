@@ -208,7 +208,18 @@ const CoursePage = () => {
 
         {summary && <ReviewSummary summary={summary} />}
 
-        <div className="flex items-center gap-2 mb-6 flex-wrap">
+        {/* Add Review */}
+        <div className="mb-8">
+          <h2 className="font-display font-bold text-xl mb-4">הוסיפו תגובה</h2>
+          <AddReviewForm
+            businessSlug={course.businessSlug}
+            businessName={course.businessName}
+            businessId={course.businessId}
+            courseId={course.id}
+            isVerifiedPurchaser={false}
+          />
+        </div>
+
           <span className="text-sm text-muted-foreground ml-2">סינון:</span>
           <Button variant={filterRating === null ? "default" : "outline"} size="sm" onClick={() => setFilterRating(null)}>הכל</Button>
           {[5, 4, 3, 2, 1].map(r => (
