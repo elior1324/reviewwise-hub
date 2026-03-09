@@ -6,8 +6,10 @@ import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
 import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
 import LockedOverlay from "@/components/LockedOverlay";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
-import AdminPlanSwitcher from "@/components/AdminPlanSwitcher";
+import DevControlPanel from "@/components/DevControlPanel";
 import UpgradeModal from "@/components/UpgradeModal";
+import LeaderboardWidget from "@/components/LeaderboardWidget";
+import GamificationNotifications from "@/components/GamificationNotifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -440,10 +442,11 @@ const BusinessDashboard = () => {
         {/* Admin Plan Switcher — only for admin users with a real business */}
         {!isDemo && isAdmin && businessId && (
           <div className="mb-6">
-            <AdminPlanSwitcher
+            <DevControlPanel
               businessId={businessId}
               currentTier={currentTier}
               onTierChanged={(newTier) => setDbTier(newTier as SubscriptionTier)}
+              onDataChanged={() => window.location.reload()}
             />
           </div>
         )}
@@ -642,59 +645,66 @@ const BusinessDashboard = () => {
 
           {/* Overview */}
           <TabsContent value="overview">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="shadow-card bg-card">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <MessageSquare size={18} /> ביקורות אחרונות
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {displayReviews.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין ביקורות. שתפו את הפרופיל שלכם כדי להתחיל לקבל ביקורות!</p>
-                  ) : (
-                    displayReviews.slice(0, 4).map((r) => (
-                      <div key={r.id} className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
-                        <div className="flex gap-0.5 shrink-0 mt-0.5">
-                          {Array.from({ length: r.rating }, (_, i) => (
-                            <Star key={i} size={10} className="fill-star text-star" />
-                          ))}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <Card className="shadow-card bg-card">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <MessageSquare size={18} /> ביקורות אחרונות
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {displayReviews.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין ביקורות. שתפו את הפרופיל שלכם כדי להתחיל לקבל ביקורות!</p>
+                    ) : (
+                      displayReviews.slice(0, 4).map((r) => (
+                        <div key={r.id} className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
+                          <div className="flex gap-0.5 shrink-0 mt-0.5">
+                            {Array.from({ length: r.rating }, (_, i) => (
+                              <Star key={i} size={10} className="fill-star text-star" />
+                            ))}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm truncate">{r.text}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{r.reviewerName} · {r.courseName}</p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{r.text}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{r.reviewerName} · {r.courseName}</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
+                      ))
+                    )}
+                  </CardContent>
+                </Card>
 
-              <Card className="shadow-card bg-card">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <TrendingUp size={18} /> ביצועי קורסים
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {displayCourses.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין קורסים. הוסיפו קורס ראשון בהגדרות הפרופיל.</p>
-                  ) : (
-                    displayCourses.map((c) => (
-                      <div key={c.id} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
-                        <div>
-                          <p className="text-sm font-medium">{c.name}</p>
-                          <p className="text-xs text-muted-foreground">{c.reviewCount} ביקורות · {c.verifiedPurchases} רכישות</p>
+                <Card className="shadow-card bg-card">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <TrendingUp size={18} /> ביצועי קורסים
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {displayCourses.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין קורסים. הוסיפו קורס ראשון בהגדרות הפרופיל.</p>
+                    ) : (
+                      displayCourses.map((c) => (
+                        <div key={c.id} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                          <div>
+                            <p className="text-sm font-medium">{c.name}</p>
+                            <p className="text-xs text-muted-foreground">{c.reviewCount} ביקורות · {c.verifiedPurchases} רכישות</p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Star size={12} className="fill-star text-star" />
+                            <span className="text-sm font-display font-bold">{c.rating}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Star size={12} className="fill-star text-star" />
-                          <span className="text-sm font-display font-bold">{c.rating}</span>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
+                      ))
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Leaderboard Sidebar */}
+              <div>
+                <LeaderboardWidget />
+              </div>
             </div>
           </TabsContent>
 
@@ -1137,6 +1147,7 @@ const BusinessDashboard = () => {
       </div>
       <BusinessFooter />
       <AIChatbot context="business" />
+      <GamificationNotifications />
       <UpgradeModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}
