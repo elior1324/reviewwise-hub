@@ -447,7 +447,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
 
                   <Button
                     type="submit"
-                    disabled={submitting || uploading}
+                    disabled={submitting || uploading || !turnstileToken}
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
                   >
                     {uploading ? "מעלה קבצים..." : submitting ? "שולח..." : "פרסום ביקורת"}
