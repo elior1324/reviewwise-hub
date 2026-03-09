@@ -18,9 +18,9 @@ interface CourseData {
   name: string;
   description: string;
   price: number;
-  rating: number;
-  reviewCount: number;
-  verifiedPurchases: number;
+  rating: number;           // computed from reviews
+  reviewCount: number;      // computed from reviews
+  verifiedPurchases: number; // computed from reviews
   affiliateUrl: string;
   businessSlug: string;
   businessName: string;
@@ -41,9 +41,14 @@ const CoursePage = () => {
     const fetchCourse = async () => {
       setLoading(true);
 
+      // ── 1. Fetch course + business ───────────────────────────────────────────
+      // courses columns: id, business_id, course_name, description, price,
+      //   affiliate_url, course_category, created_at
+      // businesses columns: id, slug, business_name (NOT .name, .rating, etc.)
+      // NOTE: courses.name, rating, review_count, verified_purchases do NOT exist.
       const { data: courseData } = await supabase
         .from("courses")
-        .select("*, businesses(slug, name)")
+        .select("id, business_id, course_name, description, price, affiliate_url, businesses(slug, business_name)")
         .eq("id", courseId)
         .maybeSingle();
 
@@ -52,37 +57,51 @@ const CoursePage = () => {
         return;
       }
 
-      setCourse({
-        id: courseData.id,
-        name: courseData.name,
-        description: courseData.description || "",
-        price: Number(courseData.price) || 0,
-        rating: Number(courseData.rating) || 0,
-        reviewCount: courseData.review_count || 0,
-        verifiedPurchases: courseData.verified_purchases || 0,
-        affiliateUrl: courseData.affiliate_url || "",
-        businessSlug: (courseData.businesses as any)?.slug || "",
-        businessName: (courseData.businesses as any)?.name || "",
-        businessId: courseData.business_id,
-      });
-
-      // Fetch reviews via the secure public_reviews view
+      // ── 2. Fetch reviews for this course ─────────────────────────────────────
+      // reviews columns: id, user_id, course_id, rating, review_text,
+      //   purchase_date, verified_purchase, anonymous, reviewer_name,
+      //   created_at, updated_at
+      // NOTE: .text, .verified, flagged, flag_reason, like_count do NOT exist.
+      //
+      // Owner responses: review_responses(response_text, created_at) via review_id FK
+      // NOTE: business_responses does NOT exist.
       const { data: reviewData } = await supabase
-        .from("public_reviews")
-        .select("*, courses(name), business_responses(text, created_at)")
+        .from("reviews")
+        .select("*, review_responses(response_text, created_at)")
         .eq("course_id", courseId)
         .order("created_at", { ascending: false });
 
+      // ── 3. Compute rating/reviewCount/verifiedPurchases from actual data ──────
+      const totalReviews = reviewData?.length || 0;
+      const avgRating = totalReviews > 0
+        ? (reviewData || []).reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / totalReviews
+        : 0;
+      const verifiedCount = (reviewData || []).filter((r: any) => r.verified_purchase).length;
+
+      setCourse({
+        id: courseData.id,
+        name: courseData.course_name || "",            // ✅ course_name (NOT .name)
+        description: courseData.description || "",
+        price: Number(courseData.price) || 0,
+        rating: Math.round(avgRating * 10) / 10,      // computed
+        reviewCount: totalReviews,                     // computed
+        verifiedPurchases: verifiedCount,              // computed
+        affiliateUrl: courseData.affiliate_url || "",
+        businessSlug: (courseData.businesses as any)?.slug || "",
+        businessName: (courseData.businesses as any)?.business_name || "", // ✅ business_name (NOT .name)
+        businessId: courseData.business_id,
+      });
+
       if (reviewData) {
-        // Expert: user wrote 3+ high-rated reviews on this course's business
+        // ── Expert Badge logic (UNCHANGED) ─────────────────────────────────────
         const expertCounts: Record<string, number> = {};
         reviewData.forEach((r: any) => {
-          if (r.rating >= 4) {
+          if (r.rating >= 4 && r.user_id) {
             expertCounts[r.user_id] = (expertCounts[r.user_id] || 0) + 1;
           }
         });
 
-        // Early bird: first 5 reviews chronologically
+        // ── Early Bird logic (UNCHANGED) ────────────────────────────────────────
         const sortedByDate = [...reviewData].sort(
           (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         );
@@ -91,25 +110,28 @@ const CoursePage = () => {
         setReviews(reviewData.map((r: any) => ({
           id: r.id,
           reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
-          rating: r.rating,
-          text: r.review_text || "", // תיקון: משיכת טקסט מה-View
-          courseName: r.courses?.name || "",
-          courseId: r.course_id,
+          rating: r.rating || 0,
+          text: r.review_text || "",                   // ✅ review_text (NOT .text)
+          courseName: courseData.course_name || "",    // use parent course, not a join
+          courseId: r.course_id || "",
           businessSlug: (courseData.businesses as any)?.slug || "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified_purchase || false, // תיקון: משיכת סטטוס אימות מה-View
+          verified: r.verified_purchase || false,      // ✅ verified_purchase (NOT .verified)
           anonymous: r.anonymous || false,
-          updatedAt: r.updated_at !== r.created_at ? new Date(r.updated_at).toLocaleDateString("he-IL") : undefined,
-          flagged: r.flagged || false,
-          flagReason: r.flag_reason || undefined,
-          likeCount: r.like_count || 0,
+          updatedAt: r.updated_at && r.updated_at !== r.created_at
+            ? new Date(r.updated_at).toLocaleDateString("he-IL")
+            : undefined,
+          flagged: false,                              // flagged doesn't exist in reviews table
+          flagReason: undefined,                       // flag_reason doesn't exist
+          likeCount: 0,                                // like_count doesn't exist
           isEarlyBird: earlyBirdIds.has(r.id),
-          isExpert: (expertCounts[r.user_id] || 0) >= 3,
-          userId: r.user_id,
-          ownerResponse: r.business_responses?.[0] ? {
-            text: r.business_responses[0].text,
-            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
+          isExpert: r.user_id ? (expertCounts[r.user_id] || 0) >= 3 : false,
+          userId: r.user_id || undefined,
+          // ✅ review_responses (NOT business_responses), response_text (NOT .text)
+          ownerResponse: r.review_responses?.[0] ? {
+            text: r.review_responses[0].response_text || "",
+            date: new Date(r.review_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
         })));
       }
@@ -144,7 +166,10 @@ const CoursePage = () => {
     );
   }
 
-  const filteredReviews = filterRating ? reviews.filter(r => r.rating === filterRating) : reviews;
+  const filteredReviews = filterRating
+    ? reviews.filter(r => r.rating === filterRating)
+    : reviews;
+
   const summary = generateReviewSummary(reviews);
 
   return (
@@ -152,96 +177,113 @@ const CoursePage = () => {
       <Navbar />
       <div className="container py-10">
         <div className="mb-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="text-muted-foreground hover:text-foreground font-medium"
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
             → חזרה
           </Button>
         </div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl p-8 shadow-card mb-8 animated-border bg-card">
-          <div className="flex flex-col md:flex-row md:items-start gap-6">
-            <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-3xl shrink-0">
-              {course.name.charAt(0)}
-            </div>
+
+        {/* Course header */}
+        <div className="mb-8">
+          <div className="flex items-start justify-between flex-wrap gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <h1 className="font-display font-bold text-2xl md:text-3xl">{course.name}</h1>
-                <Badge className="bg-trust-green-light text-trust-green border-0 gap-1">
-                  <ShieldCheck size={14} /> מאומת
-                </Badge>
-              </div>
-              {course.businessSlug && (
-                <Link to={`/biz/${course.businessSlug}`} className="text-sm text-primary hover:underline mb-2 inline-block">
+              <h1 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">{course.name}</h1>
+              {course.businessName && (
+                <Link to={`/biz/${course.businessSlug}`} className="text-sm text-primary hover:underline mb-3 inline-block">
                   {course.businessName}
                 </Link>
               )}
-              <div className="flex items-center gap-3 mb-4">
-                <StarRating rating={course.rating} size={20} showValue />
-                <span className="text-muted-foreground text-sm">({course.reviewCount} ביקורות)</span>
-              </div>
-              <p className="text-muted-foreground mb-4 max-w-2xl">{course.description}</p>
-              <div className="flex flex-wrap gap-4 items-center">
-                {course.price > 0 && (
-                  <span className="font-display font-bold text-2xl text-primary">₪{course.price.toLocaleString()}</span>
-                )}
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Users size={14} />
-                  <span>{course.verifiedPurchases} רכישות מאומתות</span>
-                </div>
-                {course.affiliateUrl && (
-                  <div>
-                    <Link to={`/go/${course.id}`} target="_blank">
-                      <Button size="sm" className="bg-primary text-primary-foreground gap-2 glow-primary">
-                        <ExternalLink size={14} /> לאתר הקורס
-                      </Button>
-                    </Link>
-                    <p className="text-xs text-muted-foreground mt-1.5">* קישור שותפים — ReviewHub עשויה לקבל עמלה מרכישה זו</p>
-                  </div>
-                )}
-              </div>
+              {course.description && (
+                <p className="text-muted-foreground text-sm mt-2 max-w-2xl">{course.description}</p>
+              )}
+            </div>
+            <div className="text-right">
+              {course.price > 0 && (
+                <p className="font-display font-bold text-2xl text-foreground mb-2">₪{course.price.toLocaleString()}</p>
+              )}
+              {course.affiliateUrl && (
+                <a href={course.affiliateUrl} target="_blank" rel="noopener noreferrer">
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
+                    לדף הקורס <ExternalLink size={16} />
+                  </Button>
+                </a>
+              )}
             </div>
           </div>
-        </motion.div>
 
+          {/* Course stats */}
+          <div className="flex items-center gap-6 mt-4 flex-wrap">
+            {course.rating > 0 && (
+              <div className="flex items-center gap-2">
+                <StarRating rating={course.rating} size="sm" />
+                <span className="font-semibold text-foreground">{course.rating.toFixed(1)}</span>
+              </div>
+            )}
+            {course.reviewCount > 0 && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Users size={14} />
+                {course.reviewCount} ביקורות
+              </div>
+            )}
+            {course.verifiedPurchases > 0 && (
+              <Badge variant="secondary" className="gap-1">
+                <ShieldCheck size={12} />
+                {course.verifiedPurchases} רכישות מאומתות
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        {/* AI Summary */}
         {summary && <ReviewSummary summary={summary} />}
 
         {/* Add Review */}
         <div className="mb-8">
-          <h2 className="font-display font-bold text-xl mb-4">הוסיפו תגובה</h2>
+          <h2 className="font-display font-bold text-xl mb-4">כתבו ביקורת</h2>
           <AddReviewForm
             businessSlug={course.businessSlug}
             businessName={course.businessName}
             businessId={course.businessId}
             courseId={course.id}
+            courseName={course.name}
             isVerifiedPurchaser={false}
           />
         </div>
 
+        {/* Review filters */}
         <div className="flex items-center gap-2 mb-6 flex-wrap">
           <span className="text-sm text-muted-foreground ml-2">סינון:</span>
           <Button variant={filterRating === null ? "default" : "outline"} size="sm" onClick={() => setFilterRating(null)}>הכל</Button>
           {[5, 4, 3, 2, 1].map(r => (
-            <Button key={r} variant={filterRating === r ? "default" : "outline"} size="sm" onClick={() => setFilterRating(r)}>
-              {r} ★
+            <Button
+              key={r}
+              variant={filterRating === r ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilterRating(filterRating === r ? null : r)}
+            >
+              {r} ⭐
             </Button>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredReviews.map((review, i) => (
-            <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <ReviewCard {...review} />
-            </motion.div>
-          ))}
+        {/* Reviews */}
+        <div className="space-y-4">
+          {filteredReviews.length > 0 ? (
+            filteredReviews.map((review, i) => (
+              <motion.div
+                key={review.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+              >
+                <ReviewCard {...review} />
+              </motion.div>
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground py-10">
+              {reviews.length === 0 ? "עדיין אין ביקורות לקורס זה." : "אין ביקורות עם הסינון הנבחר."}
+            </p>
+          )}
         </div>
-        {filteredReviews.length === 0 && (
-          <p className="text-center text-muted-foreground py-10">
-            {reviews.length === 0 ? "עדיין אין ביקורות לקורס זה." : "אין ביקורות התואמות לסינון זה."}
-          </p>
-        )}
       </div>
       <Footer />
     </div>
