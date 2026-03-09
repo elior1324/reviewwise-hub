@@ -12,6 +12,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
+import { validatePassword } from "@/lib/password-validation";
 
 interface BusinessAuthProps {
   mode: "login" | "signup";
@@ -35,6 +36,12 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
       if (mode === "signup") {
         if (!privacyConsent) {
           toast({ title: "יש לאשר את מדיניות הפרטיות ותנאי השימוש", variant: "destructive" });
+          setLoading(false);
+          return;
+        }
+        const pwCheck = validatePassword(password);
+        if (!pwCheck.valid) {
+          toast({ title: pwCheck.message, variant: "destructive" });
           setLoading(false);
           return;
         }

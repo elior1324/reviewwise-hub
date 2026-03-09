@@ -15,6 +15,7 @@ import { lovable } from "@/integrations/lovable/index";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { validatePassword } from "@/lib/password-validation";
 
 const AuthPage = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -38,6 +39,13 @@ const AuthPage = () => {
     if (!turnstileToken) {
       toast.error("אנא אמתו שאתם לא רובוט.");
       return;
+    }
+    if (mode === "signup") {
+      const pwCheck = validatePassword(password);
+      if (!pwCheck.valid) {
+        toast.error(pwCheck.message);
+        return;
+      }
     }
     setLoading(true);
 
