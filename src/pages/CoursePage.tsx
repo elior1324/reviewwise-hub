@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import StarRating from "@/components/StarRating";
 import ReviewCard from "@/components/ReviewCard";
 import ReviewSummary from "@/components/ReviewSummary";
+import AddReviewForm from "@/components/AddReviewForm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, ExternalLink, Users } from "lucide-react";
