@@ -354,7 +354,6 @@ const Dashboard = () => {
         </Tabs>
       </div>
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

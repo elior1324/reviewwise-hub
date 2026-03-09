@@ -173,7 +173,6 @@ const ForBusinessPage = () => {
       </section>
 
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

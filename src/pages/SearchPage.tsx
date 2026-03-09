@@ -417,7 +417,6 @@ const SearchPage = () => {
         </Tabs>
       </div>
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

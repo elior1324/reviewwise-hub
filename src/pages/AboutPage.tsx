@@ -181,7 +181,6 @@ const AboutPage = () => {
       </section>
 
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

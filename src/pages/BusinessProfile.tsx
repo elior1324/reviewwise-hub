@@ -263,7 +263,6 @@ const BusinessProfile = () => {
         )}
       </div>
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

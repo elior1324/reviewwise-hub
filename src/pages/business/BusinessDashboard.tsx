@@ -1160,7 +1160,6 @@ const BusinessDashboard = () => {
         </Tabs>
       </div>
       <BusinessFooter />
-      <AIChatbot context="business" />
       <GamificationNotifications />
       <UpgradeModal
         open={upgradeModalOpen}

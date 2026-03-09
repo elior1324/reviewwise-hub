@@ -243,7 +243,6 @@ const CoursePage = () => {
         )}
       </div>
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

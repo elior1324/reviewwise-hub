@@ -186,7 +186,6 @@ const WriteReview = () => {
         </motion.div>
       </div>
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

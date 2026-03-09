@@ -259,7 +259,6 @@ const BusinessRegister = () => {
         </motion.div>
       </div>
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

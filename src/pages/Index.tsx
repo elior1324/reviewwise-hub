@@ -684,7 +684,6 @@ const Index = () => {
       </section>
 
       <Footer />
-      <AIChatbot />
     </div>
   );
 };
