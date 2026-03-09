@@ -11,24 +11,64 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { action, businessId, filePath, receiptId } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    // ── Auth: require valid JWT ──
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    // Create a user-scoped client for auth verification
+    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
 
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = claimsData.claims.sub as string;
+
+    const { action, businessId, filePath, receiptId } = await req.json();
+
+    // ── Ownership check: caller must own the business ──
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    const { data: business, error: bizErr } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("id", businessId)
+      .eq("owner_id", userId)
+      .maybeSingle();
+
+    if (bizErr || !business) {
+      return new Response(JSON.stringify({ error: "Forbidden: you do not own this business" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
     if (action === "analyze_template") {
-      // Download the file and get a signed URL for AI analysis
       const { data: signedUrl } = await supabase.storage
         .from("invoices")
         .createSignedUrl(filePath, 600);
 
       if (!signedUrl?.signedUrl) throw new Error("Could not create signed URL");
 
-      // Use AI to extract key features from the invoice template
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -84,7 +124,6 @@ Respond ONLY with valid JSON, no markdown.`,
         extractedData = { raw: content };
       }
 
-      // Update the template record with AI analysis
       await supabase
         .from("invoice_templates")
         .update({ ai_extracted_data: extractedData })
@@ -97,14 +136,12 @@ Respond ONLY with valid JSON, no markdown.`,
     }
 
     if (action === "verify_receipt") {
-      // Get business invoice templates
       const { data: templates } = await supabase
         .from("invoice_templates")
         .select("*")
         .eq("business_id", businessId);
 
       if (!templates || templates.length === 0) {
-        // No templates — flag for manual review
         await supabase
           .from("customer_receipts")
           .update({ verification_status: "manual_review", ai_match_score: 0 })
@@ -115,20 +152,17 @@ Respond ONLY with valid JSON, no markdown.`,
         });
       }
 
-      // Get signed URL for the customer receipt
       const { data: receiptUrl } = await supabase.storage
         .from("invoices")
         .createSignedUrl(filePath, 600);
 
       if (!receiptUrl?.signedUrl) throw new Error("Could not create signed URL for receipt");
 
-      // Build template context
       const templateDescriptions = templates.map((t: any) => {
         const data = t.ai_extracted_data || {};
         return `Template: business_name="${data.business_name || "unknown"}", type="${data.document_type || "unknown"}", logo="${data.logo_description || "unknown"}", identifiers=${JSON.stringify(data.unique_identifiers || [])}, layout=${JSON.stringify(data.layout_features || [])}`;
       }).join("\n");
 
-      // Use AI to compare
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -188,7 +222,6 @@ Analyze the customer receipt and return ONLY valid JSON:
         // Parsing failed — manual review
       }
 
-      // Determine status
       let status = "rejected";
       if (result.verified && !result.flagged) {
         status = "verified";
@@ -198,7 +231,6 @@ Analyze the customer receipt and return ONLY valid JSON:
         status = "manual_review";
       }
 
-      // Update receipt record
       await supabase
         .from("customer_receipts")
         .update({
@@ -224,7 +256,7 @@ Analyze the customer receipt and return ONLY valid JSON:
     });
   } catch (e) {
     console.error("verify-invoice error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
