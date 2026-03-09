@@ -104,7 +104,7 @@ const PartnerDashboard = () => {
       const reviewIds = rewardsData.map((r: any) => r.review_id);
       const { data: reviews } = await supabase
         .from("reviews")
-        .select("id, text, course_id, business_id, courses(name)")
+        .select("id, text, course_id, business_id, verified, courses(name)")
         .in("id", reviewIds.length > 0 ? reviewIds : ["none"]);
 
       const reviewMap = new Map((reviews || []).map((r: any) => [r.id, r]));
