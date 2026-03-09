@@ -59,7 +59,6 @@ const ComparePage = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
-  // AI comparison state
   const [comparisonStarted, setComparisonStarted] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isAILoading, setIsAILoading] = useState(false);
@@ -72,7 +71,6 @@ const ComparePage = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Search businesses and courses
   const performSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
       setSearchResults([]);
@@ -81,55 +79,50 @@ const ComparePage = () => {
     setIsSearching(true);
     try {
       const [bizRes, courseRes] = await Promise.all([
-        supabase.from("businesses").select("id, name, slug, category, rating, review_count, description, years_experience, difficulty_level, target_audience, location").ilike("name", `%${query}%`).limit(5),
-        supabase.from("courses").select("id, name, category, rating, review_count, price, description, duration, difficulty_level, format, business_id, businesses(name, slug, years_experience, target_audience, location)").ilike("name", `%${query}%`).limit(5),
+        supabase
+          .from("businesses")
+          .select("id, name, slug, category, rating, review_count, description, years_experience, difficulty_level, target_audience, location")
+          .ilike("name", `%${query}%`)
+          .limit(5),
+        supabase
+          .from("courses")
+          .select("id, name, category, rating, review_count, price, description, duration, format, difficulty_level, target_audience, business_id, businesses(name)")
+          .ilike("name", `%${query}%`)
+          .limit(5),
       ]);
 
-      const results: SearchResult[] = [];
+      const businesses: SearchResult[] = (bizRes.data || []).map((b: any) => ({
+        id: b.id,
+        name: b.name,
+        category: b.category,
+        rating: b.rating || 0,
+        reviewCount: b.review_count || 0,
+        description: b.description,
+        type: "freelancer" as const,
+        slug: b.slug,
+        yearsExperience: b.years_experience,
+        difficultyLevel: b.difficulty_level,
+        targetAudience: b.target_audience,
+        location: b.location,
+      }));
 
-      if (bizRes.data) {
-        bizRes.data.forEach((b: any) => {
-          results.push({
-            id: b.id,
-            name: b.name,
-            category: b.category || "",
-            rating: b.rating || 0,
-            reviewCount: b.review_count || 0,
-            description: b.description || "",
-            type: "freelancer",
-            slug: b.slug,
-            yearsExperience: b.years_experience,
-            difficultyLevel: b.difficulty_level,
-            targetAudience: b.target_audience,
-            location: b.location,
-          });
-        });
-      }
+      const courses: SearchResult[] = (courseRes.data || []).map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        category: c.category,
+        rating: c.rating || 0,
+        reviewCount: c.review_count || 0,
+        price: c.price,
+        description: c.description,
+        type: "course" as const,
+        businessName: c.businesses?.name,
+        duration: c.duration,
+        format: c.format,
+        difficultyLevel: c.difficulty_level,
+        targetAudience: c.target_audience,
+      }));
 
-      if (courseRes.data) {
-        courseRes.data.forEach((c: any) => {
-          results.push({
-            id: c.id,
-            name: c.name,
-            category: c.category || "",
-            rating: c.rating || 0,
-            reviewCount: c.review_count || 0,
-            price: c.price,
-            description: c.description || "",
-            type: "course",
-            businessName: c.businesses?.name,
-            slug: c.businesses?.slug,
-            duration: c.duration,
-            difficultyLevel: c.difficulty_level,
-            format: c.format,
-            yearsExperience: c.businesses?.years_experience,
-            targetAudience: c.businesses?.target_audience,
-            location: c.businesses?.location,
-          });
-        });
-      }
-
-      setSearchResults(results);
+      setSearchResults([...businesses, ...courses]);
     } catch (e) {
       console.error("Search error:", e);
     } finally {
@@ -162,7 +155,6 @@ const ComparePage = () => {
     setSelectedItems(prev => [...prev, { ...item }]);
     setSearchQuery("");
     setShowResults(false);
-    // Reset comparison when items change
     setComparisonStarted(false);
     setMessages([]);
   };
@@ -173,7 +165,6 @@ const ComparePage = () => {
     setMessages([]);
   };
 
-  // Stream AI comparison
   const streamComparison = useCallback(async (chatMessages: Msg[]) => {
     setIsAILoading(true);
     let assistantSoFar = "";
@@ -190,11 +181,15 @@ const ComparePage = () => {
     };
 
     try {
+      // Use the authenticated user's session JWT, not the anon key
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
       const resp = await fetch(COMPARE_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           items: selectedItems,
@@ -202,6 +197,11 @@ const ComparePage = () => {
         }),
       });
 
+      if (resp.status === 401) {
+        toast({ title: "נדרשת התחברות", description: "התחברו כדי להשתמש בהשוואת AI", variant: "destructive" });
+        setIsAILoading(false);
+        return;
+      }
       if (resp.status === 429) {
         toast({ title: "יותר מדי בקשות", description: "נסו שוב בעוד רגע", variant: "destructive" });
         setIsAILoading(false);
@@ -291,7 +291,6 @@ const ComparePage = () => {
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <Navbar />
 
-      {/* Hero */}
       <section className="relative overflow-hidden border-b border-border/50">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
         <div className="container py-12 md:py-16 relative">
@@ -310,7 +309,6 @@ const ComparePage = () => {
       </section>
 
       <div className="container py-8 max-w-5xl">
-        {/* Search & Selection */}
         <div className="mb-8">
           <div className="relative max-w-xl mx-auto mb-6">
             <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -322,74 +320,80 @@ const ComparePage = () => {
               className="pr-10 h-12 text-base"
             />
             {searchQuery && (
-              <button onClick={() => { setSearchQuery(""); setShowResults(false); }} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => { setSearchQuery(""); setShowResults(false); }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
                 <X size={16} />
               </button>
             )}
 
-            {/* Search Results Dropdown */}
             <AnimatePresence>
               {showResults && searchResults.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
-                  className="absolute top-full mt-2 w-full bg-card border border-border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto"
+                  className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden"
                 >
-                  {searchResults.map(r => (
-                    <button
-                      key={r.id}
-                      onClick={() => addItem(r)}
-                      disabled={selectedItems.some(s => s.id === r.id)}
-                      className="w-full text-right p-3 hover:bg-muted/50 transition-colors flex items-center justify-between gap-3 border-b border-border/30 last:border-b-0 disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground text-sm truncate">{r.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {r.businessName ? `${r.businessName} · ` : ""}
-                          {r.category}
-                          {r.price ? ` · ₪${r.price.toLocaleString()}` : ""}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs text-muted-foreground">{r.reviewCount} ביקורות</span>
-                        <span className="text-xs font-medium text-primary">⭐{r.rating}</span>
-                        <Plus size={16} className="text-primary" />
-                      </div>
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-              {showResults && searchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
-                <motion.div
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="absolute top-full mt-2 w-full bg-card border border-border rounded-xl shadow-xl z-50 p-6 text-center text-muted-foreground"
-                >
-                  לא נמצאו תוצאות עבור "{searchQuery}"
+                  {isSearching ? (
+                    <div className="p-4 flex items-center gap-2 text-muted-foreground">
+                      <Loader2 size={16} className="animate-spin" />
+                      <span className="text-sm">מחפש...</span>
+                    </div>
+                  ) : (
+                    searchResults.map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => addItem(item)}
+                        className="w-full text-right px-4 py-3 hover:bg-muted/50 transition-colors flex items-center gap-3 border-b border-border/50 last:border-0"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
+                              {item.type === "freelancer" ? "בעל מקצוע" : "קורס"}
+                            </span>
+                            <span className="text-xs text-muted-foreground truncate">{item.category}</span>
+                          </div>
+                          <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
+                          {item.businessName && (
+                            <p className="text-xs text-muted-foreground">{item.businessName}</p>
+                          )}
+                        </div>
+                        <div className="shrink-0 text-left">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <StarRating rating={item.rating} size={10} />
+                            <span>{item.rating}</span>
+                          </div>
+                          {item.price !== undefined && (
+                            <p className="text-xs font-medium text-primary">₪{item.price.toLocaleString()}</p>
+                          )}
+                        </div>
+                      </button>
+                    ))
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Selected Items */}
           {selectedItems.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-              {selectedItems.map((item, i) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+              {selectedItems.map((item) => (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="relative bg-card border border-border rounded-xl p-4 group"
+                  className="relative bg-card border border-border rounded-xl p-4"
                 >
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="absolute top-2 left-2 w-6 h-6 rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 left-2 w-5 h-5 rounded-full bg-muted hover:bg-destructive/20 hover:text-destructive flex items-center justify-center text-muted-foreground transition-colors"
                   >
-                    <X size={12} />
+                    <Trash2 size={11} />
                   </button>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">{i + 1}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                  <div className="mb-2">
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
                       {item.type === "freelancer" ? "בעל מקצוע" : "קורס"}
                     </span>
                   </div>
@@ -405,7 +409,6 @@ const ComparePage = () => {
                 </motion.div>
               ))}
 
-              {/* Add more placeholder */}
               {selectedItems.length < 4 && (
                 <div
                   onClick={() => document.querySelector<HTMLInputElement>("input[placeholder]")?.focus()}
@@ -418,7 +421,6 @@ const ComparePage = () => {
             </div>
           )}
 
-          {/* Compare Button */}
           {selectedItems.length >= 2 && !comparisonStarted && (
             <div className="text-center">
               <Button onClick={startComparison} size="lg" className="gap-2 px-8">
@@ -429,7 +431,6 @@ const ComparePage = () => {
           )}
         </div>
 
-        {/* AI Comparison Results + Chat */}
         <AnimatePresence>
           {comparisonStarted && (
             <motion.div
@@ -437,33 +438,27 @@ const ComparePage = () => {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-4"
             >
-              {/* View Toggle */}
               <div className="flex items-center justify-center gap-1 bg-muted/50 rounded-xl p-1 max-w-xs mx-auto">
                 <button
                   onClick={() => setViewMode("chat")}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 justify-center ${
-                    viewMode === "chat"
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                    viewMode === "chat" ? "bg-card shadow text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <MessageSquare size={15} />
+                  <MessageSquare size={14} />
                   ניתוח AI
                 </button>
                 <button
                   onClick={() => setViewMode("table")}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 justify-center ${
-                    viewMode === "table"
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                    viewMode === "table" ? "bg-card shadow text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <Table2 size={15} />
+                  <Table2 size={14} />
                   טבלה
                 </button>
               </div>
 
-              {/* Table View */}
               {viewMode === "table" && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -471,164 +466,62 @@ const ComparePage = () => {
                   className="bg-card border border-border rounded-2xl overflow-hidden"
                 >
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full">
                       <thead>
-                        <tr className="border-b border-border">
-                          <th className="text-right p-4 font-semibold text-muted-foreground bg-muted/30 min-w-[120px]">קריטריון</th>
-                          {selectedItems.map((item, i) => (
-                            <th key={item.id} className="p-4 text-center min-w-[160px]">
-                              <div className="flex flex-col items-center gap-1">
-                                <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">{i + 1}</span>
-                                <span className="font-semibold text-foreground text-sm">{item.name}</span>
-                                {item.businessName && <span className="text-xs text-muted-foreground">{item.businessName}</span>}
-                              </div>
+                        <tr className="border-b border-border bg-muted/30">
+                          <th className="p-4 text-right text-sm font-semibold text-muted-foreground w-32">פרמטר</th>
+                          {selectedItems.map(item => (
+                            <th key={item.id} className="p-4 text-center text-sm font-semibold text-foreground">
+                              {item.name}
                             </th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         <tr className="border-b border-border/50">
-                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">סוג</td>
+                          <td className="p-4 text-sm font-medium text-muted-foreground bg-muted/10 align-top">סוג</td>
                           {selectedItems.map(item => (
-                            <td key={item.id} className="p-4 text-center">
-                              <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
+                            <td key={item.id} className="p-4 text-center text-sm">
+                              <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs">
                                 {item.type === "freelancer" ? "בעל מקצוע" : "קורס"}
                               </span>
                             </td>
                           ))}
                         </tr>
                         <tr className="border-b border-border/50">
-                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">קטגוריה</td>
+                          <td className="p-4 text-sm font-medium text-muted-foreground bg-muted/10 align-top">דירוג</td>
                           {selectedItems.map(item => (
-                            <td key={item.id} className="p-4 text-center text-foreground">{item.category || "—"}</td>
-                          ))}
-                        </tr>
-                        <tr className="border-b border-border/50">
-                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">דירוג</td>
-                          {selectedItems.map(item => {
-                            const maxRating = Math.max(...selectedItems.map(i => i.rating));
-                            const isTop = item.rating === maxRating;
-                            return (
-                              <td key={item.id} className="p-4 text-center">
-                                <div className="flex items-center justify-center gap-1">
-                                  <StarRating rating={item.rating} size={14} />
-                                  <span className={`font-semibold ${isTop ? "text-primary" : "text-foreground"}`}>
-                                    {item.rating}
-                                  </span>
-                                  {isTop && <span className="text-xs text-primary">👑</span>}
-                                </div>
-                              </td>
-                            );
-                          })}
-                        </tr>
-                        <tr className="border-b border-border/50">
-                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">ביקורות</td>
-                          {selectedItems.map(item => {
-                            const maxReviews = Math.max(...selectedItems.map(i => i.reviewCount));
-                            const isTop = item.reviewCount === maxReviews;
-                            return (
-                              <td key={item.id} className="p-4 text-center">
-                                <span className={`font-semibold ${isTop ? "text-primary" : "text-foreground"}`}>
-                                  {item.reviewCount}
-                                </span>
-                                {isTop && <span className="text-xs text-primary mr-1">🏆</span>}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                        <tr className="border-b border-border/50">
-                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">מחיר</td>
-                          {selectedItems.map(item => {
-                            const prices = selectedItems.filter(i => i.price !== undefined).map(i => i.price!);
-                            const minPrice = prices.length > 0 ? Math.min(...prices) : null;
-                            const isCheapest = item.price !== undefined && item.price === minPrice;
-                            return (
-                              <td key={item.id} className="p-4 text-center">
-                                {item.price !== undefined ? (
-                                  <span className={`font-semibold ${isCheapest ? "text-green-600 dark:text-green-400" : "text-foreground"}`}>
-                                    ₪{item.price.toLocaleString()}
-                                    {isCheapest && <span className="text-xs mr-1">💰</span>}
-                                  </span>
-                                ) : (
-                                  <span className="text-muted-foreground">—</span>
-                                )}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                        <tr className="border-b border-border/50">
-                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">שנות ניסיון</td>
-                          {selectedItems.map(item => {
-                            const experiences = selectedItems.filter(i => i.yearsExperience).map(i => i.yearsExperience!);
-                            const maxExp = experiences.length > 0 ? Math.max(...experiences) : null;
-                            const isTop = item.yearsExperience && item.yearsExperience === maxExp;
-                            return (
-                              <td key={item.id} className="p-4 text-center">
-                                {item.yearsExperience ? (
-                                  <span className={`font-semibold ${isTop ? "text-primary" : "text-foreground"}`}>
-                                    {item.yearsExperience} שנים
-                                    {isTop && <span className="text-xs mr-1">⭐</span>}
-                                  </span>
-                                ) : (
-                                  <span className="text-muted-foreground">—</span>
-                                )}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                        <tr className="border-b border-border/50">
-                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">רמת קושי</td>
-                          {selectedItems.map(item => (
-                            <td key={item.id} className="p-4 text-center">
-                              {item.difficultyLevel ? (
-                                <span className="text-xs px-2 py-1 rounded-full bg-accent/50 text-accent-foreground font-medium">
-                                  {item.difficultyLevel}
-                                </span>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
+                            <td key={item.id} className="p-4">
+                              <div className="flex flex-col items-center gap-1">
+                                <StarRating rating={item.rating} size={14} />
+                                <span className="text-xs text-muted-foreground">{item.rating} ({item.reviewCount})</span>
+                              </div>
                             </td>
                           ))}
                         </tr>
-                        <tr className="border-b border-border/50">
-                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">קהל יעד</td>
-                          {selectedItems.map(item => (
-                            <td key={item.id} className="p-4 text-center text-xs text-muted-foreground leading-relaxed">
-                              {item.targetAudience || "—"}
-                            </td>
-                          ))}
-                        </tr>
-                        <tr className="border-b border-border/50">
-                          <td className="p-4 font-medium text-muted-foreground bg-muted/10">מיקום</td>
-                          {selectedItems.map(item => (
-                            <td key={item.id} className="p-4 text-center text-foreground text-sm">
-                              {item.location || "—"}
-                            </td>
-                          ))}
-                        </tr>
-                        {selectedItems.some(i => i.duration) && (
+                        {selectedItems.some(i => i.price !== undefined) && (
                           <tr className="border-b border-border/50">
-                            <td className="p-4 font-medium text-muted-foreground bg-muted/10">משך</td>
+                            <td className="p-4 text-sm font-medium text-muted-foreground bg-muted/10 align-top">מחיר</td>
                             {selectedItems.map(item => (
-                              <td key={item.id} className="p-4 text-center text-foreground text-sm">
-                                {item.duration || "—"}
+                              <td key={item.id} className="p-4 text-center text-sm font-medium text-primary">
+                                {item.price !== undefined ? `₪${item.price.toLocaleString()}` : "—"}
                               </td>
                             ))}
                           </tr>
                         )}
-                        {selectedItems.some(i => i.format) && (
+                        {selectedItems.some(i => i.category) && (
                           <tr className="border-b border-border/50">
-                            <td className="p-4 font-medium text-muted-foreground bg-muted/10">פורמט</td>
+                            <td className="p-4 text-sm font-medium text-muted-foreground bg-muted/10 align-top">קטגוריה</td>
                             {selectedItems.map(item => (
-                              <td key={item.id} className="p-4 text-center text-foreground text-sm">
-                                {item.format || "—"}
+                              <td key={item.id} className="p-4 text-center text-sm text-muted-foreground">
+                                {item.category || "—"}
                               </td>
                             ))}
                           </tr>
                         )}
                         {selectedItems.some(i => i.description) && (
                           <tr>
-                            <td className="p-4 font-medium text-muted-foreground bg-muted/10 align-top">תיאור</td>
+                            <td className="p-4 text-sm font-medium text-muted-foreground bg-muted/10 align-top">תיאור</td>
                             {selectedItems.map(item => (
                               <td key={item.id} className="p-4 text-muted-foreground text-xs leading-relaxed">
                                 {item.description || "—"}
@@ -649,10 +542,8 @@ const ComparePage = () => {
                 </motion.div>
               )}
 
-              {/* Chat View */}
               {viewMode === "chat" && (
                 <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                  {/* Messages */}
                   <div className="max-h-[600px] overflow-y-auto p-6 space-y-4">
                     {messages.map((msg, i) => (
                       <div key={i} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
@@ -683,7 +574,6 @@ const ComparePage = () => {
                     <div ref={chatEndRef} />
                   </div>
 
-                  {/* Follow-up Chat Input */}
                   <div className="border-t border-border p-4">
                     <p className="text-xs text-muted-foreground mb-2">💡 שאלו שאלות המשך על ההשוואה</p>
                     <div className="flex gap-2">
@@ -699,37 +589,28 @@ const ComparePage = () => {
                         {isAILoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                       </Button>
                     </div>
-                    <div className="flex gap-2 mt-2 flex-wrap">
-                      {["מי מתאים למתחיל?", "מה היתרון הכי גדול של כל אחד?", "איזה יחס מחיר-ערך הכי טוב?"].map(q => (
-                        <button
-                          key={q}
-                          onClick={() => { setChatInput(q); }}
-                          className="text-xs px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                        >
-                          {q}
-                        </button>
-                      ))}
-                    </div>
                   </div>
                 </div>
               )}
+
+              <div className="text-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setComparisonStarted(false);
+                    setMessages([]);
+                    setSelectedItems([]);
+                  }}
+                  className="text-muted-foreground gap-2"
+                >
+                  <X size={14} />
+                  התחילו השוואה חדשה
+                </Button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Empty State */}
-        {selectedItems.length === 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Scale size={28} className="text-primary" />
-            </div>
-            <h2 className="font-display font-bold text-xl text-foreground mb-2">התחילו להשוות</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              חפשו קורסים, בעלי מקצוע או הכשרות בשדה החיפוש למעלה והוסיפו אותם להשוואה.
-              ה-AI שלנו ינתח ויציג את ההבדלים והמלצות בצורה חכמה.
-            </p>
-          </motion.div>
-        )}
       </div>
 
       <Footer />
