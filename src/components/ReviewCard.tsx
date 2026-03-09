@@ -215,18 +215,23 @@ const ReviewCard = ({
     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.2, ease: "easeOut" }}>
       <Card className={`shadow-card hover:shadow-card-hover transition-all duration-500 animated-border bg-card ${flagged ? "border-destructive/30" : ""}`}>
         <CardContent className="p-6">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                <User size={18} className="text-muted-foreground" />
-              </div>
-              <div>
-                <p className="font-display font-semibold text-sm text-foreground flex items-center gap-1.5">
-                  {anonymous ? "אנונימי" : reviewerName}
+          <div className="flex items-start gap-3 mb-3">
+            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0">
+              <User size={18} className="text-muted-foreground" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-display font-semibold text-sm text-foreground">
+                {anonymous ? "אנונימי" : reviewerName}
+              </p>
+              <p className="text-xs text-muted-foreground">{date}</p>
+              {/* Badges row — below name */}
+              {(isExpert || isEarlyBird || verified) && (
+                <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+                  {verified && <VerifiedBadge />}
                   {isExpert && (
                     <Tooltip>
                       <TooltipTrigger>
-                        <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5 px-1.5 py-0">
+                        <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5 px-1.5 py-0.5">
                           <Shield size={10} /> מומחה
                         </Badge>
                       </TooltipTrigger>
@@ -235,24 +240,20 @@ const ReviewCard = ({
                       </TooltipContent>
                     </Tooltip>
                   )}
-                </p>
-                <p className="text-xs text-muted-foreground">{date}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {isEarlyBird && (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5">
-                      <Zap size={10} /> Early Bird
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="text-xs max-w-[200px]">
-                    אחד מ-5 הביקורות הראשונות על העסק! בונוס 1.5x אוטומטי לנקודות.
-                  </TooltipContent>
-                </Tooltip>
+                  {isEarlyBird && (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5 px-1.5 py-0.5">
+                          <Zap size={10} /> Early Bird
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">
+                        אחד מ-5 הביקורות הראשונות על העסק! בונוס 1.5x אוטומטי לנקודות.
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
               )}
-              {verified && <VerifiedBadge />}
             </div>
           </div>
           <StarRating rating={rating} size={16} />
