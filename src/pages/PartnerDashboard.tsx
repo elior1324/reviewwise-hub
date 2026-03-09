@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   DollarSign, TrendingUp, Trophy, Star, ThumbsUp, Wallet, Users,
   Award, Crown, Sparkles, Timer, Gift, Zap, Shield, Info, Mail,
-  Flame, Target, ArrowUp,
+  Flame, Target, ArrowUp, BadgeCheck,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
