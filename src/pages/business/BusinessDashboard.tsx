@@ -1137,6 +1137,12 @@ const BusinessDashboard = () => {
       </div>
       <BusinessFooter />
       <AIChatbot context="business" />
+      <UpgradeModal
+        open={upgradeModalOpen}
+        onOpenChange={setUpgradeModalOpen}
+        requiredTier={upgradeModalTier}
+        featureName={upgradeModalFeature}
+      />
     </div>
   );
 };
