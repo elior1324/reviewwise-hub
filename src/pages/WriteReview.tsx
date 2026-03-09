@@ -27,7 +27,7 @@ const WriteReview = () => {
       toast({ title: "אנא בחרו דירוג", variant: "destructive" });
       return;
     }
-    toast({ title: "הביקורת נשלחה בהצלחה!", description: "תודה רבה! הביקורת שלכם תפורסם לאחר אימות." });
+    toast({ title: "💥 בום! צברתם 100 נקודות!", description: "הביקורת נשלחה! תמשיכו לכתוב ולטפס בדירוג — 70% הנחה ממתינה למקום הראשון!" });
   };
 
   return (
