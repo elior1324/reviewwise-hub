@@ -70,3 +70,5 @@ const codeStyle = {
   letterSpacing: '4px',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const link = { color: 'inherit', textDecoration: 'underline' }
+const supportLink = { fontSize: '12px', color: '#999999', margin: '10px 0 0' }
