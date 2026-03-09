@@ -1,6 +1,5 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AIChatbot from "@/components/AIChatbot";
 import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import { motion } from "framer-motion";
 import { ShieldCheck, Target, BookOpen, Users, Award, TrendingUp, CheckCircle } from "lucide-react";
