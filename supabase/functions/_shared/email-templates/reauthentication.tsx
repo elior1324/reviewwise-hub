@@ -9,6 +9,7 @@ import {
   Heading,
   Html,
   Img,
+  Link,
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
@@ -31,6 +32,12 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
         <Text style={codeStyle}>{token}</Text>
         <Text style={footer}>
           הקוד יפוג בקרוב. אם לא ביקשתם את הקוד הזה, ניתן להתעלם מהמייל הזה בבטחה.
+        </Text>
+        <Text style={supportLink}>
+          צריכים עזרה?{' '}
+          <Link href="https://reviewshub.info/contact" style={link}>
+            צרו קשר עם התמיכה
+          </Link>
         </Text>
       </Container>
     </Body>
@@ -63,3 +70,5 @@ const codeStyle = {
   letterSpacing: '4px',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const link = { color: 'inherit', textDecoration: 'underline' }
+const supportLink = { fontSize: '12px', color: '#999999', margin: '10px 0 0' }

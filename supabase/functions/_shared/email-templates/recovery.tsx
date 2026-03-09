@@ -10,6 +10,7 @@ import {
   Heading,
   Html,
   Img,
+  Link,
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
@@ -40,6 +41,12 @@ export const RecoveryEmail = ({
         </Button>
         <Text style={footer}>
           אם לא ביקשתם לאפס את הסיסמה, ניתן להתעלם מהמייל הזה. הסיסמה שלכם לא תשתנה.
+        </Text>
+        <Text style={supportLink}>
+          צריכים עזרה?{' '}
+          <Link href="https://reviewshub.info/contact" style={link}>
+            צרו קשר עם התמיכה
+          </Link>
         </Text>
       </Container>
     </Body>
@@ -73,3 +80,5 @@ const button = {
   textDecoration: 'none',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const link = { color: 'inherit', textDecoration: 'underline' }
+const supportLink = { fontSize: '12px', color: '#999999', margin: '10px 0 0' }

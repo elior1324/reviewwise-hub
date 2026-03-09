@@ -57,6 +57,12 @@ export const EmailChangeEmail = ({
         <Text style={footer}>
           אם לא ביקשתם שינוי זה, אנא אבטחו את החשבון שלכם מיד.
         </Text>
+        <Text style={supportLink}>
+          צריכים עזרה?{' '}
+          <Link href="https://reviewshub.info/contact" style={link}>
+            צרו קשר עם התמיכה
+          </Link>
+        </Text>
       </Container>
     </Body>
   </Html>
@@ -90,3 +96,4 @@ const button = {
   textDecoration: 'none',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const supportLink = { fontSize: '12px', color: '#999999', margin: '10px 0 0' }

@@ -57,6 +57,12 @@ export const SignupEmail = ({
         <Text style={footer}>
           אם לא יצרתם חשבון, ניתן להתעלם מהמייל הזה בבטחה.
         </Text>
+        <Text style={supportLink}>
+          צריכים עזרה?{' '}
+          <Link href="https://reviewshub.info/contact" style={link}>
+            צרו קשר עם התמיכה
+          </Link>
+        </Text>
       </Container>
     </Body>
   </Html>
@@ -90,3 +96,4 @@ const button = {
   textDecoration: 'none',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const supportLink = { fontSize: '12px', color: '#999999', margin: '10px 0 0' }
