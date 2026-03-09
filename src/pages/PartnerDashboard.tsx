@@ -36,6 +36,7 @@ interface RewardEntry {
   multiplier: number;
   totalPoints: number;
   isEarlyBird: boolean;
+  isVerified: boolean;
   helpfulBonus: number;
 }
 
