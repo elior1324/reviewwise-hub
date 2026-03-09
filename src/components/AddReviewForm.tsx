@@ -439,6 +439,12 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
 
                   <FormPrivacyNotice className="mt-1" />
 
+                  <TurnstileWidget
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    onError={() => setTurnstileToken(null)}
+                    className="flex justify-center mt-2"
+                  />
+
                   <Button
                     type="submit"
                     disabled={submitting || uploading}
