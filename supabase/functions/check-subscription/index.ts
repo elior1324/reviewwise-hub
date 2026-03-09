@@ -70,6 +70,26 @@ serve(async (req) => {
       logStep("Active subscription found", { productId, subscriptionEnd });
     }
 
+    // Also sync the business subscription_tier in database
+    if (hasActiveSub && productId) {
+      const tierMap: Record<string, string> = {
+        "prod_U6q0bcJeR70YPv": "pro",
+        "prod_U6q1CwTI9xXEeK": "premium",
+      };
+      const newTier = tierMap[productId as string] || "pro";
+      await supabaseClient
+        .from("businesses")
+        .update({ subscription_tier: newTier })
+        .eq("owner_id", user.id);
+      logStep("Synced business tier", { newTier });
+    } else if (!hasActiveSub) {
+      await supabaseClient
+        .from("businesses")
+        .update({ subscription_tier: "free" })
+        .eq("owner_id", user.id);
+      logStep("Reset business tier to free");
+    }
+
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       product_id: productId,
