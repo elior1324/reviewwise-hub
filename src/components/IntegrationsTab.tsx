@@ -92,24 +92,23 @@ const IntegrationsTab = ({ businessId, isPremium, isDemo, onUpgrade }: Integrati
       return;
     }
     const fetchIntegrations = async () => {
-      const { data } = await supabase
-        .from("business_integrations" as any)
-        .select("*")
-        .eq("business_id", businessId);
+      const { data: result } = await supabase.functions.invoke("manage-integrations", {
+        body: { action: "get", business_id: businessId },
+      });
 
-      if (data) {
-        const sheets = (data as any[]).find((d: any) => d.integration_type === "google_sheets");
+      if (result?.data) {
+        const sheets = result.data.find((d: any) => d.integration_type === "google_sheets");
         if (sheets) {
           setSheetsUrl(sheets.config?.webhook_url || "");
           setSheetsActive(sheets.active);
           setSheetsSaved(true);
         }
-        const hubspot = (data as any[]).find((d: any) => d.integration_type === "hubspot");
+        const hubspot = result.data.find((d: any) => d.integration_type === "hubspot");
         if (hubspot) {
-          setHubspotKey(hubspot.config?.api_key ? "••••••••••••••••" : "");
+          setHubspotKey(hubspot.config?.has_api_key ? "••••••••••••••••" : "");
           setHubspotActive(hubspot.active);
           setHubspotSaved(true);
-          setHubspotConnected(!!hubspot.config?.api_key && hubspot.active);
+          setHubspotConnected(hubspot.config?.has_api_key && hubspot.active);
         }
       }
       setLoading(false);
