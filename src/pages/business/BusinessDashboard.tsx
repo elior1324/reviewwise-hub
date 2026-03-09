@@ -640,6 +640,10 @@ const BusinessDashboard = () => {
                   <Webhook size={13} className="ml-1" /> Webhooks & API
                   {!isPremium && <PremiumBadge />}
                 </TabsTrigger>
+                <TabsTrigger value="integrations" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <Link2 size={13} className="ml-1" /> אינטגרציות
+                  {!isPremium && <PremiumBadge />}
+                </TabsTrigger>
               </TabsList>
             </div>
           </div>
