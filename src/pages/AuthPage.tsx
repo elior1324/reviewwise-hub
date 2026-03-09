@@ -185,7 +185,13 @@ const AuthPage = () => {
 
               {mode === "login" && <FormPrivacyNotice className="mt-1" />}
 
-              <Button type="submit" className="w-full bg-primary text-primary-foreground glow-primary" disabled={loading || (mode === "signup" && !privacyConsent)}>
+              <TurnstileWidget
+                onSuccess={(token) => setTurnstileToken(token)}
+                onError={() => setTurnstileToken(null)}
+                className="flex justify-center mt-2"
+              />
+
+              <Button type="submit" className="w-full bg-primary text-primary-foreground glow-primary" disabled={loading || (mode === "signup" && !privacyConsent) || !turnstileToken}>
                 {loading ? "טוען..." : mode === "login" ? "התחברו" : "הרשמו"}
               </Button>
             </form>
