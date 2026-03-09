@@ -220,6 +220,7 @@ const CoursePage = () => {
           />
         </div>
 
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
           <span className="text-sm text-muted-foreground ml-2">סינון:</span>
           <Button variant={filterRating === null ? "default" : "outline"} size="sm" onClick={() => setFilterRating(null)}>הכל</Button>
           {[5, 4, 3, 2, 1].map(r => (
