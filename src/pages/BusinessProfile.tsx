@@ -122,6 +122,7 @@ const BusinessProfile = () => {
           likeCount: r.like_count || 0,
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: (expertCounts[r.user_id] || 0) >= 3,
+          userId: r.user_id,
           ownerResponse: r.business_responses?.[0] ? {
             text: r.business_responses[0].text,
             date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
