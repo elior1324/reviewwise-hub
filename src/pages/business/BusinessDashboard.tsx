@@ -1148,6 +1148,16 @@ const BusinessDashboard = () => {
               />
             </LockedOverlay>
           </TabsContent>
+
+          {/* Integrations */}
+          <TabsContent value="integrations">
+            <IntegrationsTab
+              businessId={businessId || "demo"}
+              isPremium={isPremium}
+              isDemo={isDemo}
+              onUpgrade={() => handleUpgradeWithModal("premium", "אינטגרציות")}
+            />
+          </TabsContent>
         </Tabs>
       </div>
       <BusinessFooter />
