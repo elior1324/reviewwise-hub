@@ -3,6 +3,7 @@ import StarRating from "./StarRating";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Instagram, Linkedin, Twitter, Facebook } from "lucide-react";
 import { motion } from "framer-motion";
+import type { SocialLinks } from "@/data/mockData";
 
 const TelegramIcon = ({ size = 14 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
