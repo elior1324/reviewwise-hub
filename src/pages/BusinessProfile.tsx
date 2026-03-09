@@ -81,9 +81,9 @@ const BusinessProfile = () => {
         })));
       }
 
-      // Fetch reviews with responses and profile names
+      // Fetch reviews via the secure public_reviews view
       const { data: reviewData } = await supabase
-        .from("reviews")
+        .from("public_reviews")
         .select("*, courses(name), business_responses(text, created_at)")
         .eq("business_id", bizData.id)
         .order("created_at", { ascending: false });
