@@ -442,10 +442,11 @@ const BusinessDashboard = () => {
         {/* Admin Plan Switcher — only for admin users with a real business */}
         {!isDemo && isAdmin && businessId && (
           <div className="mb-6">
-            <AdminPlanSwitcher
+            <DevControlPanel
               businessId={businessId}
               currentTier={currentTier}
               onTierChanged={(newTier) => setDbTier(newTier as SubscriptionTier)}
+              onDataChanged={() => window.location.reload()}
             />
           </div>
         )}
