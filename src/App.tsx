@@ -33,6 +33,7 @@ import PartnerDashboard from "./pages/PartnerDashboard";
 import BusinessLanding from "./pages/business/BusinessLanding";
 import BusinessDashboard from "./pages/business/BusinessDashboard";
 import BusinessAuth from "./pages/business/BusinessAuth";
+import PricingPage from "./pages/business/PricingPage";
 
 const queryClient = new QueryClient();
 
@@ -74,7 +75,7 @@ const App = () => (
             <Route path="/business/login" element={<BusinessAuth mode="login" />} />
             <Route path="/business/signup" element={<BusinessAuth mode="signup" />} />
             <Route path="/business/dashboard" element={<BusinessDashboard />} />
-            <Route path="/business/pricing" element={<BusinessLanding />} />
+            <Route path="/business/pricing" element={<PricingPage />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
