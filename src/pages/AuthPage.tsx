@@ -25,6 +25,7 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
