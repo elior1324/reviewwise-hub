@@ -218,7 +218,7 @@ const ReviewCard = ({
           {/* Verified badge — top left */}
           {verified && (
             <div className="absolute top-3 left-3">
-              <VerifiedBadge />
+              <VerifiedBadge showBoost />
             </div>
           )}
 
