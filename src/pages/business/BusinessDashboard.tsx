@@ -20,6 +20,7 @@ import {
   Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2
 } from "lucide-react";
 import EmbedWidgetGenerator from "@/components/EmbedWidgetGenerator";
+import IntegrationsTab from "@/components/IntegrationsTab";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { type Review, type Course } from "@/data/mockData";
 import { useState, useEffect } from "react";
