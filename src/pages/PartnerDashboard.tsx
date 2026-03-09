@@ -340,10 +340,10 @@ const PartnerDashboard = () => {
               </div>
               <div>
                 <p className="font-display font-bold text-foreground">
-                  🏆 השותף המוביל בעונה זוכה ב-40% הנחה על כל קורס!
+                  🏆 השותף המוביל בעונה זוכה ב-40% הנחה על קורס אחד!
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  צברו הכי הרבה נקודות העונה ותזכו בפרס הגדול. כל עונה — הזדמנות חדשה!
+                  צברו הכי הרבה נקודות העונה ותזכו בפרס הגדול. המימוש הוא <span className="font-semibold text-foreground">חד-פעמי</span> — קורס אחד בלבד לעונה. כל עונה — הזדמנות חדשה!
                 </p>
               </div>
             </div>
