@@ -25,6 +25,7 @@ interface CourseData {
   affiliateUrl: string;
   businessSlug: string;
   businessName: string;
+  businessId: string;
 }
 
 const CoursePage = () => {
