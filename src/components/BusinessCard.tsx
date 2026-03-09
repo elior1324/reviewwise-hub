@@ -40,7 +40,7 @@ interface BusinessCardProps {
 
 const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, description, logo, socialLinks }: BusinessCardProps) => {
   const activeSocials = socialLinks
-    ? Object.entries(socialLinks).filter(([_, url]) => url && url.trim() !== "")
+    ? Object.entries(socialLinks).filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim() !== "")
     : [];
 
   return (
