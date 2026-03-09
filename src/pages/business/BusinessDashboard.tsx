@@ -6,6 +6,8 @@ import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
 import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
 import LockedOverlay from "@/components/LockedOverlay";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
+import AdminPlanSwitcher from "@/components/AdminPlanSwitcher";
+import UpgradeModal from "@/components/UpgradeModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
