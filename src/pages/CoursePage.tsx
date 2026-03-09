@@ -90,15 +90,15 @@ const CoursePage = () => {
 
         setReviews(reviewData.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
+          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
           rating: r.rating,
-          text: r.text,
+          text: r.review_text || "", // תיקון: משיכת טקסט מה-View
           courseName: r.courses?.name || "",
           courseId: r.course_id,
-          businessSlug: "",
+          businessSlug: (courseData.businesses as any)?.slug || "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified || false,
+          verified: r.verified_purchase || false, // תיקון: משיכת סטטוס אימות מה-View
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at !== r.created_at ? new Date(r.updated_at).toLocaleDateString("he-IL") : undefined,
           flagged: r.flagged || false,
@@ -106,6 +106,7 @@ const CoursePage = () => {
           likeCount: r.like_count || 0,
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: (expertCounts[r.user_id] || 0) >= 3,
+          userId: r.user_id,
           ownerResponse: r.business_responses?.[0] ? {
             text: r.business_responses[0].text,
             date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
