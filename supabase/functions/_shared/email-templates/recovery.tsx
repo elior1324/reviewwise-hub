@@ -41,6 +41,12 @@ export const RecoveryEmail = ({
         <Text style={footer}>
           אם לא ביקשתם לאפס את הסיסמה, ניתן להתעלם מהמייל הזה. הסיסמה שלכם לא תשתנה.
         </Text>
+        <Text style={supportLink}>
+          צריכים עזרה?{' '}
+          <Link href="https://reviewshub.info/contact" style={link}>
+            צרו קשר עם התמיכה
+          </Link>
+        </Text>
       </Container>
     </Body>
   </Html>

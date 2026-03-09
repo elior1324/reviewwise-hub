@@ -48,6 +48,12 @@ export const InviteEmail = ({
         <Text style={footer}>
           אם לא ציפיתם להזמנה הזו, ניתן להתעלם מהמייל הזה בבטחה.
         </Text>
+        <Text style={supportLink}>
+          צריכים עזרה?{' '}
+          <Link href="https://reviewshub.info/contact" style={link}>
+            צרו קשר עם התמיכה
+          </Link>
+        </Text>
       </Container>
     </Body>
   </Html>

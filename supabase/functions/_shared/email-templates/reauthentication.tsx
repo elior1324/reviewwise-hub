@@ -32,6 +32,12 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
         <Text style={footer}>
           הקוד יפוג בקרוב. אם לא ביקשתם את הקוד הזה, ניתן להתעלם מהמייל הזה בבטחה.
         </Text>
+        <Text style={supportLink}>
+          צריכים עזרה?{' '}
+          <Link href="https://reviewshub.info/contact" style={link}>
+            צרו קשר עם התמיכה
+          </Link>
+        </Text>
       </Container>
     </Body>
   </Html>

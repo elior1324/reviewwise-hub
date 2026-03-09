@@ -41,6 +41,12 @@ export const MagicLinkEmail = ({
         <Text style={footer}>
           אם לא ביקשתם את הקישור הזה, ניתן להתעלם מהמייל הזה בבטחה.
         </Text>
+        <Text style={supportLink}>
+          צריכים עזרה?{' '}
+          <Link href="https://reviewshub.info/contact" style={link}>
+            צרו קשר עם התמיכה
+          </Link>
+        </Text>
       </Container>
     </Body>
   </Html>

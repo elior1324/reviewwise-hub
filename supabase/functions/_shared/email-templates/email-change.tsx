@@ -57,6 +57,12 @@ export const EmailChangeEmail = ({
         <Text style={footer}>
           אם לא ביקשתם שינוי זה, אנא אבטחו את החשבון שלכם מיד.
         </Text>
+        <Text style={supportLink}>
+          צריכים עזרה?{' '}
+          <Link href="https://reviewshub.info/contact" style={link}>
+            צרו קשר עם התמיכה
+          </Link>
+        </Text>
       </Container>
     </Body>
   </Html>

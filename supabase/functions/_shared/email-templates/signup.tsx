@@ -57,6 +57,12 @@ export const SignupEmail = ({
         <Text style={footer}>
           אם לא יצרתם חשבון, ניתן להתעלם מהמייל הזה בבטחה.
         </Text>
+        <Text style={supportLink}>
+          צריכים עזרה?{' '}
+          <Link href="https://reviewshub.info/contact" style={link}>
+            צרו קשר עם התמיכה
+          </Link>
+        </Text>
       </Container>
     </Body>
   </Html>
