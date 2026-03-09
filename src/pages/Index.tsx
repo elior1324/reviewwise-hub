@@ -302,8 +302,8 @@ const Index = () => {
       </section>
 
       {/* Top Freelancers */}
-      <section className="container py-20">
-        <div className="flex items-end justify-between mb-10">
+      <section className="container py-10 md:py-20">
+        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <UserCheck size={22} className="text-primary" />
