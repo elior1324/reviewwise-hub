@@ -222,7 +222,37 @@ const ReviewCard = ({
             </div>
           )}
 
-          <div className="flex items-start gap-3 mb-3">
+          {/* Expert & Early Bird badges — top right */}
+          {(isExpert || isEarlyBird) && (
+            <div className="absolute top-3 right-3 flex items-center gap-1.5">
+              {isExpert && (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5 px-1.5 py-0.5">
+                      <Shield size={10} /> מומחה
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs max-w-[200px]">
+                    משתמש עם 3+ ביקורות מדורגות גבוה בקטגוריה זו. לייקים ממומחה שווים x2!
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              {isEarlyBird && (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5 px-1.5 py-0.5">
+                      <Zap size={10} /> Early Bird
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs max-w-[200px]">
+                    אחד מ-5 הביקורות הראשונות על העסק! בונוס 1.5x אוטומטי לנקודות.
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-start gap-3 mb-3 mt-6">
             <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0">
               <User size={18} className="text-muted-foreground" />
             </div>
@@ -231,35 +261,6 @@ const ReviewCard = ({
                 {anonymous ? "אנונימי" : reviewerName}
               </p>
               <p className="text-xs text-muted-foreground">{date}</p>
-              {/* Expert & Early Bird badges — below name */}
-              {(isExpert || isEarlyBird) && (
-                <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
-                  {isExpert && (
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5 px-1.5 py-0.5">
-                          <Shield size={10} /> מומחה
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="text-xs max-w-[200px]">
-                        משתמש עם 3+ ביקורות מדורגות גבוה בקטגוריה זו. לייקים ממומחה שווים x2!
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                  {isEarlyBird && (
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5 px-1.5 py-0.5">
-                          <Zap size={10} /> Early Bird
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="text-xs max-w-[200px]">
-                        אחד מ-5 הביקורות הראשונות על העסק! בונוס 1.5x אוטומטי לנקודות.
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-              )}
             </div>
           </div>
           <StarRating rating={rating} size={16} />
