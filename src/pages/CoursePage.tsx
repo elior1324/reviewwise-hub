@@ -66,9 +66,9 @@ const CoursePage = () => {
         businessId: courseData.business_id,
       });
 
-      // Fetch reviews
+      // Fetch reviews via the secure public_reviews view
       const { data: reviewData } = await supabase
-        .from("reviews")
+        .from("public_reviews")
         .select("*, courses(name), business_responses(text, created_at)")
         .eq("course_id", courseId)
         .order("created_at", { ascending: false });
