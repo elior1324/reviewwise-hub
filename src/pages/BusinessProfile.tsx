@@ -248,7 +248,11 @@ const BusinessProfile = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredReviews.map((review, i) => (
             <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <ReviewCard {...review} />
+              <ReviewCard
+                {...review}
+                onDelete={(reviewId) => setReviews(prev => prev.filter(r => r.id !== reviewId))}
+                onEdit={(reviewId, newText) => setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, text: newText } : r))}
+              />
             </motion.div>
           ))}
         </div>
