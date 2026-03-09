@@ -113,6 +113,10 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
       toast({ title: "אנא בחרו משך זמן בהכשרה", variant: "destructive" });
       return;
     }
+    if (!turnstileToken) {
+      toast({ title: "אנא אמתו שאתם לא רובוט", variant: "destructive" });
+      return;
+    }
 
     setSubmitting(true);
 
