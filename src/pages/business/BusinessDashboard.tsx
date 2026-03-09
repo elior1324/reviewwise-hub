@@ -1147,6 +1147,7 @@ const BusinessDashboard = () => {
       </div>
       <BusinessFooter />
       <AIChatbot context="business" />
+      <GamificationNotifications />
       <UpgradeModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}
