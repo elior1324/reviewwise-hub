@@ -43,9 +43,9 @@ const ACCEPTED_FILE_TYPES = ".pdf,.jpg,.jpeg,.png,.webp,.csv";
 const MAX_FILE_SIZE_MB = 10;
 
 const DURATION_OPTIONS = [
-  { value: "under_3_months", label: "פחות מ-3 חודשים" },
-  { value: "half_year", label: "חצי שנה" },
-  { value: "one_year", label: "שנה" },
+  { value: "3_months_plus", label: "3 חודשים+" },
+  { value: "half_year_plus", label: "חצי שנה+" },
+  { value: "one_year_plus", label: "שנה+" },
   { value: "two_years_plus", label: "שנתיים+" },
 ];
 
