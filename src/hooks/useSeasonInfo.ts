@@ -1,10 +1,9 @@
 import { useMemo } from "react";
 
 /**
- * Seasons run in 4-month blocks:
- *   Season 1: Jan-Apr
- *   Season 2: May-Aug
- *   Season 3: Sep-Dec
+ * Seasons run in 6-month blocks:
+ *   Season 1: Jan-Jun
+ *   Season 2: Jul-Dec
  */
 export function useSeasonInfo() {
   return useMemo(() => {
@@ -12,13 +11,13 @@ export function useSeasonInfo() {
     const month = now.getMonth(); // 0-indexed
     const year = now.getFullYear();
 
-    // Determine current season index (0, 1, 2)
-    const seasonIndex = Math.floor(month / 4);
+    // Determine current season index (0 or 1)
+    const seasonIndex = Math.floor(month / 6);
     const seasonNumber = seasonIndex + 1;
 
     // Season start/end months (0-indexed)
-    const startMonth = seasonIndex * 4; // 0, 4, or 8
-    const endMonth = startMonth + 3; // 3, 7, or 11
+    const startMonth = seasonIndex * 6; // 0 or 6
+    const endMonth = startMonth + 5; // 5 or 11
 
     const seasonStart = new Date(year, startMonth, 1);
     const seasonEnd = new Date(year, endMonth + 1, 0, 23, 59, 59, 999); // last day of end month

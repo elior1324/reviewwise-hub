@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DollarSign, TrendingUp, Trophy, Star, ThumbsUp, Wallet, Users,
-  Award, Crown, Sparkles, Timer, Gift, Zap, Shield, Info,
+  Award, Crown, Sparkles, Timer, Gift, Zap, Shield, Info, Mail,
+  Flame, Target, ArrowUp,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +45,14 @@ interface LeaderboardEntry {
   badge: string | null;
   rank: number;
   isExpert: boolean;
+  userId: string;
 }
+
+const PRIZES = [
+  { rank: 1, discount: "70%", emoji: "👑", color: "text-yellow-500", bg: "bg-yellow-500/15", border: "border-yellow-500/30" },
+  { rank: 2, discount: "30%", emoji: "🥈", color: "text-slate-400", bg: "bg-slate-400/10", border: "border-slate-400/30" },
+  { rank: 3, discount: "15%", emoji: "🥉", color: "text-amber-600", bg: "bg-amber-600/10", border: "border-amber-600/30" },
+];
 
 const PartnerDashboard = () => {
   const { user, loading } = useAuth();
@@ -60,13 +68,14 @@ const PartnerDashboard = () => {
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [expertCategories, setExpertCategories] = useState<string[]>([]);
   const [earlyBirdCount, setEarlyBirdCount] = useState(0);
-  const [helpfulBonusTotal, setHelpfulBonusTotal] = useState(0);
+  const [myRank, setMyRank] = useState<number | null>(null);
+  const [pointsToTop3, setPointsToTop3] = useState<number>(0);
 
   // Live countdown timer
   const [timeLeft, setTimeLeft] = useState({ days: season.daysLeft, hours: season.hoursLeft, minutes: 0 });
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const update = () => {
       const now = new Date();
       const msLeft = Math.max(0, season.seasonEnd.getTime() - now.getTime());
       setTimeLeft({
@@ -74,7 +83,9 @@ const PartnerDashboard = () => {
         hours: Math.floor((msLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
         minutes: Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60)),
       });
-    }, 60000);
+    };
+    update();
+    const interval = setInterval(update, 60000);
     return () => clearInterval(interval);
   }, [season.seasonEnd]);
 
@@ -97,7 +108,6 @@ const PartnerDashboard = () => {
 
       const reviewMap = new Map((reviews || []).map((r: any) => [r.id, r]));
 
-      // Check Early Bird: count reviews per business to see if this was in first 5
       const businessIds = [...new Set((reviews || []).map((r: any) => r.business_id))];
       let earlyBirdSet = new Set<string>();
       let ebCount = 0;
@@ -157,7 +167,7 @@ const PartnerDashboard = () => {
       .maybeSingle();
     setTotalEarnings(Number(profile?.total_earnings) || 0);
 
-    // Check Category Expert: 3+ high-rated reviews in same category
+    // Check Category Expert
     const { data: userReviews } = await supabase
       .from("reviews")
       .select("id, rating, course_id, courses(category)")
@@ -194,10 +204,21 @@ const PartnerDashboard = () => {
       });
 
       const sortedUsers = Object.entries(userPoints)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 10);
+        .sort(([, a], [, b]) => b - a);
 
-      const userIds = sortedUsers.map(([uid]) => uid);
+      // Find my rank
+      const myIndex = sortedUsers.findIndex(([uid]) => uid === user.id);
+      setMyRank(myIndex >= 0 ? myIndex + 1 : null);
+
+      // Points to top 3
+      if (sortedUsers.length >= 3 && myIndex >= 3) {
+        setPointsToTop3(sortedUsers[2][1] - (myTotalPoints || 0) + 1);
+      } else {
+        setPointsToTop3(0);
+      }
+
+      const top10 = sortedUsers.slice(0, 10);
+      const userIds = top10.map(([uid]) => uid);
       const { data: profiles } = await supabase
         .from("profiles")
         .select("user_id, display_name, partner_badge")
@@ -205,12 +226,13 @@ const PartnerDashboard = () => {
 
       const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
 
-      setLeaderboard(sortedUsers.map(([uid, pts], i) => ({
+      setLeaderboard(top10.map(([uid, pts], i) => ({
         displayName: profileMap.get(uid)?.display_name || "משתמש",
         totalPoints: pts,
         badge: profileMap.get(uid)?.partner_badge || null,
         rank: i + 1,
         isExpert: false,
+        userId: uid,
       })));
     }
   }, [user, season.seasonMonths]);
@@ -249,11 +271,17 @@ const PartnerDashboard = () => {
       <div className="min-h-screen bg-background noise-overlay" dir="rtl">
         <Navbar />
         <div className="container py-20 text-center">
-          <h1 className="font-display font-bold text-3xl mb-4">תוכנית השותפים</h1>
-          <p className="text-muted-foreground mb-6">יש להתחבר כדי לצפות ברווחים שלכם</p>
-          <Link to="/auth">
-            <Button size="lg" className="bg-primary text-primary-foreground">התחברו עכשיו</Button>
-          </Link>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
+            <Crown size={64} className="mx-auto mb-6 text-primary" />
+            <h1 className="font-display font-bold text-4xl mb-4">המרתון של 6 חודשים 🏆</h1>
+            <p className="text-muted-foreground text-lg mb-2">כתבו ביקורות. טפסו בדירוג. זכו בפרסים!</p>
+            <p className="text-muted-foreground mb-8">יש להתחבר כדי לצפות ברווחים שלכם</p>
+            <Link to="/auth">
+              <Button size="lg" className="bg-primary text-primary-foreground font-bold gap-2">
+                <Sparkles size={18} /> התחברו ותתחילו להרוויח
+              </Button>
+            </Link>
+          </motion.div>
         </div>
         <Footer />
       </div>
@@ -270,23 +298,29 @@ const PartnerDashboard = () => {
   const currentMonth = new Date().toISOString().slice(0, 7);
   const pendingPayout = payouts.find(p => p.month_year === currentMonth && p.status === "pending");
 
+  // Progress to 1st place
+  const firstPlacePoints = leaderboard.length > 0 ? leaderboard[0].totalPoints : 0;
+  const progressTo1st = firstPlacePoints > 0 ? Math.min(100, (poolData.myPoints / firstPlacePoints) * 100) : 0;
+
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <Navbar />
 
-      {/* Hero */}
+      {/* Hero - Marketing Voice */}
       <section className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, hsl(45 100% 51% / 0.08), hsl(35 100% 50% / 0.04), hsl(160 84% 39% / 0.06))" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, hsl(45 100% 51% / 0.1), hsl(35 100% 50% / 0.05), hsl(160 84% 39% / 0.08))" }} />
         <div className="container py-12 md:py-16 relative">
           <motion.div initial="hidden" animate="visible" className="max-w-3xl">
             <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-              <Sparkles size={16} /> תוכנית שותפים 50/50
+              <Flame size={16} /> המרתון של 6 חודשים
             </motion.div>
-            <motion.h1 variants={fadeUp} custom={1} className="font-display font-bold text-3xl md:text-4xl text-foreground mb-3">
-              הרווחים שלכם 💰
+            <motion.h1 variants={fadeUp} custom={1} className="font-display font-bold text-3xl md:text-5xl text-foreground mb-3">
+              כתבו. דרגו. זכו בגדול! 🏆
             </motion.h1>
-            <motion.p variants={fadeUp} custom={2} className="text-muted-foreground text-lg">
-              אנחנו מחלקים 50% מהעמלות שלנו עם הקהילה. כתבו ביקורות, צברו לייקים, והרוויחו — עונה אחר עונה.
+            <motion.p variants={fadeUp} custom={2} className="text-muted-foreground text-lg md:text-xl">
+              המרתון הגדול רץ 6 חודשים — 3 הזוכים הראשונים מקבלים הנחות מטורפות על כל קורס שירצו.
+              <br />
+              <span className="text-primary font-semibold">מקום 1 = 70% הנחה</span> · <span className="font-medium">מקום 2 = 30%</span> · <span className="font-medium">מקום 3 = 15%</span>
             </motion.p>
           </motion.div>
         </div>
@@ -306,7 +340,7 @@ const PartnerDashboard = () => {
                   <div>
                     <h2 className="font-display font-bold text-lg text-foreground">{season.seasonLabel}</h2>
                     <p className="text-sm text-muted-foreground">
-                      הנקודות מתאפסות בסוף העונה — הלייקים נשארים!
+                      ⏰ רק {timeLeft.days} ימים נותרו לאבטח את הפרס שלכם!
                     </p>
                   </div>
                 </div>
@@ -331,27 +365,86 @@ const PartnerDashboard = () => {
           </Card>
         </motion.div>
 
-        {/* Prize Banner */}
+        {/* Prize Podium Banner */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="mb-6">
-          <div className="rounded-xl p-5 border border-accent/20" style={{ background: "linear-gradient(135deg, hsl(var(--accent) / 0.1), hsl(var(--accent) / 0.03))" }}>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
-                <Gift size={20} className="text-accent" />
+          <Card className="shadow-card bg-card overflow-hidden">
+            <CardContent className="p-6">
+              <h3 className="font-display font-bold text-lg text-foreground text-center mb-6 flex items-center justify-center gap-2">
+                <Trophy size={22} className="text-primary" /> הפרסים למובילי העונה
+              </h3>
+              <div className="grid grid-cols-3 gap-3 md:gap-6">
+                {PRIZES.map((prize) => (
+                  <motion.div
+                    key={prize.rank}
+                    whileHover={{ scale: 1.04, y: -4 }}
+                    className={`text-center p-4 md:p-6 rounded-xl border ${prize.border} ${prize.bg} transition-colors relative`}
+                  >
+                    <div className="text-3xl md:text-5xl mb-2">{prize.emoji}</div>
+                    {prize.rank === 1 && (
+                      <Crown size={20} className="absolute top-2 right-2 text-yellow-500 animate-pulse" />
+                    )}
+                    <p className={`font-display font-bold text-2xl md:text-4xl ${prize.color}`}>
+                      {prize.discount}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">הנחה על כל קורס</p>
+                    <p className="font-display font-semibold text-sm text-foreground mt-2">מקום {prize.rank}</p>
+                  </motion.div>
+                ))}
               </div>
-              <div>
-                <p className="font-display font-bold text-foreground">
-                  🏆 השותף המוביל בעונה זוכה ב-40% הנחה על קורס אחד!
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  צברו הכי הרבה נקודות העונה ותזכו בפרס הגדול. המימוש הוא <span className="font-semibold text-foreground">חד-פעמי</span> — קורס אחד בלבד לעונה. כל עונה — הזדמנות חדשה!
-                </p>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
+        {/* My Rank & Progress to Top */}
+        {myRank && (
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.7} className="mb-6">
+            <Card className={`shadow-card bg-card ${myRank <= 3 ? "border-primary/30" : ""}`}>
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold ${
+                      myRank === 1 ? "bg-yellow-500/15 text-yellow-500" :
+                      myRank === 2 ? "bg-slate-400/10 text-slate-400" :
+                      myRank === 3 ? "bg-amber-600/10 text-amber-600" :
+                      "bg-primary/10 text-primary"
+                    }`}>
+                      {myRank <= 3 ? ["👑", "🥈", "🥉"][myRank - 1] : `#${myRank}`}
+                    </div>
+                    <div>
+                      <p className="font-display font-bold text-lg text-foreground">
+                        {myRank <= 3
+                          ? `🎉 אתם במקום ${myRank}! ${myRank === 1 ? "ה-70% הנחה כמעט שלכם!" : myRank === 2 ? "30% הנחה ממתינה לכם!" : "15% הנחה בהישג יד!"}`
+                          : `אתם במקום #${myRank} — הטופ 3 קרוב!`}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {poolData.myPoints.toLocaleString()} נקודות עונתיות
+                        {pointsToTop3 > 0 && ` · עוד ${pointsToTop3.toLocaleString()} נק׳ לטופ 3`}
+                      </p>
+                    </div>
+                  </div>
+                  {myRank > 3 && (
+                    <Link to="/search">
+                      <Button className="bg-primary text-primary-foreground gap-2">
+                        <ArrowUp size={16} /> כתבו ביקורת וטפסו!
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+                {/* Progress bar to 1st place */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                    <span>ההתקדמות שלכם למקום הראשון</span>
+                    <span className="font-medium text-foreground">{progressTo1st.toFixed(0)}%</span>
+                  </div>
+                  <Progress value={progressTo1st} className="h-3" />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Bonus Indicators Row */}
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.7} className="mb-8">
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.9} className="mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Early Bird Status */}
             <Tooltip>
@@ -530,11 +623,12 @@ const PartnerDashboard = () => {
             {rewards.length === 0 ? (
               <Card className="shadow-card bg-card">
                 <CardContent className="p-10 text-center">
-                  <Star size={40} className="mx-auto mb-4 text-muted-foreground/30" />
-                  <p className="text-muted-foreground mb-4">עדיין אין ביקורות בעונה הנוכחית. כתבו ביקורת מאומתת כדי להתחיל לצבור נקודות!</p>
+                  <Target size={48} className="mx-auto mb-4 text-muted-foreground/30" />
+                  <h3 className="font-display font-bold text-lg text-foreground mb-2">המרתון חם — ואתם עוד לא בפנים? 🔥</h3>
+                  <p className="text-muted-foreground mb-4">כתבו את הביקורת הראשונה שלכם וצברו 100 נקודות מיידית!</p>
                   <Link to="/search">
-                    <Button variant="outline" className="gap-2">
-                      <Star size={14} /> מצאו קורס לכתוב עליו ביקורת
+                    <Button className="bg-primary text-primary-foreground gap-2">
+                      <Sparkles size={14} /> מצאו קורס והתחילו לרוץ
                     </Button>
                   </Link>
                 </CardContent>
@@ -590,37 +684,60 @@ const PartnerDashboard = () => {
 
           {/* Sidebar */}
           <div className="space-y-4">
-            {/* Leaderboard */}
+            {/* Leaderboard with Podium */}
             <h2 className="font-display font-bold text-xl text-foreground flex items-center gap-2">
-              <Trophy size={20} className="text-primary" /> מובילי העונה
+              <Trophy size={20} className="text-primary" /> 🏅 מובילי המרתון
             </h2>
-            <Card className="shadow-card bg-card">
+            <Card className="shadow-card bg-card overflow-hidden">
+              {/* Top 3 Podium Visual */}
+              {leaderboard.length >= 3 && (
+                <div className="p-5 pb-3 border-b border-border/30" style={{ background: "linear-gradient(180deg, hsl(var(--primary) / 0.06), transparent)" }}>
+                  <div className="flex items-end justify-center gap-2 h-32">
+                    {/* 2nd place */}
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl mb-1">🥈</span>
+                      <div className="bg-slate-400/10 border border-slate-400/20 rounded-t-lg w-20 h-16 flex flex-col items-center justify-center">
+                        <p className="font-display font-bold text-xs text-foreground truncate w-full text-center px-1">{leaderboard[1].displayName}</p>
+                        <p className="text-[10px] text-muted-foreground">{leaderboard[1].totalPoints.toLocaleString()}</p>
+                        <Badge className="text-[8px] bg-slate-400/15 text-slate-500 border-0 mt-0.5">30% OFF</Badge>
+                      </div>
+                    </div>
+                    {/* 1st place */}
+                    <div className="flex flex-col items-center">
+                      <Crown size={24} className="text-yellow-500 mb-1 animate-pulse" />
+                      <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-t-lg w-24 h-24 flex flex-col items-center justify-center">
+                        <p className="font-display font-bold text-sm text-foreground truncate w-full text-center px-1">{leaderboard[0].displayName}</p>
+                        <p className="text-xs text-primary font-semibold">{leaderboard[0].totalPoints.toLocaleString()}</p>
+                        <Badge className="text-[8px] bg-yellow-500/15 text-yellow-600 border-0 mt-0.5">👑 70% OFF</Badge>
+                      </div>
+                    </div>
+                    {/* 3rd place */}
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl mb-1">🥉</span>
+                      <div className="bg-amber-600/10 border border-amber-600/20 rounded-t-lg w-20 h-12 flex flex-col items-center justify-center">
+                        <p className="font-display font-bold text-xs text-foreground truncate w-full text-center px-1">{leaderboard[2].displayName}</p>
+                        <p className="text-[10px] text-muted-foreground">{leaderboard[2].totalPoints.toLocaleString()}</p>
+                        <Badge className="text-[8px] bg-amber-600/15 text-amber-600 border-0 mt-0.5">15% OFF</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               <CardContent className="p-5">
                 {leaderboard.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-6 text-sm">עוד אין נתוני לידרבורד לעונה הנוכחית</p>
+                  <p className="text-center text-muted-foreground py-6 text-sm">עוד אין נתוני לידרבורד — תהיו הראשונים! 🚀</p>
                 ) : (
-                  <div className="space-y-3">
-                    {leaderboard.map((entry, i) => (
-                      <div key={i} className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${entry.rank <= 3 ? "bg-primary/5" : "bg-secondary/50"}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-display font-bold text-sm ${
-                          entry.rank === 1 ? "bg-accent/20 text-accent" :
-                          entry.rank === 2 ? "bg-muted text-muted-foreground" :
-                          entry.rank === 3 ? "bg-accent/10 text-accent/70" :
-                          "bg-secondary text-muted-foreground"
-                        }`}>
-                          {entry.rank <= 3 ? ["🥇", "🥈", "🥉"][entry.rank - 1] : entry.rank}
+                  <div className="space-y-2">
+                    {leaderboard.slice(3).map((entry, i) => (
+                      <div key={i} className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors bg-secondary/30 ${entry.userId === user.id ? "ring-1 ring-primary/30 bg-primary/5" : ""}`}>
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center font-display font-bold text-xs bg-secondary text-muted-foreground">
+                          {entry.rank}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-display font-semibold text-sm text-foreground truncate flex items-center gap-1">
                             {entry.displayName}
-                            {entry.badge === "elite" && (
-                              <Crown size={12} className="text-accent" />
-                            )}
-                            {entry.rank === 1 && (
-                              <Badge className="bg-accent/15 text-accent border-0 text-[9px] px-1">
-                                🏆 40% OFF
-                              </Badge>
-                            )}
+                            {entry.userId === user.id && <span className="text-[10px] text-primary">(אתם)</span>}
+                            {entry.badge === "elite" && <Crown size={12} className="text-accent" />}
                           </p>
                         </div>
                         <span className="text-xs font-medium text-primary">{entry.totalPoints.toLocaleString()} נק׳</span>
@@ -631,7 +748,7 @@ const PartnerDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* How it works - Enhanced */}
+            {/* How it works */}
             <Card className="shadow-card bg-card">
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2">
@@ -665,10 +782,31 @@ const PartnerDashboard = () => {
                 </div>
                 <div className="flex gap-2">
                   <span className="text-primary font-bold">🔄</span>
-                  <span>הנקודות <strong className="text-foreground">מתאפסות כל עונה</strong> (4 חודשים) — הלייקים נשארים!</span>
+                  <span>הנקודות <strong className="text-foreground">מתאפסות כל 6 חודשים</strong> — הלייקים נשארים!</span>
+                </div>
+                <div className="pt-3 border-t border-border/30 space-y-2">
+                  <p className="text-primary font-medium">🏆 הפרסים:</p>
+                  <p>מקום 1 = <strong className="text-yellow-500">70% הנחה</strong> על כל קורס</p>
+                  <p>מקום 2 = <strong className="text-foreground">30% הנחה</strong> על כל קורס</p>
+                  <p>מקום 3 = <strong className="text-foreground">15% הנחה</strong> על כל קורס</p>
                 </div>
                 <div className="pt-2 border-t border-border/30">
                   <p className="text-primary font-medium">ככל שהביקורת שלכם טובה יותר — אתם מרוויחים יותר! 🚀</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Contact for winners */}
+            <Card className="shadow-card bg-card">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Mail size={18} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-foreground">זכיתם? פנו אלינו!</p>
+                  <a href="mailto:support@reviewshub.info" className="text-xs text-primary hover:underline">
+                    support@reviewshub.info
+                  </a>
                 </div>
               </CardContent>
             </Card>
@@ -699,7 +837,7 @@ const PartnerDashboard = () => {
           </div>
         </div>
 
-        {/* Aggressive Partner CTA */}
+        {/* Bottom CTA */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -711,14 +849,19 @@ const PartnerDashboard = () => {
           <div className="absolute inset-0 noise-overlay opacity-30" />
           <div className="relative">
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">
-              ההשפעה שלכם = ההכנסה שלכם 💪
+              המרתון של 6 חודשים: כתבו. דרגו. זכו בגדול! 🔥
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-              אנחנו מחלקים את הרווחים שלנו 50/50 עם הקהילה. ביקורת איכותית אחת יכולה להניב לכם הכנסה פאסיבית עונה אחר עונה.
+            <p className="text-muted-foreground max-w-xl mx-auto mb-4">
+              70% הנחה למקום ראשון, 30% למקום שני, 15% למקום שלישי.
+              <br />
+              בנוסף — 50% מהעמלות מחולקות לכל הקהילה לפי נקודות.
+            </p>
+            <p className="text-sm text-muted-foreground mb-6">
+              ⏰ רק <strong className="text-foreground">{timeLeft.days} ימים</strong> נותרו בעונה הנוכחית!
             </p>
             <Link to="/search">
-              <Button size="lg" className="bg-primary text-primary-foreground font-bold glow-primary px-10">
-                כתבו ביקורת והתחילו להרוויח
+              <Button size="lg" className="bg-primary text-primary-foreground font-bold glow-primary px-10 gap-2">
+                <Flame size={18} /> כתבו ביקורת והתחילו לרוץ
               </Button>
             </Link>
           </div>
