@@ -645,8 +645,18 @@ const PartnerDashboard = () => {
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <p className="font-display font-semibold text-foreground text-sm flex items-center gap-2">
+                          <p className="font-display font-semibold text-foreground text-sm flex items-center gap-2 flex-wrap">
                             {r.courseName}
+                            {r.isVerified && (
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Badge className="bg-emerald-500/15 text-emerald-600 border-0 text-[10px] gap-0.5">
+                                    <BadgeCheck size={9} /> 2x מאומת
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs">ביקורת מאומתת — נקודות כפולות!</TooltipContent>
+                              </Tooltip>
+                            )}
                             {r.isEarlyBird && (
                               <Tooltip>
                                 <TooltipTrigger>
