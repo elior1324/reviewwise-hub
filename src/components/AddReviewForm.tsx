@@ -70,6 +70,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [showFileDialog, setShowFileDialog] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
