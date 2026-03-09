@@ -401,28 +401,37 @@ const BusinessDashboard = () => {
           </div>
         )}
 
-        {/* Demo Tier Selector — always visible for demo, hidden for real users */}
+        {/* Demo Tier Selector */}
         {isDemo && (
-          <div className="mb-6 flex items-center gap-3 rounded-lg border border-border/50 bg-muted/50 px-4 py-3">
-            <span className="text-xs text-muted-foreground font-medium">סימולציית חבילה:</span>
-            <div className="flex gap-1 rounded-lg bg-background p-1 border border-border/30">
-              {(["free", "pro", "premium"] as DemoTier[]).map((tier) => (
+          <div className="mb-6 rounded-xl border border-border/50 bg-muted/30 p-4">
+            <p className="text-xs text-muted-foreground font-medium mb-3 text-center">🎯 סימולציית חבילה — בחרו חבילה לצפייה בפיצ׳רים</p>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                { id: "free", label: "סטארטר", sublabel: "חינם", icon: null, desc: "פיצ׳רים בסיסיים" },
+                { id: "pro", label: "מקצועי", sublabel: "Pro", icon: Sparkles, desc: "כלים מתקדמים" },
+                { id: "premium", label: "פרימיום", sublabel: "Premium", icon: Crown, desc: "גישה מלאה" },
+              ] as { id: DemoTier; label: string; sublabel: string; icon: any; desc: string }[]).map(({ id, label, sublabel, icon: Icon, desc }) => (
                 <button
-                  key={tier}
-                  onClick={() => setDemoTier(tier)}
-                  className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
-                    demoTier === tier
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                  key={id}
+                  onClick={() => setDemoTier(id)}
+                  className={`relative flex flex-col items-center gap-1 rounded-lg border px-3 py-3 text-center transition-all ${
+                    demoTier === id
+                      ? id === "premium"
+                        ? "border-primary bg-primary/10 shadow-sm"
+                        : id === "pro"
+                        ? "border-accent bg-accent/10 shadow-sm"
+                        : "border-border bg-secondary shadow-sm"
+                      : "border-border/30 hover:border-border hover:bg-muted/50"
                   }`}
                 >
-                  {tier === "free" ? "סטארטר (חינם)" : tier === "pro" ? "מקצועי (Pro)" : "פרימיום (Premium)"}
+                  {Icon && <Icon size={14} className={demoTier === id ? (id === "premium" ? "text-primary" : "text-accent") : "text-muted-foreground"} />}
+                  <span className={`text-xs font-bold ${demoTier === id ? (id === "premium" ? "text-primary" : id === "pro" ? "text-accent" : "text-foreground") : "text-muted-foreground"}`}>
+                    {label}
+                  </span>
+                  <span className={`text-[10px] ${demoTier === id ? "text-muted-foreground" : "text-muted-foreground/60"}`}>{desc}</span>
                 </button>
               ))}
             </div>
-            <span className="text-[10px] text-muted-foreground/70">
-              {demoTier === "free" ? "רוב הפיצ׳רים חסומים" : demoTier === "pro" ? "פיצ׳רים פרימיום חסומים" : "כל הפיצ׳רים זמינים"}
-            </span>
           </div>
         )}
 
@@ -474,45 +483,78 @@ const BusinessDashboard = () => {
         </TooltipProvider>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="glass flex-wrap">
-            <TabsTrigger value="overview">סקירה כללית</TabsTrigger>
-            <TabsTrigger value="notifications">
-              <Bell size={14} className="ml-1" /> התראות
-              <span className="mr-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full">{displayNotifications.length}</span>
-            </TabsTrigger>
-            <TabsTrigger value="invoices" className="gap-1">
-              <FileText size={14} className="ml-1" /> קבלות ואימות
-              {isFree && <ProBadge />}
-            </TabsTrigger>
-            <TabsTrigger value="clicks" className="gap-1">
-              קליקים והמרות
-              {isFree && <ProBadge />}
-            </TabsTrigger>
-            <TabsTrigger value="testimonials" className="gap-1">
-              <Video size={14} className="ml-1" /> סרטוני לקוחות
-              {isFree && <ProBadge />}
-            </TabsTrigger>
-            <TabsTrigger value="ai-report" className="gap-1">
-              <Brain size={14} className="ml-1" /> דוח AI שבועי
-              {!isPremium && <PremiumBadge />}
-            </TabsTrigger>
-            <TabsTrigger value="crm" className="gap-1">
-              <Contact size={14} className="ml-1" /> CRM ולידים
-              {!isPremium && <PremiumBadge />}
-            </TabsTrigger>
-            <TabsTrigger value="webhooks" className="gap-1">
-              <Webhook size={14} className="ml-1" /> Webhooks & API
-              {!isPremium && <PremiumBadge />}
-            </TabsTrigger>
-            <TabsTrigger value="daily-ai" className="gap-1">
-              <CalendarClock size={14} className="ml-1" /> דוחות AI יומיים
-              {!isPremium && <PremiumBadge />}
-            </TabsTrigger>
-            <TabsTrigger value="widget" className="gap-1">
-              <Code2 size={14} className="ml-1" /> ווידג'ט להטמעה
-              {isFree && <ProBadge />}
-            </TabsTrigger>
-          </TabsList>
+          {/* Grouped Tab Navigation */}
+          <div className="rounded-xl border border-border/40 bg-card/50 p-3 space-y-3">
+            {/* Free tier tabs */}
+            <div>
+              <p className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider px-1 mb-1.5">כלים בסיסיים</p>
+              <div className="flex flex-wrap gap-1">
+                <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+                  <TabsTrigger value="overview" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    <BarChart3 size={13} className="ml-1" /> סקירה כללית
+                  </TabsTrigger>
+                  <TabsTrigger value="notifications" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    <Bell size={13} className="ml-1" /> התראות
+                    {displayNotifications.length > 0 && (
+                      <span className="mr-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full leading-none">{displayNotifications.length}</span>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </div>
+
+            {/* Pro tier tabs */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
+                <Sparkles size={10} className="text-accent" />
+                <span className="text-accent/80">מקצועי ומעלה</span>
+              </p>
+              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+                <TabsTrigger value="invoices" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
+                  <FileText size={13} className="ml-1" /> קבלות ואימות
+                  {isFree && <ProBadge />}
+                </TabsTrigger>
+                <TabsTrigger value="clicks" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
+                  <MousePointerClick size={13} className="ml-1" /> קליקים והמרות
+                  {isFree && <ProBadge />}
+                </TabsTrigger>
+                <TabsTrigger value="testimonials" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
+                  <Video size={13} className="ml-1" /> סרטוני לקוחות
+                  {isFree && <ProBadge />}
+                </TabsTrigger>
+                <TabsTrigger value="widget" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
+                  <Code2 size={13} className="ml-1" /> ווידג׳ט להטמעה
+                  {isFree && <ProBadge />}
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* Premium tier tabs */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
+                <Crown size={10} className="text-primary" />
+                <span className="text-primary/80">פרימיום בלבד</span>
+              </p>
+              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+                <TabsTrigger value="ai-report" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <Brain size={13} className="ml-1" /> דוח AI שבועי
+                  {!isPremium && <PremiumBadge />}
+                </TabsTrigger>
+                <TabsTrigger value="daily-ai" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <CalendarClock size={13} className="ml-1" /> דוחות AI יומיים
+                  {!isPremium && <PremiumBadge />}
+                </TabsTrigger>
+                <TabsTrigger value="crm" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <Contact size={13} className="ml-1" /> CRM ולידים
+                  {!isPremium && <PremiumBadge />}
+                </TabsTrigger>
+                <TabsTrigger value="webhooks" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <Webhook size={13} className="ml-1" /> Webhooks & API
+                  {!isPremium && <PremiumBadge />}
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
 
           {/* Overview */}
           <TabsContent value="overview">
