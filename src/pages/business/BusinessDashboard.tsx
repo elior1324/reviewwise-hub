@@ -6,6 +6,8 @@ import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
 import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
 import LockedOverlay from "@/components/LockedOverlay";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
+import AdminPlanSwitcher from "@/components/AdminPlanSwitcher";
+import UpgradeModal from "@/components/UpgradeModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -107,12 +109,24 @@ const BusinessDashboard = () => {
   const [realAiReports, setRealAiReports] = useState<any[]>([]);
   const [generatingReport, setGeneratingReport] = useState(false);
   const [generatingApiKey, setGeneratingApiKey] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [dbTier, setDbTier] = useState<SubscriptionTier>("free");
+  const [monthlyReviewCount, setMonthlyReviewCount] = useState(0);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [upgradeModalTier, setUpgradeModalTier] = useState<"pro" | "premium">("pro");
+  const [upgradeModalFeature, setUpgradeModalFeature] = useState<string | undefined>();
 
-  // Determine tier
-  const currentTier: SubscriptionTier = !isDemo && subscriptionTier !== "free" ? subscriptionTier : demoTier;
+  // Determine tier — use DB tier for real users, demo tier for demo mode
+  const currentTier: SubscriptionTier = !isDemo ? dbTier : demoTier;
   const isPremium = currentTier === "premium";
-  const isPro = currentTier === "pro";
+  const isPro = currentTier === "pro" || currentTier === "premium";
   const isFree = currentTier === "free";
+
+  const handleUpgradeWithModal = (tier: "pro" | "premium" = "pro", featureName?: string) => {
+    setUpgradeModalTier(tier);
+    setUpgradeModalFeature(featureName);
+    setUpgradeModalOpen(true);
+  };
 
   // Fetch real data if user is logged in and owns a business
   useEffect(() => {
@@ -121,6 +135,15 @@ const BusinessDashboard = () => {
         setIsDemo(true);
         setLoadingData(false);
         return;
+      }
+
+      // Check admin role
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      if (roleData?.some((r: any) => r.role === "admin")) {
+        setIsAdmin(true);
       }
 
       // Check if user owns a business
@@ -141,6 +164,18 @@ const BusinessDashboard = () => {
       setBusinessId(biz.id);
       setBusinessSlug(biz.slug);
       setBusinessInfo({ name: biz.name, email: biz.email || user.email || "" });
+      setDbTier((biz.subscription_tier || "free") as SubscriptionTier);
+
+      // Fetch monthly review count
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      const { count: reviewCount } = await supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("business_id", biz.id)
+        .gte("created_at", startOfMonth.toISOString());
+      setMonthlyReviewCount(reviewCount || 0);
 
       // Fetch reviews
       const { data: reviewData } = await supabase
@@ -341,7 +376,7 @@ const BusinessDashboard = () => {
   const totalRevenue = isDemo ? 48850 : displayClicks.reduce((s, c) => s + c.revenue, 0);
 
   const handleUpgrade = () => {
-    navigate("/business/pricing");
+    setUpgradeModalOpen(true);
   };
 
   const PremiumBadge = () => (
@@ -399,6 +434,54 @@ const BusinessDashboard = () => {
             </div>
             <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">מנהל</span>
             <DeleteAccountButton />
+          </div>
+        )}
+
+        {/* Admin Plan Switcher — only for admin users with a real business */}
+        {!isDemo && isAdmin && businessId && (
+          <div className="mb-6">
+            <AdminPlanSwitcher
+              businessId={businessId}
+              currentTier={currentTier}
+              onTierChanged={(newTier) => setDbTier(newTier as SubscriptionTier)}
+            />
+          </div>
+        )}
+
+        {/* Review Limit Warning for Free tier */}
+        {isFree && monthlyReviewCount >= 8 && (
+          <div className={`mb-6 rounded-lg border px-5 py-4 ${
+            monthlyReviewCount >= 10
+              ? "border-destructive/30 bg-destructive/5"
+              : "border-yellow-500/30 bg-yellow-500/5"
+          }`}>
+            <div className="flex items-center gap-3">
+              <AlertTriangle size={20} className={monthlyReviewCount >= 10 ? "text-destructive" : "text-yellow-500"} />
+              <div className="flex-1">
+                {monthlyReviewCount >= 10 ? (
+                  <>
+                    <p className="font-display font-semibold text-destructive text-sm">הגעתם למגבלת הביקורות החודשית (10/10)</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      העסק שלכם הגיע למגבלת 10 ביקורות בחודש בחבילת הסטארטר. שדרגו למקצועי כדי לקבל ביקורות ללא הגבלה!
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-display font-semibold text-yellow-600 text-sm">קרובים למגבלה ({monthlyReviewCount}/10 ביקורות החודש)</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      נותרו {10 - monthlyReviewCount} ביקורות בחבילת הסטארטר. שדרגו למקצועי כדי לקבל ביקורות ללא הגבלה.
+                    </p>
+                  </>
+                )}
+              </div>
+              <Button
+                size="sm"
+                onClick={() => handleUpgradeWithModal("pro", "ביקורות ללא הגבלה")}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
+              >
+                <Sparkles size={14} className="ml-1" /> שדרגו עכשיו
+              </Button>
+            </div>
           </div>
         )}
 
@@ -1054,6 +1137,12 @@ const BusinessDashboard = () => {
       </div>
       <BusinessFooter />
       <AIChatbot context="business" />
+      <UpgradeModal
+        open={upgradeModalOpen}
+        onOpenChange={setUpgradeModalOpen}
+        requiredTier={upgradeModalTier}
+        featureName={upgradeModalFeature}
+      />
     </div>
   );
 };
