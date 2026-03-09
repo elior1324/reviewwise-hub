@@ -155,6 +155,44 @@ export type Database = {
         }
         Relationships: []
       }
+      business_integrations: {
+        Row: {
+          active: boolean
+          business_id: string
+          config: Json
+          created_at: string
+          id: string
+          integration_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id: string
+          config?: Json
+          created_at?: string
+          id?: string
+          integration_type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          integration_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_integrations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_responses: {
         Row: {
           business_id: string
