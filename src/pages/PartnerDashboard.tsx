@@ -128,7 +128,10 @@ const PartnerDashboard = () => {
       const mapped: RewardEntry[] = rewardsData.map((r: any) => {
         const review = reviewMap.get(r.review_id);
         const isEB = earlyBirdSet.has(r.review_id);
+        const isVerified = review?.verified === true;
         if (isEB) ebCount++;
+        const ebMultiplier = isEB ? 1.5 : 1;
+        const verifiedMultiplier = isVerified ? 2 : 1;
         return {
           reviewId: r.review_id,
           reviewText: review?.text?.slice(0, 80) || "ביקורת",
@@ -136,8 +139,9 @@ const PartnerDashboard = () => {
           basePoints: Number(r.base_points),
           likeCount: r.like_count,
           multiplier: Number(r.multiplier),
-          totalPoints: Number(r.total_points) * (isEB ? 1.5 : 1),
+          totalPoints: Number(r.total_points) * ebMultiplier * verifiedMultiplier,
           isEarlyBird: isEB,
+          isVerified,
           helpfulBonus: 0,
         };
       });
