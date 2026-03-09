@@ -461,6 +461,74 @@ export type Database = {
           },
         ]
       }
+      leaderboard_entries: {
+        Row: {
+          created_at: string
+          id: string
+          points: number
+          review_count: number
+          season_id: string
+          updated_at: string
+          user_id: string
+          verified_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          points?: number
+          review_count?: number
+          season_id: string
+          updated_at?: string
+          user_id: string
+          verified_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          points?: number
+          review_count?: number
+          season_id?: string
+          updated_at?: string
+          user_id?: string
+          verified_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaderboard_entries_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leaderboard_seasons: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          is_active: boolean
+          season_name: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          season_name: string
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          season_name?: string
+          starts_at?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           business_id: string
@@ -598,6 +666,7 @@ export type Database = {
           id: string
           partner_badge: string | null
           total_earnings: number | null
+          total_points: number
           updated_at: string
           user_id: string
         }
@@ -609,6 +678,7 @@ export type Database = {
           id?: string
           partner_badge?: string | null
           total_earnings?: number | null
+          total_points?: number
           updated_at?: string
           user_id: string
         }
@@ -620,6 +690,7 @@ export type Database = {
           id?: string
           partner_badge?: string | null
           total_earnings?: number | null
+          total_points?: number
           updated_at?: string
           user_id?: string
         }
@@ -793,6 +864,7 @@ export type Database = {
           like_count: number
           purchase_id: string | null
           rating: number
+          receipt_url: string | null
           text: string
           updated_at: string
           user_id: string
@@ -809,6 +881,7 @@ export type Database = {
           like_count?: number
           purchase_id?: string | null
           rating: number
+          receipt_url?: string | null
           text: string
           updated_at?: string
           user_id: string
@@ -825,6 +898,7 @@ export type Database = {
           like_count?: number
           purchase_id?: string | null
           rating?: number
+          receipt_url?: string | null
           text?: string
           updated_at?: string
           user_id?: string
