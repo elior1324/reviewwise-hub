@@ -107,7 +107,7 @@ const AIChatbot = ({ context = "consumer" }: AIChatbotProps) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 left-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[520px] rounded-2xl overflow-hidden glass border border-border/50 flex flex-col shadow-2xl"
+            className="fixed bottom-24 left-4 right-4 sm:left-6 sm:right-auto z-50 sm:w-[380px] max-h-[70vh] h-[520px] rounded-2xl overflow-hidden glass border border-border/50 flex flex-col shadow-2xl"
           >
             <div className="p-4 border-b border-border/50 flex items-center gap-3" style={{ background: "linear-gradient(135deg, hsl(160 100% 40% / 0.1), transparent)" }}>
               <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center">

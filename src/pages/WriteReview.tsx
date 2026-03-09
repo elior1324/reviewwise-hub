@@ -33,7 +33,7 @@ const WriteReview = () => {
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
-      <div className="container py-10 max-w-2xl">
+      <div className="container py-10 pb-32 max-w-2xl">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center gap-2 text-trust-green text-sm font-medium mb-4">
             <ShieldCheck size={18} />

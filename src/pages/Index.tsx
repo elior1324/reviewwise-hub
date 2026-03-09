@@ -302,8 +302,8 @@ const Index = () => {
       </section>
 
       {/* Top Freelancers */}
-      <section className="container py-20">
-        <div className="flex items-end justify-between mb-10">
+      <section className="container py-10 md:py-20">
+        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <UserCheck size={22} className="text-primary" />
@@ -330,7 +330,7 @@ const Index = () => {
 
       {/* Top Course Providers */}
       <section className="container py-10">
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <BookOpen size={22} className="text-primary" />
@@ -484,7 +484,7 @@ const Index = () => {
           <div className="absolute top-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
           <div className="absolute bottom-0 right-0 w-72 h-72 bg-accent/10 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2" />
           
-          <div className="relative p-10 md:p-16 text-center">
+          <div className="relative p-6 md:p-16 text-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -597,7 +597,7 @@ const Index = () => {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border"
+          className="rounded-2xl p-6 md:p-16 text-center relative overflow-hidden animated-border"
           style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}
         >
           <div className="absolute inset-0 bg-primary/5 blur-3xl" />

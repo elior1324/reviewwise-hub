@@ -111,19 +111,18 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border/50 p-4 space-y-3 glass">
-          <Link to="/" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>עמוד הבית</Link>
-          
-          <Link to="/search" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>קטגוריות</Link>
-          <Link to="/partner" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>שותפים</Link>
-          <Link to="/compare" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>השוואה חכמה</Link>
-          <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
-          <Link to="/business" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>לעסקים</Link>
-          {user && <Link to="/business/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לוח בקרה עסקי</Link>}
-          {!user && <Link to="/auth" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>התחברו / צרו חשבון</Link>}
+        <div className="md:hidden border-t border-border/50 p-4 space-y-1 glass">
+          <Link to="/" className="block text-sm py-3 min-h-[44px] flex items-center" onClick={() => setMobileOpen(false)}>עמוד הבית</Link>
+          <Link to="/search" className="block text-sm py-3 min-h-[44px] flex items-center" onClick={() => setMobileOpen(false)}>קטגוריות</Link>
+          <Link to="/partner" className="block text-sm py-3 min-h-[44px] flex items-center" onClick={() => setMobileOpen(false)}>שותפים</Link>
+          <Link to="/compare" className="block text-sm py-3 min-h-[44px] flex items-center" onClick={() => setMobileOpen(false)}>השוואה חכמה</Link>
+          <Link to="/about" className="block text-sm py-3 min-h-[44px] flex items-center" onClick={() => setMobileOpen(false)}>אודות</Link>
+          <Link to="/business" className="block text-sm py-3 min-h-[44px] flex items-center text-primary" onClick={() => setMobileOpen(false)}>לעסקים</Link>
+          {user && <Link to="/business/dashboard" className="block text-sm py-3 min-h-[44px] flex items-center" onClick={() => setMobileOpen(false)}>לוח בקרה עסקי</Link>}
+          {!user && <Link to="/auth" className="block text-sm py-3 min-h-[44px] flex items-center text-primary" onClick={() => setMobileOpen(false)}>התחברו / צרו חשבון</Link>}
           {user && (
             <>
-              <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-2 text-destructive">
+              <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-3 min-h-[44px] flex items-center text-destructive w-full">
                 התנתקו
               </button>
               <DeleteAccountButton />
