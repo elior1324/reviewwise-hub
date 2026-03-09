@@ -213,8 +213,15 @@ const ReviewCard = ({
 
   return (
     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.2, ease: "easeOut" }}>
-      <Card className={`shadow-card hover:shadow-card-hover transition-all duration-500 animated-border bg-card ${flagged ? "border-destructive/30" : ""}`}>
+      <Card className={`shadow-card hover:shadow-card-hover transition-all duration-500 animated-border bg-card relative ${flagged ? "border-destructive/30" : ""}`}>
         <CardContent className="p-6">
+          {/* Verified badge — top left */}
+          {verified && (
+            <div className="absolute top-3 left-3">
+              <VerifiedBadge />
+            </div>
+          )}
+
           <div className="flex items-start gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0">
               <User size={18} className="text-muted-foreground" />
@@ -224,10 +231,9 @@ const ReviewCard = ({
                 {anonymous ? "אנונימי" : reviewerName}
               </p>
               <p className="text-xs text-muted-foreground">{date}</p>
-              {/* Badges row — below name */}
-              {(isExpert || isEarlyBird || verified) && (
+              {/* Expert & Early Bird badges — below name */}
+              {(isExpert || isEarlyBird) && (
                 <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
-                  {verified && <VerifiedBadge />}
                   {isExpert && (
                     <Tooltip>
                       <TooltipTrigger>
