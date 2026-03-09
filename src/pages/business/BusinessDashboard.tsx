@@ -17,7 +17,7 @@ import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
-  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2
+  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2, Link2
 } from "lucide-react";
 import EmbedWidgetGenerator from "@/components/EmbedWidgetGenerator";
 import IntegrationsTab from "@/components/IntegrationsTab";
