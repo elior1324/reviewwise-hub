@@ -122,21 +122,18 @@ const IntegrationsTab = ({ businessId, isPremium, isDemo, onUpgrade }: Integrati
       return false;
     }
 
-    const { error } = await supabase
-      .from("business_integrations" as any)
-      .upsert(
-        {
-          business_id: businessId,
-          integration_type: type,
-          config,
-          active,
-          updated_at: new Date().toISOString(),
-        } as any,
-        { onConflict: "business_id,integration_type" }
-      );
+    const { data: result, error } = await supabase.functions.invoke("manage-integrations", {
+      body: {
+        action: "save",
+        business_id: businessId,
+        integration_type: type,
+        config,
+        active,
+      },
+    });
 
-    if (error) {
-      console.error("Save integration error:", error);
+    if (error || result?.error) {
+      console.error("Save integration error:", error || result?.error);
       toast({ title: "שגיאה", description: "לא הצלחנו לשמור. נסו שוב.", variant: "destructive" });
       return false;
     }
