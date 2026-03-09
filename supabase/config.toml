@@ -1,35 +1,27 @@
 project_id = "nrtyavfilrmnflikyzed"
 
-[functions.evaluate-category]
-verify_jwt = false
-
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.check-subscription]
-verify_jwt = false
-
-[functions.customer-portal]
-verify_jwt = false
-
-[functions.chat]
-verify_jwt = false
-
-[functions.generate-monthly-top5]
-verify_jwt = false
-
-[functions.compare-items]
-verify_jwt = false
-
-[functions.widget-data]
-verify_jwt = false
-
-[functions.generate-ai-report]
-verify_jwt = false
-
-[functions.fire-webhooks]
-verify_jwt = false
-
-[functions.api-gateway]
-verify_jwt = false
-
+[functions]
+  [functions.api-gateway]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.chat]
+    verify_jwt = false
+  [functions.check-subscription]
+    verify_jwt = false
+  [functions.compare-items]
+    verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = false
+  [functions.customer-portal]
+    verify_jwt = false
+  [functions.evaluate-category]
+    verify_jwt = false
+  [functions.fire-webhooks]
+    verify_jwt = false
+  [functions.generate-ai-report]
+    verify_jwt = false
+  [functions.generate-monthly-top5]
+    verify_jwt = false
+  [functions.widget-data]
+    verify_jwt = false
