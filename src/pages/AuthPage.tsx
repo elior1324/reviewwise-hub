@@ -14,6 +14,7 @@ import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { lovable } from "@/integrations/lovable/index";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 const AuthPage = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
