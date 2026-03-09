@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import StarRating from "@/components/StarRating";
 import ReviewCard from "@/components/ReviewCard";
 import ReviewSummary from "@/components/ReviewSummary";
+import AddReviewForm from "@/components/AddReviewForm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, ExternalLink, Users } from "lucide-react";
@@ -24,6 +25,7 @@ interface CourseData {
   affiliateUrl: string;
   businessSlug: string;
   businessName: string;
+  businessId: string;
 }
 
 const CoursePage = () => {
@@ -62,6 +64,7 @@ const CoursePage = () => {
         affiliateUrl: courseData.affiliate_url || "",
         businessSlug: (courseData.businesses as any)?.slug || "",
         businessName: (courseData.businesses as any)?.name || "",
+        businessId: courseData.business_id,
       });
 
       // Fetch reviews
@@ -204,6 +207,18 @@ const CoursePage = () => {
         </motion.div>
 
         {summary && <ReviewSummary summary={summary} />}
+
+        {/* Add Review */}
+        <div className="mb-8">
+          <h2 className="font-display font-bold text-xl mb-4">הוסיפו תגובה</h2>
+          <AddReviewForm
+            businessSlug={course.businessSlug}
+            businessName={course.businessName}
+            businessId={course.businessId}
+            courseId={course.id}
+            isVerifiedPurchaser={false}
+          />
+        </div>
 
         <div className="flex items-center gap-2 mb-6 flex-wrap">
           <span className="text-sm text-muted-foreground ml-2">סינון:</span>

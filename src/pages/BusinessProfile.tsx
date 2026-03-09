@@ -226,10 +226,11 @@ const BusinessProfile = () => {
 
         {/* Add Review */}
         <div className="mb-8">
-          <h2 className="font-display font-bold text-xl mb-4">הוסיפו ביקורת</h2>
+          <h2 className="font-display font-bold text-xl mb-4">הוסיפו תגובה</h2>
           <AddReviewForm
             businessSlug={business.slug}
             businessName={business.name}
+            businessId={dbBusinessId || undefined}
             isVerifiedPurchaser={false}
           />
         </div>
