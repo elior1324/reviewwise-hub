@@ -15,6 +15,7 @@ import { lovable } from "@/integrations/lovable/index";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { validatePassword } from "@/lib/password-validation";
 
 const AuthPage = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
