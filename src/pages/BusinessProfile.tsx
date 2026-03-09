@@ -105,15 +105,15 @@ const BusinessProfile = () => {
 
         setReviews(reviewData.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
+          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
           rating: r.rating,
-          text: r.text,
+          text: r.review_text || "", // תיקון: שימוש בשם השדה מה-View
           courseName: r.courses?.name || "",
           courseId: r.course_id,
           businessSlug: bizData.slug,
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified || false,
+          verified: r.verified_purchase || false, // תיקון: שימוש בשם השדה מה-View
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at !== r.created_at ? new Date(r.updated_at).toLocaleDateString("he-IL") : undefined,
           flagged: r.flagged || false,
