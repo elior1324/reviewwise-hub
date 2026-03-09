@@ -10,7 +10,6 @@ import { ShieldCheck, ExternalLink, Users } from "lucide-react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import AIChatbot from "@/components/AIChatbot";
 import { generateReviewSummary, type Review } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -244,7 +243,6 @@ const CoursePage = () => {
         )}
       </div>
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

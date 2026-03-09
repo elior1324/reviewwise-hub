@@ -10,7 +10,6 @@ import { Building2, ShieldCheck, Sparkles, Link2 } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import AIChatbot from "@/components/AIChatbot";
 import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -260,7 +259,6 @@ const BusinessRegister = () => {
         </motion.div>
       </div>
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

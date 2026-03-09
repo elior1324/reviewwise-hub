@@ -11,7 +11,6 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import AIChatbot from "@/components/AIChatbot";
 import ReceiptUploader from "@/components/ReceiptUploader";
 
 const WriteReview = () => {
@@ -187,7 +186,6 @@ const WriteReview = () => {
         </motion.div>
       </div>
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

@@ -1,7 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
-import AIChatbot from "@/components/AIChatbot";
 import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
 import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
 import LockedOverlay from "@/components/LockedOverlay";
@@ -1161,7 +1160,6 @@ const BusinessDashboard = () => {
         </Tabs>
       </div>
       <BusinessFooter />
-      <AIChatbot context="business" />
       <GamificationNotifications />
       <UpgradeModal
         open={upgradeModalOpen}

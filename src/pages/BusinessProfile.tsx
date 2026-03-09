@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import AIChatbot from "@/components/AIChatbot";
 import { generateReviewSummary, FREELANCER_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -264,7 +263,6 @@ const BusinessProfile = () => {
         )}
       </div>
       <Footer />
-      <AIChatbot />
     </div>
   );
 };

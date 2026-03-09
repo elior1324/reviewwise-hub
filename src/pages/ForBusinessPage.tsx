@@ -1,7 +1,6 @@
 import Navbar from "@/components/Navbar";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import Footer from "@/components/Footer";
-import AIChatbot from "@/components/AIChatbot";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -174,7 +173,6 @@ const ForBusinessPage = () => {
       </section>
 
       <Footer />
-      <AIChatbot />
     </div>
   );
 };
