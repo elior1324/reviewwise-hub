@@ -47,7 +47,7 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <Navbar />
-      <div className="container flex items-center justify-center py-20">
+      <div className="container flex items-center justify-center py-10 md:py-20 pb-32">
         <Card className="w-full max-w-md elegant-card">
           <CardHeader className="text-center">
             <CardTitle className="font-display text-2xl">איפוס סיסמה</CardTitle>

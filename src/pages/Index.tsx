@@ -597,7 +597,7 @@ const Index = () => {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border"
+          className="rounded-2xl p-6 md:p-16 text-center relative overflow-hidden animated-border"
           style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}
         >
           <div className="absolute inset-0 bg-primary/5 blur-3xl" />

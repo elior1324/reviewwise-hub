@@ -45,7 +45,7 @@ const BusinessFooter = () => (
                 target="_blank"
                 rel="noopener noreferrer"
                 title={label}
-                className="w-8 h-8 rounded-lg bg-muted/50 hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-200"
+                className="w-9 h-9 rounded-lg bg-muted/50 hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-200"
               >
                 <Icon size={15} />
               </a>

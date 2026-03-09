@@ -71,7 +71,7 @@ const AuthPage = () => {
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <Navbar />
-      <div className="container flex items-center justify-center py-20">
+      <div className="container flex items-center justify-center py-10 md:py-20 pb-32">
         <Card className="w-full max-w-md elegant-card">
           <CardHeader className="text-center space-y-2">
             <div className="w-14 h-14 rounded-2xl overflow-hidden mx-auto mb-2">

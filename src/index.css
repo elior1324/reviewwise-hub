@@ -148,6 +148,16 @@
   }
   html {
     direction: rtl;
+    overflow-x: hidden;
+  }
+  body {
+    overflow-x: hidden;
+  }
+  /* Prevent mobile keyboard from hiding focused inputs */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    scroll-margin-bottom: 120px;
   }
   body {
     @apply bg-background text-foreground font-body antialiased;
