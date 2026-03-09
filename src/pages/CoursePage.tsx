@@ -64,6 +64,7 @@ const CoursePage = () => {
         affiliateUrl: courseData.affiliate_url || "",
         businessSlug: (courseData.businesses as any)?.slug || "",
         businessName: (courseData.businesses as any)?.name || "",
+        businessId: courseData.business_id,
       });
 
       // Fetch reviews
