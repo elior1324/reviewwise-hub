@@ -376,7 +376,7 @@ const BusinessDashboard = () => {
   const totalRevenue = isDemo ? 48850 : displayClicks.reduce((s, c) => s + c.revenue, 0);
 
   const handleUpgrade = () => {
-    navigate("/business/pricing");
+    setUpgradeModalOpen(true);
   };
 
   const PremiumBadge = () => (
