@@ -39,6 +39,12 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
           setLoading(false);
           return;
         }
+        const pwCheck = validatePassword(password);
+        if (!pwCheck.valid) {
+          toast({ title: pwCheck.message, variant: "destructive" });
+          setLoading(false);
+          return;
+        }
         const { error } = await signUp(email, password, name);
         if (error) throw error;
         toast({ title: "החשבון נוצר בהצלחה!", description: "בדקו את האימייל שלכם לאימות החשבון." });

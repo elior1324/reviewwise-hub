@@ -40,6 +40,13 @@ const AuthPage = () => {
       toast.error("אנא אמתו שאתם לא רובוט.");
       return;
     }
+    if (mode === "signup") {
+      const pwCheck = validatePassword(password);
+      if (!pwCheck.valid) {
+        toast.error(pwCheck.message);
+        return;
+      }
+    }
     setLoading(true);
 
     if (mode === "login") {
