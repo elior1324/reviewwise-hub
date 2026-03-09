@@ -33,6 +33,7 @@ import PartnerDashboard from "./pages/PartnerDashboard";
 import BusinessLanding from "./pages/business/BusinessLanding";
 import BusinessDashboard from "./pages/business/BusinessDashboard";
 import BusinessAuth from "./pages/business/BusinessAuth";
+import PricingPage from "./pages/business/PricingPage";
 
 const queryClient = new QueryClient();
 
