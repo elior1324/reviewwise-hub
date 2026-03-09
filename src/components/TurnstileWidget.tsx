@@ -7,7 +7,7 @@ interface TurnstileWidgetProps {
 }
 
 // Uses Cloudflare's visible test key by default — replace with your real site key
-const TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
+const TURNSTILE_SITE_KEY = "0x4AAAAAACoTwc1DagD0pies";
 
 const TurnstileWidget = ({ onSuccess, onError, className }: TurnstileWidgetProps) => (
   <div className={className}>
