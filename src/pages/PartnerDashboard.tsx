@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   DollarSign, TrendingUp, Trophy, Star, ThumbsUp, Wallet, Users,
   Award, Crown, Sparkles, Timer, Gift, Zap, Shield, Info, Mail,
-  Flame, Target, ArrowUp,
+  Flame, Target, ArrowUp, BadgeCheck,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,7 @@ interface RewardEntry {
   multiplier: number;
   totalPoints: number;
   isEarlyBird: boolean;
+  isVerified: boolean;
   helpfulBonus: number;
 }
 
@@ -103,7 +104,7 @@ const PartnerDashboard = () => {
       const reviewIds = rewardsData.map((r: any) => r.review_id);
       const { data: reviews } = await supabase
         .from("reviews")
-        .select("id, text, course_id, business_id, courses(name)")
+        .select("id, text, course_id, business_id, verified, courses(name)")
         .in("id", reviewIds.length > 0 ? reviewIds : ["none"]);
 
       const reviewMap = new Map((reviews || []).map((r: any) => [r.id, r]));
@@ -127,7 +128,10 @@ const PartnerDashboard = () => {
       const mapped: RewardEntry[] = rewardsData.map((r: any) => {
         const review = reviewMap.get(r.review_id);
         const isEB = earlyBirdSet.has(r.review_id);
+        const isVerified = review?.verified === true;
         if (isEB) ebCount++;
+        const ebMultiplier = isEB ? 1.5 : 1;
+        const verifiedMultiplier = isVerified ? 2 : 1;
         return {
           reviewId: r.review_id,
           reviewText: review?.text?.slice(0, 80) || "ביקורת",
@@ -135,8 +139,9 @@ const PartnerDashboard = () => {
           basePoints: Number(r.base_points),
           likeCount: r.like_count,
           multiplier: Number(r.multiplier),
-          totalPoints: Number(r.total_points) * (isEB ? 1.5 : 1),
+          totalPoints: Number(r.total_points) * ebMultiplier * verifiedMultiplier,
           isEarlyBird: isEB,
+          isVerified,
           helpfulBonus: 0,
         };
       });
@@ -640,8 +645,18 @@ const PartnerDashboard = () => {
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <p className="font-display font-semibold text-foreground text-sm flex items-center gap-2">
+                          <p className="font-display font-semibold text-foreground text-sm flex items-center gap-2 flex-wrap">
                             {r.courseName}
+                            {r.isVerified && (
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Badge className="bg-emerald-500/15 text-emerald-600 border-0 text-[10px] gap-0.5">
+                                    <BadgeCheck size={9} /> 2x מאומת
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs">ביקורת מאומתת — נקודות כפולות!</TooltipContent>
+                              </Tooltip>
+                            )}
                             {r.isEarlyBird && (
                               <Tooltip>
                                 <TooltipTrigger>
@@ -669,6 +684,11 @@ const PartnerDashboard = () => {
                         <span className="flex items-center gap-1">
                           <TrendingUp size={12} className="text-primary" /> מכפיל: {r.multiplier}x
                         </span>
+                        {r.isVerified && (
+                          <span className="flex items-center gap-1 text-emerald-600">
+                            <BadgeCheck size={12} /> מאומת 2x
+                          </span>
+                        )}
                         {r.isEarlyBird && (
                           <span className="flex items-center gap-1 text-accent">
                             <Zap size={12} /> EB 1.5x
@@ -767,6 +787,10 @@ const PartnerDashboard = () => {
                 <div className="flex gap-2">
                   <span className="text-primary font-bold">3.</span>
                   <span><strong className="text-foreground">50%</strong> מכלל העמלות הולכים לקופה משותפת</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="text-emerald-500 font-bold">✅</span>
+                  <span><strong className="text-foreground">ביקורת מאומתת = 2x נקודות!</strong> אמתו את הרכישה וטפסו מהר כפול</span>
                 </div>
                 <div className="flex gap-2">
                   <span className="text-accent font-bold">⚡</span>
