@@ -122,6 +122,7 @@ const BusinessProfile = () => {
           likeCount: r.like_count || 0,
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: (expertCounts[r.user_id] || 0) >= 3,
+          userId: r.user_id,
           ownerResponse: r.business_responses?.[0] ? {
             text: r.business_responses[0].text,
             date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
@@ -247,7 +248,11 @@ const BusinessProfile = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredReviews.map((review, i) => (
             <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <ReviewCard {...review} />
+              <ReviewCard
+                {...review}
+                onDelete={(reviewId) => setReviews(prev => prev.filter(r => r.id !== reviewId))}
+                onEdit={(reviewId, newText) => setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, text: newText } : r))}
+              />
             </motion.div>
           ))}
         </div>
