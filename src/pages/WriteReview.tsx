@@ -96,6 +96,19 @@ const WriteReview = () => {
                   <Textarea id="review" placeholder="שתפו את החוויה שלכם עם הקורס..." value={reviewText} onChange={e => setReviewText(e.target.value)} rows={5} className="glass border-border/50" />
                 </div>
 
+                {/* Verified tip */}
+                <div className="rounded-lg p-3 border border-emerald-500/20 bg-emerald-500/5">
+                  <div className="flex items-start gap-2.5">
+                    <BadgeCheck size={18} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">רוצים לטפס מהר כפול? 🚀</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        אמתו את הרכישה שלכם וקבלו <strong className="text-emerald-600">2x נקודות</strong> על הביקורת — טפסו בלידרבורד מהר כפול!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" size="lg">
                   שליחת ביקורת
                 </Button>

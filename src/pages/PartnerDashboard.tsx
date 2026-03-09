@@ -789,6 +789,10 @@ const PartnerDashboard = () => {
                   <span><strong className="text-foreground">50%</strong> מכלל העמלות הולכים לקופה משותפת</span>
                 </div>
                 <div className="flex gap-2">
+                  <span className="text-emerald-500 font-bold">✅</span>
+                  <span><strong className="text-foreground">ביקורת מאומתת = 2x נקודות!</strong> אמתו את הרכישה וטפסו מהר כפול</span>
+                </div>
+                <div className="flex gap-2">
                   <span className="text-accent font-bold">⚡</span>
                   <span><strong className="text-foreground">Early Bird:</strong> 5 ביקורות ראשונות = <strong className="text-accent">1.5x בונוס</strong></span>
                 </div>
