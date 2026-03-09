@@ -174,6 +174,9 @@ const AboutPage = () => {
                 </Button>
               </Link>
             </div>
+            <p className="text-sm text-muted-foreground mt-6">
+              שאלות? כתבו לנו: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a>
+            </p>
           </div>
         </div>
       </section>
