@@ -1,18 +1,31 @@
 import { Lock, Crown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import UpgradeModal from "@/components/UpgradeModal";
 
 interface LockedOverlayProps {
   children: React.ReactNode;
   isLocked: boolean;
   tier?: "pro" | "premium";
   onUpgrade?: () => void;
+  featureName?: string;
 }
 
-const LockedOverlay = ({ children, isLocked, tier = "premium", onUpgrade }: LockedOverlayProps) => {
+const LockedOverlay = ({ children, isLocked, tier = "premium", onUpgrade, featureName }: LockedOverlayProps) => {
+  const [modalOpen, setModalOpen] = useState(false);
+
   if (!isLocked) return <>{children}</>;
 
   const isPro = tier === "pro";
+
+  const handleClick = () => {
+    if (onUpgrade) {
+      onUpgrade();
+    } else {
+      setModalOpen(true);
+    }
+  };
 
   return (
     <div className="relative">
@@ -44,13 +57,19 @@ const LockedOverlay = ({ children, isLocked, tier = "premium", onUpgrade }: Lock
             </p>
           </div>
           <Button
-            onClick={onUpgrade}
+            onClick={handleClick}
             className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2"
           >
             {isPro ? <><Sparkles size={14} /> שדרגו למקצועי</> : <><Crown size={14} /> שדרגו לפרימיום</>}
           </Button>
         </div>
       </motion.div>
+      <UpgradeModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        requiredTier={tier}
+        featureName={featureName}
+      />
     </div>
   );
 };
