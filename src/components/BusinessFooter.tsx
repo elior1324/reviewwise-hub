@@ -83,7 +83,7 @@ const BusinessFooter = () => (
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-xs text-muted-foreground text-center md:text-right">
             <p className="font-semibold text-foreground mb-1">ReviewHub בע"מ</p>
-            <p>תל אביב, ישראל</p>
+            <p>ישראל</p>
             <p>אימייל: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></p>
           </div>
           <p className="text-xs text-muted-foreground">
