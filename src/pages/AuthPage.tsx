@@ -35,6 +35,10 @@ const AuthPage = () => {
       toast.error("יש לאשר את מדיניות הפרטיות ותנאי השימוש כדי להירשם.");
       return;
     }
+    if (!turnstileToken) {
+      toast.error("אנא אמתו שאתם לא רובוט.");
+      return;
+    }
     setLoading(true);
 
     if (mode === "login") {
