@@ -10,7 +10,6 @@ import CourseCard from "@/components/CourseCard";
 import { Star, MessageSquare, Link2, Upload, TrendingUp, Users, BarChart3, Send, AlertTriangle, DollarSign, MousePointerClick, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import AIChatbot from "@/components/AIChatbot";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
