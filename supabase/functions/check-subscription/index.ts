@@ -20,7 +20,7 @@ serve(async (req) => {
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
+    { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
   );
 
   try {
@@ -68,6 +68,26 @@ serve(async (req) => {
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       productId = subscription.items.data[0].price.product;
       logStep("Active subscription found", { productId, subscriptionEnd });
+    }
+
+    // Also sync the business subscription_tier in database
+    if (hasActiveSub && productId) {
+      const tierMap: Record<string, string> = {
+        "prod_U6q0bcJeR70YPv": "pro",
+        "prod_U6q1CwTI9xXEeK": "premium",
+      };
+      const newTier = tierMap[productId as string] || "pro";
+      await supabaseClient
+        .from("businesses")
+        .update({ subscription_tier: newTier })
+        .eq("owner_id", user.id);
+      logStep("Synced business tier", { newTier });
+    } else if (!hasActiveSub) {
+      await supabaseClient
+        .from("businesses")
+        .update({ subscription_tier: "free" })
+        .eq("owner_id", user.id);
+      logStep("Reset business tier to free");
     }
 
     return new Response(JSON.stringify({

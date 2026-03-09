@@ -20,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { type Review, type Course } from "@/data/mockData";
 import { useState, useEffect } from "react";
 import { useAuth, SubscriptionTier } from "@/contexts/AuthContext";
+import { useFeatureGating } from "@/hooks/useFeatureGating";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
