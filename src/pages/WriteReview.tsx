@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldCheck, Star, DollarSign, Sparkles } from "lucide-react";
+import { ShieldCheck, Star, DollarSign, Sparkles, BadgeCheck } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
