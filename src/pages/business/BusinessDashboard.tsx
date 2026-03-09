@@ -137,6 +137,15 @@ const BusinessDashboard = () => {
         return;
       }
 
+      // Check admin role
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      if (roleData?.some((r: any) => r.role === "admin")) {
+        setIsAdmin(true);
+      }
+
       // Check if user owns a business
       const { data: biz } = await supabase
         .from("businesses")
@@ -155,6 +164,18 @@ const BusinessDashboard = () => {
       setBusinessId(biz.id);
       setBusinessSlug(biz.slug);
       setBusinessInfo({ name: biz.name, email: biz.email || user.email || "" });
+      setDbTier((biz.subscription_tier || "free") as SubscriptionTier);
+
+      // Fetch monthly review count
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      const { count: reviewCount } = await supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("business_id", biz.id)
+        .gte("created_at", startOfMonth.toISOString());
+      setMonthlyReviewCount(reviewCount || 0);
 
       // Fetch reviews
       const { data: reviewData } = await supabase
