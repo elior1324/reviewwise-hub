@@ -44,6 +44,20 @@ serve(async (req) => {
 
     if (!business_id) throw new Error("business_id is required");
 
+    // Verify caller owns this business
+    const { data: ownerCheck } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("id", business_id)
+      .eq("owner_id", userId)
+      .single();
+
+    if (!ownerCheck) {
+      return new Response(JSON.stringify({ error: "Forbidden: not business owner" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Determine period
     const now = new Date();
     const daysBack = report_type === "daily" ? 1 : 7;
