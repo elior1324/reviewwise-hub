@@ -12,11 +12,52 @@ serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // Authenticate the caller
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userSupabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userSupabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = claimsData.claims.sub;
 
     const { business_id, event, payload } = await req.json();
 
     if (!business_id || !event) throw new Error("business_id and event are required");
+
+    // Use service role client for data operations
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Verify the caller owns this business
+    const { data: business, error: bizError } = await supabase
+      .from("businesses")
+      .select("id, owner_id")
+      .eq("id", business_id)
+      .single();
+
+    if (bizError || !business || business.owner_id !== userId) {
+      return new Response(JSON.stringify({ error: "Forbidden: you do not own this business" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Get active webhooks for this business and event
     const { data: webhooks, error } = await supabase
@@ -88,7 +129,6 @@ serve(async (req) => {
           }
 
           if (intg.integration_type === "hubspot" && intg.config?.api_key) {
-            // Send lead/review data to HubSpot as a contact
             const contactData = {
               properties: {
                 email: payload?.customer_email || payload?.reviewer_email || "",
