@@ -330,7 +330,7 @@ const Index = () => {
 
       {/* Top Course Providers */}
       <section className="container py-10">
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <BookOpen size={22} className="text-primary" />
