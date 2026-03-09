@@ -109,12 +109,24 @@ const BusinessDashboard = () => {
   const [realAiReports, setRealAiReports] = useState<any[]>([]);
   const [generatingReport, setGeneratingReport] = useState(false);
   const [generatingApiKey, setGeneratingApiKey] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [dbTier, setDbTier] = useState<SubscriptionTier>("free");
+  const [monthlyReviewCount, setMonthlyReviewCount] = useState(0);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [upgradeModalTier, setUpgradeModalTier] = useState<"pro" | "premium">("pro");
+  const [upgradeModalFeature, setUpgradeModalFeature] = useState<string | undefined>();
 
-  // Determine tier
-  const currentTier: SubscriptionTier = !isDemo && subscriptionTier !== "free" ? subscriptionTier : demoTier;
+  // Determine tier — use DB tier for real users, demo tier for demo mode
+  const currentTier: SubscriptionTier = !isDemo ? dbTier : demoTier;
   const isPremium = currentTier === "premium";
-  const isPro = currentTier === "pro";
+  const isPro = currentTier === "pro" || currentTier === "premium";
   const isFree = currentTier === "free";
+
+  const handleUpgradeWithModal = (tier: "pro" | "premium" = "pro", featureName?: string) => {
+    setUpgradeModalTier(tier);
+    setUpgradeModalFeature(featureName);
+    setUpgradeModalOpen(true);
+  };
 
   // Fetch real data if user is logged in and owns a business
   useEffect(() => {
