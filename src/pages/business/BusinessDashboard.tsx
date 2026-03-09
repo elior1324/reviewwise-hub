@@ -437,6 +437,54 @@ const BusinessDashboard = () => {
           </div>
         )}
 
+        {/* Admin Plan Switcher — only for admin users with a real business */}
+        {!isDemo && isAdmin && businessId && (
+          <div className="mb-6">
+            <AdminPlanSwitcher
+              businessId={businessId}
+              currentTier={currentTier}
+              onTierChanged={(newTier) => setDbTier(newTier as SubscriptionTier)}
+            />
+          </div>
+        )}
+
+        {/* Review Limit Warning for Free tier */}
+        {isFree && monthlyReviewCount >= 8 && (
+          <div className={`mb-6 rounded-lg border px-5 py-4 ${
+            monthlyReviewCount >= 10
+              ? "border-destructive/30 bg-destructive/5"
+              : "border-yellow-500/30 bg-yellow-500/5"
+          }`}>
+            <div className="flex items-center gap-3">
+              <AlertTriangle size={20} className={monthlyReviewCount >= 10 ? "text-destructive" : "text-yellow-500"} />
+              <div className="flex-1">
+                {monthlyReviewCount >= 10 ? (
+                  <>
+                    <p className="font-display font-semibold text-destructive text-sm">הגעתם למגבלת הביקורות החודשית (10/10)</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      העסק שלכם הגיע למגבלת 10 ביקורות בחודש בחבילת הסטארטר. שדרגו למקצועי כדי לקבל ביקורות ללא הגבלה!
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-display font-semibold text-yellow-600 text-sm">קרובים למגבלה ({monthlyReviewCount}/10 ביקורות החודש)</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      נותרו {10 - monthlyReviewCount} ביקורות בחבילת הסטארטר. שדרגו למקצועי כדי לקבל ביקורות ללא הגבלה.
+                    </p>
+                  </>
+                )}
+              </div>
+              <Button
+                size="sm"
+                onClick={() => handleUpgradeWithModal("pro", "ביקורות ללא הגבלה")}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
+              >
+                <Sparkles size={14} className="ml-1" /> שדרגו עכשיו
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Demo Tier Selector */}
         {isDemo && (
           <div className="mb-6 rounded-xl border border-border/50 bg-muted/30 p-4">
