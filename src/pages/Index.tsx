@@ -136,8 +136,9 @@ const Index = () => {
     };
 
     const fetchReviews = async () => {
+      // Fetch recent reviews via the secure public_reviews view
       const { data } = await supabase
-        .from("reviews")
+        .from("public_reviews")
         .select("*, courses(name), business_responses(text, created_at)")
         .order("created_at", { ascending: false })
         .limit(6);
@@ -186,7 +187,6 @@ const Index = () => {
           } : undefined,
         }));
         setRecentReviews(mapped);
-        setStats(prev => ({ ...prev, reviews: data.length }));
       }
     };
 
@@ -662,18 +662,18 @@ const Index = () => {
             ].map(({ q, a }, i) => (
               <motion.div
                 key={i}
-                initial="hidden"
-                whileInView="visible"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                variants={fadeUp}
-                custom={Math.floor(i / 3)}
+                transition={{ delay: i * 0.05 }}
+                className="group border border-border/40 rounded-xl overflow-hidden bg-card/40 hover:bg-card/60 transition-colors"
               >
-                <details className="group rounded-xl border border-border/50 bg-card hover:border-primary/30 transition-colors">
-                  <summary className="flex items-center justify-between cursor-pointer p-5 text-sm font-display font-semibold text-foreground list-none">
-                    <span>{q}</span>
-                    <ChevronDown size={16} className="text-muted-foreground transition-transform duration-300 group-open:rotate-180 shrink-0 mr-3" />
+                <details className="w-full">
+                  <summary className="flex items-center justify-between p-5 cursor-pointer list-none font-display font-bold text-foreground group-open:text-primary transition-colors">
+                    {q}
+                    <ChevronDown size={18} className="text-muted-foreground transition-transform group-open:rotate-180" />
                   </summary>
-                  <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-border/30 pt-4">
+                  <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
                     {a}
                   </div>
                 </details>
