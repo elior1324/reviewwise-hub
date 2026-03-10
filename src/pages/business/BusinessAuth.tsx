@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import { validatePassword } from "@/lib/password-validation";
+import { translateAuthError } from "@/lib/auth-errors";
 
 interface BusinessAuthProps {
   mode: "login" | "signup";
@@ -45,8 +46,12 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
           setLoading(false);
           return;
         }
-        const { error } = await signUp(email, password, name);
+        const { data, error } = await signUp(email, password, name);
         if (error) throw error;
+        if (!data?.user) {
+          // Supabase returned no error but also no user — auth hook likely blocked signup silently
+          throw new Error("hook — signup blocked silently. Check Supabase → Auth → Hooks and Logs.");
+        }
         toast({ title: "החשבון נוצר בהצלחה!", description: "בדקו את האימייל שלכם לאימות החשבון." });
       } else {
         const { error } = await signIn(email, password);
@@ -54,7 +59,7 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
         navigate("/business/dashboard");
       }
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast({ title: "שגיאה", description: translateAuthError(err.message), variant: "destructive" });
     } finally {
       setLoading(false);
     }

@@ -23,8 +23,8 @@ interface AuthContextType {
   subscriptionEnd: string | null;
   isSubscribed: boolean;
   checkSubscription: () => Promise<void>;
-  signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, displayName?: string) => Promise<{ data: any; error: any }>;
+  signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -101,7 +101,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user, checkSubscription]);
 
   const signUp = async (email: string, password: string, displayName?: string) => {
-    const { error } = await supabase.auth.signUp({
+    console.log("[Auth] signUp called for:", email, "| origin:", window.location.origin);
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -109,12 +110,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         data: { display_name: displayName },
       },
     });
-    return { error };
+    if (error) {
+      // Log full error object — visible in DevTools Console for debugging
+      console.error("[Auth] signUp error:", error.message, "| status:", error.status, "| full:", error);
+    } else {
+      // data.user is null when: (a) email confirmation is required, or (b) an auth hook blocked silently
+      // data.session is null until email is confirmed
+      console.log("[Auth] signUp response — user:", data?.user?.id ?? "null (check auth hooks in Supabase dashboard)", "| session:", !!data?.session);
+      if (!data?.user) {
+        console.warn("[Auth] signUp returned no user and no error. Most likely causes:\n" +
+          "  1. Auth email hook is configured but failing (check Supabase → Auth → Hooks)\n" +
+          "  2. Email confirmation is required — user exists but is unconfirmed\n" +
+          "  3. Supabase project is paused\n" +
+          "  Check: Supabase Dashboard → Logs → Auth for the real error."
+        );
+      }
+    }
+    return { data, error };
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    console.log("[Auth] signIn called for:", email);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      console.error("[Auth] signIn error:", error.message, "| status:", error.status, "| full:", error);
+    } else {
+      console.log("[Auth] signIn success — user:", data?.user?.id);
+    }
+    return { data, error };
   };
 
   const signOut = async () => {

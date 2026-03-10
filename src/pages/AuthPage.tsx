@@ -16,6 +16,7 @@ import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { validatePassword } from "@/lib/password-validation";
+import { translateAuthError } from "@/lib/auth-errors";
 
 const AuthPage = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -52,15 +53,20 @@ const AuthPage = () => {
     if (mode === "login") {
       const { error } = await signIn(email, password);
       if (error) {
-        toast.error(error.message === "Invalid login credentials" ? "פרטי התחברות שגויים" : error.message);
+        const msg = translateAuthError(error.message);
+        toast.error(msg);
       } else {
         toast.success("התחברתם בהצלחה!");
         navigate("/");
       }
     } else {
-      const { error } = await signUp(email, password, displayName);
+      const { data, error } = await signUp(email, password, displayName);
       if (error) {
-        toast.error(error.message);
+        const msg = translateAuthError(error.message);
+        toast.error(msg);
+      } else if (!data?.user) {
+        // Supabase returned no error but also no user — auth hook likely blocked signup silently
+        toast.error("ההרשמה נכשלה — ייתכן בעיה בשרת. פתחו את מסוף הדפדפן (F12) לפרטים.");
       } else {
         toast.success("נרשמתם בהצלחה! בדקו את המייל לאימות.");
       }
