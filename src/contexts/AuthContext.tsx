@@ -109,7 +109,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user, checkSubscription]);
 
   const signUp = async (email: string, password: string, displayName?: string) => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
     console.log("[Auth] signUp called for:", email, "| origin:", window.location.origin);
+    console.log("[Auth] Supabase URL:", supabaseUrl);
+
+    // ── Pre-flight: verify Supabase is actually reachable ─────────────────────
+    // If this fetch returns a non-Supabase response or fails, calls are being
+    // intercepted (e.g. Lovable's preview environment).
+    try {
+      const probe = await fetch(`${supabaseUrl}/auth/v1/settings`, {
+        headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string },
+      });
+      const probeJson = await probe.json().catch(() => null);
+      console.log("[Auth] Supabase pre-flight check:", probe.status, JSON.stringify(probeJson)?.slice(0, 200));
+      if (probe.status === 404 || !probeJson) {
+        console.error("[Auth] ⚠️  Supabase URL unreachable or returning unexpected response — calls may be intercepted by the development environment.");
+      }
+    } catch (probeErr) {
+      console.error("[Auth] ⚠️  Supabase pre-flight fetch failed:", probeErr);
+    }
 
     // Set flag so onAuthStateChange suppresses any SIGNED_IN event during this flow
     signingUpRef.current = true;
