@@ -62,7 +62,7 @@ const Dashboard = () => {
       // ✅ Select only columns that exist in the businesses table
       const { data: biz } = await supabase
         .from("businesses")
-        .select("id, slug, business_name, website, email, phone, category, description")
+        .select("id, slug, name, website, email, phone, category, description")
         .eq("owner_id", user.id)
         .maybeSingle();
 
