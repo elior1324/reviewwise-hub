@@ -242,7 +242,7 @@ const TermsAndConditions = () => {
               ReviewHub שומרת לעצמה את הזכות, אך <strong>אינה מחויבת</strong>, להסיר, לערוך או לחסום כל תוכן לפי שיקול דעתה הבלעדי. הסרת תוכן או אי-הסרתו אינה מהווה נטילת אחריות על תוכן כלשהו ואינה הופכת את ReviewHub לצד בסכסוך.
             </p>
             <p className="mb-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-foreground font-medium">
-              ⚠️ כל אדם או עסק הסבור כי תוכן בפלטפורמה פוגע בזכויותיו רשאי לפנות אלינו בכתובת <a href="mailto:legal@reviewhub.co.il" className="text-primary hover:underline">legal@reviewhub.co.il</a> לצורך דיווח. ReviewHub תשקול את הפנייה בהתאם לדין החל, אך מבהירה כי <strong>כל הליך משפטי בנוגע לתוכן יתנהל בין כותב התוכן לבין הצד הנפגע ישירות, ללא מעורבות ReviewHub.</strong>
+              ⚠️ כל אדם או עסק הסבור כי תוכן בפלטפורמה פוגע בזכויותיו רשאי לפנות אלינו בכתובת <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a> לצורך דיווח. ReviewHub תשקול את הפנייה בהתאם לדין החל, אך מבהירה כי <strong>כל הליך משפטי בנוגע לתוכן יתנהל בין כותב התוכן לבין הצד הנפגע ישירות, ללא מעורבות ReviewHub.</strong>
             </p>
             <p className="font-semibold text-foreground mb-2">שיפוי בגין תוכן משתמשים:</p>
             <p>
