@@ -37,7 +37,7 @@ const BusinessProfile = () => {
       //   Rating and reviewCount are computed below from the reviews we fetch.
       const { data: bizData } = await supabase
         .from("businesses")
-        .select("id, slug, business_name, website, email, phone, category, description, verified")
+        .select("id, slug, name, website, email, phone, category, description, verified")
         .eq("slug", slug)
         .maybeSingle();
 
