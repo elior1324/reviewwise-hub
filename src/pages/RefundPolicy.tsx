@@ -1,40 +1,202 @@
+/**
+ * RefundPolicy.tsx
+ * מדיניות ביטולים והחזרים — ReviewHub
+ * עומד ב: חוק הגנת הצרכן התשמ"א-1981, תקנות הגנת הצרכן (ביטול עסקה) התשע"א-2010
+ *          חוק כרטיסי חיוב התשמ"ו-1986
+ * נתיב: /refund-policy
+ */
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { RotateCcw, ChevronDown, Mail, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { motion } from "framer-motion";
-import { RotateCcw, FileText, CreditCard, Clock, Mail, AlertTriangle, Shield } from "lucide-react";
-import { ReactNode } from "react";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+const META = {
+  updated: "10 במרץ 2026",
+  email:   "billing@reviewhub.co.il",
 };
 
-const Section = ({ icon: Icon, title, children }: { icon: any; title: string; children: ReactNode }) => (
-  <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
-    <div className="flex items-center gap-3 mb-4">
-      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-        <Icon size={20} className="text-primary" />
-      </div>
-      <h2 className="font-display font-bold text-xl text-foreground">{title}</h2>
-    </div>
-    <div className="pr-[52px] text-muted-foreground leading-relaxed">{children}</div>
-  </motion.section>
-);
+const HERO_BOXES = [
+  { label: "ימי ביטול", value: "14", sub: "ימי עסקים מלאים לביטול ללא הסבר", color: "text-emerald-400" },
+  { label: "זמן החזר", value: "5–14", sub: "ימי עסקים לקבלת הכסף חזרה", color: "text-blue-400" },
+  { label: "עמלת ביטול", value: "₪0", sub: "אין עמלה על ביטול בזמן", color: "text-purple-400" },
+];
 
-const RefundPolicy = () => {
+const SECTIONS = [
+  {
+    title: "1. תחולת המדיניות",
+    body: [
+      { type: "p", text: "מדיניות זו חלה על שירותים בתשלום של ReviewHub בלבד:" },
+      { type: "list", items: [
+        "מנוי Pro לבעלי עסקים — ₪189/חודש",
+        "מנוי Premium לבעלי עסקים — ₪479/חודש",
+        "רווחי תוכנית שותפים — ראה סעיף 5",
+      ]},
+      { type: "p", text: "אינה חלה על: קורסים ושירותים של עסקים צד-שלישי הרשומים בפלטפורמה. לגבי החזרים עבורם — פנה ישירות לבעל הקורס." },
+    ],
+  },
+  {
+    title: "2. ביטול בתוך 14 ימי עסקים (חוק הגנת הצרכן)",
+    body: [
+      { type: "p", text: "בהתאם לחוק הגנת הצרכן התשמ\"א-1981 (סעיף 14ג) ותקנות הגנת הצרכן (ביטול עסקה) התשע\"א-2010:" },
+      { type: "list", items: [
+        "זכות ביטול מלאה ללא צורך בהסבר תוך 14 ימי עסקים מיום הרכישה",
+        "החזר כספי מלא תוך 14 ימי עסקים מקבלת בקשת הביטול",
+        "ביטול ניתן: בדואר אלקטרוני, דרך ממשק האתר (הגדרות → מנוי → ביטול), או בפנייה ישירה",
+        "אין עמלת ביטול",
+      ]},
+    ],
+  },
+  {
+    title: "3. ביטול לאחר 14 ימי עסקים",
+    body: [
+      { type: "list", items: [
+        "ביטול מנוי חודשי — ניתן בכל עת; החיוב ייפסק בסוף תקופת החיוב הנוכחית",
+        "אין החזר יחסי על חלק שעבר מהחודש (אלא אם כן נגרמה תקלה מצידנו)",
+        "מנוי שנתי (אם יופעל בעתיד) — ביטול יקנה החזר יחסי על החודשים שנותרו",
+      ]},
+    ],
+  },
+  {
+    title: "4. החזרים במקרים מיוחדים",
+    body: [
+      { type: "subtitle", text: "החזר מלא מובטח:" },
+      { type: "list", items: [
+        "תקלה טכנית של ReviewHub שמנעה שימוש ביותר מ-48 שעות רצופות",
+        "חיוב כפול בטעות",
+        "שירות שלא סופק כמוסכם",
+      ]},
+      { type: "subtitle", text: "החזר חלקי (בשיקול דעת):" },
+      { type: "list", items: [
+        "אם הפסקת שימוש בתוך 7 ימים מתחילת תקופת חיוב חדשה",
+        "נסיבות חריגות אישיות — כל מקרה לגופו",
+      ]},
+      { type: "subtitle", text: "אין החזר:" },
+      { type: "list", items: [
+        "לאחר 14 ימי עסקים ושימוש נרחב בשירות",
+        "אם חשבון הושעה בשל הפרת תנאי שימוש",
+        "על אי-שביעות רצון מביקורות שקיבל עסקך (שאינן בשליטתנו)",
+      ]},
+    ],
+  },
+  {
+    title: "5. תוכנית שותפים — משיכת רווחים",
+    body: [
+      { type: "list", items: [
+        "רווחים מחושבים בסוף חודש לוח ומועברים עד ה-10 בחודש שלאחריו",
+        "מינימום למשיכה: 50 ₪ — יתרה קטנה יותר תגולגל לחודש הבא",
+        "רווחים שנצברו בדרכי מרמה — יבוטלו ללא החזר",
+        "שינוי שיעורי עמלה: הודעה 30 יום מראש; לא חל על רווחים שנצברו לפני השינוי",
+        "חשבון שנסגר: ניתן למשוך רווחים תוך 60 יום; לאחר מכן מועברים לקרן הקהילה",
+      ]},
+    ],
+  },
+  {
+    title: "6. הליך הגשת בקשת ביטול/החזר",
+    body: [
+      { type: "p", text: `שלח דואר אלקטרוני ל-${META.email} עם:` },
+      { type: "list", items: [
+        "שם מלא וכתובת אימייל החשבון",
+        "מספר עסקה (מופיע בחשבונית)",
+        "תיאור קצר של הסיבה",
+        "צילום מסך במקרה של תקלה טכנית",
+      ]},
+      { type: "p", text: "מענה: עד 3 ימי עסקים. עיבוד ההחזר: 5–14 ימי עסקים לאחר האישור (תלוי בחברת האשראי)." },
+    ],
+  },
+  {
+    title: "7. סכסוכי חיוב (Chargeback)",
+    body: [
+      { type: "p", text: `לפני פתיחת סכסוך דרך חברת האשראי — אנא פנה אלינו ל-${META.email}. ברוב המקרים נוכל לפתור מהר יותר.` },
+      { type: "p", text: "אם פתחת Chargeback ללא פנייה מוקדמת — שמורה לנו הזכות לעדכן את מצב חשבונך ולדחות בקשות שירות עתידיות עד ליישוב. מדיניות זו אינה גורעת מזכויותיך לפי חוק כרטיסי חיוב." },
+    ],
+  },
+];
+
+const AccordionItem = ({ section }: { section: typeof SECTIONS[0] }) => {
+  const [open, setOpen] = useState(false);
   return (
-    <div className="min-h-screen bg-background noise-overlay" dir="rtl">
-      <Navbar />
-
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
-        <div className="container py-16 md:py-24 relative">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
-              <RotateCcw size={16} /> מדיניות ביטולים
+    <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/[0.03]">
+      <button onClick={() => setOpen(v => !v)} className="w-full flex items-center justify-between px-6 py-4 text-right hover:bg-white/[0.04] transition-colors" aria-expanded={open}>
+        <span className="font-semibold text-white text-sm">{section.title}</span>
+        <ChevronDown size={16} className={`text-white/40 transition-transform duration-200 shrink-0 ml-4 ${open ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+            <div className="px-6 pb-5 pt-1 border-t border-white/10 space-y-3">
+              {section.body.map((block, i) => {
+                if (block.type === "p") return <p key={i} className="text-sm text-white/60 leading-relaxed">{block.text}</p>;
+                if (block.type === "subtitle") return <p key={i} className="text-sm font-semibold text-white/80 mt-2">{block.text}</p>;
+                if (block.type === "list") return (
+                  <ul key={i} className="space-y-1.5">
+                    {(block.items as string[]).map((item, j) => (
+                      <li key={j} className="flex gap-2 text-sm text-white/60"><span className="text-emerald-400 shrink-0 mt-0.5">•</span><span>{item}</span></li>
+                    ))}
+                  </ul>
+                );
+                return null;
+              })}
             </div>
-            <h1 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-4">
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default function RefundPolicy() {
+  return (
+    <div className="min-h-screen bg-background" dir="rtl">
+      <Navbar />
+      <main className="container max-w-2xl py-16">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-semibold mb-5">
+            <RotateCcw size={13} /> זכויות צרכן מוגנות בחוק
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-3">מדיניות ביטולים והחזרים</h1>
+          <p className="text-white/50 text-sm">עודכן: {META.updated} · בהתאם לחוק הגנת הצרכן התשמ"א-1981</p>
+        </motion.div>
+
+        {/* Quick stats */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className="grid grid-cols-3 gap-3 mb-8">
+          {HERO_BOXES.map((b, i) => (
+            <div key={i} className="bg-white/[0.04] border border-white/10 rounded-2xl p-4 text-center">
+              <div className={`text-2xl font-bold ${b.color} mb-1`}>{b.value}</div>
+              <div className="text-[11px] text-white/40 leading-tight">{b.sub}</div>
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Legal note */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
+          className="flex gap-3 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-2xl mb-6">
+          <AlertCircle size={16} className="text-yellow-400 shrink-0 mt-0.5" />
+          <p className="text-xs text-white/50 leading-relaxed">
+            לפי תקנות הגנת הצרכן (ביטול עסקה) התשע"א-2010, זכות הביטול תוך 14 ימי עסקים היא <strong className="text-white/80">זכות חוקית בלתי ניתנת לוויתור</strong>.
+            לא ניתן להגביל אותה בחוזה.
+          </p>
+        </motion.div>
+
+        <div className="space-y-2">
+          {SECTIONS.map((s, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.03 }}>
+              <AccordionItem section={s} />
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+          className="mt-8 flex items-center justify-center gap-2 p-4 bg-emerald-500/5 border border-emerald-500/15 rounded-2xl text-sm text-white/50">
+          <Mail size={14} className="text-emerald-400" />
+          לבקשות ביטול והחזר:&nbsp;<a href={`mailto:${META.email}`} className="text-emerald-400 hover:underline">{META.email}</a>
+        </motion.div>
+      </main>
+      <Footer />
+    </div>
+  );
+}            <h1 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-4">
               מדיניות ביטול עסקה והחזרים
             </h1>
             <p className="text-muted-foreground text-lg">
