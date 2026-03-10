@@ -83,21 +83,11 @@ const BusinessProfile = () => {
       // Owner responses: table is review_responses (NOT business_responses)
       //   columns: id, review_id, business_id, response_text, created_at
       //   joined via review_id FK (PostgREST: review_responses(response_text, created_at))
-      const { data: reviewData } = await supabase
-        .from("reviews")
-        .select("*, courses(course_name), review_responses(response_text, created_at)")
-        .eq("course_id", courseData?.map((c: any) => c.id) as any)  // fallback below
-        .order("created_at", { ascending: false });
-
-      // The above filter won't work well with an array. Use a proper approach:
-      // Re-fetch by business_id via the courses junction.
-      // reviews doesn't have business_id directly — we filter by course_ids.
-      const courseIds = (courseData || []).map((c: any) => c.id);
-
+      // reviews has business_id directly
       const { data: reviewDataFinal } = await supabase
         .from("reviews")
-        .select("*, courses(course_name), review_responses(response_text, created_at)")
-        .in("course_id", courseIds.length > 0 ? courseIds : ["00000000-0000-0000-0000-000000000000"])
+        .select("*, courses(name), business_responses(text, created_at)")
+        .eq("business_id", bizData.id)
         .order("created_at", { ascending: false });
 
       if (reviewDataFinal) {
