@@ -1,3 +1,15 @@
+# ── Environment / Secrets — NEVER commit these ────────────────────────────────
+# SECURITY: .env contains publishable keys and project IDs.
+# Even "safe" VITE_ vars leak your project ID and can be used for enumeration.
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+# Supabase service-role key (NEVER in frontend, but guard anyway)
+.env.service
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
 # Logs
 logs
 *.log
