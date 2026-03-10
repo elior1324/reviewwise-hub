@@ -1,4 +1,5 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, MotionConfig } from "framer-motion";
+import { FloatingPaths } from "@/components/ui/background-paths";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -217,22 +218,40 @@ const Index = () => {
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 40]);
 
   return (
+    // MotionConfig propagates `reducedMotion="user"` to every framer-motion
+    // element on the page — when the OS "Reduce Motion" setting is on, all
+    // animations are suppressed automatically (WCAG 2.1 SC 2.3.3 / AAA).
+    <MotionConfig reducedMotion="user">
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
 
       <FloatingEarnCTA />
 
       {/* Hero — Audience-First */}
-      <section ref={heroRef} className="relative overflow-hidden">
-        <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
-        <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl animate-float" />
-        <div className="absolute bottom-10 right-1/4 w-64 h-64 rounded-full bg-accent/5 blur-3xl animate-float" style={{ animationDelay: "3s" }} />
+      {/*
+        aria-labelledby links this landmark to the visible h1 heading so that
+        screen readers announce "Hero region: מצאו את בעל המקצוע…" (WCAG 1.3.1).
+      */}
+      <section ref={heroRef} className="relative overflow-hidden" aria-labelledby="hero-heading">
+        {/* Decorative gradient overlay — hidden from assistive technology */}
+        <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} aria-hidden="true" />
+        {/* Animated teal SVG path decorations (FloatingPaths) */}
+        <FloatingPaths position={1} />
+        <FloatingPaths position={-1} />
+        {/* Decorative blur orbs — purely visual, skip for AT */}
+        <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl animate-float" aria-hidden="true" />
+        <div className="absolute bottom-10 right-1/4 w-64 h-64 rounded-full bg-accent/5 blur-3xl animate-float" style={{ animationDelay: "3s" }} aria-hidden="true" />
         <motion.div className="container py-16 md:py-24 relative" style={{ opacity: heroOpacity, y: heroY }}>
           <motion.div className="max-w-4xl mx-auto text-center" initial="hidden" animate="visible">
             <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
-              <ShieldCheck size={16} /> רק ביקורות מאומתות
+              {/* Icon is decorative — label text "רק ביקורות מאומתות" conveys the meaning */}
+              <ShieldCheck size={16} aria-hidden="true" /> רק ביקורות מאומתות
             </motion.div>
-            <motion.h1 variants={fadeUp} custom={1} className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-4">
+            {/*
+              id="hero-heading" is referenced by aria-labelledby on the <section>
+              so screen readers announce the heading when navigating by landmarks.
+            */}
+            <motion.h1 id="hero-heading" variants={fadeUp} custom={1} className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-4">
               מצאו את{" "}
               <span className="gradient-text glow-text">בעל המקצוע</span>
               {" "}או{" "}
@@ -242,11 +261,18 @@ const Index = () => {
             <motion.p variants={fadeUp} custom={2} className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
               פרילנסרים, קורסים, סדנאות, הרצאות ומנטורינג — עם ביקורות מאומתות מלקוחות שבאמת רכשו.
             </motion.p>
-            <motion.form variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex gap-3 max-w-lg mx-auto mb-12">
+            {/*
+              role="search" identifies this as the site's primary search form for
+              screen reader landmark navigation (WCAG 1.3.1 / ARIA landmark roles).
+              aria-label distinguishes it from any other search forms on the page.
+            */}
+            <motion.form role="search" aria-label="חיפוש פרילנסרים וקורסים" variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex gap-3 max-w-lg mx-auto mb-12">
               <div className="relative flex-1">
-                <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                {/* Search icon is decorative — the input's aria-label conveys the purpose */}
+                <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
                   placeholder="חפשו פרילנסרים, קורסים או קטגוריות..."
+                  aria-label="חיפוש פרילנסרים, קורסים ושירותים"
                   className="pr-10 h-12 glass border-border/50"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -730,6 +756,7 @@ const Index = () => {
 
       <Footer />
     </div>
+    </MotionConfig>
   );
 };
 
