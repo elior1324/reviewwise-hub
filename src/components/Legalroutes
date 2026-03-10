@@ -1,0 +1,64 @@
+/**
+ * legalRoutes.tsx
+ * ─────────────────────────────────────────────────────────────────────────────
+ * הוסף את הנתיבים האלה ל-App.tsx שלך בתוך <Routes>
+ *
+ * דרישות:
+ *   import { lazy, Suspense } from "react"
+ *   import { Routes, Route } from "react-router-dom"
+ *
+ * שימוש:
+ *   <Routes>
+ *     ... (הנתיבים הקיימים שלך) ...
+ *     {legalRoutes}
+ *   </Routes>
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+import { lazy, Suspense } from "react";
+import { Route } from "react-router-dom";
+
+const PrivacyPolicy         = lazy(() => import("@/pages/legal/PrivacyPolicy"));
+const TermsOfService        = lazy(() => import("@/pages/legal/TermsOfService"));
+const RefundPolicy          = lazy(() => import("@/pages/legal/RefundPolicy"));
+const AccessibilityStatement = lazy(() => import("@/pages/legal/AccessibilityStatement"));
+const CookiePolicy          = lazy(() => import("@/pages/legal/CookiePolicy"));
+
+const Loading = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="w-6 h-6 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
+  </div>
+);
+
+export const legalRoutes = (
+  <Suspense fallback={<Loading />}>
+    <Route path="/privacy-policy"  element={<PrivacyPolicy />} />
+    <Route path="/terms"           element={<TermsOfService />} />
+    <Route path="/refund-policy"   element={<RefundPolicy />} />
+    <Route path="/accessibility"   element={<AccessibilityStatement />} />
+    <Route path="/cookie-policy"   element={<CookiePolicy />} />
+  </Suspense>
+);
+
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * הוסף גם ל-App.tsx:
+ *
+ *   import CookieConsent from "@/components/CookieConsent";
+ *
+ *   // בתוך ה-JSX של App (מחוץ ל-<Routes>, אחרי ה-BrowserRouter):
+ *   <CookieConsent />
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * מבנה תיקיות מומלץ:
+ *   src/
+ *     pages/
+ *       legal/
+ *         PrivacyPolicy.tsx
+ *         TermsOfService.tsx
+ *         RefundPolicy.tsx
+ *         AccessibilityStatement.tsx
+ *         CookiePolicy.tsx
+ *     components/
+ *       CookieConsent.tsx
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
