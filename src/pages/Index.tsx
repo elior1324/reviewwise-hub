@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Search, ShieldCheck, Star, TrendingUp, Users,
-  GraduationCap, Briefcase, Palette, Code2, BarChart3, Brain, Megaphone, Wrench,
   UserCheck, BookOpen, DollarSign, HelpCircle, ChevronDown
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -44,16 +43,6 @@ const scaleIn = {
   },
 };
 
-const AUDIENCE_TYPES = [
-  { icon: GraduationCap, label: "סטודנטים", desc: "מחפשים קורסים איכותיים" },
-  { icon: Briefcase, label: "מחליפי קריירה", desc: "מעבר לתחום חדש" },
-  { icon: Code2, label: "מפתחים", desc: "שדרוג מיומנויות טכניות" },
-  { icon: Palette, label: "מעצבים", desc: "UI/UX, גרפיקה ועיצוב" },
-  { icon: Megaphone, label: "משווקים", desc: "שיווק דיגיטלי ו-SEO" },
-  { icon: Brain, label: "דאטה סיינטיסטים", desc: "Python, ML ו-AI" },
-  { icon: Wrench, label: "פרילנסרים", desc: "בניית עסק עצמאי" },
-  { icon: BarChart3, label: "יזמים", desc: "Growth וניהול סטארטאפ" },
-];
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -269,36 +258,6 @@ const Index = () => {
             </motion.form>
           </motion.div>
 
-          {/* Audience Tiles */}
-          <motion.div
-            className="max-w-5xl mx-auto"
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-          >
-            <motion.p variants={fadeUp} custom={4} className="text-center text-sm text-muted-foreground mb-6 font-medium">
-              מי אתם? מצאו מה שמתאים לכם
-            </motion.p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {AUDIENCE_TYPES.map(({ icon: Icon, label, desc }, i) => (
-                <motion.div
-                  key={label}
-                  variants={fadeUp}
-                  custom={5 + i * 0.5}
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  whileTap={{ scale: 0.97 }}
-                  className="group cursor-pointer rounded-xl p-4 bg-card/60 border border-border/40 hover:border-primary/40 hover:bg-card transition-colors duration-300"
-                  onClick={() => navigate(`/search?audience=${encodeURIComponent(label)}`)}
-                >
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-                    <Icon size={20} className="text-primary" />
-                  </div>
-                  <p className="font-display font-semibold text-sm text-foreground">{label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
         </motion.div>
       </section>
 
