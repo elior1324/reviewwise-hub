@@ -216,13 +216,12 @@ const CopyButton = ({ text }: { text: string }) => {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TrustBadgePage() {
-  const { user, businessProfile } = useAuth();
+  const { user } = useAuth();
   const [activeVariant, setActiveVariant] = useState<"full" | "mini" | "sidebar">("full");
   const [showFixed, setShowFixed] = useState(false);
 
-  // Try to load real data if the user is logged in and has a business
-  const { data: realData, loading } = useWidgetData(businessProfile?.slug ?? null);
-  const widgetProps = realData ?? DEMO_PROPS;
+  // Use demo data (no businessProfile in auth context)
+  const widgetProps = DEMO_PROPS;
 
   const snippet = buildEmbedSnippet(
     businessProfile?.slug ?? "your-business-slug",
