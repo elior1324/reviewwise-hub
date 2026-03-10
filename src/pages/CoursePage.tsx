@@ -243,7 +243,6 @@ const CoursePage = () => {
             businessName={course.businessName}
             businessId={course.businessId}
             courseId={course.id}
-            courseName={course.name}
             isVerifiedPurchaser={false}
           />
         </div>

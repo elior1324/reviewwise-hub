@@ -157,10 +157,9 @@ const BusinessProfile = () => {
           } : undefined,
         })));
       } else {
-        // No courses → no reviews, but still need to set business
         const mappedBiz: Business = {
           slug: bizData.slug,
-          name: bizData.business_name || "",
+          name: bizData.name || "",
           type: FREELANCER_CATEGORIES.includes(bizData.category) ? "freelancer" : "course-provider",
           category: bizData.category || "",
           rating: 0,

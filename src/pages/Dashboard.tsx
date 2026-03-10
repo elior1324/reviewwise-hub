@@ -191,16 +191,15 @@ const Dashboard = () => {
   }, []);
 
   // ── Respond to review ──────────────────────────────────────────────────────
-  // Inserts into review_responses (NOT business_responses)
   const handleRespond = async (reviewId: string) => {
     if (!responseText.trim() || !bizId) return;
 
     const { error } = await supabase
-      .from("review_responses")
+      .from("business_responses")
       .insert({
         review_id: reviewId,
         business_id: bizId,
-        response_text: responseText.trim(),        // ✅ response_text (NOT text)
+        text: responseText.trim(),
       });
 
     if (error) {
