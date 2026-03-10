@@ -57,7 +57,7 @@ serve(async (req) => {
     if (format === "html") {
       // Return an embeddable HTML widget
       const profileUrl = `https://reviewhub.co.il/biz/${biz.slug}`;
-      const logoUrl = "https://nrtyavfilrmnflikyzed.supabase.co/storage/v1/object/public/testimonials/reviewhub-logo-widget.png";
+      const logoUrl = "https://pujsopidbejeuqteormi.supabase.co/storage/v1/object/public/testimonials/reviewhub-logo-widget.png";
       
       const stars = Array.from({ length: 5 }, (_, i) => {
         const filled = i < Math.round(rating);

@@ -30,7 +30,7 @@
  *
  *   3. Register the hook in Supabase dashboard:
  *        Authentication → Hooks → "Send email" hook
- *        URL: https://nrtyavfilrmnflikyzed.supabase.co/functions/v1/auth-email-hook
+ *        URL: https://pujsopidbejeuqteormi.supabase.co/functions/v1/auth-email-hook
  *        (Do NOT use Lovable's proxy URL anymore)
  *
  *   4. Optional — set a hook secret in the Supabase dashboard and add it here
