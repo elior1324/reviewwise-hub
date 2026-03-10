@@ -6,7 +6,7 @@ import ReportReviewDialog from "./ReportReviewDialog";
 import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2 } from "lucide-react";
 import { getTimeSincePurchase } from "@/data/mockData";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -94,20 +94,23 @@ const ReviewCard = ({
 
   const isOwner = user && userId && user.id === userId;
 
-  // Check if user already liked this review on mount
-  useState(() => {
-    if (user && id) {
-      supabase
-        .from("review_likes")
-        .select("id")
-        .eq("review_id", id)
-        .eq("user_id", user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data) setLiked(true);
-        });
-    }
-  });
+  // BUG FIX: was useState(() => {...}) — useState initializer runs once
+  // synchronously and its return value is ignored; async work inside it
+  // was fire-and-forget with no cleanup possible. useEffect is correct here.
+  useEffect(() => {
+    if (!user || !id) return;
+    let cancelled = false;
+    supabase
+      .from("review_likes")
+      .select("id")
+      .eq("review_id", id)
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled && data) setLiked(true);
+      });
+    return () => { cancelled = true; };
+  }, [user, id]);
 
   const currentMultiplier = Math.max(1, Math.min(Math.floor(likeCount / 10) * 2, 10));
   const nextMultiplierAt = (Math.floor(likeCount / 10) + 1) * 10;

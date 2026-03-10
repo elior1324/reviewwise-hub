@@ -232,7 +232,18 @@ const BusinessProfile = () => {
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          // SECURITY: JSON.stringify does NOT escape "</script>" sequences.
+          // A business name/description/url containing "</script>" would let
+          // an attacker break out of the <script> tag and inject arbitrary HTML.
+          // Unicode-escape the three characters that are dangerous inside a
+          // raw <script> block: <  >  & — this is the same approach React uses
+          // internally and that Next.js applies to JSON-LD blocks.
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd)
+              .replace(/</g,  '\\u003c')
+              .replace(/>/g,  '\\u003e')
+              .replace(/&/g,  '\\u0026'),
+          }}
         />
       )}
       <Navbar />

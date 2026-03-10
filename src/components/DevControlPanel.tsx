@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Crown, Sparkles, Shield, Loader2, Plus, BadgeCheck, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { SubscriptionTier } from "@/contexts/AuthContext";
 
 interface DevControlPanelProps {
@@ -21,7 +21,6 @@ const TIERS = [
 
 const DevControlPanel = ({ businessId, currentTier, onTierChanged, onDataChanged }: DevControlPanelProps) => {
   const [loading, setLoading] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const handleSwitch = async (tier: string) => {
     if (tier === currentTier || loading) return;
@@ -33,12 +32,11 @@ const DevControlPanel = ({ businessId, currentTier, onTierChanged, onDataChanged
         .eq("id", businessId);
       if (error) throw error;
       onTierChanged(tier);
-      toast({
-        title: "✅ החבילה שונתה",
+      toast.success("✅ החבילה שונתה", {
         description: `שונה ל-${TIERS.find(t => t.id === tier)?.label}. הפיצ׳רים עודכנו מיידית.`,
       });
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast.error(err.message);
     }
     setLoading(null);
   };
@@ -55,7 +53,7 @@ const DevControlPanel = ({ businessId, currentTier, onTierChanged, onDataChanged
         .limit(1);
 
       if (!courses || courses.length === 0) {
-        toast({ title: "שגיאה", description: "אין קורסים בעסק הזה. הוסיפו קורס קודם.", variant: "destructive" });
+        toast.error("אין קורסים בעסק הזה. הוסיפו קורס קודם.");
         setLoading(null);
         return;
       }
@@ -77,13 +75,12 @@ const DevControlPanel = ({ businessId, currentTier, onTierChanged, onDataChanged
       const { error } = await supabase.from("reviews").insert(reviews);
       if (error) throw error;
 
-      toast({
-        title: "🎯 10 ביקורות נוספו!",
+      toast.success("🎯 10 ביקורות נוספו!", {
         description: "בדקו את מגבלת הביקורות בחבילת הסטארטר.",
       });
       onDataChanged();
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast.error(err.message);
     }
     setLoading(null);
   };
@@ -105,7 +102,7 @@ const DevControlPanel = ({ businessId, currentTier, onTierChanged, onDataChanged
         .single();
 
       if (!lastReview) {
-        toast({ title: "שגיאה", description: "אין ביקורות למשתמש הזה.", variant: "destructive" });
+        toast.error("אין ביקורות למשתמש הזה.");
         setLoading(null);
         return;
       }
@@ -118,15 +115,14 @@ const DevControlPanel = ({ businessId, currentTier, onTierChanged, onDataChanged
 
       if (error) throw error;
 
-      toast({
-        title: newStatus ? "✅ ביקורת אומתה!" : "❌ אימות הוסר",
-        description: newStatus
-          ? "🔥 המשתמש קיבל 2X נקודות! בדקו את הלידרבורד."
-          : "הנקודות חושבו מחדש.",
-      });
+      if (newStatus) {
+        toast.success("✅ ביקורת אומתה!", { description: "🔥 המשתמש קיבל 2X נקודות! בדקו את הלידרבורד." });
+      } else {
+        toast("❌ אימות הוסר", { description: "הנקודות חושבו מחדש." });
+      }
       onDataChanged();
     } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
+      toast.error(err.message);
     }
     setLoading(null);
   };
