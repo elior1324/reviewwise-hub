@@ -109,29 +109,28 @@ const CoursePage = () => {
 
         setReviews(reviewData.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating || 0,
-          text: r.review_text || "",                   // ✅ review_text (NOT .text)
-          courseName: courseData.course_name || "",    // use parent course, not a join
+          text: r.text || "",
+          courseName: courseData.name || "",
           courseId: r.course_id || "",
           businessSlug: (courseData.businesses as any)?.slug || "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified_purchase || false,      // ✅ verified_purchase (NOT .verified)
+          verified: r.verified || false,
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at && r.updated_at !== r.created_at
             ? new Date(r.updated_at).toLocaleDateString("he-IL")
             : undefined,
-          flagged: false,                              // flagged doesn't exist in reviews table
-          flagReason: undefined,                       // flag_reason doesn't exist
-          likeCount: 0,                                // like_count doesn't exist
+          flagged: r.flagged || false,
+          flagReason: r.flag_reason || undefined,
+          likeCount: r.like_count || 0,
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: r.user_id ? (expertCounts[r.user_id] || 0) >= 3 : false,
           userId: r.user_id || undefined,
-          // ✅ review_responses (NOT business_responses), response_text (NOT .text)
-          ownerResponse: r.review_responses?.[0] ? {
-            text: r.review_responses[0].response_text || "",
-            date: new Date(r.review_responses[0].created_at).toLocaleDateString("he-IL"),
+          ownerResponse: r.business_responses?.[0] ? {
+            text: r.business_responses[0].text || "",
+            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
         })));
       }
