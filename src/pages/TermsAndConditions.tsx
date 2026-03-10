@@ -448,7 +448,7 @@ const TermsAndConditions = () => {
               <li><strong>הזמנות ביקורת:</strong> הזמנות ביקורת הנשלחות בשם בעלי עסקים — בעל העסק הוא השולח ונושא באחריות החוקית. ראו סעיף "אחריות מרכזית והנחיות".</li>
             </ul>
             <p>
-              להסרה מרשימת תפוצה, ניתן גם לפנות אלינו ישירות: <a href="mailto:unsubscribe@reviewhub.co.il" className="text-primary hover:underline">unsubscribe@reviewhub.co.il</a>
+              להסרה מרשימת תפוצה, ניתן גם לפנות אלינו ישירות: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a>
             </p>
           </Section>
 
