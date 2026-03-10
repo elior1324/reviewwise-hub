@@ -114,7 +114,7 @@ const BusinessProfile = () => {
         // Now we can set business with real computed values
         const mappedBiz: Business = {
           slug: bizData.slug,
-          name: bizData.business_name || "",      // ✅ business_name (NOT .name)
+          name: bizData.name || "",
           type: FREELANCER_CATEGORIES.includes(bizData.category) ? "freelancer" : "course-provider",
           category: bizData.category || "",
           rating: Math.round(avgRating * 10) / 10, // computed from reviews
