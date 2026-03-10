@@ -127,7 +127,7 @@ const Dashboard = () => {
           if (!reviewsByCourse[r.course_id]) reviewsByCourse[r.course_id] = { count: 0, ratingSum: 0, verified: 0 };
           reviewsByCourse[r.course_id].count++;
           reviewsByCourse[r.course_id].ratingSum += (r.rating || 0);
-          if (r.verified_purchase) reviewsByCourse[r.course_id].verified++;
+          if (r.verified) reviewsByCourse[r.course_id].verified++;
         });
 
         setBusinessCourses(prev => prev.map(c => {
