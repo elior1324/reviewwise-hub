@@ -3,9 +3,8 @@
 // Mouse-tracking glowing border effect.
 // Source: Aceternity UI / glowing-effect — verbatim, adapted for Vite/React:
 //   • "use client" directive removed (not needed outside Next.js)
-//   • animate imported from "motion/react" which ships inside framer-motion ≥ v11.
-//     If the app uses a standalone `motion` package instead of framer-motion,
-//     the import path is the same ("motion/react") and both resolve identically.
+//   • animate imported from "framer-motion" (not "motion/react") because this
+//     project uses the framer-motion package. Both export an identical `animate` API.
 //
 // Usage:
 //   <div className="relative rounded-2xl border border-border p-2">
@@ -19,7 +18,10 @@
 
 import { memo, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { animate } from "motion/react";
+// framer-motion v11+ exports `animate` at the top level.
+// The component spec uses "motion/react" (standalone `motion` pkg), but this
+// project uses `framer-motion` — the APIs are identical.
+import { animate } from "framer-motion";
 
 interface GlowingEffectProps {
   blur?: number;
