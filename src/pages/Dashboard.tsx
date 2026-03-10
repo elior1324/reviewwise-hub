@@ -111,7 +111,7 @@ const Dashboard = () => {
       if (reviews && reviews.length > 0) {
         // Compute business-level rating from all reviews
         const avgRating = reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length;
-        const verifiedCount = reviews.filter((r: any) => r.verified_purchase).length;
+        const verifiedCount = reviews.filter((r: any) => r.verified).length;
 
         setStats({
           rating: avgRating.toFixed(1),
