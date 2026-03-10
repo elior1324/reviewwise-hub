@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
-import { lovable } from "@/integrations/lovable/index";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -114,7 +113,7 @@ const AuthPage = () => {
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [debugSnap, setDebugSnap] = useState<DebugSnapshot | null>(null);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -173,16 +172,15 @@ const AuthPage = () => {
 
   const handleGoogleAuth = async () => {
     setGoogleLoading(true);
-    try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      toast.error(err.message || "שגיאה בהתחברות עם Google");
-    } finally {
+    // signInWithOAuth triggers a full-page redirect to Google.
+    // If it returns immediately (error before redirect), show the error.
+    // Otherwise the browser navigates away and AuthCallback handles the rest.
+    const { error } = await signInWithGoogle();
+    if (error) {
+      toast.error(error.message || "שגיאה בהתחברות עם Google");
       setGoogleLoading(false);
     }
+    // No finally — if redirect happened, this component is already gone.
   };
 
   return (

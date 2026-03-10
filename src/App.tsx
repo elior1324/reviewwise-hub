@@ -16,6 +16,7 @@ import BusinessRegister from "./pages/BusinessRegister";
 import AboutPage from "./pages/AboutPage";
 import ForBusinessPage from "./pages/ForBusinessPage";
 import AuthPage from "./pages/AuthPage";
+import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
@@ -62,6 +63,7 @@ const App = () => (
             {/* Consumer routes */}
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/for-business" element={<ForBusinessPage />} />

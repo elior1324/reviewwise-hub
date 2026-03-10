@@ -8,7 +8,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, ArrowLeft } from "lucide-react";
-import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
@@ -65,7 +64,7 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [debugSnap, setDebugSnap] = useState<DebugSnapshot | null>(null);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -117,16 +116,14 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
 
   const handleGoogleAuth = async () => {
     setGoogleLoading(true);
-    try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      toast({ title: "שגיאה בהתחברות Google", description: err.message, variant: "destructive" });
-    } finally {
+    // Pass the business dashboard as the post-login destination.
+    // AuthCallback will redirect business users there automatically.
+    const { error } = await signInWithGoogle();
+    if (error) {
+      toast({ title: "שגיאה בהתחברות Google", description: error.message, variant: "destructive" });
       setGoogleLoading(false);
     }
+    // No finally — redirect already happened if no error.
   };
 
   return (

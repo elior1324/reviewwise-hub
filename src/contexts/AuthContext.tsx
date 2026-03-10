@@ -25,6 +25,7 @@ interface AuthContextType {
   checkSubscription: () => Promise<void>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ data: any; error: any }>;
   signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
+  signInWithGoogle: (redirectTo?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -206,6 +207,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { data, error };
   };
 
+  const signInWithGoogle = async (redirectTo?: string) => {
+    console.log("[Auth] signInWithGoogle called");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        // After Google auth, Supabase redirects here with ?code=xxx (PKCE flow).
+        // detectSessionInUrl:true on the client will auto-exchange the code for tokens.
+        // Falls back to the app root if no specific destination is provided.
+        redirectTo: redirectTo ?? `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      console.error("[Auth] signInWithGoogle error:", error);
+    }
+    return { error };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -217,7 +235,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       subscriptionEnd,
       isSubscribed: subscriptionTier !== "free",
       checkSubscription,
-      signUp, signIn, signOut,
+      signUp, signIn, signInWithGoogle, signOut,
     }}>
       {children}
     </AuthContext.Provider>
