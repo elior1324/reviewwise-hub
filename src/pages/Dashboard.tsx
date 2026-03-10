@@ -76,7 +76,7 @@ const Dashboard = () => {
       // ✅ rating/review_count/verified_purchases do NOT exist — computed below
       const { data: courses } = await supabase
         .from("courses")
-        .select("id, course_name, description, price, affiliate_url, course_category")
+        .select("id, name, description, price, affiliate_url, category")
         .eq("business_id", biz.id);
 
       const courseIds = (courses || []).map((c: any) => c.id);
