@@ -9,6 +9,35 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    // Exclude Playwright E2E tests (they live in tests/e2e/, not src/)
+    exclude: ["tests/e2e/**", "node_modules/**"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html", "lcov"],
+      reportsDirectory: "./coverage",
+      // Focus coverage on business logic — skip generated/config files
+      include: [
+        "src/lib/**",
+        "src/components/**",
+        "src/pages/**",
+        "src/contexts/**",
+      ],
+      exclude: [
+        "src/test/**",
+        "src/integrations/**",
+        "src/**/*.d.ts",
+        "src/main.tsx",
+        "src/App.tsx",
+        "src/vite-env.d.ts",
+      ],
+      // Thresholds — fail CI if coverage drops below these
+      thresholds: {
+        lines: 40,
+        functions: 40,
+        branches: 35,
+        statements: 40,
+      },
+    },
   },
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
