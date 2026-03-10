@@ -122,8 +122,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
         options: {
-          // After email confirmation, redirect back to the app root
-          emailRedirectTo: window.location.origin,
+          // NOTE: emailRedirectTo is intentionally omitted.
+          // If you pass window.location.origin and that URL is NOT in your Supabase
+          // "Redirect URLs" allowlist (Auth → URL Configuration), Supabase silently
+          // rejects the URL and can suppress the confirmation email entirely.
+          // Leaving it unset means Supabase uses the "Site URL" you configured in the
+          // dashboard — which is always allowlisted by default.
           data: { display_name: displayName },
         },
       });

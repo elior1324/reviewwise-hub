@@ -15,6 +15,44 @@ import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import { validatePassword } from "@/lib/password-validation";
 import { translateAuthError } from "@/lib/auth-errors";
 
+// ─── DEBUG PANEL ─────────────────────────────────────────────────────────────
+interface DebugSnapshot {
+  supabaseUrl: string;
+  publishableKey: string;
+  rawData: unknown;
+  rawError: unknown;
+  timestamp: string;
+}
+function DebugPanel({ snap }: { snap: DebugSnapshot }) {
+  const urlOk = snap.supabaseUrl.startsWith("https://") && snap.supabaseUrl.includes(".supabase.co");
+  const keyOk = snap.publishableKey.startsWith("eyJ");
+  return (
+    <div dir="ltr" style={{ fontSize: 12, fontFamily: "monospace", background: "#1a0000", color: "#ff9999", border: "2px solid #ff4444", borderRadius: 8, padding: 12, marginBottom: 12, overflowX: "auto" }}>
+      <div style={{ color: "#ff4444", fontWeight: "bold", fontSize: 14, marginBottom: 8 }}>🔴 AUTH DEBUG PANEL — remove before production</div>
+      <div style={{ marginBottom: 6 }}>
+        <span style={{ color: urlOk ? "#88ff88" : "#ff4444" }}>{urlOk ? "✅" : "❌"} SUPABASE_URL: </span>
+        <span style={{ color: "#ffff88" }}>{snap.supabaseUrl || "(empty!)"}</span>
+      </div>
+      <div style={{ marginBottom: 10 }}>
+        <span style={{ color: keyOk ? "#88ff88" : "#ff4444" }}>{keyOk ? "✅" : "❌"} PUBLISHABLE_KEY: </span>
+        <span style={{ color: "#ffff88" }}>{snap.publishableKey ? snap.publishableKey.slice(0, 20) + "..." : "(empty!)"}</span>
+      </div>
+      <div style={{ marginBottom: 4, color: snap.rawError ? "#ff6666" : "#88ff88", fontWeight: "bold" }}>
+        {snap.rawError ? "❌ ERROR from supabase.auth.signUp:" : "✅ No error from supabase.auth.signUp"}
+      </div>
+      <pre style={{ background: "#0a0000", padding: 8, borderRadius: 4, color: "#ff9999", whiteSpace: "pre-wrap", wordBreak: "break-all", marginBottom: 10 }}>
+        {JSON.stringify(snap.rawError, null, 2)}
+      </pre>
+      <div style={{ marginBottom: 4, color: "#aaaaff", fontWeight: "bold" }}>📦 data from supabase.auth.signUp:</div>
+      <pre style={{ background: "#0a0000", padding: 8, borderRadius: 4, color: "#aaffaa", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
+        {JSON.stringify(snap.rawData, null, 2)}
+      </pre>
+      <div style={{ color: "#888888", marginTop: 8 }}>🕐 {snap.timestamp}</div>
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface BusinessAuthProps {
   mode: "login" | "signup";
 }
@@ -26,6 +64,7 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
   const [loading, setLoading] = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [debugSnap, setDebugSnap] = useState<DebugSnapshot | null>(null);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -33,6 +72,7 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setDebugSnap(null); // clear previous result
     try {
       if (mode === "signup") {
         if (!privacyConsent) {
@@ -47,6 +87,16 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
           return;
         }
         const { data, error } = await signUp(email, password, name);
+
+        // Always capture a debug snapshot — visible on screen, no DevTools needed
+        setDebugSnap({
+          supabaseUrl: import.meta.env.VITE_SUPABASE_URL ?? "",
+          publishableKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "",
+          rawData: data,
+          rawError: error,
+          timestamp: new Date().toISOString(),
+        });
+
         if (error) throw error;
         if (!data?.user) {
           // Supabase returned no error but also no user — auth hook likely blocked signup silently
@@ -95,6 +145,9 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* ── DEBUG: remove once auth is confirmed working ── */}
+            {debugSnap && <DebugPanel snap={debugSnap} />}
+
             {/* Google OAuth */}
             <Button
               type="button"
@@ -166,7 +219,7 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
               {mode === "login" && <FormPrivacyNotice className="mt-1" />}
 
               <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" disabled={loading || (mode === "signup" && !privacyConsent)}>
-                {loading ? "..." : mode === "login" ? "התחברו" : "צרו חשבון"}
+                {loading ? "טוען..." : mode === "login" ? "התחברו" : "צרו חשבון"}
                 <ArrowLeft size={16} className="mr-2" />
               </Button>
             </form>
