@@ -17,6 +17,10 @@ export default {
         display: ['"Space Grotesk"', '"Heebo"', 'system-ui', 'sans-serif'],
         body: ['"Heebo"', 'system-ui', 'sans-serif'],
       },
+      maxWidth: {
+        // Used by TestimonialsSection (max-w-container)
+        container: "1280px",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -96,13 +100,17 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        // TestimonialsSection marquee: moves by exactly one full clone-set width
+        // plus the gap, then jumps back to 0 seamlessly.
+        // The component sets --gap and --duration via Tailwind's JIT arbitrary-value classes.
         marquee: {
-          "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-50%)" },
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(calc(-100% - var(--gap)))" },
         },
+        // Reverse variant kept for ReviewsMarquee (second row scroll direction)
         "marquee-reverse": {
-          "0%": { transform: "translateX(-50%)" },
-          "100%": { transform: "translateX(0)" },
+          from: { transform: "translateX(calc(-100% - var(--gap)))" },
+          to: { transform: "translateX(0)" },
         },
       },
       animation: {
@@ -111,8 +119,11 @@ export default {
         "fade-in-up": "fade-in-up 0.5s ease-out forwards",
         "pulse-glow": "pulse-glow 3s ease-in-out infinite",
         float: "float 6s ease-in-out infinite",
-        marquee: "marquee 35s linear infinite",
-        "marquee-reverse": "marquee-reverse 35s linear infinite",
+        // Duration driven by --duration CSS variable set on the parent element
+        // e.g. [--duration:40s] on the wrapper div.
+        marquee: "marquee var(--duration) linear infinite",
+        "marquee-reverse": "marquee-reverse var(--duration) linear infinite",
+        // Explicit fallback speeds for components that don't set --duration
         "marquee-slow": "marquee 50s linear infinite",
         "marquee-reverse-slow": "marquee-reverse 50s linear infinite",
       },

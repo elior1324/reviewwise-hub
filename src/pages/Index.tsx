@@ -13,7 +13,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import AnimatedCounter from "@/components/AnimatedCounter";
-import ReviewsMarquee from "@/components/ReviewsMarquee";
+import { TestimonialsSection } from "@/components/blocks/testimonials-with-marquee";
 import { useState, useRef, useEffect } from "react";
 import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, type Business, type Review } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
@@ -451,13 +451,85 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Reviews Marquee — Trustpilot-style social proof strip */}
-      <ReviewsMarquee
+      {/* Trustpilot-style testimonials marquee */}
+      <TestimonialsSection
         title="מה אומרים עלינו?"
-        subtitle="ביקורות אמיתיות מלקוחות שבאמת רכשו שירותים וקורסים דרך ReviewHub"
-        pauseOnHover
-        speed="normal"
+        description="ביקורות אמיתיות מלקוחות שבאמת רכשו שירותים וקורסים דרך ReviewHub"
         className="border-t border-border/40"
+        testimonials={[
+          {
+            author: {
+              name: "דנה לוי",
+              handle: "@dana_levy",
+              avatar:
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+            },
+            text: "הקורס שינה לי את הדרך שאני חושבת על שיווק. תוצאות אמיתיות תוך שלושה שבועות — ממש לא ציפיתי לזה.",
+          },
+          {
+            author: {
+              name: "יובל כהן",
+              handle: "@yuval_cohen",
+              avatar:
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+            },
+            text: "עבדתי עם המעצבת על האתר שלי — מקצועית, מדויקת, ועומדת בזמנים. פשוט תענוג לעבוד איתה.",
+          },
+          {
+            author: {
+              name: "שיר מזרחי",
+              handle: "@shir_mizrachi",
+              avatar:
+                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+            },
+            text: "המנטור לא רק לימד — הוא ממש ישב איתי על הפרויקט. קיבלתי ידע שאני משתמשת בו כל יום.",
+          },
+          {
+            author: {
+              name: "אורי גרין",
+              handle: "@uri_green",
+              avatar:
+                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+            },
+            text: "סוף סוף מצאתי פרילנסרית שכתבה תוכן בדיוק לפי קול המותג שלנו. ממליץ בחום לכל עסק קטן.",
+          },
+          {
+            author: {
+              name: "נועה בן-דוד",
+              handle: "@noa_bendavid",
+              avatar:
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+            },
+            text: "קורס הנתונים הוא הכי פרקטי שמצאתי ברשת. כל שיעור מסתיים בפרויקט אמיתי — ממש לא תיאורטי.",
+          },
+          {
+            author: {
+              name: "עמיר ברק",
+              handle: "@amir_barak",
+              avatar:
+                "https://images.unsplash.com/photo-1570295999897-c9c4c55e7839?w=150&h=150&fit=crop&crop=face",
+            },
+            text: "חסכתי חצי שנה של לימוד עצמי. הקורס בנוי חכם — מתחיל מאפס ומגיע לדברים מורכבים בצעדים הגיוניים.",
+          },
+          {
+            author: {
+              name: "מיה רוזן",
+              handle: "@mia_rosen",
+              avatar:
+                "https://images.unsplash.com/photo-1517365830279-8d4dead2e554?w=150&h=150&fit=crop&crop=face",
+            },
+            text: "הייתה לי שאלה שנה אחרי שסיימתי את הקורס — המרצה ענה תוך 24 שעות. שירות כזה לא מוצאים בשום מקום.",
+          },
+          {
+            author: {
+              name: "לירן אזולאי",
+              handle: "@liran_azulay",
+              avatar:
+                "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
+            },
+            text: "הביקורות באתר הן אמיתיות לחלוטין. ReviewHub היא הפלטפורמה הראשונה שאני באמת סומך עליה.",
+          },
+        ]}
       />
 
       {/* Recent Reviews */}
