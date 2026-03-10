@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,13 +10,37 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { validatePassword } from "@/lib/password-validation";
 import { translateAuthError } from "@/lib/auth-errors";
 
+
+// ── Password strength ─────────────────────────────────────────────────────────
+type StrengthLevel = 0 | 1 | 2 | 3;
+
+function getPasswordStrength(pw: string): StrengthLevel {
+  if (!pw) return 0;
+  const long    = pw.length >= 12;
+  const ok      = pw.length >= 8;
+  const hasLetter  = /[a-zA-Z]/.test(pw);
+  const hasNumber  = /[0-9]/.test(pw);
+  const hasSpecial = /[^a-zA-Z0-9]/.test(pw);
+  if (ok && hasLetter && hasNumber && (long || hasSpecial)) return 3;
+  if (ok && hasLetter && hasNumber) return 2;
+  return 1;
+}
+
+const STRENGTH_META: Record<StrengthLevel, { label: string; color: string; width: string }> = {
+  0: { label: "",       color: "",                     width: "w-0"   },
+  1: { label: "חלשה",   color: "bg-red-500",           width: "w-1/3" },
+  2: { label: "בינונית", color: "bg-yellow-400",        width: "w-2/3" },
+  3: { label: "חזקה",   color: "bg-emerald-500",       width: "w-full" },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const AuthPage = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -30,6 +54,9 @@ const AuthPage = () => {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const { signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
+
+  const strengthLevel = getPasswordStrength(password);
+  const strengthMeta  = STRENGTH_META[strengthLevel];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +94,7 @@ const AuthPage = () => {
         toast.error(msg);
       } else if (!data?.user) {
         // Supabase returned no error but also no user — auth hook likely blocked signup silently
-        toast.error("ההרשמה נכשלה — ייתכן בעיה בשרת. ראו פרטים בפאנל האדום למטה.");
+        toast.error("ההרשמה נכשלה — ייתכן בעיה בשרת. אנא נסו שנית או פנו לתמיכה.");
       } else {
         toast.success("נרשמתם בהצלחה! בדקו את המייל לאימות.");
       }
@@ -121,7 +148,10 @@ const AuthPage = () => {
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
-              {googleLoading ? "מתחבר..." : mode === "login" ? "התחברו עם Google" : "הירשמו עם Google"}
+              {googleLoading
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> מתחבר...</>
+                : mode === "login" ? "התחברו עם Google" : "הירשמו עם Google"
+              }
             </Button>
 
             <div className="flex items-center gap-3">
@@ -183,11 +213,25 @@ const AuthPage = () => {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute left-3 top-3 text-muted-foreground hover:text-foreground"
+                    aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
+
+              {mode === "signup" && password.length > 0 && (
+                <div className="space-y-1 -mt-1">
+                  <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                    <div className={`h-full rounded-full transition-all duration-300 ${strengthMeta.color} ${strengthMeta.width}`} />
+                  </div>
+                  {strengthMeta.label && (
+                    <p className={`text-xs ${strengthLevel === 1 ? "text-red-500" : strengthLevel === 2 ? "text-yellow-500" : "text-emerald-500"}`}>
+                      חוזק הסיסמה: {strengthMeta.label}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {mode === "signup" && (
                 <PrivacyConsentCheckbox
@@ -206,7 +250,10 @@ const AuthPage = () => {
               />
 
               <Button type="submit" className="w-full bg-primary text-primary-foreground glow-primary" disabled={loading || (mode === "signup" && !privacyConsent) || !turnstileToken}>
-                {loading ? "טוען..." : mode === "login" ? "התחברו" : "הרשמו"}
+                {loading
+                  ? <><Loader2 className="h-4 w-4 animate-spin" /> טוען...</>
+                  : mode === "login" ? "התחברו" : "הרשמו"
+                }
               </Button>
             </form>
 

@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, PenLine, LogIn, ShieldCheck, ShieldX, Plus, HelpCircle, Upload, X, FileText, Image as ImageIcon } from "lucide-react";
+import { Star, PenLine, LogIn, ShieldCheck, ShieldX, Plus, HelpCircle, Upload, X, FileText, Image as ImageIcon, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -54,7 +54,6 @@ const RequiredMark = () => <span className="text-destructive mr-0.5">*</span>;
 
 const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVerifiedPurchaser = false }: AddReviewFormProps) => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -80,7 +79,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-        toast({ title: `הקובץ ${file.name} גדול מדי (מקסימום ${MAX_FILE_SIZE_MB}MB)`, variant: "destructive" });
+        toast.error(`הקובץ ${file.name} גדול מדי (מקסימום ${MAX_FILE_SIZE_MB}MB)`);
         continue;
       }
       newFiles.push(file);
@@ -98,23 +97,23 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
     e.preventDefault();
 
     if (rating === 0) {
-      toast({ title: "אנא בחרו דירוג", variant: "destructive" });
+      toast.error("אנא בחרו דירוג");
       return;
     }
     if (!subject.trim()) {
-      toast({ title: "אנא מלאו את נושא התגובה", variant: "destructive" });
+      toast.error("אנא מלאו את נושא התגובה");
       return;
     }
     if (reviewText.trim().length < 10) {
-      toast({ title: "הביקורת קצרה מדי", description: "כתבו לפחות 10 תווים", variant: "destructive" });
+      toast.error("הביקורת קצרה מדי", { description: "כתבו לפחות 10 תווים" });
       return;
     }
     if (!duration) {
-      toast({ title: "אנא בחרו משך זמן בהכשרה", variant: "destructive" });
+      toast.error("אנא בחרו משך זמן בהכשרה");
       return;
     }
     if (!turnstileToken) {
-      toast({ title: "אנא אמתו שאתם לא רובוט", variant: "destructive" });
+      toast.error("אנא אמתו שאתם לא רובוט");
       return;
     }
 
@@ -134,7 +133,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
             .upload(filePath, file);
 
           if (uploadError) {
-            toast({ title: "שגיאה בהעלאת קובץ", description: uploadError.message, variant: "destructive" });
+            toast.error("שגיאה בהעלאת קובץ", { description: uploadError.message });
           } else {
             uploadedFilePaths.push(filePath);
 
@@ -175,8 +174,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
       // Submit review (simulated — in production save to DB with subject & duration)
       await new Promise(r => setTimeout(r, 800));
 
-      toast({
-        title: "הביקורת נשלחה בהצלחה! ✨",
+      toast.success("הביקורת נשלחה בהצלחה! ✨", {
         description: receiptVerified
           ? "הביקורת שלכם תפורסם כביקורת רכישה מאומתת."
           : "הביקורת שלכם תפורסם ללא תג רכישה מאומתת.",
@@ -190,7 +188,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
       setUploadedFiles([]);
       setIsOpen(false);
     } catch {
-      toast({ title: "שגיאה", description: "אירעה שגיאה בשליחת הביקורת", variant: "destructive" });
+      toast.error("אירעה שגיאה בשליחת הביקורת");
     }
 
     setSubmitting(false);
@@ -448,8 +446,9 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                   <Button
                     type="submit"
                     disabled={submitting || uploading || !turnstileToken}
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2"
                   >
+                    {(submitting || uploading) && <Loader2 size={16} className="animate-spin" />}
                     {uploading ? "מעלה קבצים..." : submitting ? "שולח..." : "פרסום ביקורת"}
                   </Button>
                 </form>

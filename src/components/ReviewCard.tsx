@@ -3,7 +3,7 @@ import StarRating from "./StarRating";
 import VerifiedBadge from "./VerifiedBadge";
 import ReviewResponse from "./ReviewResponse";
 import ReportReviewDialog from "./ReportReviewDialog";
-import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check } from "lucide-react";
+import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2 } from "lucide-react";
 import { getTimeSincePurchase } from "@/data/mockData";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Tooltip,
@@ -90,7 +90,6 @@ const ReviewCard = ({
   const [displayText, setDisplayText] = useState(text);
   const [wasEdited, setWasEdited] = useState(!!updatedAt);
   const [editSaving, setEditSaving] = useState(false);
-  const { toast } = useToast();
   const { user } = useAuth();
 
   const isOwner = user && userId && user.id === userId;
@@ -116,7 +115,7 @@ const ReviewCard = ({
 
   const handleLike = async () => {
     if (!user) {
-      toast({ title: "יש להתחבר", description: "התחברו כדי לסמן ביקורות כמועילות", variant: "destructive" });
+      toast.error("יש להתחבר", { description: "התחברו כדי לסמן ביקורות כמועילות" });
       return;
     }
     if (likeLoading) return;
@@ -139,7 +138,7 @@ const ReviewCard = ({
         if (deleteError) {
           setLiked(true);
           setLikeCount(prev => prev + 1);
-          toast({ title: "שגיאה", description: "לא ניתן לבטל לייק", variant: "destructive" });
+          toast.error("לא ניתן לבטל לייק");
         } else {
           await supabase.rpc("decrement_review_likes", { review_id: id });
         }
@@ -161,7 +160,7 @@ const ReviewCard = ({
         if (insertError) {
           setLiked(false);
           setLikeCount(prev => prev - 1);
-          toast({ title: "שגיאה", description: "לא ניתן לעדכן לייק", variant: "destructive" });
+          toast.error("לא ניתן לעדכן לייק");
         } else {
           await supabase.rpc("increment_review_likes", { review_id: id });
         }
@@ -174,23 +173,23 @@ const ReviewCard = ({
     if (helpfulMarked) return;
     setHelpfulMarked(true);
     onHelpfulReply?.();
-    toast({ title: "+20 נקודות!", description: "הביקורת שלכם זכתה בבונוס על תגובה מועילה." });
+    toast.success("+20 נקודות!", { description: "הביקורת שלכם זכתה בבונוס על תגובה מועילה." });
   };
 
   const handleDelete = async () => {
     if (!id) return;
     const { error } = await supabase.from("reviews").delete().eq("id", id);
     if (error) {
-      toast({ title: "שגיאה", description: "לא ניתן למחוק את הביקורת", variant: "destructive" });
+      toast.error("לא ניתן למחוק את הביקורת");
     } else {
-      toast({ title: "הביקורת נמחקה" });
+      toast.success("הביקורת נמחקה");
       onDelete?.(id);
     }
   };
 
   const handleEditSave = async () => {
     if (!id || editText.trim().length < 10) {
-      toast({ title: "הביקורת קצרה מדי", description: "כתבו לפחות 10 תווים", variant: "destructive" });
+      toast.error("הביקורת קצרה מדי", { description: "כתבו לפחות 10 תווים" });
       return;
     }
     setEditSaving(true);
@@ -200,12 +199,12 @@ const ReviewCard = ({
       .eq("id", id);
 
     if (error) {
-      toast({ title: "שגיאה", description: "לא ניתן לעדכן את הביקורת", variant: "destructive" });
+      toast.error("לא ניתן לעדכן את הביקורת");
     } else {
       setDisplayText(editText);
       setWasEdited(true);
       setIsEditing(false);
-      toast({ title: "הביקורת עודכנה ✓" });
+      toast.success("הביקורת עודכנה ✓");
       onEdit?.(id, editText);
     }
     setEditSaving(false);
@@ -283,7 +282,8 @@ const ReviewCard = ({
               />
               <div className="flex items-center gap-2">
                 <Button size="sm" onClick={handleEditSave} disabled={editSaving} className="gap-1 text-xs">
-                  <Check size={12} /> {editSaving ? "שומר..." : "שמירה"}
+                  {editSaving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                  {editSaving ? "שומר..." : "שמירה"}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => { setIsEditing(false); setEditText(displayText); }} className="gap-1 text-xs">
                   <X size={12} /> ביטול

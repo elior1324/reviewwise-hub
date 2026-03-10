@@ -6,14 +6,37 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, User, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import { Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import { validatePassword } from "@/lib/password-validation";
 import { translateAuthError } from "@/lib/auth-errors";
 
+// ── Password strength ─────────────────────────────────────────────────────────
+type StrengthLevel = 0 | 1 | 2 | 3;
+
+function getPasswordStrength(pw: string): StrengthLevel {
+  if (!pw) return 0;
+  const long       = pw.length >= 12;
+  const ok         = pw.length >= 8;
+  const hasLetter  = /[a-zA-Z]/.test(pw);
+  const hasNumber  = /[0-9]/.test(pw);
+  const hasSpecial = /[^a-zA-Z0-9]/.test(pw);
+  if (ok && hasLetter && hasNumber && (long || hasSpecial)) return 3;
+  if (ok && hasLetter && hasNumber) return 2;
+  return 1;
+}
+
+const STRENGTH_META: Record<StrengthLevel, { label: string; color: string; width: string }> = {
+  0: { label: "",        color: "",               width: "w-0"    },
+  1: { label: "חלשה",    color: "bg-red-500",     width: "w-1/3"  },
+  2: { label: "בינונית", color: "bg-yellow-400",  width: "w-2/3"  },
+  3: { label: "חזקה",    color: "bg-emerald-500", width: "w-full" },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface BusinessAuthProps {
   mode: "login" | "signup";
@@ -23,12 +46,12 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,13 +59,13 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
     try {
       if (mode === "signup") {
         if (!privacyConsent) {
-          toast({ title: "יש לאשר את מדיניות הפרטיות ותנאי השימוש", variant: "destructive" });
+          toast.error("יש לאשר את מדיניות הפרטיות ותנאי השימוש");
           setLoading(false);
           return;
         }
         const pwCheck = validatePassword(password);
         if (!pwCheck.valid) {
-          toast({ title: pwCheck.message, variant: "destructive" });
+          toast.error(pwCheck.message);
           setLoading(false);
           return;
         }
@@ -51,16 +74,16 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
         if (error) throw error;
         if (!data?.user) {
           // Supabase returned no error but also no user — auth hook likely blocked signup silently
-          throw new Error("hook — signup blocked silently. Check Supabase → Auth → Hooks and Logs.");
+          throw new Error("ההרשמה נכשלה — ייתכן בעיה בשרת. אנא נסו שנית או פנו לתמיכה.");
         }
-        toast({ title: "החשבון נוצר בהצלחה!", description: "בדקו את האימייל שלכם לאימות החשבון." });
+        toast.success("החשבון נוצר בהצלחה!", { description: "בדקו את האימייל שלכם לאימות החשבון." });
       } else {
         const { error } = await signIn(email, password);
         if (error) throw error;
         navigate("/business/dashboard");
       }
     } catch (err: any) {
-      toast({ title: "שגיאה", description: translateAuthError(err.message), variant: "destructive" });
+      toast.error(translateAuthError(err.message));
     } finally {
       setLoading(false);
     }
@@ -72,11 +95,14 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
     // AuthCallback will redirect business users there automatically.
     const { error } = await signInWithGoogle();
     if (error) {
-      toast({ title: "שגיאה בהתחברות Google", description: error.message, variant: "destructive" });
+      toast.error(error.message || "שגיאה בהתחברות עם Google");
       setGoogleLoading(false);
     }
     // No finally — redirect already happened if no error.
   };
+
+  const strengthLevel = getPasswordStrength(password);
+  const strengthMeta  = STRENGTH_META[strengthLevel];
 
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
@@ -102,12 +128,16 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
               onClick={handleGoogleAuth}
               disabled={googleLoading}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
+              {googleLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+              )}
               {googleLoading ? "מתחבר..." : mode === "login" ? "התחברו עם Google" : "הירשמו עם Google"}
             </Button>
 
@@ -140,20 +170,47 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="pr-10 glass border-border/50"
                   required
+                  dir="ltr"
                 />
               </div>
-              <div className="relative">
-                <Lock size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="password"
-                  placeholder="סיסמה"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pr-10 glass border-border/50"
-                  required
-                  minLength={8}
-                />
+              <div className="space-y-1">
+                <div className="relative">
+                  <Lock size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="סיסמה"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pr-10 pl-10 glass border-border/50"
+                    required
+                    minLength={8}
+                    dir="ltr"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+
+                {/* Password strength bar — shown only in signup while typing */}
+                {mode === "signup" && password.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                      <div className={`h-full rounded-full transition-all duration-300 ${strengthMeta.color} ${strengthMeta.width}`} />
+                    </div>
+                    {strengthMeta.label && (
+                      <p className={`text-xs ${strengthLevel === 1 ? "text-red-500" : strengthLevel === 2 ? "text-yellow-500" : "text-emerald-500"}`}>
+                        חוזק הסיסמה: {strengthMeta.label}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
+
               {mode === "signup" && (
                 <PrivacyConsentCheckbox
                   checked={privacyConsent}
@@ -164,9 +221,13 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
 
               {mode === "login" && <FormPrivacyNotice className="mt-1" />}
 
-              <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" disabled={loading || (mode === "signup" && !privacyConsent)}>
+              <Button
+                type="submit"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2"
+                disabled={loading || (mode === "signup" && !privacyConsent)}
+              >
+                {loading && <Loader2 size={16} className="animate-spin" />}
                 {loading ? "טוען..." : mode === "login" ? "התחברו" : "צרו חשבון"}
-                <ArrowLeft size={16} className="mr-2" />
               </Button>
             </form>
 
