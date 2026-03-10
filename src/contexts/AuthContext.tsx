@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useRef, ReactNode, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -48,6 +48,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>("free");
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
+  // Prevents auto-login flash when signUp returns a session (Email Confirmations disabled in Supabase)
+  const signingUpRef = useRef(false);
 
   const checkSubscription = useCallback(async () => {
     try {
@@ -69,7 +71,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // While signUp is in progress, suppress SIGNED_IN so the app doesn't flash-authenticate
+      // the user before we have a chance to call signOut (enforcing email confirmation).
+      if (event === "SIGNED_IN" && signingUpRef.current) {
+        console.log("[Auth] onAuthStateChange: suppressing SIGNED_IN during signUp flow (will sign out)");
+        return;
+      }
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -102,30 +110,66 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string, displayName?: string) => {
     console.log("[Auth] signUp called for:", email, "| origin:", window.location.origin);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { display_name: displayName },
-      },
-    });
-    if (error) {
-      // Log full error object — visible in DevTools Console for debugging
-      console.error("[Auth] signUp error:", error.message, "| status:", error.status, "| full:", error);
-    } else {
-      // data.user is null when: (a) email confirmation is required, or (b) an auth hook blocked silently
-      // data.session is null until email is confirmed
-      console.log("[Auth] signUp response — user:", data?.user?.id ?? "null (check auth hooks in Supabase dashboard)", "| session:", !!data?.session);
-      if (!data?.user) {
-        console.warn("[Auth] signUp returned no user and no error. Most likely causes:\n" +
-          "  1. Auth email hook is configured but failing (check Supabase → Auth → Hooks)\n" +
-          "  2. Email confirmation is required — user exists but is unconfirmed\n" +
-          "  3. Supabase project is paused\n" +
-          "  Check: Supabase Dashboard → Logs → Auth for the real error."
-        );
-      }
+
+    // Set flag so onAuthStateChange suppresses any SIGNED_IN event during this flow
+    signingUpRef.current = true;
+
+    let data: any = null;
+    let error: any = null;
+
+    try {
+      const result = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          // After email confirmation, redirect back to the app root
+          emailRedirectTo: window.location.origin,
+          data: { display_name: displayName },
+        },
+      });
+      data = result.data;
+      error = result.error;
+    } finally {
+      signingUpRef.current = false;
     }
+
+    if (error) {
+      console.error("[Auth] signUp error:", error.message, "| status:", error.status, "| full:", error);
+      return { data, error };
+    }
+
+    console.log(
+      "[Auth] signUp response — user:", data?.user?.id ?? "null",
+      "| email_confirmed:", !!data?.user?.email_confirmed_at,
+      "| session:", !!data?.session,
+    );
+
+    if (!data?.user) {
+      // No user and no error = Supabase auth hook is likely blocking signup silently
+      console.warn(
+        "[Auth] signUp returned no user and no error. Most likely causes:\n" +
+        "  1. Auth email hook is configured but failing (Supabase → Auth → Hooks)\n" +
+        "  2. Supabase project is paused\n" +
+        "  Check: Supabase Dashboard → Logs → Auth for the real error."
+      );
+      return { data, error };
+    }
+
+    // Supabase returned a session immediately — this happens when "Email Confirmations"
+    // is DISABLED in the Supabase dashboard (Auth → Email settings → Confirm email toggle).
+    // Enforce email confirmation at the app level: sign out and tell the user to check email.
+    if (data?.session) {
+      console.warn(
+        "[Auth] signUp returned a live session — Supabase Email Confirmations appear to be disabled.\n" +
+        "  Signing out now to enforce email confirmation at the app level.\n" +
+        "  To fix permanently: Supabase Dashboard → Authentication → Email → enable 'Confirm email'."
+      );
+      await supabase.auth.signOut();
+      // Return with session cleared so callers show "check your email" state
+      return { data: { ...data, session: null }, error: null };
+    }
+
+    // Normal path: Email Confirmations enabled — user exists but session is null until confirmed
     return { data, error };
   };
 
