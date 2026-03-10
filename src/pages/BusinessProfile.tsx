@@ -54,7 +54,7 @@ const BusinessProfile = () => {
       // NOTE: courses.name, rating, review_count, verified_purchases do NOT exist.
       const { data: courseData } = await supabase
         .from("courses")
-        .select("id, course_name, description, price, affiliate_url, course_category")
+        .select("id, name, description, price, affiliate_url, category")
         .eq("business_id", bizData.id);
 
       if (courseData) {
