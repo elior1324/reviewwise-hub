@@ -48,7 +48,7 @@ const CoursePage = () => {
       // NOTE: courses.name, rating, review_count, verified_purchases do NOT exist.
       const { data: courseData } = await supabase
         .from("courses")
-        .select("id, business_id, course_name, description, price, affiliate_url, businesses(slug, business_name)")
+        .select("id, business_id, name, description, price, affiliate_url, businesses(slug, name)")
         .eq("id", courseId)
         .maybeSingle();
 
