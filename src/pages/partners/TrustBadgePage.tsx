@@ -363,11 +363,9 @@ export default function TrustBadgePage() {
             </div>
 
             {/* Demo note */}
-            {!realData && (
-              <p className="text-center text-xs text-white/30 mt-3">
-                * מוצג דאטה לדוגמה — לאחר כניסה לחשבון ייטענו נתוני העסק שלכם
-              </p>
-            )}
+            <p className="text-center text-xs text-white/30 mt-3">
+              * מוצג דאטה לדוגמה — לאחר כניסה לחשבון ייטענו נתוני העסק שלכם
+            </p>
           </div>
         </section>
 
