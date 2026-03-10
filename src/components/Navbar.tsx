@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, Scale, DollarSign } from "lucide-react";
+import { Menu, X, LogOut, User, Scale, DollarSign, Tag } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,6 +52,10 @@ const Navbar = () => {
           </Link>
           <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             אודות
+          </Link>
+          <Link to="/business/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
+            <Tag size={14} />
+            מחירים
           </Link>
         </div>
 
@@ -117,6 +121,9 @@ const Navbar = () => {
           <Link to="/partner" className="block text-sm py-3 min-h-[44px] flex items-center" onClick={() => setMobileOpen(false)}>שותפים</Link>
           <Link to="/compare" className="block text-sm py-3 min-h-[44px] flex items-center" onClick={() => setMobileOpen(false)}>השוואה חכמה</Link>
           <Link to="/about" className="block text-sm py-3 min-h-[44px] flex items-center" onClick={() => setMobileOpen(false)}>אודות</Link>
+          <Link to="/business/pricing" className="block text-sm py-3 min-h-[44px] flex items-center gap-1.5" onClick={() => setMobileOpen(false)}>
+            <Tag size={14} aria-hidden="true" /> מחירים
+          </Link>
           <Link to="/business" className="block text-sm py-3 min-h-[44px] flex items-center text-primary" onClick={() => setMobileOpen(false)}>לעסקים</Link>
           {user && <Link to="/business/dashboard" className="block text-sm py-3 min-h-[44px] flex items-center" onClick={() => setMobileOpen(false)}>לוח בקרה עסקי</Link>}
           {!user && <Link to="/auth" className="block text-sm py-3 min-h-[44px] flex items-center text-primary" onClick={() => setMobileOpen(false)}>התחברו / צרו חשבון</Link>}
