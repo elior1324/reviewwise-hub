@@ -237,8 +237,8 @@ const TermsOfUse = () => (
           </ul>
           <p className="mb-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-foreground font-medium">
             ⚠️ לדיווח על תוכן פוגעני:{" "}
-            <a href="mailto:legal@reviewhub.co.il" className="text-primary hover:underline">
-              legal@reviewhub.co.il
+            <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">
+              support@reviewshub.info
             </a>
             . כל הליך משפטי יתנהל בין כותב התוכן לצד הנפגע ישירות, ללא מעורבות ReviewHub.
           </p>
@@ -363,8 +363,8 @@ const TermsOfUse = () => (
             <p className="text-muted-foreground">כתובת: תל אביב, ישראל</p>
             <p className="text-muted-foreground">
               אימייל:{" "}
-              <a href="mailto:legal@reviewhub.co.il" className="text-primary hover:underline">
-                legal@reviewhub.co.il
+              <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">
+                support@reviewshub.info
               </a>
             </p>
           </div>

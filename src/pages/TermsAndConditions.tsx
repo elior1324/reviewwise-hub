@@ -242,7 +242,7 @@ const TermsAndConditions = () => {
               ReviewHub שומרת לעצמה את הזכות, אך <strong>אינה מחויבת</strong>, להסיר, לערוך או לחסום כל תוכן לפי שיקול דעתה הבלעדי. הסרת תוכן או אי-הסרתו אינה מהווה נטילת אחריות על תוכן כלשהו ואינה הופכת את ReviewHub לצד בסכסוך.
             </p>
             <p className="mb-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-foreground font-medium">
-              ⚠️ כל אדם או עסק הסבור כי תוכן בפלטפורמה פוגע בזכויותיו רשאי לפנות אלינו בכתובת <a href="mailto:legal@reviewhub.co.il" className="text-primary hover:underline">legal@reviewhub.co.il</a> לצורך דיווח. ReviewHub תשקול את הפנייה בהתאם לדין החל, אך מבהירה כי <strong>כל הליך משפטי בנוגע לתוכן יתנהל בין כותב התוכן לבין הצד הנפגע ישירות, ללא מעורבות ReviewHub.</strong>
+              ⚠️ כל אדם או עסק הסבור כי תוכן בפלטפורמה פוגע בזכויותיו רשאי לפנות אלינו בכתובת <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a> לצורך דיווח. ReviewHub תשקול את הפנייה בהתאם לדין החל, אך מבהירה כי <strong>כל הליך משפטי בנוגע לתוכן יתנהל בין כותב התוכן לבין הצד הנפגע ישירות, ללא מעורבות ReviewHub.</strong>
             </p>
             <p className="font-semibold text-foreground mb-2">שיפוי בגין תוכן משתמשים:</p>
             <p>
@@ -410,7 +410,7 @@ const TermsAndConditions = () => {
               <li>חתימה (פיזית או אלקטרונית) של בעל הזכויות או מורשה מטעמו</li>
             </ul>
             <p>
-              הודעות יש לשלוח לכתובת: <a href="mailto:legal@reviewhub.co.il" className="text-primary hover:underline">legal@reviewhub.co.il</a>. ReviewHub תטפל בפניה תוך 7 ימי עסקים.
+              הודעות יש לשלוח לכתובת: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a>. ReviewHub תטפל בפניה תוך 7 ימי עסקים.
             </p>
           </Section>
 
@@ -448,7 +448,7 @@ const TermsAndConditions = () => {
               <li><strong>הזמנות ביקורת:</strong> הזמנות ביקורת הנשלחות בשם בעלי עסקים — בעל העסק הוא השולח ונושא באחריות החוקית. ראו סעיף "אחריות מרכזית והנחיות".</li>
             </ul>
             <p>
-              להסרה מרשימת תפוצה, ניתן גם לפנות אלינו ישירות: <a href="mailto:unsubscribe@reviewhub.co.il" className="text-primary hover:underline">unsubscribe@reviewhub.co.il</a>
+              להסרה מרשימת תפוצה, ניתן גם לפנות אלינו ישירות: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a>
             </p>
           </Section>
 
@@ -493,7 +493,7 @@ const TermsAndConditions = () => {
             <div className="mt-4 p-4 rounded-xl bg-secondary/50 border border-border/50 space-y-2 text-sm">
               <p className="font-semibold text-foreground">ReviewHub בע"מ</p>
               <p className="text-muted-foreground">כתובת: תל אביב, ישראל</p>
-              <p className="text-muted-foreground">אימייל: <a href="mailto:legal@reviewhub.co.il" className="text-primary hover:underline">legal@reviewhub.co.il</a></p>
+              <p className="text-muted-foreground">אימייל: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></p>
             </div>
             <p className="mt-4 text-muted-foreground text-sm">
               תנאי שימוש אלה עודכנו לאחרונה: מרץ 2026
