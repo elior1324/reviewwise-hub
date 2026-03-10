@@ -18,7 +18,7 @@ import {
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
   Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2, Link2
 } from "lucide-react";
-import EmbedWidgetGenerator from "@/components/EmbedWidgetGenerator";
+import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
 import IntegrationsTab from "@/components/IntegrationsTab";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { type Review, type Course } from "@/data/mockData";
@@ -1136,14 +1136,33 @@ const BusinessDashboard = () => {
             </LockedOverlay>
           </TabsContent>
 
-          {/* Embed Widget */}
+          {/* Trust Badge / Embed Widget */}
           <TabsContent value="widget">
             <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
-              <EmbedWidgetGenerator
+              <TrustBadgeDashboard
                 businessSlug={isDemo ? "demo-business" : (businessId ? businessSlug : "demo-business")}
                 businessName={isDemo ? "העסק שלכם" : displayBusiness.name}
                 rating={isDemo ? 4.8 : (Number(displayStats[0]?.value) || 0)}
                 reviewCount={isDemo ? 124 : (Number(displayStats[1]?.value) || 0)}
+                reviews={isDemo ? DEMO_REVIEWS.map(r => ({
+                  id: r.id,
+                  rating: r.rating,
+                  text: r.text,
+                  reviewerName: r.reviewerName,
+                  anonymous: r.anonymous,
+                  verified: r.verified,
+                  courseName: r.courseName,
+                  date: r.date,
+                })) : realReviews.map(r => ({
+                  id: r.id,
+                  rating: r.rating,
+                  text: r.text,
+                  reviewerName: r.reviewerName,
+                  anonymous: r.anonymous,
+                  verified: r.verified,
+                  courseName: r.courseName,
+                  date: r.date,
+                }))}
               />
             </LockedOverlay>
           </TabsContent>

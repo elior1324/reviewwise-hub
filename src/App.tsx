@@ -35,6 +35,9 @@ import BusinessDashboard from "./pages/business/BusinessDashboard";
 import BusinessAuth from "./pages/business/BusinessAuth";
 import PricingPage from "./pages/business/PricingPage";
 
+// Partner pages
+import TrustBadgePage from "./pages/partners/TrustBadgePage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -76,6 +79,9 @@ const App = () => (
             <Route path="/business/signup" element={<BusinessAuth mode="signup" />} />
             <Route path="/business/dashboard" element={<BusinessDashboard />} />
             <Route path="/business/pricing" element={<PricingPage />} />
+
+            {/* Partner / widget pages */}
+            <Route path="/partners/trust-badge" element={<TrustBadgePage />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

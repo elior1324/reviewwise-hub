@@ -97,6 +97,57 @@ serve(async (req) => {
     }
 
     // Default: JSON response
+    // Optionally include a featured review snippet (for the "expanded" widget variant)
+    const includeReview = url.searchParams.get("include_review") === "1";
+    let featuredReview = null;
+
+    if (includeReview) {
+      // Fetch one high-quality review to feature in the expanded badge
+      const { data: reviews } = await supabaseClient
+        .from("reviews")
+        .select("id, rating, content, reviewer_name, is_anonymous, is_verified_purchase")
+        .eq("business_id_via_slug", slug)            // handled below via subquery fallback
+        .eq("status", "approved")
+        .gte("rating", 4)
+        .not("content", "is", null)
+        .order("rating", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+        // The above uses a column that may not exist; fall back with a join
+        .then(async (r) => {
+          if (r.data) return r;
+          // Fallback: look up the business id first
+          const { data: bizRow } = await supabaseClient
+            .from("businesses")
+            .select("id")
+            .eq("slug", slug)
+            .single();
+          if (!bizRow) return { data: null };
+          return supabaseClient
+            .from("reviews")
+            .select("id, rating, content, reviewer_name, is_anonymous, is_verified_purchase")
+            .eq("business_id", bizRow.id)
+            .eq("status", "approved")
+            .gte("rating", 4)
+            .not("content", "is", null)
+            .order("rating", { ascending: false })
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        });
+
+      if (reviews?.data && reviews.data.content && reviews.data.content.length >= 40) {
+        featuredReview = {
+          rating: reviews.data.rating,
+          content: reviews.data.content,
+          reviewer_name: reviews.data.reviewer_name,
+          is_anonymous: reviews.data.is_anonymous,
+          is_verified_purchase: reviews.data.is_verified_purchase,
+        };
+      }
+    }
+
     return new Response(JSON.stringify({
       name: biz.name,
       slug: biz.slug,
@@ -104,6 +155,7 @@ serve(async (req) => {
       review_count: reviewCount,
       verified: biz.verified,
       profile_url: `https://reviewhub.co.il/biz/${biz.slug}`,
+      ...(includeReview ? { featured_review: featuredReview } : {}),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
