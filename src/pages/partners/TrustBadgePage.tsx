@@ -280,7 +280,7 @@ export default function TrustBadgePage() {
                 <Lock size={14} />
                 <span>
                   הווידג׳ט זמין לתכניות Pro ו-Premium.{" "}
-                  <a href="/pricing" className="underline underline-offset-2 hover:text-amber-300">
+                  <a href="/business/pricing" className="underline underline-offset-2 hover:text-amber-300">
                     שדרגו עכשיו
                   </a>
                 </span>
@@ -551,14 +551,14 @@ export default function TrustBadgePage() {
                     asChild
                     className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8"
                   >
-                    <a href="/pricing">שדרגו לPro</a>
+                    <a href="/business/pricing">שדרגו לPro</a>
                   </Button>
                   <Button
                     asChild
                     variant="outline"
                     className="border-white/15 text-white/70 hover:text-white hover:bg-white/5"
                   >
-                    <a href="/pricing" className="flex items-center gap-1.5">
+                    <a href="/business/pricing" className="flex items-center gap-1.5">
                       <span>ראו את כל התכניות</span>
                       <ExternalLink size={13} />
                     </a>

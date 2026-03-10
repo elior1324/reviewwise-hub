@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import Index from "./pages/Index";
@@ -37,6 +37,15 @@ import PricingPage from "./pages/business/PricingPage";
 
 // Partner pages
 import TrustBadgePage from "./pages/partners/TrustBadgePage";
+
+// Business solution pages
+import ReviewsSolution from "./pages/business/solutions/ReviewsSolution";
+import WidgetsSolution from "./pages/business/solutions/WidgetsSolution";
+import AnalyticsSolution from "./pages/business/solutions/AnalyticsSolution";
+
+// Business resource pages
+import DocsPage from "./pages/business/resources/DocsPage";
+import BlogPage from "./pages/business/resources/BlogPage";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +91,18 @@ const App = () => (
 
             {/* Partner / widget pages */}
             <Route path="/partners/trust-badge" element={<TrustBadgePage />} />
+
+            {/* Business solution pages */}
+            <Route path="/business/solutions/reviews" element={<ReviewsSolution />} />
+            <Route path="/business/solutions/widgets" element={<WidgetsSolution />} />
+            <Route path="/business/solutions/analytics" element={<AnalyticsSolution />} />
+
+            {/* Business resource pages */}
+            <Route path="/business/resources/docs" element={<DocsPage />} />
+            <Route path="/business/resources/blog" element={<BlogPage />} />
+
+            {/* Redirect /pricing → /business/pricing */}
+            <Route path="/pricing" element={<Navigate to="/business/pricing" replace />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
