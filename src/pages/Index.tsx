@@ -13,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import ReviewsMarquee from "@/components/ReviewsMarquee";
 import { useState, useRef, useEffect } from "react";
 import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, type Business, type Review } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
@@ -449,6 +450,15 @@ const Index = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Reviews Marquee — Trustpilot-style social proof strip */}
+      <ReviewsMarquee
+        title="מה אומרים עלינו?"
+        subtitle="ביקורות אמיתיות מלקוחות שבאמת רכשו שירותים וקורסים דרך ReviewHub"
+        pauseOnHover
+        speed="normal"
+        className="border-t border-border/40"
+      />
 
       {/* Recent Reviews */}
       <section className="container py-20">
