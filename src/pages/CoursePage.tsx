@@ -213,7 +213,7 @@ const CoursePage = () => {
           <div className="flex items-center gap-6 mt-4 flex-wrap">
             {course.rating > 0 && (
               <div className="flex items-center gap-2">
-                <StarRating rating={course.rating} size="sm" />
+                <StarRating rating={Number(course.rating)} size="sm" />
                 <span className="font-semibold text-foreground">{course.rating.toFixed(1)}</span>
               </div>
             )}
