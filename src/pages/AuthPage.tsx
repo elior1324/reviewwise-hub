@@ -17,90 +17,6 @@ import TurnstileWidget from "@/components/TurnstileWidget";
 import { validatePassword } from "@/lib/password-validation";
 import { translateAuthError } from "@/lib/auth-errors";
 
-// ─── DEBUG PANEL ─────────────────────────────────────────────────────────────
-// Collects raw Supabase signUp response for on-screen diagnosis.
-// Remove this block (and <DebugPanel /> below) once auth is confirmed working.
-interface DebugSnapshot {
-  supabaseUrl: string;
-  publishableKey: string;
-  rawData: unknown;
-  rawError: unknown;
-  timestamp: string;
-}
-
-/** Diagnose the result and tell the user exactly what to fix */
-function diagnose(snap: DebugSnapshot): { colour: string; text: string } {
-  const err = snap.rawError as any;
-  const data = snap.rawData as any;
-
-  if (err) {
-    const msg: string = err.message ?? JSON.stringify(err);
-    if (msg.toLowerCase().includes("hook"))
-      return { colour: "#ffaa44", text: "🔴 Auth hook failed. Most likely: auth-email-hook is registered in Supabase dashboard but RESEND_API_KEY is not set as a Supabase secret. Run: supabase secrets set RESEND_API_KEY=re_xxx" };
-    if (msg.toLowerCase().includes("email"))
-      return { colour: "#ffaa44", text: "🔴 Email-related error — see raw error above." };
-    if (msg.toLowerCase().includes("network") || msg.toLowerCase().includes("fetch"))
-      return { colour: "#ff4444", text: "🔴 Network error. The Supabase URL is unreachable — you may be running inside Lovable's preview environment which intercepts auth calls. Test outside Lovable (run locally or on a deployed URL)." };
-    return { colour: "#ff4444", text: `🔴 Supabase returned an error: ${msg}` };
-  }
-
-  if (!data?.user)
-    return { colour: "#ffaa44", text: "🟡 No error AND no user — likely the auth-email-hook IS registered in Supabase and is failing silently. Check: Supabase Dashboard → Authentication → Hooks → disable or fix the hook." };
-
-  if (data?.user && !data?.session)
-    return { colour: "#44ff88", text: "✅ Signup succeeded — user created, session null (email confirmation required). Check your inbox." };
-
-  if (data?.user && data?.session)
-    return { colour: "#ffff44", text: "🟡 Signup succeeded but returned a live session — Email Confirmations are DISABLED in your Supabase dashboard. Go to: Authentication → Email → enable 'Confirm email'." };
-
-  return { colour: "#888888", text: "Unknown state — see raw data above." };
-}
-
-function DebugPanel({ snap }: { snap: DebugSnapshot }) {
-  const urlOk = snap.supabaseUrl.startsWith("https://") && snap.supabaseUrl.includes(".supabase.co");
-  const keyOk = snap.publishableKey.startsWith("eyJ");
-  const dx = diagnose(snap);
-  return (
-    <div dir="ltr" style={{ fontSize: 12, fontFamily: "monospace", background: "#0d0d0d", color: "#ff9999", border: "2px solid #ff4444", borderRadius: 8, padding: 12, marginBottom: 12, overflowX: "auto" }}>
-      <div style={{ color: "#ff4444", fontWeight: "bold", fontSize: 14, marginBottom: 10 }}>🔴 AUTH DEBUG — remove before production</div>
-
-      {/* Diagnosis */}
-      <div style={{ background: "#1a1000", border: `1px solid ${dx.colour}`, borderRadius: 6, padding: "8px 12px", marginBottom: 12, color: dx.colour, fontWeight: "bold", fontSize: 13, lineHeight: 1.5 }}>
-        {dx.text}
-      </div>
-
-      {/* Env vars */}
-      <div style={{ marginBottom: 4 }}>
-        <span style={{ color: urlOk ? "#88ff88" : "#ff4444" }}>{urlOk ? "✅" : "❌"} SUPABASE_URL: </span>
-        <span style={{ color: "#ffff88" }}>{snap.supabaseUrl || "(empty — check .env)"}</span>
-      </div>
-      <div style={{ marginBottom: 10 }}>
-        <span style={{ color: keyOk ? "#88ff88" : "#ff4444" }}>{keyOk ? "✅" : "❌"} PUBLISHABLE_KEY: </span>
-        <span style={{ color: "#ffff88" }}>{snap.publishableKey ? snap.publishableKey.slice(0, 20) + "..." : "(empty — check .env)"}</span>
-      </div>
-
-      {/* Raw error */}
-      <div style={{ marginBottom: 4, color: snap.rawError ? "#ff6666" : "#88ff88", fontWeight: "bold" }}>
-        {snap.rawError ? "❌ Raw error object:" : "✅ No error returned from supabase.auth.signUp"}
-      </div>
-      <pre style={{ background: "#0a0000", padding: 8, borderRadius: 4, color: "#ff9999", whiteSpace: "pre-wrap", wordBreak: "break-all", marginBottom: 10, minHeight: 32 }}>
-        {JSON.stringify(snap.rawError, null, 2) ?? "null"}
-      </pre>
-
-      {/* Raw data */}
-      <div style={{ marginBottom: 4, color: "#aaaaff", fontWeight: "bold" }}>📦 Raw data object (user + session):</div>
-      <pre style={{ background: "#000a00", padding: 8, borderRadius: 4, color: "#aaffaa", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
-        {JSON.stringify(snap.rawData, null, 2)}
-      </pre>
-
-      <div style={{ color: "#666", marginTop: 8, fontSize: 11 }}>
-        🕐 {snap.timestamp} &nbsp;|&nbsp;
-        Check DevTools → Console for pre-flight Supabase reachability test
-      </div>
-    </div>
-  );
-}
-// ─────────────────────────────────────────────────────────────────────────────
 
 const AuthPage = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -112,7 +28,6 @@ const AuthPage = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [debugSnap, setDebugSnap] = useState<DebugSnapshot | null>(null);
   const { signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -134,7 +49,6 @@ const AuthPage = () => {
       }
     }
     setLoading(true);
-    setDebugSnap(null); // clear previous result
 
     if (mode === "login") {
       const { error } = await signIn(email, password);
@@ -147,15 +61,6 @@ const AuthPage = () => {
       }
     } else {
       const { data, error } = await signUp(email, password, displayName);
-
-      // Always capture a debug snapshot — visible on screen, no DevTools needed
-      setDebugSnap({
-        supabaseUrl: import.meta.env.VITE_SUPABASE_URL ?? "",
-        publishableKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "",
-        rawData: data,
-        rawError: error,
-        timestamp: new Date().toISOString(),
-      });
 
       if (error) {
         const msg = translateAuthError(error.message);
@@ -202,9 +107,6 @@ const AuthPage = () => {
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* ── DEBUG: remove once auth is confirmed working ── */}
-            {debugSnap && <DebugPanel snap={debugSnap} />}
-
             {/* Google OAuth */}
             <Button
               type="button"
@@ -273,7 +175,7 @@ const AuthPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={6}
+                    minLength={8}
                     className="pr-10 pl-10"
                     dir="ltr"
                   />

@@ -64,7 +64,8 @@ import { ReauthenticationEmail } from '../_shared/email-templates/reauthenticati
 
 // ── Configuration ─────────────────────────────────────────────────────────────
 const SITE_NAME    = "ReviewHub"
-const SITE_URL     = "https://reviewshub.info"
+const SITE_URL     = "https://reviewshub.info"   // Frontend (used as redirect target)
+const SUPABASE_URL = "https://pujsopidbejeuqteormi.supabase.co" // Auth API base
 const FROM_ADDRESS = "ReviewHub <noreply@reviewshub.info>"
 const REPLY_TO     = "support@reviewshub.info"
 
@@ -95,22 +96,39 @@ const corsHeaders = {
 }
 
 // ── Build confirmation URL from Supabase hook payload ─────────────────────────
-// Supabase does not send a pre-built URL; we construct it from parts.
+//
+// CORRECT URL ANATOMY
+// ───────────────────
+//   BASE  → https://pujsopidbejeuqteormi.supabase.co   (Supabase API, not the frontend)
+//   PATH  → /auth/v1/verify                            (Supabase's token validation endpoint)
+//   token_hash  → the opaque hash from the hook payload
+//   type        → email_action_type (signup, recovery, …)
+//   redirect_to → where Supabase redirects AFTER validation — this is the FRONTEND URL
+//
+// Common mistake: using site_url (frontend) as the base → produces
+//   https://reviewshub.info/auth/v1/verify   ← 404, no such React route
+// Correct:
+//   https://pujsopidbejeuqteormi.supabase.co/auth/v1/verify?…&redirect_to=https://reviewshub.info
+//
+// Flow after user clicks the link:
+//   1. Browser hits Supabase /auth/v1/verify with token_hash
+//   2. Supabase validates → sets session cookies / tokens
+//   3. Supabase 302-redirects to redirect_to (our frontend)
+//   4. Frontend's detectSessionInUrl / AuthCallback picks up the session
+//
 function buildConfirmationUrl(emailData: any): string {
   const { token_hash, email_action_type, redirect_to, site_url } = emailData
 
-  // site_url comes from Supabase dashboard "Site URL" setting
-  const base = (site_url || SITE_URL).replace(/\/$/, '')
+  // Always use the Supabase API URL as the base — NOT the frontend URL.
+  const base = SUPABASE_URL.replace(/\/$/, '')
 
-  // Standard Supabase verification path
   const params = new URLSearchParams({
-    token_hash: token_hash || '',
-    type: email_action_type || '',
+    token_hash:  token_hash || '',
+    type:        email_action_type || '',
+    // redirect_to tells Supabase where to send the browser after token validation.
+    // Fall back: explicit redirect_to from payload → site_url from payload → our SITE_URL constant.
+    redirect_to: redirect_to || site_url || SITE_URL,
   })
-
-  if (redirect_to) {
-    params.set('next', redirect_to)
-  }
 
   return `${base}/auth/v1/verify?${params.toString()}`
 }

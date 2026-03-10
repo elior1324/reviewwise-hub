@@ -10,7 +10,7 @@ export const translateAuthError = (msg: string): string => {
   if (m.includes("email not confirmed"))          return "האימייל טרם אומת. בדקו את תיבת הדואר.";
   if (m.includes("user already registered"))      return "כתובת האימייל כבר רשומה. נסו להתחבר.";
   if (m.includes("email address is invalid"))     return "כתובת האימייל אינה תקינה.";
-  if (m.includes("password should be"))           return "הסיסמה חייבת להכיל לפחות 6 תווים.";
+  if (m.includes("password should be"))           return "הסיסמה חייבת להכיל לפחות 8 תווים.";
   if (m.includes("signup is disabled"))           return "ההרשמה מושבתת כרגע. פנו לתמיכה.";
   if (m.includes("email provider is disabled"))   return "כניסה באימייל מושבתת בהגדרות הפרויקט.";
   if (m.includes("hook"))                         return "שגיאת שרת פנימית (auth hook). בדקו את לוגי Supabase.";
