@@ -61,14 +61,14 @@ const BusinessProfile = () => {
         setCourses(courseData.map((c: any) => ({
           id: c.id,
           businessSlug: bizData.slug,
-          name: c.course_name || "",           // ✅ course_name → name (frontend shape)
+          name: c.name || "",
           price: Number(c.price) || 0,
           description: c.description || "",
           affiliateUrl: c.affiliate_url || "",
-          category: c.course_category || "",   // ✅ course_category → category
-          rating: 0,                           // not stored per-course in DB
-          reviewCount: 0,                      // not stored per-course in DB
-          verifiedPurchases: 0,                // not stored in DB
+          category: c.category || "",
+          rating: 0,
+          reviewCount: 0,
+          verifiedPurchases: 0,
         })));
       }
 
