@@ -67,7 +67,7 @@ const CoursePage = () => {
       // NOTE: business_responses does NOT exist.
       const { data: reviewData } = await supabase
         .from("reviews")
-        .select("*, review_responses(response_text, created_at)")
+        .select("*, business_responses(text, created_at)")
         .eq("course_id", courseId)
         .order("created_at", { ascending: false });
 
