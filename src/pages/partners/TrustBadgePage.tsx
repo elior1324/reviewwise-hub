@@ -224,11 +224,11 @@ export default function TrustBadgePage() {
   const widgetProps = DEMO_PROPS;
 
   const snippet = buildEmbedSnippet(
-    businessProfile?.slug ?? "your-business-slug",
+    "your-business-slug",
     activeVariant
   );
 
-  const isPro = businessProfile?.subscription_tier === "pro" || businessProfile?.subscription_tier === "premium";
+  const isPro = false;
 
   return (
     <div
