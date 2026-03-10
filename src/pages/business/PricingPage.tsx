@@ -255,7 +255,7 @@ const PricingPage = () => {
             </p>
             <div className="space-y-2">
               <Button
-                onClick={() => window.open("mailto:support@reviewhub.co.il?subject=שדרוג לתוכנית " + selectedPlan, "_blank")}
+                onClick={() => window.open("mailto:support@reviewshub.info?subject=שדרוג לתוכנית " + selectedPlan, "_blank")}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 gap-2"
               >
                 <MessageSquare size={14} /> צרו קשר לשדרוג

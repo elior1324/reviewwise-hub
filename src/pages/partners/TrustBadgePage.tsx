@@ -461,7 +461,7 @@ export default function TrustBadgePage() {
               הביקורות והדירוג מתעדכנים אוטומטית — אין צורך לשנות את הקוד לאחר ההטמעה.
               יש שאלות?{" "}
               <a
-                href="mailto:support@reviewhub.co.il"
+                href="mailto:support@reviewshub.info"
                 className="text-primary/60 hover:text-primary underline underline-offset-2"
               >
                 צרו קשר עם התמיכה

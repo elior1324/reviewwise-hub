@@ -216,10 +216,10 @@ const Accessibility = () => (
             <p className="text-muted-foreground">
               אימייל:{" "}
               <a
-                href="mailto:accessibility@reviewhub.co.il"
+                href="mailto:support@reviewshub.info"
                 className="text-primary hover:underline"
               >
-                accessibility@reviewhub.co.il
+                support@reviewshub.info
               </a>
             </p>
             <p className="text-muted-foreground">

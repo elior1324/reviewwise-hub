@@ -13,7 +13,7 @@ import Footer from "@/components/Footer";
 const META = {
   updated:   "10 במרץ 2026",
   company:   "ReviewHub",
-  email:     "privacy@reviewhub.co.il",
+  email:     "support@reviewshub.info",
   authority: "https://www.gov.il/he/departments/the_privacy_protection_authority",
 };
 

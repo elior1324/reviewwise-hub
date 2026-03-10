@@ -363,8 +363,8 @@ const TermsOfUse = () => (
             <p className="text-muted-foreground">כתובת: תל אביב, ישראל</p>
             <p className="text-muted-foreground">
               אימייל:{" "}
-              <a href="mailto:legal@reviewhub.co.il" className="text-primary hover:underline">
-                legal@reviewhub.co.il
+              <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">
+                support@reviewshub.info
               </a>
             </p>
           </div>

@@ -228,8 +228,8 @@ const RefundPolicy = () => (
             <p className="font-semibold text-foreground">ReviewHub בע&quot;מ</p>
             <p className="text-muted-foreground">
               אימייל:{" "}
-              <a href="mailto:billing@reviewhub.co.il" className="text-primary hover:underline">
-                billing@reviewhub.co.il
+              <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">
+                support@reviewshub.info
               </a>
             </p>
             <p className="text-muted-foreground">כתובת: תל אביב, ישראל</p>
