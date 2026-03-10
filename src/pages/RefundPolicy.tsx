@@ -69,7 +69,7 @@ const RefundPolicy = () => {
           <Section icon={FileText} title="אופן ביטול העסקה">
             <p className="mb-3">ניתן לבטל עסקה באחת הדרכים הבאות:</p>
             <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-              <li><strong>דוא"ל:</strong> שליחת הודעת ביטול לכתובת <a href="mailto:billing@reviewhub.co.il" className="text-primary hover:underline">billing@reviewhub.co.il</a></li>
+              <li><strong>דוא"ל:</strong> שליחת הודעת ביטול לכתובת <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></li>
               <li><strong>טופס מקוון:</strong> באמצעות פנייה דרך עמוד "צור קשר" באתר</li>
               <li><strong>דואר רשום:</strong> ReviewHub בע"מ, תל אביב, ישראל</li>
             </ul>
