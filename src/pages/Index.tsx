@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { TestimonialsSection } from "@/components/blocks/testimonials-with-marquee";
+import { FeaturesGrid } from "@/components/blocks/features-grid";
 import { useState, useRef, useEffect } from "react";
 import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, type Business, type Review } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
@@ -450,6 +451,9 @@ const Index = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* "Why ReviewHub?" bento feature grid with glowing border effect */}
+      <FeaturesGrid />
 
       {/* Trustpilot-style testimonials marquee */}
       <TestimonialsSection
