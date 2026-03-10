@@ -85,14 +85,14 @@ const Dashboard = () => {
         setBusinessCourses(courses.map((c: any) => ({
           id: c.id,
           businessSlug: biz.slug || "",
-          name: c.course_name || "",               // ✅ course_name → frontend .name
+          name: c.name || "",
           price: Number(c.price) || 0,
           description: c.description || "",
           affiliateUrl: c.affiliate_url || "",
-          category: c.course_category || "",       // ✅ course_category → frontend .category
-          rating: 0,                               // computed below from reviews
-          reviewCount: 0,                          // computed below from reviews
-          verifiedPurchases: 0,                    // computed below from reviews
+          category: c.category || "",
+          rating: 0,
+          reviewCount: 0,
+          verifiedPurchases: 0,
         })));
       }
 
