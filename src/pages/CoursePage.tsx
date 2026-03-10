@@ -76,19 +76,19 @@ const CoursePage = () => {
       const avgRating = totalReviews > 0
         ? (reviewData || []).reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / totalReviews
         : 0;
-      const verifiedCount = (reviewData || []).filter((r: any) => r.verified_purchase).length;
+      const verifiedCount = (reviewData || []).filter((r: any) => r.verified).length;
 
       setCourse({
         id: courseData.id,
-        name: courseData.course_name || "",            // ✅ course_name (NOT .name)
+        name: courseData.name || "",
         description: courseData.description || "",
         price: Number(courseData.price) || 0,
-        rating: Math.round(avgRating * 10) / 10,      // computed
-        reviewCount: totalReviews,                     // computed
-        verifiedPurchases: verifiedCount,              // computed
+        rating: Math.round(avgRating * 10) / 10,
+        reviewCount: totalReviews,
+        verifiedPurchases: verifiedCount,
         affiliateUrl: courseData.affiliate_url || "",
         businessSlug: (courseData.businesses as any)?.slug || "",
-        businessName: (courseData.businesses as any)?.business_name || "", // ✅ business_name (NOT .name)
+        businessName: (courseData.businesses as any)?.name || "",
         businessId: courseData.business_id,
       });
 
