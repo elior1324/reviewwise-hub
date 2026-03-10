@@ -410,7 +410,7 @@ const TermsAndConditions = () => {
               <li>חתימה (פיזית או אלקטרונית) של בעל הזכויות או מורשה מטעמו</li>
             </ul>
             <p>
-              הודעות יש לשלוח לכתובת: <a href="mailto:legal@reviewhub.co.il" className="text-primary hover:underline">legal@reviewhub.co.il</a>. ReviewHub תטפל בפניה תוך 7 ימי עסקים.
+              הודעות יש לשלוח לכתובת: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a>. ReviewHub תטפל בפניה תוך 7 ימי עסקים.
             </p>
           </Section>
 
