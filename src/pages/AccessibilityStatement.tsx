@@ -1,192 +1,154 @@
-/**
- * AccessibilityStatement.tsx
- * הצהרת נגישות — ReviewHub
- * עומד ב: חוק שוויון זכויות לאנשים עם מוגבלות התשנ"ח-1998,
- *          תקנות שוויון זכויות (התאמות נגישות לשירות) התשע"ג-2013,
- *          תקן ישראלי IS 5568, WCAG 2.1 Level AA
- * נתיב: /accessibility
- */
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Eye, ChevronDown, CheckCircle2, Clock, Mail } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { motion } from "framer-motion";
+import { Accessibility, Monitor, Keyboard, Eye, MessageSquare, RefreshCw, Settings } from "lucide-react";
 
-const META = {
-  updated:     "10 במרץ 2026",
-  coordinator: "accessibility@reviewhub.co.il",
-  level:       "WCAG 2.1 AA / תקן IS 5568",
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-const FEATURES = [
-  // done
-  { done: true,  text: "ניווט מלא במקלדת (Tab / Enter / Space / חצים)" },
-  { done: true,  text: "תאימות עם NVDA, JAWS, VoiceOver, TalkBack" },
-  { done: true,  text: "כל התמונות מכילות alt text תיאורי" },
-  { done: true,  text: "יחס ניגודיות ≥ 4.5:1 (WCAG AA) לטקסט רגיל" },
-  { done: true,  text: "יחס ניגודיות ≥ 3:1 לאלמנטים גרפיים ואינטראקטיביים" },
-  { done: true,  text: "גופנים ניתנים להגדלה עד 200% ללא גלילה אופקית" },
-  { done: true,  text: "ממשק RTL מלאה עם תמיכה בעברית" },
-  { done: true,  text: "כל הכפתורים/קישורים עם תוויות ARIA ותיאורים נגישים" },
-  { done: true,  text: "הודעות שגיאה בטפסים מפורשות ומוקדמות למיקוד" },
-  { done: true,  text: "Skip navigation link — קפיצה לתוכן הראשי" },
-  { done: true,  text: "מבנה כותרות היררכי ועקבי (h1→h2→h3)" },
-  { done: true,  text: "Landmark roles (main, nav, footer, aside)" },
-  { done: true,  text: "אנימציות מכובדות prefers-reduced-motion" },
-  // in progress
-  { done: false, text: "כתוביות לסרטוני וידאו שמועלים על ידי משתמשים (בפיתוח, Q2 2026)" },
-  { done: false, text: "מצב ניגודיות גבוהה (High Contrast Mode) — בפיתוח" },
-  { done: false, text: "Live regions לעדכונים דינמיים — בשיפור" },
-];
-
-const SECTIONS = [
-  {
-    title: "מהו תקן IS 5568?",
-    body: [
-      { type: "p", text: "תקן ישראלי IS 5568 הוא תרגום רשמי של הנחיות WCAG 2.1 ברמת AA, כפי שאומצו על ידי מכון התקנים הישראלי. תקנות שוויון זכויות לאנשים עם מוגבלות (התאמות נגישות לשירות) מחייבות אתרים ציבוריים לעמוד בתקן זה." },
-    ],
-  },
-  {
-    title: "טכנולוגיות עזר נתמכות",
-    body: [
-      { type: "list", items: [
-        "קוראי מסך: NVDA + Chrome (Windows), JAWS (Windows), VoiceOver (macOS/iOS), TalkBack (Android)",
-        "ניווט מקלדת: ללא עכבר — כולל focus visible ברור",
-        "מגדיל מסך: עד 200% בדפדפן",
-        "דפדפנים: Chrome 120+, Firefox 120+, Safari 17+, Edge 120+",
-      ]},
-    ],
-  },
-  {
-    title: "מגבלות ידועות",
-    body: [
-      { type: "p", text: "אנחנו עובדים על שיפור מתמיד. מגבלות ידועות נכון לתאריך העדכון:" },
-      { type: "list", items: [
-        "תכנים מוטמעים מ-YouTube: כפופים למדיניות YouTube; אנו ממליצים לצפות ישירות ב-YouTube עם כתוביות",
-        "טבלאות מורכבות בדשבורד — בשיפור לתאימות מלאה עם קוראי מסך",
-        "מצב ניגודיות גבוהה — עדיין לא זמין; פנה אלינו ונסייע ידנית",
-      ]},
-    ],
-  },
-  {
-    title: "כיצד לנווט בנגישות",
-    body: [
-      { type: "list", items: [
-        "Tab — מעבר בין אלמנטים אינטראקטיביים",
-        "Shift+Tab — חזרה לאלמנט הקודם",
-        "Enter / Space — הפעלת כפתורים וקישורים",
-        "חצים — ניווט בתפריטים ורשימות",
-        "Escape — סגירת דיאלוגים ומוגנים",
-        'הקש Alt+1 (או Tab+1 ב-VoiceOver) לדילוג לתוכן הראשי',
-      ]},
-    ],
-  },
-  {
-    title: "הגשת משוב על נגישות",
-    body: [
-      { type: "p", text: `מצאת מחסום נגישות? אנחנו רוצים לדעת ולתקן. רכז הנגישות: ${META.coordinator}` },
-      { type: "p", text: "בפנייתך כלול: תיאור המחסום, הדף/הפונקציה, הדפדפן ומערכת ההפעלה, וציוד העזר בו השתמשת." },
-      { type: "p", text: "זמן מענה: עד 7 ימי עסקים. אם לא קיבלת מענה — ניתן לפנות לנציב שוויון זכויות לאנשים עם מוגבלות." },
-    ],
-  },
-];
-
-const AccordionItem = ({ section }: { section: typeof SECTIONS[0] }) => {
-  const [open, setOpen] = useState(false);
+const AccessibilityStatement = () => {
   return (
-    <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/[0.03]">
-      <button onClick={() => setOpen(v => !v)} className="w-full flex items-center justify-between px-6 py-4 text-right hover:bg-white/[0.04] transition-colors" aria-expanded={open}>
-        <span className="font-semibold text-white text-sm">{section.title}</span>
-        <ChevronDown size={16} className={`text-white/40 transition-transform duration-200 shrink-0 ml-4 ${open ? "rotate-180" : ""}`} />
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-            <div className="px-6 pb-5 pt-1 border-t border-white/10 space-y-3">
-              {section.body.map((block, i) => {
-                if (block.type === "p") return <p key={i} className="text-sm text-white/60 leading-relaxed">{block.text}</p>;
-                if (block.type === "list") return (
-                  <ul key={i} className="space-y-1.5">
-                    {(block.items as string[]).map((item, j) => (
-                      <li key={j} className="flex gap-2 text-sm text-white/60"><span className="text-emerald-400 shrink-0 mt-0.5">•</span><span>{item}</span></li>
-                    ))}
-                  </ul>
-                );
-                return null;
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-export default function AccessibilityStatement() {
-  return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      {/* Skip navigation — hidden visually but accessible */}
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:right-4 focus:z-50 focus:bg-emerald-500 focus:text-black focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold">
-        דלג לתוכן הראשי
-      </a>
-
+    <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <Navbar />
-      <main id="main-content" className="container max-w-2xl py-16">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-semibold mb-5">
-            <Eye size={13} /> תקן IS 5568 / WCAG 2.1 AA
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-3">הצהרת נגישות</h1>
-          <p className="text-white/50 text-sm">עודכן: {META.updated} · ReviewHub מחויבת לנגישות דיגיטלית לכולם</p>
-        </motion.div>
 
-        {/* Compliance status badge */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="flex items-center justify-between p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl mb-6">
-          <div>
-            <p className="text-sm font-semibold text-white">רמת עמידה נוכחית</p>
-            <p className="text-xs text-white/50 mt-0.5">חלקית — WCAG 2.1 Level AA</p>
-          </div>
-          <div className="text-xs bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 px-3 py-1.5 rounded-full font-semibold">
-            בתהליך שיפור מתמיד
-          </div>
-        </motion.div>
-
-        {/* Features checklist */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-          className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 mb-6">
-          <h2 className="font-semibold text-white text-sm mb-4">תכונות נגישות קיימות ומתוכננות</h2>
-          <div className="space-y-2.5">
-            {FEATURES.map((f, i) => (
-              <div key={i} className="flex items-start gap-3 text-sm">
-                {f.done
-                  ? <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
-                  : <Clock size={15} className="text-yellow-400 shrink-0 mt-0.5" />}
-                <span className={f.done ? "text-white/70" : "text-white/40"}>{f.text}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        <div className="space-y-2">
-          {SECTIONS.map((s, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.03 }}>
-              <AccordionItem section={s} />
-            </motion.div>
-          ))}
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-border/50">
+        <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
+        <div className="container py-16 md:py-24 relative">
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} className="max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
+              <Accessibility size={16} /> הצהרת נגישות
+            </div>
+            <h1 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-4">
+              הצהרת נגישות
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              גרסה 1.0 — מרץ 2026
+            </p>
+            <p className="text-muted-foreground mt-2">
+              ב-ReviewHub אנו מחויבים לקידום הנגישות ופועלים לאפשר לכל אדם, כולל אנשים עם מוגבלות וצרכים מיוחדים, להשתמש וליהנות מהשירותים שאנו מציעים.
+            </p>
+          </motion.div>
         </div>
+      </section>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-          className="mt-8 flex items-center justify-center gap-2 p-4 bg-emerald-500/5 border border-emerald-500/15 rounded-2xl text-sm text-white/50">
-          <Mail size={14} className="text-emerald-400" />
-          רכז נגישות:&nbsp;<a href={`mailto:${META.coordinator}`} className="text-emerald-400 hover:underline">{META.coordinator}</a>
-        </motion.div>
+      <div className="container py-12 max-w-4xl">
+        <div className="space-y-12">
 
-        <p className="text-center text-xs text-white/30 mt-6">
-          הצהרה זו נערכה בהתאם לתקנות שוויון זכויות לאנשים עם מוגבלות (התאמות נגישות לשירות), התשע"ג-2013.
-        </p>
-      </main>
+          {/* Why Accessibility */}
+          <Section icon={Eye} title="מדוע נגישות חשובה לנו">
+            <p>
+              כרבע מהאוכלוסייה בישראל נתקלת בקשיי נגישות לאינטרנט: לקויי ראייה, לקויי שמיעה, אנשים עם מוגבלות מוטורית, בני הגיל השלישי ועוד.
+            </p>
+            <p className="mt-3">
+              אנו מאמינים שלכל אדם יש את הזכות לחיות בכבוד, בשוויון, בנוחות ובעצמאות. לכן השקענו משאבים משמעותיים כדי להבטיח שהפלטפורמה שלנו תהיה קלה לשימוש ונגישה לכולם.
+            </p>
+          </Section>
+
+          {/* Standards */}
+          <Section icon={Monitor} title="תקנים והתאמות">
+            <p>
+              ביצענו את ההתאמות הנדרשות בפלטפורמה שלנו והטמענו את כללי הנגישות ככל שניתן, בהתאם לעקרונות הבאים:
+            </p>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mt-3">
+              <li>תקן הנגישות הישראלי (ת"י 5568)</li>
+              <li>תקנות שוויון זכויות לאנשים עם מוגבלות (התאמות נגישות לשירות), תשע"ג-2013 — סימן ג': שירותי האינטרנט</li>
+              <li>הנחיות WCAG 2.1 ברמה AA</li>
+            </ul>
+            <p className="mt-3">
+              הפלטפורמה מותאמת לדפדפנים המובילים: Chrome, Firefox, Safari ו-Edge.
+            </p>
+          </Section>
+
+          {/* Features */}
+          <Section icon={Settings} title="התאמות הנגישות בפלטפורמה">
+            <p className="mb-3">
+              הפלטפורמה כוללת תפריט נגישות הממוקם בפינה השמאלית העליונה של כל עמוד (סמל <Accessibility size={14} className="inline text-primary" />). לחיצה על הסמל פותחת תפריט המאפשר את ההתאמות הבאות:
+            </p>
+            <ul className="list-disc pr-6 space-y-2 text-muted-foreground">
+              <li><strong>שינוי גודל טקסט</strong> — שלוש רמות: רגיל, גדול (115%), וגדול מאוד (130%). לחיצה חוזרת מחליפה בין הרמות</li>
+              <li><strong>ניגודיות גבוהה</strong> — מפעיל מצב ניגודיות גבוהה (רקע כהה וטקסט בהיר) לשיפור הקריאות</li>
+              <li><strong>הפחתת אנימציות</strong> — עוצר את כל האנימציות והמעברים באתר, מתאים למי שרגיש להבהובים ותנועה</li>
+              <li><strong>הדגשת קישורים</strong> — מוסיף קו תחתון לכל הקישורים באתר לזיהוי קל יותר</li>
+              <li><strong>פונט קריא</strong> — מחליף את הפונט בכל האתר לפונט Arial הקריא והברור יותר</li>
+              <li><strong>סמן מוגדל</strong> — מגדיל את סמן העכבר לנראות טובה יותר</li>
+              <li><strong>גווני אפור</strong> — מציג את האתר בגווני אפור בלבד, מתאים לאנשים עם רגישות לצבעים</li>
+              <li><strong>ריווח טקסט</strong> — מגדיל את המרווחים בין אותיות, מילים ושורות לקריאה נוחה יותר</li>
+              <li><strong>איפוס הגדרות</strong> — מחזיר את כל ההגדרות למצב ברירת המחדל</li>
+            </ul>
+            <p className="mt-3 text-muted-foreground">
+              ההגדרות נשמרות אוטומטית במכשיר שלכם ויישמרו גם בביקורים הבאים באתר.
+            </p>
+          </Section>
+
+          {/* Keyboard & Screen Readers */}
+          <Section icon={Keyboard} title="ניווט מקלדת וקוראי מסך">
+            <p>
+              הפלטפורמה תומכת בניווט מלא באמצעות מקלדת ומותאמת לעבודה עם תוכנות קוראי מסך, כגון JAWS, NVDA ותוכנות נוספות.
+            </p>
+          </Section>
+
+          {/* Ongoing Efforts */}
+          <Section icon={RefreshCw} title="מאמצים מתמשכים">
+            <p>
+              אנו ממשיכים במאמצים לשפר את נגישות הפלטפורמה כחלק ממחויבותנו לאפשר שימוש נוח עבור כלל האוכלוסייה, ובכלל זה אנשים עם מוגבלות וצרכים מיוחדים.
+            </p>
+            <p className="mt-3">
+              יש לציין כי למרות מאמצינו להנגיש את כלל הדפים בפלטפורמה, ייתכן שתיתקלו בחלקים שטרם הונגשו. אנו עובדים באופן שוטף על שיפורם.
+            </p>
+          </Section>
+
+          {/* Contact */}
+          <Section icon={MessageSquare} title="דיווח על בעיית נגישות">
+            <p>
+              אם במהלך הגלישה בפלטפורמה נתקלתם בבעיה בנושא נגישות, נשמח אם תדווחו לנו ואנו נדאג לטפל בכך בהקדם.
+            </p>
+            <p className="mt-3 font-semibold text-foreground">
+              כדי שנוכל לטפל בבעיה בדרך הטובה ביותר, אנו ממליצים לצרף את הפרטים הבאים:
+            </p>
+            <ul className="list-disc pr-6 space-y-1 text-muted-foreground mt-2">
+              <li>תיאור הבעיה</li>
+              <li>מהי הפעולה שניסיתם לבצע</li>
+              <li>באיזה דף גלשתם</li>
+              <li>סוג וגרסה של הדפדפן</li>
+              <li>מערכת הפעלה</li>
+              <li>סוג הטכנולוגיה המסייעת (במידה והשתמשתם)</li>
+            </ul>
+            <div className="mt-4 p-4 rounded-xl bg-secondary/50 border border-border/50 text-sm">
+              <p className="text-muted-foreground">
+                ניתן לפנות אלינו בנושאי נגישות דרך עמוד <a href="/terms" className="text-primary hover:underline">יצירת הקשר</a> שבאתר.
+              </p>
+            </div>
+          </Section>
+
+        </div>
+      </div>
+
       <Footer />
     </div>
   );
-}
+};
+
+const Section = ({ icon: Icon, title, children }: { icon: any; title: string; children: React.ReactNode }) => (
+  <motion.section
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: true }}
+    variants={fadeUp}
+    className="scroll-mt-20"
+  >
+    <div className="flex items-center gap-3 mb-4">
+      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <Icon size={20} className="text-primary" />
+      </div>
+      <h2 className="font-display font-bold text-xl text-foreground">{title}</h2>
+    </div>
+    <div className="pr-[52px] text-muted-foreground leading-relaxed">
+      {children}
+    </div>
+  </motion.section>
+);
+
+export default AccessibilityStatement;
