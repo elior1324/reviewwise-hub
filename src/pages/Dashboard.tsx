@@ -143,23 +143,22 @@ const Dashboard = () => {
 
         setBusinessReviews(reviews.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating || 0,
-          text: r.review_text || "",               // ✅ review_text (NOT r.text)
-          courseName: r.courses?.course_name || "", // ✅ course_name (NOT courses.name)
+          text: r.text || "",
+          courseName: r.courses?.name || "",
           courseId: r.course_id || "",
           businessSlug: biz.slug || "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified_purchase || false,  // ✅ verified_purchase (NOT r.verified)
+          verified: r.verified || false,
           anonymous: r.anonymous || false,
-          flagged: false,                           // flagged doesn't exist in reviews table
-          flagReason: undefined,                    // flag_reason doesn't exist
-          likeCount: 0,                             // like_count doesn't exist
-          // ✅ review_responses (NOT business_responses), response_text (NOT .text)
-          ownerResponse: r.review_responses?.[0] ? {
-            text: r.review_responses[0].response_text || "",
-            date: new Date(r.review_responses[0].created_at).toLocaleDateString("he-IL"),
+          flagged: r.flagged || false,
+          flagReason: r.flag_reason || undefined,
+          likeCount: r.like_count || 0,
+          ownerResponse: r.business_responses?.[0] ? {
+            text: r.business_responses[0].text || "",
+            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
         })));
       } else {
