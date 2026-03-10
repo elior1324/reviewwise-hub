@@ -12,8 +12,14 @@
  *   Add to .env.local (git-ignored):
  *     VITE_TURNSTILE_SITE_KEY=0x4AAAAAAA...your_real_key
  *   Get your real key: https://dash.cloudflare.com → Turnstile → Add Site
+ *
+ * DEV MODE:
+ *   When VITE_TURNSTILE_SITE_KEY is not set, CAPTCHA is bypassed automatically.
+ *   This is intentional for MVP/local development — re-enable by adding the key.
+ *   To re-enable: set VITE_TURNSTILE_SITE_KEY in .env.local and remove DEV_BYPASS_CAPTCHA.
  */
 import { Turnstile } from "@marsidev/react-turnstile";
+import { useEffect } from "react";
 
 interface TurnstileWidgetProps {
   onSuccess: (token: string) => void;
@@ -24,26 +30,41 @@ interface TurnstileWidgetProps {
 // Pull from env — never hardcode a Turnstile key here.
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
 
-if (!TURNSTILE_SITE_KEY) {
-  console.error(
-    "[Security] VITE_TURNSTILE_SITE_KEY is not set. " +
-    "Add it to .env.local — CAPTCHA is NOT protecting your forms right now."
+// --- DEV BYPASS FLAG ---
+// Set to true to skip CAPTCHA during development/MVP testing.
+// Set to false (or add VITE_TURNSTILE_SITE_KEY) to enforce CAPTCHA in production.
+const DEV_BYPASS_CAPTCHA = !TURNSTILE_SITE_KEY;
+
+if (DEV_BYPASS_CAPTCHA) {
+  console.warn(
+    "[Dev] CAPTCHA bypassed — VITE_TURNSTILE_SITE_KEY is not set. " +
+    "Forms are unprotected. Add the key to .env.local before going to production."
   );
 }
 
 const TurnstileWidget = ({ onSuccess, onError, className }: TurnstileWidgetProps) => {
-  if (!TURNSTILE_SITE_KEY) {
+  // --- DEV MODE: auto-pass CAPTCHA so forms are not blocked during development ---
+  useEffect(() => {
+    if (DEV_BYPASS_CAPTCHA) {
+      onSuccess("dev-bypass-token");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (DEV_BYPASS_CAPTCHA) {
+    // Show a subtle dev-only notice — does NOT block the form
     return (
-      <div className={`${className ?? ""} p-3 rounded border border-destructive/50 bg-destructive/10 text-destructive text-xs`}>
-        ⚠️ CAPTCHA לא מוגדר — הוסיפו VITE_TURNSTILE_SITE_KEY ל-.env.local
+      <div className={`${className ?? ""} px-3 py-1.5 rounded border border-yellow-500/30 bg-yellow-500/5 text-yellow-600 dark:text-yellow-400 text-xs text-center`}>
+        🛠️ מצב פיתוח — CAPTCHA מושבת זמנית
       </div>
     );
   }
 
+  // --- PRODUCTION: render the real Turnstile widget ---
   return (
     <div className={className}>
       <Turnstile
-        siteKey={TURNSTILE_SITE_KEY}
+        siteKey={TURNSTILE_SITE_KEY!}
         onSuccess={onSuccess}
         onError={onError}
         options={{ theme: "auto", size: "flexible" }}
