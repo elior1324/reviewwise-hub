@@ -356,19 +356,7 @@ export default function TrustBadgePage() {
                         : "w-full max-w-xs"
                     }
                   >
-                    {loading ? (
-                      <div className="flex items-center justify-center gap-3 text-white/30 text-sm py-12">
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        >
-                          <Zap size={18} className="text-primary" />
-                        </motion.div>
-                        <span>טוען נתוני עסק...</span>
-                      </div>
-                    ) : (
-                      <TrustWidget variant={activeVariant} {...widgetProps} />
-                    )}
+                    <TrustWidget variant={activeVariant} {...widgetProps} />
                   </motion.div>
                 </AnimatePresence>
               </div>
