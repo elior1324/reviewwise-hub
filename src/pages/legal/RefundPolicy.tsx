@@ -115,8 +115,8 @@ const RefundPolicy = () => (
           <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
             <li>
               <strong>דוא&quot;ל:</strong> שליחת הודעת ביטול לכתובת{" "}
-              <a href="mailto:billing@reviewhub.co.il" className="text-primary hover:underline">
-                billing@reviewhub.co.il
+              <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">
+                support@reviewshub.info
               </a>
             </li>
             <li><strong>טופס מקוון:</strong> באמצעות פנייה דרך עמוד &quot;צור קשר&quot; באתר</li>
