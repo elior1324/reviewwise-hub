@@ -103,7 +103,7 @@ const Dashboard = () => {
       const { data: reviews } = courseIds.length > 0
         ? await supabase
             .from("reviews")
-            .select("*, courses(course_name), review_responses(response_text, created_at)")
+            .select("*, courses(name), business_responses(text, created_at)")
             .in("course_id", courseIds)
             .order("created_at", { ascending: false })
         : { data: [] as any[] };
