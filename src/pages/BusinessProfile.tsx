@@ -37,7 +37,7 @@ const BusinessProfile = () => {
       //   Rating and reviewCount are computed below from the reviews we fetch.
       const { data: bizData } = await supabase
         .from("businesses")
-        .select("id, slug, business_name, website, email, phone, category, description, verified")
+        .select("id, slug, name, website, email, phone, category, description, verified")
         .eq("slug", slug)
         .maybeSingle();
 
@@ -54,21 +54,21 @@ const BusinessProfile = () => {
       // NOTE: courses.name, rating, review_count, verified_purchases do NOT exist.
       const { data: courseData } = await supabase
         .from("courses")
-        .select("id, course_name, description, price, affiliate_url, course_category")
+        .select("id, name, description, price, affiliate_url, category")
         .eq("business_id", bizData.id);
 
       if (courseData) {
         setCourses(courseData.map((c: any) => ({
           id: c.id,
           businessSlug: bizData.slug,
-          name: c.course_name || "",           // ✅ course_name → name (frontend shape)
+          name: c.name || "",
           price: Number(c.price) || 0,
           description: c.description || "",
           affiliateUrl: c.affiliate_url || "",
-          category: c.course_category || "",   // ✅ course_category → category
-          rating: 0,                           // not stored per-course in DB
-          reviewCount: 0,                      // not stored per-course in DB
-          verifiedPurchases: 0,                // not stored in DB
+          category: c.category || "",
+          rating: 0,
+          reviewCount: 0,
+          verifiedPurchases: 0,
         })));
       }
 
@@ -83,21 +83,11 @@ const BusinessProfile = () => {
       // Owner responses: table is review_responses (NOT business_responses)
       //   columns: id, review_id, business_id, response_text, created_at
       //   joined via review_id FK (PostgREST: review_responses(response_text, created_at))
-      const { data: reviewData } = await supabase
-        .from("reviews")
-        .select("*, courses(course_name), review_responses(response_text, created_at)")
-        .eq("course_id", courseData?.map((c: any) => c.id) as any)  // fallback below
-        .order("created_at", { ascending: false });
-
-      // The above filter won't work well with an array. Use a proper approach:
-      // Re-fetch by business_id via the courses junction.
-      // reviews doesn't have business_id directly — we filter by course_ids.
-      const courseIds = (courseData || []).map((c: any) => c.id);
-
+      // reviews has business_id directly
       const { data: reviewDataFinal } = await supabase
         .from("reviews")
-        .select("*, courses(course_name), review_responses(response_text, created_at)")
-        .in("course_id", courseIds.length > 0 ? courseIds : ["00000000-0000-0000-0000-000000000000"])
+        .select("*, courses(name), business_responses(text, created_at)")
+        .eq("business_id", bizData.id)
         .order("created_at", { ascending: false });
 
       if (reviewDataFinal) {
@@ -124,7 +114,7 @@ const BusinessProfile = () => {
         // Now we can set business with real computed values
         const mappedBiz: Business = {
           slug: bizData.slug,
-          name: bizData.business_name || "",      // ✅ business_name (NOT .name)
+          name: bizData.name || "",
           type: FREELANCER_CATEGORIES.includes(bizData.category) ? "freelancer" : "course-provider",
           category: bizData.category || "",
           rating: Math.round(avgRating * 10) / 10, // computed from reviews
@@ -167,10 +157,9 @@ const BusinessProfile = () => {
           } : undefined,
         })));
       } else {
-        // No courses → no reviews, but still need to set business
         const mappedBiz: Business = {
           slug: bizData.slug,
-          name: bizData.business_name || "",
+          name: bizData.name || "",
           type: FREELANCER_CATEGORIES.includes(bizData.category) ? "freelancer" : "course-provider",
           category: bizData.category || "",
           rating: 0,

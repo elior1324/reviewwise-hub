@@ -48,7 +48,7 @@ const CoursePage = () => {
       // NOTE: courses.name, rating, review_count, verified_purchases do NOT exist.
       const { data: courseData } = await supabase
         .from("courses")
-        .select("id, business_id, course_name, description, price, affiliate_url, businesses(slug, business_name)")
+        .select("id, business_id, name, description, price, affiliate_url, businesses(slug, name)")
         .eq("id", courseId)
         .maybeSingle();
 
@@ -67,7 +67,7 @@ const CoursePage = () => {
       // NOTE: business_responses does NOT exist.
       const { data: reviewData } = await supabase
         .from("reviews")
-        .select("*, review_responses(response_text, created_at)")
+        .select("*, business_responses(text, created_at)")
         .eq("course_id", courseId)
         .order("created_at", { ascending: false });
 
@@ -76,19 +76,19 @@ const CoursePage = () => {
       const avgRating = totalReviews > 0
         ? (reviewData || []).reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / totalReviews
         : 0;
-      const verifiedCount = (reviewData || []).filter((r: any) => r.verified_purchase).length;
+      const verifiedCount = (reviewData || []).filter((r: any) => r.verified).length;
 
       setCourse({
         id: courseData.id,
-        name: courseData.course_name || "",            // ✅ course_name (NOT .name)
+        name: courseData.name || "",
         description: courseData.description || "",
         price: Number(courseData.price) || 0,
-        rating: Math.round(avgRating * 10) / 10,      // computed
-        reviewCount: totalReviews,                     // computed
-        verifiedPurchases: verifiedCount,              // computed
+        rating: Math.round(avgRating * 10) / 10,
+        reviewCount: totalReviews,
+        verifiedPurchases: verifiedCount,
         affiliateUrl: courseData.affiliate_url || "",
         businessSlug: (courseData.businesses as any)?.slug || "",
-        businessName: (courseData.businesses as any)?.business_name || "", // ✅ business_name (NOT .name)
+        businessName: (courseData.businesses as any)?.name || "",
         businessId: courseData.business_id,
       });
 
@@ -109,29 +109,28 @@ const CoursePage = () => {
 
         setReviews(reviewData.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating || 0,
-          text: r.review_text || "",                   // ✅ review_text (NOT .text)
-          courseName: courseData.course_name || "",    // use parent course, not a join
+          text: r.text || "",
+          courseName: courseData.name || "",
           courseId: r.course_id || "",
           businessSlug: (courseData.businesses as any)?.slug || "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified_purchase || false,      // ✅ verified_purchase (NOT .verified)
+          verified: r.verified || false,
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at && r.updated_at !== r.created_at
             ? new Date(r.updated_at).toLocaleDateString("he-IL")
             : undefined,
-          flagged: false,                              // flagged doesn't exist in reviews table
-          flagReason: undefined,                       // flag_reason doesn't exist
-          likeCount: 0,                                // like_count doesn't exist
+          flagged: r.flagged || false,
+          flagReason: r.flag_reason || undefined,
+          likeCount: r.like_count || 0,
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: r.user_id ? (expertCounts[r.user_id] || 0) >= 3 : false,
           userId: r.user_id || undefined,
-          // ✅ review_responses (NOT business_responses), response_text (NOT .text)
-          ownerResponse: r.review_responses?.[0] ? {
-            text: r.review_responses[0].response_text || "",
-            date: new Date(r.review_responses[0].created_at).toLocaleDateString("he-IL"),
+          ownerResponse: r.business_responses?.[0] ? {
+            text: r.business_responses[0].text || "",
+            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
         })));
       }
@@ -214,8 +213,8 @@ const CoursePage = () => {
           <div className="flex items-center gap-6 mt-4 flex-wrap">
             {course.rating > 0 && (
               <div className="flex items-center gap-2">
-                <StarRating rating={course.rating} size="sm" />
-                <span className="font-semibold text-foreground">{course.rating.toFixed(1)}</span>
+                <StarRating rating={Number(course.rating)} size={16} />
+                <span className="font-semibold text-foreground">{Number(course.rating).toFixed(1)}</span>
               </div>
             )}
             {course.reviewCount > 0 && (
@@ -244,7 +243,6 @@ const CoursePage = () => {
             businessName={course.businessName}
             businessId={course.businessId}
             courseId={course.id}
-            courseName={course.name}
             isVerifiedPurchaser={false}
           />
         </div>

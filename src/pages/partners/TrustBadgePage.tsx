@@ -216,20 +216,19 @@ const CopyButton = ({ text }: { text: string }) => {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TrustBadgePage() {
-  const { user, businessProfile } = useAuth();
+  const { user } = useAuth();
   const [activeVariant, setActiveVariant] = useState<"full" | "mini" | "sidebar">("full");
   const [showFixed, setShowFixed] = useState(false);
 
-  // Try to load real data if the user is logged in and has a business
-  const { data: realData, loading } = useWidgetData(businessProfile?.slug ?? null);
-  const widgetProps = realData ?? DEMO_PROPS;
+  // Use demo data (no businessProfile in auth context)
+  const widgetProps = DEMO_PROPS;
 
   const snippet = buildEmbedSnippet(
-    businessProfile?.slug ?? "your-business-slug",
+    "your-business-slug",
     activeVariant
   );
 
-  const isPro = businessProfile?.subscription_tier === "pro" || businessProfile?.subscription_tier === "premium";
+  const isPro = false;
 
   return (
     <div
@@ -357,30 +356,16 @@ export default function TrustBadgePage() {
                         : "w-full max-w-xs"
                     }
                   >
-                    {loading ? (
-                      <div className="flex items-center justify-center gap-3 text-white/30 text-sm py-12">
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        >
-                          <Zap size={18} className="text-primary" />
-                        </motion.div>
-                        <span>טוען נתוני עסק...</span>
-                      </div>
-                    ) : (
-                      <TrustWidget variant={activeVariant} {...widgetProps} />
-                    )}
+                    <TrustWidget variant={activeVariant} {...widgetProps} />
                   </motion.div>
                 </AnimatePresence>
               </div>
             </div>
 
             {/* Demo note */}
-            {!realData && (
-              <p className="text-center text-xs text-white/30 mt-3">
-                * מוצג דאטה לדוגמה — לאחר כניסה לחשבון ייטענו נתוני העסק שלכם
-              </p>
-            )}
+            <p className="text-center text-xs text-white/30 mt-3">
+              * מוצג דאטה לדוגמה — לאחר כניסה לחשבון ייטענו נתוני העסק שלכם
+            </p>
           </div>
         </section>
 

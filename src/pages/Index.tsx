@@ -138,7 +138,7 @@ const Index = () => {
     const fetchReviews = async () => {
       // Fetch recent reviews via the secure public_reviews view
       const { data } = await supabase
-        .from("public_reviews")
+        .from("reviews")
         .select("*, courses(name), business_responses(text, created_at)")
         .order("created_at", { ascending: false })
         .limit(6);

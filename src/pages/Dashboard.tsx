@@ -62,7 +62,7 @@ const Dashboard = () => {
       // ✅ Select only columns that exist in the businesses table
       const { data: biz } = await supabase
         .from("businesses")
-        .select("id, slug, business_name, website, email, phone, category, description")
+        .select("id, slug, name, website, email, phone, category, description")
         .eq("owner_id", user.id)
         .maybeSingle();
 
@@ -76,7 +76,7 @@ const Dashboard = () => {
       // ✅ rating/review_count/verified_purchases do NOT exist — computed below
       const { data: courses } = await supabase
         .from("courses")
-        .select("id, course_name, description, price, affiliate_url, course_category")
+        .select("id, name, description, price, affiliate_url, category")
         .eq("business_id", biz.id);
 
       const courseIds = (courses || []).map((c: any) => c.id);
@@ -85,14 +85,14 @@ const Dashboard = () => {
         setBusinessCourses(courses.map((c: any) => ({
           id: c.id,
           businessSlug: biz.slug || "",
-          name: c.course_name || "",               // ✅ course_name → frontend .name
+          name: c.name || "",
           price: Number(c.price) || 0,
           description: c.description || "",
           affiliateUrl: c.affiliate_url || "",
-          category: c.course_category || "",       // ✅ course_category → frontend .category
-          rating: 0,                               // computed below from reviews
-          reviewCount: 0,                          // computed below from reviews
-          verifiedPurchases: 0,                    // computed below from reviews
+          category: c.category || "",
+          rating: 0,
+          reviewCount: 0,
+          verifiedPurchases: 0,
         })));
       }
 
@@ -103,15 +103,15 @@ const Dashboard = () => {
       const { data: reviews } = courseIds.length > 0
         ? await supabase
             .from("reviews")
-            .select("*, courses(course_name), review_responses(response_text, created_at)")
+            .select("*, courses(name), business_responses(text, created_at)")
             .in("course_id", courseIds)
             .order("created_at", { ascending: false })
         : { data: [] as any[] };
 
       if (reviews && reviews.length > 0) {
         // Compute business-level rating from all reviews
-        const avgRating = reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length;
-        const verifiedCount = reviews.filter((r: any) => r.verified_purchase).length;
+        const avgRating = (reviews as any[]).reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length;
+        const verifiedCount = reviews.filter((r: any) => r.verified).length;
 
         setStats({
           rating: avgRating.toFixed(1),
@@ -127,7 +127,7 @@ const Dashboard = () => {
           if (!reviewsByCourse[r.course_id]) reviewsByCourse[r.course_id] = { count: 0, ratingSum: 0, verified: 0 };
           reviewsByCourse[r.course_id].count++;
           reviewsByCourse[r.course_id].ratingSum += (r.rating || 0);
-          if (r.verified_purchase) reviewsByCourse[r.course_id].verified++;
+          if (r.verified) reviewsByCourse[r.course_id].verified++;
         });
 
         setBusinessCourses(prev => prev.map(c => {
@@ -143,23 +143,22 @@ const Dashboard = () => {
 
         setBusinessReviews(reviews.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating || 0,
-          text: r.review_text || "",               // ✅ review_text (NOT r.text)
-          courseName: r.courses?.course_name || "", // ✅ course_name (NOT courses.name)
+          text: r.text || "",
+          courseName: r.courses?.name || "",
           courseId: r.course_id || "",
           businessSlug: biz.slug || "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified_purchase || false,  // ✅ verified_purchase (NOT r.verified)
+          verified: r.verified || false,
           anonymous: r.anonymous || false,
-          flagged: false,                           // flagged doesn't exist in reviews table
-          flagReason: undefined,                    // flag_reason doesn't exist
-          likeCount: 0,                             // like_count doesn't exist
-          // ✅ review_responses (NOT business_responses), response_text (NOT .text)
-          ownerResponse: r.review_responses?.[0] ? {
-            text: r.review_responses[0].response_text || "",
-            date: new Date(r.review_responses[0].created_at).toLocaleDateString("he-IL"),
+          flagged: r.flagged || false,
+          flagReason: r.flag_reason || undefined,
+          likeCount: r.like_count || 0,
+          ownerResponse: r.business_responses?.[0] ? {
+            text: r.business_responses[0].text || "",
+            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
         })));
       } else {
@@ -192,16 +191,15 @@ const Dashboard = () => {
   }, []);
 
   // ── Respond to review ──────────────────────────────────────────────────────
-  // Inserts into review_responses (NOT business_responses)
   const handleRespond = async (reviewId: string) => {
     if (!responseText.trim() || !bizId) return;
 
     const { error } = await supabase
-      .from("review_responses")
+      .from("business_responses")
       .insert({
         review_id: reviewId,
         business_id: bizId,
-        response_text: responseText.trim(),        // ✅ response_text (NOT text)
+        text: responseText.trim(),
       });
 
     if (error) {
