@@ -10,10 +10,10 @@
  *   4. The Supabase client (detectSessionInUrl: true, flowType: "pkce") detects
  *      the code in the URL and begins the async token exchange.
  *   5. Once the exchange completes, onAuthStateChange fires SIGNED_IN.
- *   6. This page listens for that event, then reads the user's role from
- *      public.users and redirects:
- *        business  → /business/dashboard
- *        otherwise → /
+ *   6. This page listens for that event, then checks the `businesses` table
+ *      for a row owned by this user and redirects:
+ *        has business → /business/dashboard
+ *        otherwise    → /
  *
  * WHY onAuthStateChange instead of getSession():
  *   Calling getSession() immediately on mount creates a race condition —
@@ -57,16 +57,19 @@ const AuthCallback = () => {
       return;
     }
 
-    // ── Redirect helper (role-based) ───────────────────────────────────────
+    // ── Redirect helper (business ownership check) ────────────────────────
+    // The `users` table does not exist in this schema. Instead we check
+    // whether the authenticated user owns any row in `businesses` — if they
+    // do, they are a business owner and should land on the business dashboard.
     const redirectForUser = async (userId: string) => {
-      const { data: profile } = await supabase
-        .from("users")
-        .select("role")
-        .eq("id", userId)
-        .single();
+      const { data: business } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("owner_id", userId)
+        .maybeSingle();
 
-      console.log("[AuthCallback] Session established for user:", userId, "role:", profile?.role);
-      if (profile?.role === "business") {
+      console.log("[AuthCallback] Session established for user:", userId, "hasBusiness:", !!business);
+      if (business) {
         navigate("/business/dashboard", { replace: true });
       } else {
         navigate("/", { replace: true });
