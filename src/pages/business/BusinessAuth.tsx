@@ -13,28 +13,7 @@ import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import { validatePassword } from "@/lib/password-validation";
 import { translateAuthError } from "@/lib/auth-errors";
-
-// ── Password strength ─────────────────────────────────────────────────────────
-type StrengthLevel = 0 | 1 | 2 | 3;
-
-function getPasswordStrength(pw: string): StrengthLevel {
-  if (!pw) return 0;
-  const long       = pw.length >= 12;
-  const ok         = pw.length >= 8;
-  const hasLetter  = /[a-zA-Z]/.test(pw);
-  const hasNumber  = /[0-9]/.test(pw);
-  const hasSpecial = /[^a-zA-Z0-9]/.test(pw);
-  if (ok && hasLetter && hasNumber && (long || hasSpecial)) return 3;
-  if (ok && hasLetter && hasNumber) return 2;
-  return 1;
-}
-
-const STRENGTH_META: Record<StrengthLevel, { label: string; color: string; width: string }> = {
-  0: { label: "",        color: "",               width: "w-0"    },
-  1: { label: "חלשה",    color: "bg-red-500",     width: "w-1/3"  },
-  2: { label: "בינונית", color: "bg-yellow-400",  width: "w-2/3"  },
-  3: { label: "חזקה",    color: "bg-emerald-500", width: "w-full" },
-};
+import PasswordStrengthMeter from "@/components/ui/password-strength-meter";
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -100,9 +79,6 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
     }
     // No finally — redirect already happened if no error.
   };
-
-  const strengthLevel = getPasswordStrength(password);
-  const strengthMeta  = STRENGTH_META[strengthLevel];
 
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
@@ -196,18 +172,9 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
                   </button>
                 </div>
 
-                {/* Password strength bar — shown only in signup while typing */}
+                {/* Password strength meter — shown only in signup while typing */}
                 {mode === "signup" && password.length > 0 && (
-                  <div className="space-y-1">
-                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-300 ${strengthMeta.color} ${strengthMeta.width}`} />
-                    </div>
-                    {strengthMeta.label && (
-                      <p className={`text-xs ${strengthLevel === 1 ? "text-red-500" : strengthLevel === 2 ? "text-yellow-500" : "text-emerald-500"}`}>
-                        חוזק הסיסמה: {strengthMeta.label}
-                      </p>
-                    )}
-                  </div>
+                  <PasswordStrengthMeter password={password} />
                 )}
               </div>
 
