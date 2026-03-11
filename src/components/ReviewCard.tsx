@@ -349,7 +349,12 @@ const ReviewCard = ({
             </div>
           )}
 
-          <div className="mt-3 flex items-center justify-between">
+          {/* Safe Harbor disclaimer */}
+          <p className="mt-3 text-[10px] text-muted-foreground/60 leading-snug">
+            ביקורת זו משקפת את דעתו האישית של המשתמש שפרסם אותה. ReviewHub אינה מאמתת את דיוק העובדות.
+          </p>
+
+          <div className="mt-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
