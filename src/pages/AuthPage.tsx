@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import TwoFactorVerify from "@/components/TwoFactorVerify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock, User, Loader2, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Loader2, ArrowRight, ShieldAlert, AlertTriangle } from "lucide-react";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -18,21 +19,54 @@ import { validatePassword } from "@/lib/password-validation";
 import { translateAuthError } from "@/lib/auth-errors";
 import PasswordStrengthMeter from "@/components/ui/password-strength-meter";
 import { supabase } from "@/integrations/supabase/client";
+import { formatCountdown, secondsUntil } from "@/lib/auth-security";
 
 // ─────────────────────────────────────────────────────────────────────────────
 
 const AuthPage = () => {
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [mode,           setMode]           = useState<"login" | "signup" | "forgot" | "mfa">("login");
+  const [email,          setEmail]          = useState("");
+  const [password,       setPassword]       = useState("");
+  const [displayName,    setDisplayName]    = useState("");
+  const [showPassword,   setShowPassword]   = useState(false);
+  const [loading,        setLoading]        = useState(false);
+  const [googleLoading,  setGoogleLoading]  = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+  // MFA state — populated after a successful password auth that requires AAL2
+  const [mfaFactorId,   setMfaFactorId]   = useState<string>("");
+
+  // Rate-limit UI state
+  const [lockedUntilMs,      setLockedUntilMs]      = useState<number | null>(null);
+  const [remainingAttempts,  setRemainingAttempts]  = useState<number | null>(null);
+  const [countdown,          setCountdown]          = useState<string>("");
+
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const { signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
+
+  // ── Countdown ticker ───────────────────────────────────────────────────────
+  useEffect(() => {
+    if (lockedUntilMs === null) {
+      setCountdown("");
+      if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+      return;
+    }
+
+    const tick = () => {
+      const secs = secondsUntil(lockedUntilMs);
+      setCountdown(formatCountdown(secs));
+      if (secs === 0) {
+        setLockedUntilMs(null);
+        setRemainingAttempts(null);
+      }
+    };
+    tick();
+    countdownRef.current = setInterval(tick, 1000);
+    return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
+  }, [lockedUntilMs]);
 
   // ── Email + password submit ────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,13 +91,40 @@ const AuthPage = () => {
     setLoading(true);
 
     if (mode === "login") {
-      const { error } = await signIn(email, password);
-      if (error) {
-        toast.error(translateAuthError(error.message));
-      } else {
-        toast.success("התחברתם בהצלחה!");
-        navigate("/");
+      const result = await signIn(email, password);
+
+      if (result.rateLimit && !result.rateLimit.allowed) {
+        // Locked out — show countdown
+        setLockedUntilMs(result.rateLimit.lockedUntilMs);
+        setRemainingAttempts(0);
+        toast.error(translateAuthError(result.error?.message ?? "account_locked"));
+        setLoading(false);
+        return;
       }
+
+      if (result.error) {
+        // Show remaining attempts warning if close to lockout
+        if (result.rateLimit && result.rateLimit.remainingAttempts !== undefined) {
+          setRemainingAttempts(result.rateLimit.remainingAttempts);
+        }
+        toast.error(translateAuthError(result.error.message));
+        setLoading(false);
+        return;
+      }
+
+      // MFA required — switch to MFA step
+      if (result.mfaRequired && result.mfaFactorId) {
+        setMfaFactorId(result.mfaFactorId);
+        setMode("mfa");
+        setLoading(false);
+        return;
+      }
+
+      // Full login success
+      setRemainingAttempts(null);
+      setLockedUntilMs(null);
+      toast.success("התחברתם בהצלחה!");
+      navigate("/");
 
     } else if (mode === "signup") {
       const { data, error } = await signUp(email, password, displayName);
@@ -105,11 +166,25 @@ const AuthPage = () => {
     }
   };
 
+  // ── MFA callbacks ──────────────────────────────────────────────────────────
+  const handleMfaSuccess = () => {
+    toast.success("התחברתם בהצלחה!");
+    navigate("/");
+  };
+
+  const handleMfaCancel = () => {
+    setMode("login");
+    setMfaFactorId("");
+  };
+
   // ── Derived UI state ───────────────────────────────────────────────────────
-  const isForgot  = mode === "forgot";
-  const isSignup  = mode === "signup";
+  const isForgot       = mode === "forgot";
+  const isSignup       = mode === "signup";
+  const isLocked       = lockedUntilMs !== null;
+
   const submitDisabled =
     loading ||
+    isLocked ||
     (isSignup && !privacyConsent) ||
     (!isForgot && !turnstileToken);
 
@@ -125,6 +200,25 @@ const AuthPage = () => {
     ? "הזינו את פרטי ההתחברות שלכם"
     : "צרו חשבון חדש תוך שניות";
 
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // MFA step — replace the whole card with the verify widget
+  if (mode === "mfa") {
+    return (
+      <div className="min-h-screen bg-background" dir="rtl">
+        <Navbar />
+        <div className="container flex items-center justify-center py-10 md:py-20 pb-32">
+          <TwoFactorVerify
+            factorId={mfaFactorId}
+            onSuccess={handleMfaSuccess}
+            onCancel={handleMfaCancel}
+          />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <Navbar />
@@ -139,6 +233,33 @@ const AuthPage = () => {
           </CardHeader>
 
           <CardContent className="space-y-4">
+
+            {/* ── Account locked banner ──────────────────────────────────────── */}
+            {isLocked && (
+              <div className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-3">
+                <ShieldAlert className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                <div className="text-sm space-y-0.5">
+                  <p className="font-medium text-destructive">החשבון נעול זמנית</p>
+                  <p className="text-muted-foreground">
+                    יותר מדי ניסיונות כושלים. נסו שוב בעוד{" "}
+                    <span className="font-mono font-semibold text-foreground">{countdown}</span>
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ── Remaining attempts warning ─────────────────────────────────── */}
+            {!isLocked && remainingAttempts !== null && remainingAttempts <= 2 && (
+              <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-3">
+                <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  {remainingAttempts === 0
+                    ? "נסיון נוסף יגרום לנעילת החשבון."
+                    : `נותרו ${remainingAttempts} ניסיונות לפני נעילה.`}
+                </p>
+              </div>
+            )}
+
             {/* ── Google OAuth (hidden on forgot-password mode) ─────────────── */}
             {!isForgot && (
               <>
@@ -147,7 +268,7 @@ const AuthPage = () => {
                   variant="outline"
                   className="w-full border-border/50 hover:bg-secondary gap-3 h-12"
                   onClick={handleGoogleAuth}
-                  disabled={googleLoading}
+                  disabled={googleLoading || isLocked}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -286,6 +407,8 @@ const AuthPage = () => {
                   ? <><Loader2 className="h-4 w-4 animate-spin" /> טוען...</>
                   : isForgot
                   ? <><ArrowRight className="h-4 w-4" /> שלחו קישור לאיפוס</>
+                  : isLocked
+                  ? `נעול — ${countdown}`
                   : mode === "login"
                   ? "התחברו"
                   : "הרשמו"
