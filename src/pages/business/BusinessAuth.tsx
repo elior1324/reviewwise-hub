@@ -71,14 +71,20 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
 
   const handleGoogleAuth = async () => {
     setGoogleLoading(true);
-    // Pass the business dashboard as the post-login destination.
-    // AuthCallback will redirect business users there automatically.
     const { error } = await signInWithGoogle();
     if (error) {
       toast.error(error.message || "שגיאה בהתחברות עם Google");
       setGoogleLoading(false);
     }
-    // No finally — redirect already happened if no error.
+  };
+
+  const handleAppleAuth = async () => {
+    setAppleLoading(true);
+    const { error } = await signInWithApple();
+    if (error) {
+      toast.error(error.message || "שגיאה בהתחברות עם Apple");
+      setAppleLoading(false);
+    }
   };
 
   return (
