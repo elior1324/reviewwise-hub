@@ -110,7 +110,7 @@ const PartnerDashboard = () => {
       const reviewMap = new Map((reviews || []).map((r: any) => [r.id, r]));
 
       const businessIds = [...new Set((reviews || []).map((r: any) => r.business_id))];
-      let earlyBirdSet = new Set<string>();
+      const earlyBirdSet = new Set<string>();
       let ebCount = 0;
 
       for (const bizId of businessIds) {

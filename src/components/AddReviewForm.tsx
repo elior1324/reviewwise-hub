@@ -134,7 +134,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
 
     try {
       // Upload files if any
-      let uploadedFilePaths: string[] = [];
+      const uploadedFilePaths: string[] = [];
       if (uploadedFiles.length > 0 && user) {
         setUploading(true);
         for (const file of uploadedFiles) {
