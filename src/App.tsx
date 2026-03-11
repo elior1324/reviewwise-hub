@@ -37,6 +37,7 @@ import DPA from "./pages/legal/DPA";
 import EarningsDashboard from "./pages/EarningsDashboard";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import CourseFinder from "./pages/CourseFinder";
+import MerchantVerificationDashboard from "./pages/business/MerchantVerificationDashboard";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
@@ -102,6 +103,9 @@ const App = () => (
             <Route path="/earnings" element={<EarningsDashboard />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/course-finder" element={<CourseFinder />} />
+
+            {/* AFVE — Merchant Verification Loop (token link — no auth required) */}
+            <Route path="/business/verify-invoice" element={<MerchantVerificationDashboard />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />
