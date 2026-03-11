@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import GmailProtectedRoute from "./components/GmailProtectedRoute";
 import AuthProtectedRoute from "./components/AuthProtectedRoute";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
+import ScrollToTopButton from "@/components/ui/scroll-to-top";
 import Index from "./pages/Index";
 import BusinessProfile from "./pages/BusinessProfile";
 import SearchPage from "./pages/SearchPage";
@@ -61,6 +62,8 @@ const App = () => (
         <BrowserRouter>
           <ScrollToTop />
           <CookieConsentBanner />
+          {/* Floating scroll-to-top button — visible on all pages */}
+          <ScrollToTopButton />
           <Routes>
             {/* Consumer routes */}
             <Route path="/" element={<Index />} />
