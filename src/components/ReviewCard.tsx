@@ -52,6 +52,9 @@ interface ReviewCardProps {
   };
   flagged?: boolean;
   flagReason?: string;
+  /** True while a formal dispute is open and under investigation */
+  isDisputed?: boolean;
+  disputeStatus?: string | null;
   /** Set by admin after a complaint was resolved; review was kept on platform */
   challenged?: boolean;
   challengeUpheld?: boolean | null;
@@ -79,6 +82,8 @@ const ReviewCard = ({
   ownerResponse,
   flagged,
   flagReason,
+  isDisputed = false,
+  disputeStatus = null,
   challenged = false,
   challengeUpheld = null,
   onLikeUpdate,
@@ -221,8 +226,24 @@ const ReviewCard = ({
 
   return (
     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.2, ease: "easeOut" }}>
-      <Card className={`shadow-card hover:shadow-card-hover transition-all duration-500 animated-border bg-card relative ${flagged ? "border-destructive/30" : ""}`}>
-        <CardContent className="p-6">
+      <Card className={`shadow-card hover:shadow-card-hover transition-all duration-500 animated-border bg-card relative ${flagged ? "border-destructive/30" : ""} ${isDisputed ? "border-amber-500/40" : ""}`}>
+        {/* ── Disputed overlay — blurs content while under investigation ── */}
+        {isDisputed && (
+          <div className="absolute inset-0 z-10 rounded-[inherit] overflow-hidden flex flex-col items-center justify-center gap-2 backdrop-blur-sm bg-background/60 border border-amber-500/30">
+            <div className="bg-amber-500/15 border border-amber-500/40 rounded-full px-3 py-1.5 flex items-center gap-2">
+              <Shield size={13} className="text-amber-500" />
+              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                ביקורת זו נמצאת בחקירה
+              </span>
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center max-w-[220px] leading-snug">
+              {disputeStatus === "evidence_submitted"
+                ? "הראיה התקבלה — Admin בוחן את המסמך"
+                : "ממתין לתגובת הכותב — עד 72 שעות"}
+            </p>
+          </div>
+        )}
+        <CardContent className={`p-6 ${isDisputed ? "blur-[2px] pointer-events-none select-none" : ""}`}>
           {/* Verified badge — top left */}
           {verified && (
             <div className="absolute top-3 left-3">

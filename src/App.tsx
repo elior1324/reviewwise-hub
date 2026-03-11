@@ -31,6 +31,7 @@ import AccessibilityStatement from "./pages/AccessibilityStatement";
 import ComparePage from "./pages/ComparePage";
 import RefundPolicy from "./pages/RefundPolicy";
 import PartnerDashboard from "./pages/PartnerDashboard";
+import EvidenceUploadPanel from "./components/EvidenceUploadPanel";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
@@ -87,6 +88,8 @@ const App = () => (
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/partner" element={<PartnerDashboard />} />
+            {/* Evidence submission — token-based, no login required */}
+            <Route path="/evidence/:token" element={<EvidenceUploadPanel />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />
