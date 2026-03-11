@@ -7,13 +7,14 @@
 #   • Every pull request targeting main
 #
 # Jobs:
-#   1. unit-tests    — Vitest (password-validation, auth-errors, AuthPage, ReviewCard)
-#   2. e2e-tests     — Playwright (auth flows, XSS regression, RLS API checks)
-#   3. db-tests      — pgTAP via Supabase CLI (RLS, cascade, views, triggers)
-#   4. type-check    — tsc --noEmit (type safety gate)
-#   5. lint          — ESLint (code quality gate)
+#   1. type-check  — tsc --noEmit  (always runs, blocks everything downstream)
+#   2. lint        — ESLint         (always runs)
+#   3. unit-tests  — Vitest         (always runs, needs type-check)
+#   4. e2e-tests   — Playwright     (runs only when Supabase secrets are set)
+#   5. db-tests    — pgTAP          (runs only when Supabase secrets are set)
+#   6. ci-gate     — summary gate   (core jobs must pass; infra jobs pass OR skip)
 #
-# Required GitHub Secrets (add in Repo → Settings → Secrets → Actions):
+# Required GitHub Secrets for E2E / pgTAP (Repo → Settings → Secrets → Actions):
 #   SUPABASE_ACCESS_TOKEN  — from supabase.com → Account → Access Tokens
 #   SUPABASE_PROJECT_ID    — from supabase.com → Project → Settings → General
 #   SUPABASE_DB_PASSWORD   — Supabase DB password (for supabase db pull)
@@ -114,12 +115,16 @@ jobs:
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Job 4: Playwright E2E tests
+# Skipped automatically when VITE_SUPABASE_URL secret is not configured.
 # ══════════════════════════════════════════════════════════════════════════════
   e2e-tests:
     name: Playwright E2E tests
     runs-on: ubuntu-latest
     needs: [unit-tests]
     timeout-minutes: 30
+    # Skip this job if Supabase secrets are not configured — avoids
+    # "Preview has not been built yet" and auth failures in forks / fresh repos.
+    if: ${{ secrets.VITE_SUPABASE_URL != '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -170,11 +175,14 @@ jobs:
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Job 5: pgTAP database tests
+# Skipped automatically when SUPABASE_ACCESS_TOKEN secret is not configured.
 # ══════════════════════════════════════════════════════════════════════════════
   db-tests:
     name: pgTAP database tests
     runs-on: ubuntu-latest
     needs: [type-check]
+    # Skip this job if Supabase credentials are not configured
+    if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -214,7 +222,10 @@ jobs:
         run: supabase stop
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Job 6: Summary / gate (all jobs must pass for merge)
+# Job 6: Summary / gate
+#   Core jobs (type-check, lint, unit-tests) MUST succeed.
+#   Infrastructure jobs (e2e-tests, db-tests) must succeed OR be skipped
+#   (skipped = secrets not configured, which is acceptable).
 # ══════════════════════════════════════════════════════════════════════════════
   ci-gate:
     name: All tests passed
@@ -224,17 +235,58 @@ jobs:
     steps:
       - name: Check all jobs passed
         run: |
-          if [[ "${{ needs.type-check.result }}"  != "success" ]] ||
-             [[ "${{ needs.lint.result }}"         != "success" ]] ||
-             [[ "${{ needs.unit-tests.result }}"   != "success" ]] ||
-             [[ "${{ needs.e2e-tests.result }}"    != "success" ]] ||
-             [[ "${{ needs.db-tests.result }}"     != "success" ]]; then
-            echo "❌ One or more CI jobs failed."
-            echo "  type-check:  ${{ needs.type-check.result }}"
-            echo "  lint:        ${{ needs.lint.result }}"
-            echo "  unit-tests:  ${{ needs.unit-tests.result }}"
-            echo "  e2e-tests:   ${{ needs.e2e-tests.result }}"
-            echo "  db-tests:    ${{ needs.db-tests.result }}"
+          CORE_PASS=true
+          INFRA_PASS=true
+
+          # Core jobs must be "success"
+          if [[ "${{ needs.type-check.result }}" != "success" ]]; then
+            echo "❌ type-check: ${{ needs.type-check.result }}"
+            CORE_PASS=false
+          else
+            echo "✅ type-check: ${{ needs.type-check.result }}"
+          fi
+
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then
+            echo "❌ lint: ${{ needs.lint.result }}"
+            CORE_PASS=false
+          else
+            echo "✅ lint: ${{ needs.lint.result }}"
+          fi
+
+          if [[ "${{ needs.unit-tests.result }}" != "success" ]]; then
+            echo "❌ unit-tests: ${{ needs.unit-tests.result }}"
+            CORE_PASS=false
+          else
+            echo "✅ unit-tests: ${{ needs.unit-tests.result }}"
+          fi
+
+          # Infrastructure jobs: "success" or "skipped" are both acceptable.
+          # "skipped" means secrets are not yet configured (acceptable for fresh repos).
+          E2E_RESULT="${{ needs.e2e-tests.result }}"
+          if [[ "$E2E_RESULT" == "success" ]]; then
+            echo "✅ e2e-tests: $E2E_RESULT"
+          elif [[ "$E2E_RESULT" == "skipped" ]]; then
+            echo "⏭️  e2e-tests: skipped (VITE_SUPABASE_URL secret not configured)"
+          else
+            echo "❌ e2e-tests: $E2E_RESULT"
+            INFRA_PASS=false
+          fi
+
+          DB_RESULT="${{ needs.db-tests.result }}"
+          if [[ "$DB_RESULT" == "success" ]]; then
+            echo "✅ db-tests: $DB_RESULT"
+          elif [[ "$DB_RESULT" == "skipped" ]]; then
+            echo "⏭️  db-tests: skipped (SUPABASE_ACCESS_TOKEN secret not configured)"
+          else
+            echo "❌ db-tests: $DB_RESULT"
+            INFRA_PASS=false
+          fi
+
+          if [[ "$CORE_PASS" == "false" || "$INFRA_PASS" == "false" ]]; then
+            echo ""
+            echo "❌ CI gate failed — see above for details."
             exit 1
           fi
-          echo "✅ All CI jobs passed — safe to merge."
+
+          echo ""
+          echo "✅ All CI jobs passed (or were intentionally skipped) — safe to merge."
