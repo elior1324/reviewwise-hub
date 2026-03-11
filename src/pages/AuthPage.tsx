@@ -31,6 +31,7 @@ const AuthPage = () => {
   const [showPassword,   setShowPassword]   = useState(false);
   const [loading,        setLoading]        = useState(false);
   const [googleLoading,  setGoogleLoading]  = useState(false);
+  const [appleLoading,   setAppleLoading]   = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
