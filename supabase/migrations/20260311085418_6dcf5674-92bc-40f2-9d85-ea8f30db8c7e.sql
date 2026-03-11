@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Templates viewable by authenticated users" ON public.invoice_templates;
