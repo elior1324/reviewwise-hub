@@ -3,7 +3,6 @@ import StarRating from "./StarRating";
 import VerifiedBadge from "./VerifiedBadge";
 import ReviewResponse from "./ReviewResponse";
 import ReportReviewDialog from "./ReportReviewDialog";
-import DefamationComplaintDialog from "./DefamationComplaintDialog";
 import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2 } from "lucide-react";
 import { getTimeSincePurchase } from "@/data/mockData";
 import { motion } from "framer-motion";
@@ -461,7 +460,6 @@ const ReviewCard = ({
             </div>
             <div className="flex items-center gap-2">
               <ReportReviewDialog reviewId={id || ""} />
-              <DefamationComplaintDialog reviewId={id || ""} />
             </div>
           </div>
         </CardContent>
