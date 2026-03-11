@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
+import IndemnityModal from "@/components/IndemnityModal";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { supabase } from "@/integrations/supabase/client";
 import { sanitizeText } from "@/lib/sanitize";
@@ -59,6 +60,8 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [showIndemnity, setShowIndemnity] = useState(false);
+  const [indemnityAcceptedAt, setIndemnityAcceptedAt] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [subject, setSubject] = useState("");
@@ -116,6 +119,10 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
     }
     if (!turnstileToken) {
       toast.error("אנא אמתו שאתם לא רובוט");
+      return;
+    }
+    if (!indemnityAcceptedAt) {
+      toast.error("יש לאשר את הצהרת האחריות האישית לפני שליחת הביקורת");
       return;
     }
 
@@ -186,12 +193,15 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
           body: {
             turnstileToken,
             businessId,
-            courseId:          courseId || null,
+            courseId:              courseId || null,
             rating,
-            subject:           cleanSubject,
-            reviewText:        cleanReviewText,
-            trainingDuration:  duration,
-            verifiedPurchase:  receiptVerified,
+            subject:               cleanSubject,
+            reviewText:            cleanReviewText,
+            trainingDuration:      duration,
+            verifiedPurchase:      receiptVerified,
+            indemnityAccepted:     true,
+            indemnityAcceptedAt:   indemnityAcceptedAt,
+            verificationStatus:    receiptVerified ? "purchase_verified" : "email_verified",
           },
         },
       );
@@ -255,9 +265,20 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
   // Logged in — show toggle button or form
   return (
     <div>
+      {/* Indemnity gate — must accept before form opens */}
+      <IndemnityModal
+        open={showIndemnity}
+        onAccept={(acceptedAt) => {
+          setIndemnityAcceptedAt(acceptedAt);
+          setShowIndemnity(false);
+          setIsOpen(true);
+        }}
+        onDismiss={() => setShowIndemnity(false)}
+      />
+
       {!isOpen ? (
         <Button
-          onClick={() => setIsOpen(true)}
+          onClick={() => setShowIndemnity(true)}
           className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
           size="lg"
         >

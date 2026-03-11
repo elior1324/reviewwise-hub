@@ -9,7 +9,7 @@ import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   Scale, FileText, Users, CreditCard, Lock, AlertTriangle,
-  Globe, RefreshCw, Mail, Ban, Handshake, DollarSign, Shield,
+  Globe, RefreshCw, Mail, Ban, Handshake, DollarSign, Shield, Gavel,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -99,6 +99,66 @@ const TermsOfUse = () => (
             אתם מסכימים לתנאים אלה על ידי ביצוע אחת מהפעולות הבאות: (א) לחיצה על כפתור אישור;
             (ב) חתימה על טופס הזמנה; (ג) תשלום עבור מנוי; או (ד) תביעת עמוד פרופיל עסקי או
             שימוש בכל אחד מהשירותים שלנו.
+          </p>
+        </Section>
+
+        {/* 1a — Safe Harbor / Neutral Intermediary */}
+        <Section icon={Gavel} title='מגן Safe Harbor — צינור להעברת מידע (חוק איסור לשון הרע, סעיף 15)'>
+          <div className="mb-4 p-4 rounded-xl bg-primary/8 border border-primary/20">
+            <p className="font-bold text-foreground mb-2 text-base">
+              ReviewHub פועלת כ"צינור להעברת מידע" בלבד — פלטפורמה טכנולוגית ניטרלית.
+            </p>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              בהתאם לחוק איסור לשון הרע, התשכ"ה-1965 (סעיף 15), ולעקרון "Safe Harbor" המוכר
+              בדין הישראלי ובדין הבינלאומי, ReviewHub אינה אחראית לתוכן שגולשים מפרסמים
+              בפלטפורמה. ReviewHub אינה יוצרת, עורכת, מאשרת או מאמתת את תוכן הביקורות,
+              ואינה נושאת באחריות פלילית או אזרחית בגינו.
+            </p>
+          </div>
+
+          <p className="font-semibold text-foreground mb-2">חמשת עקרונות ה-Safe Harbor של ReviewHub:</p>
+          <ol className="list-decimal pr-6 space-y-3 text-muted-foreground">
+            <li>
+              <strong className="text-foreground">הגדרת הפלטפורמה:</strong>{" "}
+              ReviewHub היא פלטפורמה טכנולוגית המאפשרת פרסום ביקורות על-ידי משתמשים.
+              ReviewHub אינה המוציא לאור, אינה עורכת את התוכן, ואינה מציגה עמדה לגביו.
+            </li>
+            <li>
+              <strong className="text-foreground">אחריות המשתמש:</strong>{" "}
+              כל משתמש המפרסם ביקורת נושא באחריות המלאה והבלעדית לתוכן שכתב, לרבות
+              אחריות פלילית ואזרחית בגין לשון הרע, עובדות כוזבות, פגיעה בפרטיות
+              וניגוד עניינים. <strong>כותב הביקורת מאשר זאת באופן מפורש לפני שליחת הביקורת.</strong>
+            </li>
+            <li>
+              <strong className="text-foreground">איסור ניגוד עניינים:</strong>{" "}
+              חל איסור מוחלט על כתיבת ביקורת שמטרתה הפגעה במתחרה עסקי. ReviewHub
+              שומרת מידע מזהה (IP, דוא"ל, חותמות זמן) ותחשוף אותו בצו בית משפט.
+            </li>
+            <li>
+              <strong className="text-foreground">הליך Notice & Takedown:</strong>{" "}
+              כל אדם הרואה עצמו נפגע מביקורת רשאי להגיש תלונה רשמית דרך הפלטפורמה.
+              ReviewHub תפעל בתום לב לבחון כל תלונה תוך 72 שעות ותשיב תוך 14 יום.
+              ביצוע ההליך מעניק לפלטפורמה הגנת Safe Harbor ואינו מטיל עליה
+              אחריות כצד בסכסוך.
+            </li>
+            <li>
+              <strong className="text-foreground">שקיפות ציבורית:</strong>{" "}
+              כל ביקורת שהייתה נתונה לתלונה ונשארה בפלטפורמה לאחר בדיקה תסומן בתג
+              שקיפות, כך שהציבור יוכל לראות שהתוכן נבחן ואושר בתום לב על-ידי
+              ReviewHub. ביקורות שהוסרו יירשמו ביומן הגלוי.
+            </li>
+          </ol>
+
+          <p className="mt-4 text-xs text-muted-foreground">
+            ← למידע על הגשת תלונה ראו:{" "}
+            <a href="/terms#notice-takedown" className="text-primary hover:underline">
+              הליך Notice & Takedown
+            </a>
+            . לצו גילוי זהות ראו:{" "}
+            <a href="/terms#court-order" className="text-primary hover:underline">
+              חשיפת זהות בצו בית משפט
+            </a>
+            .
           </p>
         </Section>
 
@@ -303,6 +363,7 @@ const TermsOfUse = () => (
         </Section>
 
         {/* Notice & Takedown */}
+        <div id="notice-takedown">
         <Section icon={Shield} title="הליך דיווח והסרת תוכן (Notice & Takedown)">
           <p className="mb-3">
             ReviewHub מפעילה הליך מובנה לטיפול בתלונות על תוכן שפורסם בפלטפורמה:
@@ -318,8 +379,10 @@ const TermsOfUse = () => (
             ביצוע הליך זה אינו הופך את ReviewHub לצד בסכסוך.
           </p>
         </Section>
+        </div>
 
         {/* Court-ordered identity disclosure */}
+        <div id="court-order">
         <Section icon={Shield} title="חשיפת זהות בצו בית משפט">
           <p className="mb-3">
             ReviewHub שומרת לעצמה את הזכות לחשוף מידע מזהה של משתמשים (כולל כתובת IP,
@@ -327,6 +390,7 @@ const TermsOfUse = () => (
             בהתאם לחוק הגנת הפרטיות, התשמ&quot;א-1981.
           </p>
         </Section>
+        </div>
 
         {/* 13 — Third party (original) */}
         <Section icon={Globe} title="תוכן צדדים שלישיים וקישורים חיצוניים">

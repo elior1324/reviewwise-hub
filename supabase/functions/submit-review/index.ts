@@ -110,7 +110,27 @@ serve(async (req: Request) => {
       reviewText,
       trainingDuration,
       verifiedPurchase = false,
+      indemnityAccepted = false,
+      indemnityAcceptedAt = null,
+      verificationStatus = "anonymous",
     } = body;
+
+    // ── Legal compliance gate: indemnity must be accepted ─────────────────
+    if (!indemnityAccepted) {
+      return jsonResp(
+        { error: "Indemnity acceptance is required to submit a review" },
+        400,
+        cors,
+      );
+    }
+
+    // Validate verificationStatus value
+    const VALID_VERIFICATION_STATUSES = new Set([
+      "anonymous", "email_verified", "purchase_verified",
+    ]);
+    const cleanVerificationStatus = VALID_VERIFICATION_STATUSES.has(verificationStatus as string)
+      ? (verificationStatus as string)
+      : "anonymous";
 
     // Required fields
     if (!turnstileToken || typeof turnstileToken !== "string") {
@@ -196,18 +216,24 @@ serve(async (req: Request) => {
     const { error: insertError } = await adminClient
       .from("reviews")
       .insert({
-        user_id:           user.id,
-        business_id:       businessId,
-        course_id:         courseId && typeof courseId === "string" ? courseId : null,
-        rating:            Math.round(rating as number),
-        review_text:       cleanReviewText,
-        subject:           cleanSubject,
-        training_duration: trainingDuration,
-        verified_purchase: Boolean(verifiedPurchase),
-        reviewer_name:     cleanReviewerName,
-        anonymous:         false,
-        submission_ip:     submissionIp,
+        user_id:               user.id,
+        business_id:           businessId,
+        course_id:             courseId && typeof courseId === "string" ? courseId : null,
+        rating:                Math.round(rating as number),
+        review_text:           cleanReviewText,
+        subject:               cleanSubject,
+        training_duration:     trainingDuration,
+        verified_purchase:     Boolean(verifiedPurchase),
+        reviewer_name:         cleanReviewerName,
+        anonymous:             false,
+        submission_ip:         submissionIp,
         submission_user_agent: submissionUa,
+        // Legal compliance fields (migration 20260311000005)
+        indemnity_accepted:    true,
+        indemnity_accepted_at: indemnityAcceptedAt && typeof indemnityAcceptedAt === "string"
+          ? indemnityAcceptedAt
+          : new Date().toISOString(),
+        verification_status:   cleanVerificationStatus,
       });
 
     if (insertError) {

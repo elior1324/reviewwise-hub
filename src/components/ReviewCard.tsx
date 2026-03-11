@@ -3,6 +3,7 @@ import StarRating from "./StarRating";
 import VerifiedBadge from "./VerifiedBadge";
 import ReviewResponse from "./ReviewResponse";
 import ReportReviewDialog from "./ReportReviewDialog";
+import DefamationComplaintDialog from "./DefamationComplaintDialog";
 import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2 } from "lucide-react";
 import { getTimeSincePurchase } from "@/data/mockData";
 import { motion } from "framer-motion";
@@ -51,6 +52,9 @@ interface ReviewCardProps {
   };
   flagged?: boolean;
   flagReason?: string;
+  /** Set by admin after a complaint was resolved; review was kept on platform */
+  challenged?: boolean;
+  challengeUpheld?: boolean | null;
   onLikeUpdate?: (newLikeCount: number) => void;
   onHelpfulReply?: () => void;
   onDelete?: (reviewId: string) => void;
@@ -75,6 +79,8 @@ const ReviewCard = ({
   ownerResponse,
   flagged,
   flagReason,
+  challenged = false,
+  challengeUpheld = null,
   onLikeUpdate,
   onHelpfulReply,
   onDelete,
@@ -312,6 +318,27 @@ const ReviewCard = ({
             </div>
           )}
 
+          {/* ── Public Transparency Log Badge ────────────────────────────── */}
+          {/* Shown when an admin resolved a defamation complaint about this review */}
+          {challenged && challengeUpheld === true && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-medium text-primary bg-primary/8 border border-primary/20 rounded-full px-2.5 py-1 cursor-help">
+                  <Shield size={10} className="shrink-0" />
+                  בוקרה ואושרה — יומן שקיפות
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs max-w-[280px] leading-snug">
+                <p className="font-semibold mb-1">ביקורת זו עמדה בפיקוח</p>
+                <p>
+                  בוצעה תלונה משפטית על ביקורת זו. ReviewHub בחנה אותה בתום לב
+                  בהתאם להליך ה-Notice &amp; Takedown שלה ואישרה כי הביקורת
+                  עומדת בתנאי הפלטפורמה.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
           {/* Multiplier tooltip */}
           {likeCount > 0 && (
             <div className="mt-2">
@@ -411,7 +438,10 @@ const ReviewCard = ({
                 </>
               )}
             </div>
-            <ReportReviewDialog reviewId={id || ""} />
+            <div className="flex items-center gap-2">
+              <ReportReviewDialog reviewId={id || ""} />
+              <DefamationComplaintDialog reviewId={id || ""} />
+            </div>
           </div>
         </CardContent>
       </Card>
