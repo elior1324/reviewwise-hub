@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Instagram, Linkedin, Twitter, Facebook } from "lucide-react";
 import { motion } from "framer-motion";
 import type { SocialLinks } from "@/data/mockData";
+import { sanitizeUrl } from "@/lib/sanitize";
 
 const TelegramIcon = ({ size = 14 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -88,14 +89,16 @@ const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, 
           {/* Social links — only those the business owner added */}
           {activeSocials.length > 0 && (
             <div className="flex gap-1.5 flex-wrap mt-3" onClick={(e) => e.preventDefault()}>
-              {activeSocials.map(([key, url]) => {
+              {activeSocials.map(([key, rawUrl]) => {
                 const social = SOCIAL_ICON_MAP[key];
                 if (!social) return null;
+                const safeUrl = sanitizeUrl(rawUrl);
+                if (!safeUrl) return null;
                 const { Icon, label } = social;
                 return (
                   <a
                     key={key}
-                    href={url}
+                    href={safeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     title={label}

@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { generateReviewSummary, type Review } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeUrl } from "@/lib/sanitize";
 
 interface CourseData {
   id: string;
@@ -199,8 +200,8 @@ const CoursePage = () => {
               {course.price > 0 && (
                 <p className="font-display font-bold text-2xl text-foreground mb-2">₪{course.price.toLocaleString()}</p>
               )}
-              {course.affiliateUrl && (
-                <a href={course.affiliateUrl} target="_blank" rel="noopener noreferrer">
+              {course.affiliateUrl && sanitizeUrl(course.affiliateUrl) && (
+                <a href={sanitizeUrl(course.affiliateUrl)} target="_blank" rel="noopener noreferrer">
                   <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
                     לדף הקורס <ExternalLink size={16} />
                   </Button>

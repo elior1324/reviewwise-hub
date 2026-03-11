@@ -43,6 +43,14 @@ function productIdToTier(productId: string | null): SubscriptionTier {
   return "free";
 }
 
+// Shorthand: only log in development builds.
+// Vite replaces import.meta.env.DEV with `true` during `vite dev` and `false`
+// in `vite build`, so dead-code elimination strips these calls from the
+// production bundle entirely — they never reach the browser.
+const devLog  = (...args: unknown[]) => { if (import.meta.env.DEV) console.log(...args); };
+const devWarn = (...args: unknown[]) => { if (import.meta.env.DEV) console.warn(...args); };
+const devErr  = (...args: unknown[]) => { if (import.meta.env.DEV) console.error(...args); };
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -56,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data, error } = await supabase.functions.invoke("check-subscription");
       if (error) {
-        console.error("Check subscription error:", error);
+        devErr("Check subscription error:", error);
         return;
       }
       if (data?.subscribed) {
@@ -67,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSubscriptionEnd(null);
       }
     } catch (err) {
-      console.error("Failed to check subscription:", err);
+      devErr("Failed to check subscription:", err);
     }
   }, []);
 
@@ -76,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // While signUp is in progress, suppress SIGNED_IN so the app doesn't flash-authenticate
       // the user before we have a chance to call signOut (enforcing email confirmation).
       if (event === "SIGNED_IN" && signingUpRef.current) {
-        console.log("[Auth] onAuthStateChange: suppressing SIGNED_IN during signUp flow (will sign out)");
+        devLog("[Auth] onAuthStateChange: suppressing SIGNED_IN during signUp flow (will sign out)");
         return;
       }
       setSession(session);
@@ -110,24 +118,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user, checkSubscription]);
 
   const signUp = async (email: string, password: string, displayName?: string) => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-    console.log("[Auth] signUp called for:", email, "| origin:", window.location.origin);
-    console.log("[Auth] Supabase URL:", supabaseUrl);
+    // ── Dev-only diagnostics ───────────────────────────────────────────────────
+    // These logs contain PII (email) and infrastructure details (Supabase URL).
+    // They are compiled out of production builds by Vite's dead-code elimination.
+    if (import.meta.env.DEV) {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      devLog("[Auth] signUp called for:", email, "| origin:", window.location.origin);
+      devLog("[Auth] Supabase URL:", supabaseUrl);
 
-    // ── Pre-flight: verify Supabase is actually reachable ─────────────────────
-    // If this fetch returns a non-Supabase response or fails, calls are being
-    // intercepted (e.g. Lovable's preview environment).
-    try {
-      const probe = await fetch(`${supabaseUrl}/auth/v1/settings`, {
-        headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string },
-      });
-      const probeJson = await probe.json().catch(() => null);
-      console.log("[Auth] Supabase pre-flight check:", probe.status, JSON.stringify(probeJson)?.slice(0, 200));
-      if (probe.status === 404 || !probeJson) {
-        console.error("[Auth] ⚠️  Supabase URL unreachable or returning unexpected response — calls may be intercepted by the development environment.");
+      // Pre-flight: verify Supabase is actually reachable in dev environments
+      // (e.g. Lovable's preview can intercept fetch calls).
+      try {
+        const probe = await fetch(`${supabaseUrl}/auth/v1/settings`, {
+          headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string },
+        });
+        const probeJson = await probe.json().catch(() => null);
+        devLog("[Auth] Supabase pre-flight check:", probe.status, JSON.stringify(probeJson)?.slice(0, 200));
+        if (probe.status === 404 || !probeJson) {
+          devErr("[Auth] ⚠️  Supabase URL unreachable or returning unexpected response — calls may be intercepted by the development environment.");
+        }
+      } catch (probeErr) {
+        devErr("[Auth] ⚠️  Supabase pre-flight fetch failed:", probeErr);
       }
-    } catch (probeErr) {
-      console.error("[Auth] ⚠️  Supabase pre-flight fetch failed:", probeErr);
     }
 
     // Set flag so onAuthStateChange suppresses any SIGNED_IN event during this flow
@@ -157,11 +169,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (error) {
-      console.error("[Auth] signUp error:", error.message, "| status:", error.status, "| full:", error);
+      devErr("[Auth] signUp error:", error.message, "| status:", error.status);
       return { data, error };
     }
 
-    console.log(
+    devLog(
       "[Auth] signUp response — user:", data?.user?.id ?? "null",
       "| email_confirmed:", !!data?.user?.email_confirmed_at,
       "| session:", !!data?.session,
@@ -169,7 +181,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (!data?.user) {
       // No user and no error = Supabase auth hook is likely blocking signup silently
-      console.warn(
+      devWarn(
         "[Auth] signUp returned no user and no error. Most likely causes:\n" +
         "  1. Auth email hook is configured but failing (Supabase → Auth → Hooks)\n" +
         "  2. Supabase project is paused\n" +
@@ -182,7 +194,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // is DISABLED in the Supabase dashboard (Auth → Email settings → Confirm email toggle).
     // Enforce email confirmation at the app level: sign out and tell the user to check email.
     if (data?.session) {
-      console.warn(
+      devWarn(
         "[Auth] signUp returned a live session — Supabase Email Confirmations appear to be disabled.\n" +
         "  Signing out now to enforce email confirmation at the app level.\n" +
         "  To fix permanently: Supabase Dashboard → Authentication → Email → enable 'Confirm email'."
@@ -197,18 +209,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    console.log("[Auth] signIn called for:", email);
+    devLog("[Auth] signIn called");   // intentionally no email in prod
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      console.error("[Auth] signIn error:", error.message, "| status:", error.status, "| full:", error);
+      devErr("[Auth] signIn error:", error.message, "| status:", error.status);
     } else {
-      console.log("[Auth] signIn success — user:", data?.user?.id);
+      devLog("[Auth] signIn success");
     }
     return { data, error };
   };
 
   const signInWithGoogle = async (redirectTo?: string) => {
-    console.log("[Auth] signInWithGoogle called");
+    devLog("[Auth] signInWithGoogle called");
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -219,7 +231,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
     });
     if (error) {
-      console.error("[Auth] signInWithGoogle error:", error);
+      devErr("[Auth] signInWithGoogle error:", error);
     }
     return { error };
   };
