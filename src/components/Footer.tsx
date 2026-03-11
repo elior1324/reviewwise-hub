@@ -26,7 +26,10 @@ const REVIEWHUB_SOCIALS = [
 const Footer = () => (
   <footer className="border-t border-border/50 mt-20">
     <div className="container py-12">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* 4-column grid: brand · product · platform · legal */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+        {/* Brand + socials */}
         <div>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-8 h-8 rounded-lg overflow-hidden">
@@ -34,8 +37,9 @@ const Footer = () => (
             </div>
             <span className="font-display font-bold text-lg gradient-text">ReviewHub</span>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">הפלטפורמה שעוזרת לכם לבחור נכון ולבנות את העתיד.</p>
-          {/* Social icons */}
+          <p className="text-sm text-muted-foreground mb-4">
+            הפלטפורמה שעוזרת לכם לבחור נכון ולבנות את העתיד.
+          </p>
           <div className="flex gap-2 flex-wrap">
             {REVIEWHUB_SOCIALS.map(({ Icon, label, url }) => (
               <a
@@ -44,29 +48,102 @@ const Footer = () => (
                 target="_blank"
                 rel="noopener noreferrer"
                 title={label}
+                aria-label={label}
                 className="w-9 h-9 rounded-lg bg-muted/50 hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-200"
               >
-                <Icon size={15} />
+                <Icon size={15} aria-hidden="true" />
               </a>
             ))}
           </div>
         </div>
+
+        {/* Product — mirrors the navbar "מוצר" dropdown (no Pricing: auth-gated) */}
+        <div>
+          <h4 className="font-display font-semibold mb-3 text-sm text-foreground">מוצר</h4>
+          <div className="space-y-2">
+            <Link
+              to="/business/solutions/reviews"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ביקורות מאומתות
+            </Link>
+            <Link
+              to="/business/solutions/widgets"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ווידג'טים
+            </Link>
+            <Link
+              to="/business/solutions/analytics"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              אנליטיקס
+            </Link>
+            {/* Pricing intentionally omitted from the static footer:
+                it requires Gmail authentication and the footer has no auth context.
+                The link is surfaced in the navbar dropdown for eligible users. */}
+          </div>
+        </div>
+
+        {/* Platform */}
         <div>
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">פלטפורמה</h4>
           <div className="space-y-2">
-            <Link to="/search" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">עיון בקורסים</Link>
-            <Link to="/compare" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">השוואה</Link>
-            <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">אודות</Link>
-            <Link to="/business" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">לעסקים</Link>
+            <Link
+              to="/search"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              עיון בקורסים
+            </Link>
+            <Link
+              to="/compare"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              השוואה
+            </Link>
+            <Link
+              to="/about"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              אודות
+            </Link>
+            <Link
+              to="/business"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              לעסקים
+            </Link>
           </div>
         </div>
+
+        {/* Legal */}
         <div>
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">משפטי</h4>
           <div className="space-y-2">
-            <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות פרטיות</Link>
-            <Link to="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">תנאי שימוש</Link>
-            <Link to="/refund-policy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות ביטולים והחזרים</Link>
-            <Link to="/accessibility" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">הצהרת נגישות</Link>
+            <Link
+              to="/privacy"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              מדיניות פרטיות
+            </Link>
+            <Link
+              to="/terms"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              תנאי שימוש
+            </Link>
+            <Link
+              to="/refund-policy"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              מדיניות ביטולים והחזרים
+            </Link>
+            <Link
+              to="/accessibility"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              הצהרת נגישות
+            </Link>
           </div>
         </div>
       </div>

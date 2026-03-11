@@ -5,6 +5,7 @@ import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { isGmailAddress } from "@/components/GmailProtectedRoute";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ const BusinessNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const canSeePricing = isGmailAddress(user?.email);
 
   const handleSignOut = async () => {
     await signOut();
@@ -39,9 +41,14 @@ const BusinessNavbar = () => {
 
         {/* Center nav */}
         <div className="hidden lg:flex items-center gap-4">
-          <Link to="/business/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            מחירים
-          </Link>
+          {canSeePricing && (
+            <Link
+              to="/business/pricing"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              מחירים
+            </Link>
+          )}
           <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             אודות
           </Link>
@@ -89,7 +96,9 @@ const BusinessNavbar = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="lg:hidden border-t border-border/50 p-4 space-y-3 glass">
-          <Link to="/business/pricing" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>מחירים</Link>
+          {canSeePricing && (
+            <Link to="/business/pricing" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>מחירים</Link>
+          )}
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
           <div className="border-t border-border/30 my-2" />
           {!user && (

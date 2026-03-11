@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import GmailProtectedRoute from "./components/GmailProtectedRoute";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import Index from "./pages/Index";
 import BusinessProfile from "./pages/BusinessProfile";
@@ -89,7 +90,11 @@ const App = () => (
             <Route path="/business/login" element={<BusinessAuth mode="login" />} />
             <Route path="/business/signup" element={<BusinessAuth mode="signup" />} />
             <Route path="/business/dashboard" element={<BusinessDashboard />} />
-            <Route path="/business/pricing" element={<PricingPage />} />
+
+            {/* Gmail-only: pricing page — both canonical and short-form URLs */}
+            <Route element={<GmailProtectedRoute />}>
+              <Route path="/business/pricing" element={<PricingPage />} />
+            </Route>
 
             {/* Partner / widget pages */}
             <Route path="/partners/trust-badge" element={<TrustBadgePage />} />
@@ -103,8 +108,10 @@ const App = () => (
             <Route path="/business/resources/docs" element={<DocsPage />} />
             <Route path="/business/resources/blog" element={<BlogPage />} />
 
-            {/* Redirect /pricing → /business/pricing */}
-            <Route path="/pricing" element={<Navigate to="/business/pricing" replace />} />
+            {/* /pricing redirect also passes through the Gmail guard */}
+            <Route element={<GmailProtectedRoute />}>
+              <Route path="/pricing" element={<Navigate to="/business/pricing" replace />} />
+            </Route>
 
             <Route path="*" element={<NotFound />} />
           </Routes>
