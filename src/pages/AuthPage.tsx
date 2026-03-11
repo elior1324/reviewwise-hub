@@ -44,7 +44,7 @@ const AuthPage = () => {
 
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { signIn, signUp, signInWithGoogle, signInWithApple } = useAuth();
   const navigate = useNavigate();
 
   // ── Countdown ticker ───────────────────────────────────────────────────────
