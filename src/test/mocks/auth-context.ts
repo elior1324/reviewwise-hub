@@ -2,13 +2,6 @@
  * src/test/mocks/auth-context.ts
  *
  * A reusable factory for AuthContext values in tests.
- * Import and use with vi.mock or pass directly to a custom wrapper.
- *
- * Usage:
- *   vi.mock("@/contexts/AuthContext", () => ({
- *     useAuth: () => mockAuthContext(),
- *     AuthProvider: ({ children }) => children,
- *   }));
  */
 import { vi } from "vitest";
 import type { User } from "@supabase/supabase-js";
@@ -48,5 +41,12 @@ export function mockAuthContext(overrides: AuthContextOverrides = {}) {
     signUp: overrides.signUp ?? vi.fn().mockResolvedValue({ data: { user: MOCK_USER }, error: null }),
     signInWithGoogle: overrides.signInWithGoogle ?? vi.fn().mockResolvedValue({ error: null }),
     signOut: overrides.signOut ?? vi.fn().mockResolvedValue(undefined),
+    // MFA stubs
+    mfaEnroll: vi.fn().mockResolvedValue({ qrCode: "", secret: "", factorId: "", error: null }),
+    mfaVerifyEnrollment: vi.fn().mockResolvedValue({ error: null }),
+    mfaUnenroll: vi.fn().mockResolvedValue({ error: null }),
+    mfaChallenge: vi.fn().mockResolvedValue({ challengeId: "", error: null }),
+    mfaVerify: vi.fn().mockResolvedValue({ error: null }),
+    mfaListFactors: vi.fn().mockResolvedValue({ totp: [], error: null }),
   };
 }

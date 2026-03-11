@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const THRESHOLD = 3; // Minimum businesses requesting same category before AI evaluates
+const THRESHOLD = 3;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -14,6 +14,30 @@ serve(async (req) => {
   }
 
   try {
+    // ── Auth check ──────────────────────────────────────────────────────
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const authHeader = req.headers.get("Authorization") ?? "";
+    if (!authHeader.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: authErr } = await userClient.auth.getUser();
+    if (authErr || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { suggested_name, type, business_id } = await req.json();
 
     if (!suggested_name || !type || !business_id) {
@@ -23,11 +47,24 @@ serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // ── Ownership check ─────────────────────────────────────────────────
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Check if category already exists in approved list
+    const { data: biz } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("id", business_id)
+      .eq("owner_id", user.id)
+      .maybeSingle();
+
+    if (!biz) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ── Check if category already exists ────────────────────────────────
     const { data: existing } = await supabase
       .from("approved_categories")
       .select("id")
@@ -41,21 +78,21 @@ serve(async (req) => {
       );
     }
 
-    // Insert the pending suggestion
+    // ── Insert the pending suggestion ───────────────────────────────────
     await supabase.from("pending_categories").insert({
       suggested_name: suggested_name.trim(),
       type,
       business_id,
     });
 
-    // Count how many unique businesses suggested the same (or very similar) category
+    // ── Count unique businesses with same suggestion ────────────────────
     const { data: pendingSuggestions } = await supabase
       .from("pending_categories")
       .select("business_id, suggested_name")
       .eq("type", type);
 
-    // Normalize and group similar names
-    const normalize = (s: string) => s.trim().toLowerCase().replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "");
+    const normalize = (s: string) =>
+      s.trim().toLowerCase().replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "");
 
     const normalizedTarget = normalize(suggested_name);
     const matchingBusinessIds = new Set<string>();
@@ -69,7 +106,6 @@ serve(async (req) => {
     const count = matchingBusinessIds.size;
 
     if (count < THRESHOLD) {
-      // Not enough yet - business goes to "אחר"
       return new Response(
         JSON.stringify({
           status: "pending",
@@ -82,17 +118,14 @@ serve(async (req) => {
       );
     }
 
-    // Threshold reached! Use AI to validate and create a proper category name
+    // ── Threshold reached — AI validation ───────────────────────────────
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      // Fallback: approve as-is without AI
       await supabase.from("approved_categories").insert({
         name: suggested_name.trim(),
         type,
         auto_approved: true,
       });
-
-      // Update businesses from "אחר" to the new category
       await updateBusinessCategories(supabase, normalizedTarget, suggested_name.trim(), pendingSuggestions || []);
 
       return new Response(
@@ -101,12 +134,10 @@ serve(async (req) => {
       );
     }
 
-    // Collect all similar suggestion names for AI context
     const allSimilarNames = (pendingSuggestions || [])
       .filter(s => normalize(s.suggested_name) === normalizedTarget)
       .map(s => s.suggested_name);
 
-    // Get existing categories for context
     const { data: existingCats } = await supabase
       .from("approved_categories")
       .select("name")
@@ -167,7 +198,6 @@ serve(async (req) => {
     });
 
     if (!aiResponse.ok) {
-      // Fallback: approve as-is
       await supabase.from("approved_categories").insert({
         name: suggested_name.trim(),
         type,
@@ -183,7 +213,7 @@ serve(async (req) => {
 
     const aiData = await aiResponse.json();
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    
+
     let decision;
     try {
       decision = JSON.parse(toolCall.function.arguments);
@@ -192,7 +222,6 @@ serve(async (req) => {
     }
 
     if (decision.existing_match && existingNames.includes(decision.existing_match)) {
-      // Map to existing category
       await updateBusinessCategories(supabase, normalizedTarget, decision.existing_match, pendingSuggestions || []);
 
       return new Response(
@@ -216,11 +245,6 @@ serve(async (req) => {
 
       await updateBusinessCategories(supabase, normalizedTarget, finalName, pendingSuggestions || []);
 
-      // Clean up processed pending suggestions
-      const idsToDelete = (pendingSuggestions || [])
-        .filter(s => normalize(s.suggested_name) === normalizedTarget)
-        .map(s => s.business_id);
-
       return new Response(
         JSON.stringify({
           status: "approved",
@@ -231,7 +255,6 @@ serve(async (req) => {
       );
     }
 
-    // AI rejected the category
     return new Response(
       JSON.stringify({
         status: "rejected",
@@ -243,7 +266,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("evaluate-category error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
@@ -255,14 +278,14 @@ async function updateBusinessCategories(
   newCategory: string,
   pendingSuggestions: { business_id: string; suggested_name: string }[]
 ) {
-  const normalize = (s: string) => s.trim().toLowerCase().replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "");
+  const normalize = (s: string) =>
+    s.trim().toLowerCase().replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "");
 
   const businessIds = pendingSuggestions
     .filter(s => normalize(s.suggested_name) === normalizedName)
     .map(s => s.business_id);
 
   if (businessIds.length > 0) {
-    // Update businesses that were in "אחר" to the new category
     await supabase
       .from("businesses")
       .update({ category: newCategory })
