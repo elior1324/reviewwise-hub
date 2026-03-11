@@ -91,7 +91,7 @@ const AuthPage = () => {
     setLoading(true);
 
     if (mode === "login") {
-      const result = await signIn(email, password);
+      const result = await signIn(email, password, turnstileToken ?? undefined);
 
       if (result.rateLimit && !result.rateLimit.allowed) {
         // Locked out — show countdown
@@ -127,7 +127,7 @@ const AuthPage = () => {
       navigate("/");
 
     } else if (mode === "signup") {
-      const { data, error } = await signUp(email, password, displayName);
+      const { data, error } = await signUp(email, password, displayName, turnstileToken ?? undefined);
       if (error) {
         toast.error(translateAuthError(error.message));
       } else if (!data?.user) {

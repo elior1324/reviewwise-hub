@@ -1,0 +1,237 @@
+/**
+ * auth-gate — Edge Function
+ *
+ * The SINGLE server-side gate for all password-based authentication.
+ * No login or signup can happen without passing through this function first.
+ *
+ * Responsibilities (in order):
+ *  1. Hard-fail immediately if TURNSTILE_SECRET_KEY is not configured —
+ *     this prevents the server misconfiguration silent-bypass found in the
+ *     previous submit-review warning-only path.
+ *  2. Verify the Cloudflare Turnstile token with the siteverify API BEFORE
+ *     any Supabase Auth call is made. Bots that bypass the frontend widget
+ *     cannot reach Supabase Auth at all.
+ *  3. For "login":  server-side rate-limit check → signInWithPassword →
+ *     record attempt → return session tokens.
+ *  4. For "signup": signUp via anon client → return user (email confirmation
+ *     is enforced; any live session is immediately revoked).
+ *
+ * Response contract:
+ *  Always HTTP 200. Inspect `response.success` (boolean) in the body.
+ *  On success:  { success: true,  access_token?, refresh_token?, user, ... }
+ *  On failure:  { success: false, error: string, [extra fields] }
+ *
+ * Deployment note:
+ *  This function MUST be deployed with --no-verify-jwt (verify_jwt = false)
+ *  because callers are unauthenticated users attempting to log in or register.
+ *
+ * Environment variables (Supabase → Project → Edge Functions → Secrets):
+ *   TURNSTILE_SECRET_KEY       — Cloudflare Turnstile secret key
+ *   SUPABASE_URL               — auto-injected by Supabase runtime
+ *   SUPABASE_ANON_KEY          — auto-injected by Supabase runtime
+ *   SUPABASE_SERVICE_ROLE_KEY  — auto-injected by Supabase runtime
+ */
+
+import { serve }        from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders } from "../_shared/cors.ts";
+
+// ── Constants ──────────────────────────────────────────────────────────────
+
+const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+/** Always HTTP 200 — callers check `data.success` for application-level errors. */
+function ok(body: Record<string, unknown>, cors: Record<string, string>): Response {
+  return new Response(JSON.stringify(body), {
+    status:  200,
+    headers: { "Content-Type": "application/json", ...cors },
+  });
+}
+
+function fail(error: string, extra: Record<string, unknown> = {}, cors: Record<string, string>): Response {
+  return ok({ success: false, error, ...extra }, cors);
+}
+
+// ── Main handler ───────────────────────────────────────────────────────────
+
+serve(async (req: Request) => {
+  const cors = getCorsHeaders(req);
+
+  // Pre-flight
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  if (req.method !== "POST")    return fail("Method not allowed", {}, cors);
+
+  // ── Environment ────────────────────────────────────────────────────────
+  const TURNSTILE_SECRET_KEY      = Deno.env.get("TURNSTILE_SECRET_KEY") ?? "";
+  const SUPABASE_URL              = Deno.env.get("SUPABASE_URL")!;
+  const SUPABASE_ANON_KEY         = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+  // ── HARD FAIL if secret is missing — no silent dev bypass here ─────────
+  // Unlike submit-review (which warned), auth-gate refuses ALL requests
+  // when the secret is absent. This prevents a misconfigured deployment
+  // from silently accepting unauthenticated bot signups/logins.
+  if (!TURNSTILE_SECRET_KEY) {
+    console.error("[auth-gate] TURNSTILE_SECRET_KEY is not configured — refusing all requests");
+    return fail("Server misconfiguration — please contact support", {}, cors);
+  }
+
+  // ── Parse body ─────────────────────────────────────────────────────────
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return fail("Invalid JSON body", {}, cors);
+  }
+
+  const { action, email, password, displayName, turnstileToken } = body;
+
+  // ── Validate action + required fields ──────────────────────────────────
+  if (action !== "login" && action !== "signup") {
+    return fail("Invalid action — must be 'login' or 'signup'", {}, cors);
+  }
+  if (!email || typeof email !== "string" || !email.includes("@")) {
+    return fail("A valid email address is required", {}, cors);
+  }
+  if (!password || typeof password !== "string" || (password as string).length < 8) {
+    return fail("Password must be at least 8 characters", {}, cors);
+  }
+  // Token presence check — before hitting Cloudflare to fail fast
+  if (!turnstileToken || typeof turnstileToken !== "string") {
+    return fail("Human verification token is required. Please complete the CAPTCHA.", {}, cors);
+  }
+
+  // ── Step 1: Verify Turnstile with Cloudflare siteverify API ────────────
+  // This is the critical gate — no Supabase Auth call is made until
+  // Cloudflare confirms the token was generated by a real browser interaction.
+  const formData = new URLSearchParams();
+  formData.set("secret",   TURNSTILE_SECRET_KEY);
+  formData.set("response", turnstileToken as string);
+  // Include the requester's IP for binding the token to an IP (extra security)
+  const remoteIp = req.headers.get("CF-Connecting-IP");
+  if (remoteIp) formData.set("remoteip", remoteIp);
+
+  let tsResult: { success: boolean; "error-codes"?: string[] };
+  try {
+    const tsResp = await fetch(TURNSTILE_VERIFY_URL, {
+      method: "POST",
+      body:   formData,
+    });
+    tsResult = await tsResp.json() as typeof tsResult;
+  } catch (e) {
+    console.error("[auth-gate] Cloudflare Turnstile request failed:", e);
+    return fail(
+      "Human verification service unavailable — please try again in a moment.",
+      {},
+      cors,
+    );
+  }
+
+  if (!tsResult.success) {
+    console.warn("[auth-gate] Turnstile rejected token — error-codes:", tsResult["error-codes"]);
+    return fail(
+      "Human verification failed. Please refresh the page and try again.",
+      {},
+      cors,
+    );
+  }
+
+  // ── Supabase clients ───────────────────────────────────────────────────
+  // anonClient: used for actual Auth calls (signInWithPassword / signUp)
+  // adminClient: used for rate-limit RPCs (bypasses RLS; never touches auth)
+  const anonClient  = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+  // ── Action: login ──────────────────────────────────────────────────────
+  if (action === "login") {
+
+    // Server-side rate-limit check (SECURITY DEFINER function, DB-backed)
+    try {
+      const { data: rl } = await adminClient.rpc("check_login_rate_limit", {
+        p_email: email as string,
+      });
+      if (rl && rl.allowed === false) {
+        console.warn("[auth-gate] login blocked — rate limit for:", email);
+        return fail("account_locked", {
+          locked_until:    rl.locked_until    ?? null,
+          failed_attempts: rl.failed_attempts ?? 0,
+        }, cors);
+      }
+    } catch (e) {
+      // Non-fatal: if RPC fails, allow the attempt (fail open to avoid
+      // locking out legitimate users due to transient DB issues)
+      console.warn("[auth-gate] check_login_rate_limit RPC failed (non-fatal):", e);
+    }
+
+    // Attempt authentication via Supabase Auth
+    const { data: authData, error: authError } = await anonClient.auth.signInWithPassword({
+      email:    email    as string,
+      password: password as string,
+    });
+
+    // Record attempt for future rate-limit checks (best-effort)
+    try {
+      await adminClient.rpc("record_login_attempt", {
+        p_email:   email    as string,
+        p_success: !authError,
+      });
+    } catch (e) {
+      console.warn("[auth-gate] record_login_attempt RPC failed (non-fatal):", e);
+    }
+
+    if (authError || !authData?.session) {
+      console.warn("[auth-gate] login failed:", authError?.message);
+      return fail(
+        authError?.message ?? "Authentication failed",
+        { code: (authError as any)?.code ?? null },
+        cors,
+      );
+    }
+
+    // Return session tokens for client to call supabase.auth.setSession()
+    return ok({
+      success:       true,
+      access_token:  authData.session.access_token,
+      refresh_token: authData.session.refresh_token,
+      user: {
+        id:    authData.user?.id    ?? null,
+        email: authData.user?.email ?? null,
+      },
+    }, cors);
+  }
+
+  // ── Action: signup ─────────────────────────────────────────────────────
+  const { data: signupData, error: signupError } = await anonClient.auth.signUp({
+    email:    email    as string,
+    password: password as string,
+    options:  { data: { display_name: displayName ?? "" } },
+  });
+
+  if (signupError) {
+    console.warn("[auth-gate] signup failed:", signupError.message);
+    return fail(signupError.message, {}, cors);
+  }
+
+  if (!signupData?.user) {
+    return fail("Signup failed — please try again or contact support.", {}, cors);
+  }
+
+  // If email confirmation is disabled in this Supabase project, a live session
+  // is returned immediately. Sign it out to enforce email confirmation at the
+  // application level — users must click the confirmation link before logging in.
+  if (signupData.session) {
+    console.warn("[auth-gate] live session on signup — revoking to enforce email confirmation");
+    await anonClient.auth.signOut();
+  }
+
+  return ok({
+    success:              true,
+    requiresConfirmation: true,
+    user: {
+      id:    signupData.user.id,
+      email: signupData.user.email,
+    },
+  }, cors);
+});

@@ -103,8 +103,8 @@ interface AuthContextType {
   isSubscribed:     boolean;
   checkSubscription: () => Promise<void>;
 
-  signUp:           (email: string, password: string, displayName?: string) => Promise<{ data: any; error: any }>;
-  signIn:           (email: string, password: string) => Promise<SignInResult>;
+  signUp:           (email: string, password: string, displayName?: string, turnstileToken?: string) => Promise<{ data: any; error: any }>;
+  signIn:           (email: string, password: string, turnstileToken?: string) => Promise<SignInResult>;
   signInWithGoogle: (redirectTo?: string)             => Promise<{ error: any }>;
   signOut:          ()                                => Promise<void>;
 
@@ -257,123 +257,95 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => clearInterval(id);
   }, [user, checkSubscription]);
 
-  // ── signUp ─────────────────────────────────────────────────────────────────
+  // ── signUp (via auth-gate Edge Function) ──────────────────────────────────
+  // All signup requests are routed through the auth-gate Edge Function which
+  // verifies the Turnstile token server-side BEFORE creating the account.
+  // Bots that call supabase.auth.signUp() directly are blocked at the DB level
+  // (RLS) — the only path to insert a new user session is through this gate.
 
   const signUp = async (
     email: string,
     password: string,
     displayName?: string,
+    turnstileToken?: string,
   ): Promise<{ data: any; error: any }> => {
-    if (import.meta.env.DEV) {
-      const url = import.meta.env.VITE_SUPABASE_URL as string;
-      devLog("[Auth] signUp | origin:", window.location.origin);
-      devLog("[Auth] Supabase URL:", url);
-      try {
-        const probe = await fetch(`${url}/auth/v1/settings`, {
-          headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string },
-        });
-        const json = await probe.json().catch(() => null);
-        devLog("[Auth] pre-flight:", probe.status, JSON.stringify(json)?.slice(0, 200));
-        if (probe.status === 404 || !json)
-          devErr("[Auth] ⚠️ Supabase unreachable / intercepted");
-      } catch (e) {
-        devErr("[Auth] ⚠️ pre-flight failed:", e);
-      }
-    }
+    devLog("[Auth] signUp via auth-gate | origin:", window.location.origin);
 
-    signingUpRef.current = true;
-    let data: any = null;
-    let error: any = null;
-
-    try {
-      const result = await supabase.auth.signUp({
+    const { data: fnData, error: fnError } = await supabase.functions.invoke("auth-gate", {
+      body: {
+        action:         "signup",
         email,
         password,
-        options: { data: { display_name: displayName } },
-      });
-      data = result.data;
-      error = result.error;
-    } finally {
-      signingUpRef.current = false;
+        displayName:    displayName ?? "",
+        turnstileToken: turnstileToken ?? "",
+      },
+    });
+
+    if (fnError) {
+      devErr("[Auth] auth-gate network error on signup:", fnError.message);
+      return { data: null, error: { message: fnError.message } };
     }
 
-    if (error) { devErr("[Auth] signUp error:", error.message); return { data, error }; }
-
-    devLog("[Auth] signUp — user:", data?.user?.id ?? "null", "| session:", !!data?.session);
-
-    if (!data?.user) {
-      devWarn("[Auth] signUp returned no user — check Supabase Auth Hooks.");
-      return { data, error };
+    if (!fnData?.success) {
+      devErr("[Auth] auth-gate signup rejected:", fnData?.error);
+      return { data: null, error: { message: fnData?.error ?? "Signup failed" } };
     }
 
-    // Email Confirmations disabled: Supabase returns a live session immediately.
-    // Force sign-out to require email confirmation at the app level.
-    if (data?.session) {
-      devWarn("[Auth] live session on signUp — signing out to enforce email confirmation.");
-      await supabase.auth.signOut();
-      return { data: { ...data, session: null }, error: null };
-    }
+    devLog("[Auth] signUp success — user:", fnData.user?.id ?? "null");
 
-    return { data, error };
+    // Return a shape compatible with the existing AuthPage success handler
+    return {
+      data: {
+        user:    fnData.user,
+        session: null, // email confirmation required — no live session
+      },
+      error: null,
+    };
   };
 
-  // ── signIn (rate-limited + MFA-aware) ─────────────────────────────────────
+  // ── signIn (via auth-gate Edge Function — rate-limited + Turnstile + MFA) ──
+  // All login requests are routed through the auth-gate Edge Function which:
+  //   1. Verifies the Turnstile token server-side (blocks bots before auth)
+  //   2. Checks the server-side rate limit (DB-backed, cross-device lockout)
+  //   3. Calls supabase.auth.signInWithPassword server-side
+  //   4. Records the attempt for future rate-limit enforcement
+  // On success the function returns session tokens; we call setSession()
+  // to restore the authenticated state on this client, which triggers the
+  // normal onAuthStateChange → subscription check → session timeout flow.
 
-  const signIn = async (email: string, password: string): Promise<SignInResult> => {
-    devLog("[Auth] signIn called");
+  const signIn = async (
+    email:          string,
+    password:       string,
+    turnstileToken?: string,
+  ): Promise<SignInResult> => {
+    devLog("[Auth] signIn via auth-gate called");
 
-    // ── Layer 1: client-side gate (instant, no network) ──────────────────────
+    // ── Client-side instant gate (no network, gives instant UI feedback) ───
+    // Kept as a convenience layer — the real enforcement is in auth-gate.
     const clientRL = clientCheckRateLimit();
     if (!clientRL.allowed) {
       devWarn("[Auth] client-side rate limit triggered");
       return { data: null, error: { message: "client_rate_limit" }, rateLimit: clientRL };
     }
 
-    // ── Layer 2: server-side rate limit (DB-backed, cross-device) ────────────
-    try {
-      const { data: rl, error: rlErr } = await supabase.rpc("check_login_rate_limit", {
-        p_email: email,
-      });
-      if (!rlErr && rl && rl.allowed === false) {
-        const lockedUntilMs = rl.locked_until
-          ? new Date(rl.locked_until as string).getTime()
-          : null;
-        devWarn("[Auth] server-side lockout until:", rl.locked_until);
-        return {
-          data: null,
-          error: { message: "account_locked" },
-          rateLimit: {
-            allowed:           false,
-            remainingAttempts: 0,
-            lockedUntilMs,
-            failedAttempts:    rl.failed_attempts as number,
-          },
-        };
-      }
-    } catch (e) {
-      devErr("[Auth] check_login_rate_limit RPC failed (non-fatal):", e);
-    }
+    // ── Call auth-gate — this is where Turnstile + server rate-limit live ──
+    const { data: fnData, error: fnError } = await supabase.functions.invoke("auth-gate", {
+      body: {
+        action:         "login",
+        email,
+        password,
+        turnstileToken: turnstileToken ?? "",
+      },
+    });
 
-    // ── Layer 3: actual Supabase authentication ───────────────────────────────
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-    // ── Layer 4: record attempt in DB for future checks ───────────────────────
-    try {
-      await supabase.rpc("record_login_attempt", {
-        p_email:   email,
-        p_success: !error,
-      });
-    } catch (e) {
-      devErr("[Auth] record_login_attempt RPC failed (non-fatal):", e);
-    }
-
-    if (error) {
+    if (fnError) {
+      // True network / invocation failure (not an application-level rejection)
+      devErr("[Auth] auth-gate network error:", fnError.message);
       clientRecordFailure();
       const rlAfter = clientCheckRateLimit();
-      devErr("[Auth] signIn error:", error.message);
       return {
-        data,
-        error,
+        data:  null,
+        error: { message: fnError.message },
         rateLimit: {
           allowed:           rlAfter.allowed,
           remainingAttempts: rlAfter.remainingAttempts,
@@ -382,26 +354,73 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       };
     }
 
-    // ── Success path ──────────────────────────────────────────────────────────
-    clientClearAttempts();
-    devLog("[Auth] signIn success");
+    // ── Application-level errors returned by auth-gate ─────────────────────
+    if (!fnData?.success) {
+      const errMsg = (fnData?.error as string) ?? "auth_error";
+      devWarn("[Auth] auth-gate rejected login:", errMsg);
 
-    // ── Layer 5: MFA check (AAL2) ─────────────────────────────────────────────
+      // Rate-limit / account-locked response
+      if (errMsg === "account_locked") {
+        const lockedUntilMs = fnData?.locked_until
+          ? new Date(fnData.locked_until as string).getTime()
+          : null;
+        devWarn("[Auth] server-side lockout until:", fnData?.locked_until);
+        return {
+          data:  null,
+          error: { message: "account_locked" },
+          rateLimit: {
+            allowed:           false,
+            remainingAttempts: 0,
+            lockedUntilMs,
+            failedAttempts:    fnData?.failed_attempts as number ?? 0,
+          },
+        };
+      }
+
+      // General auth error (wrong password, email not found, etc.)
+      clientRecordFailure();
+      const rlAfter = clientCheckRateLimit();
+      return {
+        data:  null,
+        error: { message: errMsg, code: fnData?.code ?? null },
+        rateLimit: {
+          allowed:           rlAfter.allowed,
+          remainingAttempts: rlAfter.remainingAttempts,
+          lockedUntilMs:     rlAfter.lockedUntilMs,
+        },
+      };
+    }
+
+    // ── Success: restore session on this client ────────────────────────────
+    const { error: sessionError } = await supabase.auth.setSession({
+      access_token:  fnData.access_token  as string,
+      refresh_token: fnData.refresh_token as string,
+    });
+
+    if (sessionError) {
+      devErr("[Auth] setSession failed:", sessionError.message);
+      return { data: null, error: sessionError };
+    }
+
+    clientClearAttempts();
+    devLog("[Auth] signIn success — session restored via setSession");
+
+    // ── MFA check (AAL2) — runs after session is established ──────────────
     try {
       const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
         const { data: factors } = await supabase.auth.mfa.listFactors();
-        const verified = factors?.totp?.find(f => f.status === "verified");
+        const verified = factors?.totp?.find((f: any) => f.status === "verified");
         if (verified) {
           devLog("[Auth] MFA required — factorId:", verified.id);
-          return { data, error: null, mfaRequired: true, mfaFactorId: verified.id };
+          return { data: fnData, error: null, mfaRequired: true, mfaFactorId: verified.id };
         }
       }
     } catch (e) {
       devErr("[Auth] MFA AAL check failed (non-fatal):", e);
     }
 
-    return { data, error: null };
+    return { data: fnData, error: null };
   };
 
   // ── signInWithGoogle ───────────────────────────────────────────────────────
