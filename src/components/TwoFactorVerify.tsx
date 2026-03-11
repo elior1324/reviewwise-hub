@@ -85,7 +85,6 @@ const TwoFactorVerify = ({ factorId, onSuccess, onCancel }: TwoFactorVerifyProps
     if (code.length === 6 && challengeId && !loading) {
       handleVerify();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   // ─────────────────────────────────────────────────────────────────────────

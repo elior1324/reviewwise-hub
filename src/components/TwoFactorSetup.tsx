@@ -114,7 +114,6 @@ const TwoFactorSetup = () => {
     if (code.length === 6 && step === "enroll" && !loading) {
       handleVerifyEnrollment();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   // ── Unenroll ───────────────────────────────────────────────────────────────

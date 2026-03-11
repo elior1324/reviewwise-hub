@@ -48,7 +48,6 @@ const TurnstileWidget = ({ onSuccess, onError, className }: TurnstileWidgetProps
     if (DEV_BYPASS_CAPTCHA) {
       onSuccess("dev-bypass-token");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (DEV_BYPASS_CAPTCHA) {

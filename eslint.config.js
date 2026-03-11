@@ -20,6 +20,7 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
       ...reactHooks.configs.recommended.rules,
       // Disabled: fires on utility exports alongside components; not relevant here
       "react-refresh/only-export-components": "off",
