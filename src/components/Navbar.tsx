@@ -7,7 +7,6 @@ import {
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { isGmailAddress } from "@/components/GmailProtectedRoute";
 import NotificationBell from "./NotificationBell";
 import AccessibilityMenu from "./AccessibilityMenu";
 import {
@@ -41,8 +40,8 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  // True only when the authenticated user's email is @gmail.com
-  const canSeePricing = isGmailAddress(user?.email);
+  // Pricing is now open to all authenticated users (C-7 fix)
+  const canSeePricing = !!user;
 
   const handleSignOut = async () => {
     await signOut();

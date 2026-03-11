@@ -177,8 +177,41 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
         }
       }
 
-      // Submit review (simulated — in production save to DB with subject & duration)
-      await new Promise(r => setTimeout(r, 800));
+      // ── Persist the review via the submit-review Edge Function ──────────
+      // The Edge Function runs Turnstile server-side verification and then
+      // inserts the row — keeping all auth + bot-protection logic server-side.
+      const { data: fnResult, error: fnError } = await supabase.functions.invoke(
+        "submit-review",
+        {
+          body: {
+            turnstileToken,
+            businessId,
+            courseId:          courseId || null,
+            rating,
+            subject:           cleanSubject,
+            reviewText:        cleanReviewText,
+            trainingDuration:  duration,
+            verifiedPurchase:  receiptVerified,
+          },
+        },
+      );
+
+      if (fnError || fnResult?.error) {
+        const msg = fnResult?.message || fnResult?.error || fnError?.message || "";
+        if (fnResult?.error === "duplicate_review") {
+          toast.error("כבר שלחתם ביקורת על עסק זה", {
+            description: "ניתן לכתוב ביקורת אחת בלבד לכל עסק.",
+          });
+        } else if (msg.includes("CAPTCHA")) {
+          toast.error("אימות CAPTCHA נכשל", {
+            description: "נסו לרענן את הדף ולשלוח שוב.",
+          });
+        } else {
+          toast.error("שגיאה בשמירת הביקורת", { description: msg });
+        }
+        setSubmitting(false);
+        return;
+      }
 
       toast.success("הביקורת נשלחה בהצלחה! ✨", {
         description: receiptVerified

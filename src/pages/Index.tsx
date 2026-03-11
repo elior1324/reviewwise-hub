@@ -266,19 +266,19 @@ const Index = () => {
               screen reader landmark navigation (WCAG 1.3.1 / ARIA landmark roles).
               aria-label distinguishes it from any other search forms on the page.
             */}
-            <motion.form role="search" aria-label="חיפוש פרילנסרים וקורסים" variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex gap-3 max-w-lg mx-auto mb-12">
+            <motion.form role="search" aria-label="חיפוש פרילנסרים וקורסים" variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto mb-12 w-full px-4 sm:px-0">
               <div className="relative flex-1">
                 {/* Search icon is decorative — the input's aria-label conveys the purpose */}
                 <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
                   placeholder="חפשו פרילנסרים, קורסים או קטגוריות..."
                   aria-label="חיפוש פרילנסרים, קורסים ושירותים"
-                  className="pr-10 h-12 glass border-border/50"
+                  className="pr-10 h-12 glass border-border/50 w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button type="submit" size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 glow-primary">
+              <Button type="submit" size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 glow-primary w-full sm:w-auto">
                 חיפוש
               </Button>
             </motion.form>

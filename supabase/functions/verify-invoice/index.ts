@@ -1,13 +1,10 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { serve }            from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient }     from "https://esm.sh/@supabase/supabase-js@2";
+import { checkAiRateLimit } from "../_shared/rate-limit.ts";
+import { getCorsHeaders }   from "../_shared/cors.ts";
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
@@ -58,6 +55,10 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // ── Rate limit: 10 AI invoice-verify calls per user per day ───────────
+    const rateCheck = await checkAiRateLimit(supabase, userId, "verify-invoice", corsHeaders);
+    if (!rateCheck.allowed) return rateCheck.response!;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");

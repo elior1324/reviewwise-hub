@@ -439,8 +439,8 @@ const BusinessDashboard = () => {
           </div>
         )}
 
-        {/* Admin Plan Switcher — only for admin users with a real business */}
-        {!isDemo && isAdmin && businessId && (
+        {/* Admin Plan Switcher — dev/admin only; hidden in production for non-admin users */}
+        {import.meta.env.DEV && !isDemo && isAdmin && businessId && (
           <div className="mb-6">
             <DevControlPanel
               businessId={businessId}

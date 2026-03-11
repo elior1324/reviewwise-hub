@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import GmailProtectedRoute from "./components/GmailProtectedRoute";
 import AuthProtectedRoute from "./components/AuthProtectedRoute";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import ScrollToTopButton from "@/components/ui/scroll-to-top";
@@ -95,10 +94,8 @@ const App = () => (
             <Route path="/business/signup" element={<BusinessAuth mode="signup" />} />
             <Route path="/business/dashboard" element={<BusinessDashboard />} />
 
-            {/* Gmail-only: pricing page — both canonical and short-form URLs */}
-            <Route element={<GmailProtectedRoute />}>
-              <Route path="/business/pricing" element={<PricingPage />} />
-            </Route>
+            {/* Pricing page — accessible to all authenticated users */}
+            <Route path="/business/pricing" element={<PricingPage />} />
 
             {/* Partner / widget pages */}
             <Route path="/partners/trust-badge" element={<TrustBadgePage />} />
@@ -114,10 +111,8 @@ const App = () => (
             <Route path="/business/resources/docs" element={<DocsPage />} />
             <Route path="/business/resources/blog" element={<BlogPage />} />
 
-            {/* /pricing redirect also passes through the Gmail guard */}
-            <Route element={<GmailProtectedRoute />}>
-              <Route path="/pricing" element={<Navigate to="/business/pricing" replace />} />
-            </Route>
+            {/* /pricing → canonical URL */}
+            <Route path="/pricing" element={<Navigate to="/business/pricing" replace />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
