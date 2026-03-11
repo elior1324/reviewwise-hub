@@ -14,7 +14,7 @@
  *   /business/verify-invoice?token=X  — token decision page (no auth needed)
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -200,17 +200,17 @@ export default function MerchantVerificationDashboard() {
   const [filter, setFilter]     = useState<"pending" | "all">("pending");
   const [businessId, setBusinessId] = useState<string | null>(null);
 
-  // If token param is present, show the token decision UI (no auth needed)
-  if (token) return <TokenDecisionPage token={token} />;
+  // ── All hooks must appear unconditionally before any early return ──
 
-  // Redirect if not logged in
+  // Redirect if not logged in (skip when using email-token flow)
   useEffect(() => {
+    if (token) return;
     if (!user) navigate("/auth");
-  }, [user]);
+  }, [token, user, navigate]);
 
-  // Load user's business id
+  // Load user's business id (skip when using email-token flow)
   useEffect(() => {
-    if (!user) return;
+    if (token || !user) return;
     supabase
       .from("businesses")
       .select("id, subscription_tier")
@@ -219,11 +219,11 @@ export default function MerchantVerificationDashboard() {
       .then(({ data }) => {
         if (data) setBusinessId(data.id);
       });
-  }, [user]);
+  }, [token, user]);
 
   // Load queue items
-  async function loadQueue() {
-    if (!businessId) return;
+  const loadQueue = useCallback(async () => {
+    if (!businessId || token) return;
     setLoading(true);
 
     const query = supabase
@@ -237,9 +237,12 @@ export default function MerchantVerificationDashboard() {
     const { data } = await query;
     setItems((data as QueueItem[]) ?? []);
     setLoading(false);
-  }
+  }, [businessId, filter, token]);
 
-  useEffect(() => { loadQueue(); }, [businessId, filter]);
+  useEffect(() => { loadQueue(); }, [loadQueue]);
+
+  // If token param is present, show the token decision UI (no auth needed)
+  if (token) return <TokenDecisionPage token={token} />;
 
   async function decide(item: QueueItem, d: "confirmed" | "rejected") {
     setDeciding(item.id);
