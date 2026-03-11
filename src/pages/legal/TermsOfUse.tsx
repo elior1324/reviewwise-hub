@@ -200,6 +200,7 @@ const TermsOfUse = () => (
             <li>למכור מחדש, להעביר, או להעניק רישיון לשירותים ללא הרשאה</li>
             <li>לנהוג בצורה פוגענית או חסרת כבוד כלפי עובדי ReviewHub ומשתמשים</li>
             <li>לגרד נתונים לכל מטרה, כולל אימון מערכות בינה מלאכותית</li>
+            <li><strong>איסור ביקורות מתחרים (ניגוד עניינים):</strong> כתיבת ביקורות שליליות על עסק מתחרה, או כל פעולה שמטרתה לפגוע בדירוג או במוניטין של מתחרה באמצעות הפלטפורמה. ReviewHub שומרת לעצמה את הזכות לחשוף את זהות כותב הביקורת לבית המשפט במקרה של חשד לניגוד עניינים.</li>
           </ul>
         </Section>
 
@@ -301,7 +302,33 @@ const TermsOfUse = () => (
           </ul>
         </Section>
 
-        {/* 13 — Third party */}
+        {/* Notice & Takedown */}
+        <Section icon={Shield} title="הליך דיווח והסרת תוכן (Notice & Takedown)">
+          <p className="mb-3">
+            ReviewHub מפעילה הליך מובנה לטיפול בתלונות על תוכן שפורסם בפלטפורמה:
+          </p>
+          <ol className="list-decimal pr-6 space-y-2 text-muted-foreground mb-4">
+            <li><strong>הגשת דיווח:</strong> באמצעות כפתור ה&quot;דווח&quot; או פנייה ל-<a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a>.</li>
+            <li><strong>בדיקה ראשונית:</strong> תוך 72 שעות.</li>
+            <li><strong>הודעה לכותב:</strong> הכותב מקבל 7 ימים להגיב.</li>
+            <li><strong>החלטה:</strong> הותרה, עריכה או הסרה.</li>
+            <li><strong>היעדר תגובה:</strong> ReviewHub רשאית להסיר לפי שיקול דעתה.</li>
+          </ol>
+          <p className="text-muted-foreground text-sm">
+            ביצוע הליך זה אינו הופך את ReviewHub לצד בסכסוך.
+          </p>
+        </Section>
+
+        {/* Court-ordered identity disclosure */}
+        <Section icon={Shield} title="חשיפת זהות בצו בית משפט">
+          <p className="mb-3">
+            ReviewHub שומרת לעצמה את הזכות לחשוף מידע מזהה של משתמשים (כולל כתובת IP,
+            דוא&quot;ל מאומת וחותמות זמן) בהתאם לצו בית משפט או דרישה חוקית מחייבת,
+            בהתאם לחוק הגנת הפרטיות, התשמ&quot;א-1981.
+          </p>
+        </Section>
+
+        {/* 13 — Third party (original) */}
         <Section icon={Globe} title="תוכן צדדים שלישיים וקישורים חיצוניים">
           <p className="mb-3">
             ReviewHub אינה אחראית לתוכן, לנכונות, לאבטחה או לחוקיות של אתרים חיצוניים

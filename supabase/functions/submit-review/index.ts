@@ -189,6 +189,10 @@ serve(async (req: Request) => {
       return jsonResp({ error: "Business not found" }, 404, cors);
     }
 
+    // Capture audit metadata for legal compliance (Pillar 3)
+    const submissionIp = req.headers.get("CF-Connecting-IP") ?? req.headers.get("X-Forwarded-For") ?? null;
+    const submissionUa = req.headers.get("User-Agent") ?? null;
+
     const { error: insertError } = await adminClient
       .from("reviews")
       .insert({
@@ -202,6 +206,8 @@ serve(async (req: Request) => {
         verified_purchase: Boolean(verifiedPurchase),
         reviewer_name:     cleanReviewerName,
         anonymous:         false,
+        submission_ip:     submissionIp,
+        submission_user_agent: submissionUa,
       });
 
     if (insertError) {

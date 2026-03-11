@@ -807,26 +807,44 @@ export type Database = {
       review_reports: {
         Row: {
           created_at: string
+          details: string | null
           id: string
           reason: string
           reporter_id: string | null
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
           review_id: string
+          reviewer_notified_at: string | null
+          reviewer_response: string | null
           status: string
         }
         Insert: {
           created_at?: string
+          details?: string | null
           id?: string
           reason: string
           reporter_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
           review_id: string
+          reviewer_notified_at?: string | null
+          reviewer_response?: string | null
           status?: string
         }
         Update: {
           created_at?: string
+          details?: string | null
           id?: string
           reason?: string
           reporter_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
           review_id?: string
+          reviewer_notified_at?: string | null
+          reviewer_response?: string | null
           status?: string
         }
         Relationships: [
@@ -903,6 +921,8 @@ export type Database = {
           purchase_id: string | null
           rating: number
           receipt_url: string | null
+          submission_ip: string | null
+          submission_user_agent: string | null
           text: string
           updated_at: string
           user_id: string
@@ -920,6 +940,8 @@ export type Database = {
           purchase_id?: string | null
           rating: number
           receipt_url?: string | null
+          submission_ip?: string | null
+          submission_user_agent?: string | null
           text: string
           updated_at?: string
           user_id: string
@@ -937,6 +959,8 @@ export type Database = {
           purchase_id?: string | null
           rating?: number
           receipt_url?: string | null
+          submission_ip?: string | null
+          submission_user_agent?: string | null
           text?: string
           updated_at?: string
           user_id?: string

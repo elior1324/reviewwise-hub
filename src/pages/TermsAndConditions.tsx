@@ -161,6 +161,7 @@ const TermsAndConditions = () => {
               <li>לבצע הונאה או מעשים בלתי חוקיים אחרים דרך הפלטפורמה</li>
               <li>לנהוג באופן פוגעני או חסר כבוד כלפי עובדי ReviewHub, משתמשים או לקוחות אחרים</li>
               <li>לגרד נתונים או לבצע כריית טקסט לכל מטרה, כולל פיתוח, אימון או אימות מערכות בינה מלאכותית</li>
+              <li><strong>איסור ביקורות מתחרים (ניגוד עניינים):</strong> כתיבת ביקורות שליליות על עסק מתחרה, או כל פעולה שמטרתה לפגוע בדירוג או במוניטין של מתחרה באמצעות הפלטפורמה. ReviewHub שומרת לעצמה את הזכות לחשוף את זהות כותב הביקורת לבית המשפט במקרה של חשד לניגוד עניינים.</li>
             </ul>
           </Section>
 
@@ -393,6 +394,42 @@ const TermsAndConditions = () => {
             </ul>
             <p className="text-sm">
               לפרטים מלאים ראו <a href="/refund-policy" className="text-primary hover:underline">מדיניות ביטולים והחזרים</a>.
+            </p>
+          </Section>
+
+          {/* Notice & Takedown */}
+          <Section icon={Shield} title="הליך דיווח והסרת תוכן (Notice & Takedown)">
+            <p className="mb-3">
+              ReviewHub מפעילה הליך מובנה לטיפול בתלונות על תוכן שפורסם בפלטפורמה, בהתאם לעקרונות ה-<strong>Notice & Takedown</strong> המקובלים בדין הישראלי והבינלאומי:
+            </p>
+            <ol className="list-decimal pr-6 space-y-2 text-muted-foreground mb-4">
+              <li><strong>הגשת דיווח:</strong> כל אדם או עסק רשאי לדווח על ביקורת הנחשבת פוגענית, כוזבת, משמיצה או מפרה זכויות — באמצעות כפתור ה"דווח" בפלטפורמה או בפנייה ישירה ל-<a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a>.</li>
+              <li><strong>בדיקה ראשונית:</strong> צוות ReviewHub יבחן את הדיווח תוך 72 שעות ממועד קבלתו.</li>
+              <li><strong>הודעה לכותב הביקורת:</strong> במקרה שהדיווח נמצא ראוי לבדיקה, ReviewHub תיידע את כותב הביקורת ותעניק לו 7 ימים להגיב.</li>
+              <li><strong>החלטת הפלטפורמה:</strong> לאחר קבלת תגובת כותב הביקורת (או בהיעדר תגובה), ReviewHub תקבל החלטה סופית: הותרת הביקורת, עריכתה או הסרתה.</li>
+              <li><strong>היעדר תגובה:</strong> אם כותב הביקורת אינו מגיב תוך 7 ימים, ReviewHub רשאית להסיר את הביקורת לפי שיקול דעתה.</li>
+            </ol>
+            <p className="p-3 rounded-lg bg-secondary/50 border border-border/50 text-foreground text-sm mb-3">
+              ⚖️ <strong>הבהרה:</strong> ביצוע הליך Notice & Takedown אינו הופך את ReviewHub לצד בסכסוך בין כותב הביקורת לבין בעל העסק. כל הליך משפטי יתנהל ישירות בין הצדדים.
+            </p>
+          </Section>
+
+          {/* Court-ordered identity disclosure */}
+          <Section icon={Shield} title="חשיפת זהות בצו בית משפט">
+            <p className="mb-3">
+              ReviewHub שומרת לעצמה את הזכות לחשוף מידע מזהה של משתמשים — כולל כתובת IP, כתובת דוא"ל מאומתת, חותמות זמן ומידע טכני נוסף — בהתאם לצו בית משפט או דרישה חוקית מחייבת, בהתאם לחוק הגנת הפרטיות, התשמ"א-1981.
+            </p>
+            <p className="mb-3">
+              חשיפת מידע כאמור תתבצע אך ורק בנסיבות הבאות:
+            </p>
+            <ul className="list-disc pr-6 space-y-1 text-muted-foreground mb-3">
+              <li>צו בית משפט מפורש המחייב חשיפת המידע</li>
+              <li>דרישה חוקית מחייבת מרשות מוסמכת</li>
+              <li>חשד סביר לניגוד עניינים או ביקורת מתחרה (בכפוף לאישור משפטי)</li>
+              <li>הגנה על זכויות, רכוש או בטיחות של ReviewHub, משתמשיה או הציבור</li>
+            </ul>
+            <p className="text-muted-foreground text-sm">
+              למידע נוסף על עיבוד מידע אישי, ראו <a href="/privacy" className="text-primary hover:underline">מדיניות הפרטיות</a>.
             </p>
           </Section>
 
