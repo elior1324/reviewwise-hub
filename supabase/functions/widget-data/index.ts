@@ -137,13 +137,13 @@ serve(async (req) => {
             .maybeSingle();
         });
 
-      if (reviews?.data && reviews.data.content && reviews.data.content.length >= 40) {
+      if (reviews && reviews.content && reviews.content.length >= 40) {
         featuredReview = {
-          rating: reviews.data.rating,
-          content: reviews.data.content,
-          reviewer_name: reviews.data.reviewer_name,
-          is_anonymous: reviews.data.is_anonymous,
-          is_verified_purchase: reviews.data.is_verified_purchase,
+          rating: reviews.rating,
+          content: reviews.content,
+          reviewer_name: reviews.reviewer_name,
+          is_anonymous: reviews.is_anonymous,
+          is_verified_purchase: reviews.is_verified_purchase,
         };
       }
     }
@@ -160,7 +160,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: (err as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

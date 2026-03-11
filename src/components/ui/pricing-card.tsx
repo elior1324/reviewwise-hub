@@ -357,80 +357,141 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
 // 4. ReviewHub plan data
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Feature name constants — must be identical across all plans so the
+// comparison table `find()` can match them correctly.
+// ---------------------------------------------------------------------------
+const F = {
+  limit10:      "עד 10 ביקורות בחודש",       // ✓ Starter only → ✗ others (no limit)
+  profile:      "פרופיל עסקי בסיסי",
+  reply:        "תגובה ידנית לביקורות",
+  badge:        "תג אמינות בסיסי",
+  unlimited:    "ביקורות ללא הגבלה",
+  autoRequests: "בקשות ביקורת אוטומטיות",
+  widget:       "ווידג'ט ביקורות להטמעה באתר",
+  analytics:    "דאשבורד אנליטיקס בזמן אמת",
+  social:       "רשתות חברתיות בפרופיל",
+  affiliate:    "מערכת אפיליאט",
+  aiWeekly:     "סיכומי AI שבועיים",
+  support4h:    "תמיכה בעדיפות גבוהה תוך 4 שעות",
+  aiDaily:      "דוחות AI יומיים מותאמים אישית",
+  crm:          "חיבור CRM — HubSpot, Salesforce, Monday",
+  webhooks:     "Webhooks — Zapier, Make, n8n",
+  api:          "גישת API מלאה",
+  csm:          "מנהל הצלחה אישי ייעודי",
+  multiBiz:     "ניהול מספר עסקים ללא הגבלה",
+  googleAds:    "כוכבי ביקורות ב-Google Ads ⭐",
+} as const;
+
 export const REVIEWHUB_PLANS: [PricingTier, PricingTier, PricingTier] = [
+  // ── STARTER — Loss aversion: first 6 features show 4 ✓ then 2 ✗ gaps ────
   {
     id: "free",
     name: "Starter",
-    nameHe: "סטארטר",
-    description: "התחלה מושלמת לעסקים שרוצים לנהל ביקורות.",
+    nameHe: "בסיסי",
+    // Loss aversion framing: "limited" not "perfect start"
+    description: "לעסקים שמתחילים לאסוף הוכחה חברתית — אבל מוגבל.",
     priceMonthly: 0,
     priceAnnually: 0,
     isPopular: false,
-    buttonLabel: "הישארו בסטארטר",
+    buttonLabel: "התחילו בחינם",   // low-commitment CTA
     features: [
-      { name: "עד 10 ביקורות בחודש", isIncluded: true },
-      { name: "לוח בקרה בסיסי", isIncluded: true },
-      { name: "פרופיל עסקי ציבורי", isIncluded: true },
-      { name: "תגובה לביקורות", isIncluded: true },
-      { name: "תמיכה קהילתית", isIncluded: true },
-      { name: "ביקורות ללא הגבלה", isIncluded: false },
-      { name: "ווידג'ט ביקורות לאתר", isIncluded: false },
-      { name: "בקשות ביקורת אוטומטיות", isIncluded: false },
-      { name: "מערכת אפיליאט", isIncluded: false },
-      { name: "תמיכה בעדיפות גבוהה", isIncluded: false },
-      { name: "דוחות AI", isIncluded: false },
-      { name: "אינטגרציית CRM", isIncluded: false },
-      { name: "גישת API מלאה", isIncluded: false },
+      // ── Card display (first 6) ──
+      { name: F.limit10,      isIncluded: true  }, // specificity: "10", not "limited"
+      { name: F.profile,      isIncluded: true  },
+      { name: F.reply,        isIncluded: true  },
+      { name: F.badge,        isIncluded: true  },
+      { name: F.unlimited,    isIncluded: false }, // loss aversion ✗
+      { name: F.autoRequests, isIncluded: false }, // loss aversion ✗
+      // ── Comparison table only (hidden in card) ──
+      { name: F.widget,       isIncluded: false },
+      { name: F.analytics,    isIncluded: false },
+      { name: F.social,       isIncluded: false },
+      { name: F.affiliate,    isIncluded: false },
+      { name: F.aiWeekly,     isIncluded: false },
+      { name: F.support4h,    isIncluded: false },
+      { name: F.aiDaily,      isIncluded: false },
+      { name: F.crm,          isIncluded: false },
+      { name: F.webhooks,     isIncluded: false },
+      { name: F.api,          isIncluded: false },
+      { name: F.csm,          isIncluded: false },
+      { name: F.multiBiz,     isIncluded: false },
+      { name: F.googleAds,    isIncluded: false },
     ],
   },
+
+  // ── PRO — Decoy effect: obvious best value, social proof badge ───────────
   {
     id: "pro",
     name: "Business Growth",
     nameHe: "צמיחה עסקית",
-    description: "כל מה שצריך כדי לצמוח ולמשוך לקוחות חדשים.",
+    // Future pacing + social proof: reader visualises automated growth
+    description: "הכל כדי להפוך ביקורות למנוע צמיחה אמיתי. הנבחר ע״י מאות עסקים.",
     priceMonthly: 189,
     priceAnnually: 1814, // ≈ ₪151/month after 20% discount
-    isPopular: true,
-    buttonLabel: "שדרגו למקצועי",
+    isPopular: true,     // anchors "most popular" badge → decoy effect
+    buttonLabel: "התחילו לצמוח היום",  // urgency + action
     features: [
-      { name: "עד 10 ביקורות בחודש", isIncluded: true },
-      { name: "לוח בקרה בסיסי", isIncluded: true },
-      { name: "פרופיל עסקי ציבורי", isIncluded: true },
-      { name: "תגובה לביקורות", isIncluded: true },
-      { name: "תמיכה קהילתית", isIncluded: true },
-      { name: "ביקורות ללא הגבלה", isIncluded: true },
-      { name: "ווידג'ט ביקורות לאתר", isIncluded: true },
-      { name: "בקשות ביקורת אוטומטיות", isIncluded: true },
-      { name: "מערכת אפיליאט", isIncluded: true },
-      { name: "תמיכה בעדיפות גבוהה", isIncluded: true },
-      { name: "דוחות AI", isIncluded: false },
-      { name: "אינטגרציית CRM", isIncluded: false },
-      { name: "גישת API מלאה", isIncluded: false },
+      // ── Card display (first 6) — all ✓, benefit-ordered ──
+      { name: F.unlimited,    isIncluded: true  },
+      { name: F.autoRequests, isIncluded: true  },
+      { name: F.widget,       isIncluded: true  },
+      { name: F.analytics,    isIncluded: true  },
+      { name: F.affiliate,    isIncluded: true  },
+      { name: F.support4h,    isIncluded: true  },
+      // ── Also included (shown as "+ N more features") ──
+      { name: F.profile,      isIncluded: true  },
+      { name: F.reply,        isIncluded: true  },
+      { name: F.badge,        isIncluded: true  },
+      { name: F.social,       isIncluded: true  },
+      { name: F.aiWeekly,     isIncluded: true  },
+      // ── Comparison table: Pro doesn't have the 10-review cap ──
+      { name: F.limit10,      isIncluded: false }, // ✗ = no restriction — good!
+      // ── Enterprise-only (shown as ✗ in comparison table) ──
+      { name: F.aiDaily,      isIncluded: false },
+      { name: F.crm,          isIncluded: false },
+      { name: F.webhooks,     isIncluded: false },
+      { name: F.api,          isIncluded: false },
+      { name: F.csm,          isIncluded: false },
+      { name: F.multiBiz,     isIncluded: false },
+      { name: F.googleAds,    isIncluded: false },
     ],
   },
+
+  // ── PREMIUM — Anchoring: highest price seen first sets reference point ───
   {
     id: "premium",
     name: "Enterprise",
     nameHe: "ארגוני ואוטומציה",
-    description: "הפתרון המלא — AI, אוטומציות ו-CRM לארגונים.",
+    // NLP future pacing: "שליטה מלאה" triggers control-oriented identity
+    description: "השליטה המלאה — AI, אוטומציות ו-CRM לעסקים שרוצים לשלוט בכל פרט.",
     priceMonthly: 479,
     priceAnnually: 4598, // ≈ ₪383/month after 20% discount
     isPopular: false,
-    buttonLabel: "עברו לפרימיום",
+    buttonLabel: "קחו שליטה מלאה",  // identity-based CTA
     features: [
-      { name: "עד 10 ביקורות בחודש", isIncluded: true },
-      { name: "לוח בקרה בסיסי", isIncluded: true },
-      { name: "פרופיל עסקי ציבורי", isIncluded: true },
-      { name: "תגובה לביקורות", isIncluded: true },
-      { name: "תמיכה קהילתית", isIncluded: true },
-      { name: "ביקורות ללא הגבלה", isIncluded: true },
-      { name: "ווידג'ט ביקורות לאתר", isIncluded: true },
-      { name: "בקשות ביקורת אוטומטיות", isIncluded: true },
-      { name: "מערכת אפיליאט", isIncluded: true },
-      { name: "תמיכה בעדיפות גבוהה", isIncluded: true },
-      { name: "דוחות AI", isIncluded: true },
-      { name: "אינטגרציית CRM", isIncluded: true },
-      { name: "גישת API מלאה", isIncluded: true },
+      // ── Card display (first 6) — enterprise differentiators first ──
+      { name: F.aiDaily,      isIncluded: true  },
+      { name: F.crm,          isIncluded: true  },
+      { name: F.webhooks,     isIncluded: true  },
+      { name: F.multiBiz,     isIncluded: true  },
+      { name: F.googleAds,    isIncluded: true  },
+      { name: F.csm,          isIncluded: true  },
+      // ── Everything from Pro (shown as "+ N more features") ──
+      { name: F.unlimited,    isIncluded: true  },
+      { name: F.autoRequests, isIncluded: true  },
+      { name: F.widget,       isIncluded: true  },
+      { name: F.analytics,    isIncluded: true  },
+      { name: F.affiliate,    isIncluded: true  },
+      { name: F.support4h,    isIncluded: true  },
+      { name: F.profile,      isIncluded: true  },
+      { name: F.reply,        isIncluded: true  },
+      { name: F.badge,        isIncluded: true  },
+      { name: F.social,       isIncluded: true  },
+      { name: F.aiWeekly,     isIncluded: true  },
+      { name: F.api,          isIncluded: true  },
+      // ── No 10-review limit ──
+      { name: F.limit10,      isIncluded: false },
     ],
   },
 ];
