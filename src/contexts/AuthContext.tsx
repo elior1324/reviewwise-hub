@@ -438,6 +438,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error };
   };
 
+  // ── signInWithApple ────────────────────────────────────────────────────────
+
+  const signInWithApple = async () => {
+    devLog("[Auth] signInWithApple called");
+    const { lovable } = await import("@/integrations/lovable/index");
+    const result = await lovable.auth.signInWithOAuth("apple", {
+      redirect_uri: window.location.origin,
+    });
+    const error = result?.error ?? null;
+    if (error) devErr("[Auth] signInWithApple error:", error);
+    return { error };
+  };
+
   // ── signOut ────────────────────────────────────────────────────────────────
 
   const signOut = doSignOut;
