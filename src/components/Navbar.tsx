@@ -80,7 +80,7 @@ const Navbar = () => {
                   />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-52" dir="rtl">
+              <DropdownMenuContent align="start" className="w-52" style={{ direction: "rtl" }}>
                 {PRODUCT_LINKS.map(({ to, icon: Icon, label }) => (
                   <DropdownMenuItem key={to} asChild>
                     <Link
