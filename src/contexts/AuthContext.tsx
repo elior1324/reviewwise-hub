@@ -106,6 +106,7 @@ interface AuthContextType {
   signUp:           (email: string, password: string, displayName?: string, turnstileToken?: string) => Promise<{ data: any; error: any }>;
   signIn:           (email: string, password: string, turnstileToken?: string) => Promise<SignInResult>;
   signInWithGoogle: (redirectTo?: string)             => Promise<{ error: any }>;
+  signInWithApple:  ()                               => Promise<{ error: any }>;
   signOut:          ()                                => Promise<void>;
 
   // ── MFA ───────────────────────────────────────────────────────────────────
