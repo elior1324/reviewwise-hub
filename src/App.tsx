@@ -34,6 +34,9 @@ import PartnerDashboard from "./pages/PartnerDashboard";
 import EvidenceUploadPanel from "./components/EvidenceUploadPanel";
 import CookiePolicy from "./pages/legal/CookiePolicy";
 import DPA from "./pages/legal/DPA";
+import EarningsDashboard from "./pages/EarningsDashboard";
+import LeaderboardPage from "./pages/LeaderboardPage";
+import CourseFinder from "./pages/CourseFinder";
 
 // Business portal pages
 import BusinessLanding from "./pages/business/BusinessLanding";
@@ -94,6 +97,11 @@ const App = () => (
             <Route path="/evidence/:token" element={<EvidenceUploadPanel />} />
             <Route path="/cookies" element={<CookiePolicy />} />
             <Route path="/legal/dpa" element={<DPA />} />
+
+            {/* Earnings, Leaderboard & Course Finder */}
+            <Route path="/earnings" element={<EarningsDashboard />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/course-finder" element={<CourseFinder />} />
 
             {/* Business portal routes */}
             <Route path="/business" element={<BusinessLanding />} />
