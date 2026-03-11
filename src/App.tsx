@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import GmailProtectedRoute from "./components/GmailProtectedRoute";
+import AuthProtectedRoute from "./components/AuthProtectedRoute";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import Index from "./pages/Index";
 import BusinessProfile from "./pages/BusinessProfile";
@@ -99,10 +100,12 @@ const App = () => (
             {/* Partner / widget pages */}
             <Route path="/partners/trust-badge" element={<TrustBadgePage />} />
 
-            {/* Business solution pages */}
-            <Route path="/business/solutions/reviews" element={<ReviewsSolution />} />
-            <Route path="/business/solutions/widgets" element={<WidgetsSolution />} />
-            <Route path="/business/solutions/analytics" element={<AnalyticsSolution />} />
+            {/* Business solution pages — any authenticated user required */}
+            <Route element={<AuthProtectedRoute />}>
+              <Route path="/business/solutions/reviews"   element={<ReviewsSolution />} />
+              <Route path="/business/solutions/widgets"   element={<WidgetsSolution />} />
+              <Route path="/business/solutions/analytics" element={<AnalyticsSolution />} />
+            </Route>
 
             {/* Business resource pages */}
             <Route path="/business/resources/docs" element={<DocsPage />} />

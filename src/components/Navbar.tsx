@@ -19,13 +19,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import DeleteAccountButton from "./DeleteAccountButton";
 
-// ── Product menu items ────────────────────────────────────────────────────────
+// ── "לעסקים" dropdown items ───────────────────────────────────────────────────
 // Pricing is intentionally excluded here; it is appended conditionally below
 // based on Gmail authentication status.
 const PRODUCT_LINKS = [
-  { to: "/business/solutions/reviews", icon: ShieldCheck,     label: "ביקורות מאומתות" },
-  { to: "/business/solutions/widgets", icon: LayoutDashboard, label: "ווידג'טים"          },
-  { to: "/business/solutions/analytics", icon: BarChart3,     label: "אנליטיקס"           },
+  { to: "/business/solutions/reviews",   icon: ShieldCheck,     label: "ביקורות מאומתות" },
+  { to: "/business/solutions/widgets",   icon: LayoutDashboard, label: "ווידג'טים"          },
+  { to: "/business/solutions/analytics", icon: BarChart3,       label: "אנליטיקס"           },
 ] as const;
 
 const Navbar = () => {
@@ -72,7 +72,7 @@ const Navbar = () => {
             קטגוריות
           </Link>
 
-          {/* ── "מוצר" dropdown ─────────────────────────────────────────────── */}
+          {/* ── "לעסקים" dropdown ───────────────────────────────────────────── */}
           <DropdownMenu open={productOpen} onOpenChange={setProductOpen}>
             <DropdownMenuTrigger asChild>
               <button
@@ -80,7 +80,7 @@ const Navbar = () => {
                 aria-haspopup="menu"
                 aria-expanded={productOpen}
               >
-                מוצר
+                לעסקים
                 <ChevronDown
                   size={14}
                   className={`transition-transform duration-200 ${productOpen ? "rotate-180" : ""}`}
@@ -150,16 +150,6 @@ const Navbar = () => {
         <div className="flex items-center gap-2">
           <AccessibilityMenu />
           {user && <NotificationBell />}
-
-          <Link to="/business" className="hidden md:block">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-muted-foreground hover:text-foreground font-medium text-sm"
-            >
-              לעסקים
-            </Button>
-          </Link>
 
           {user ? (
             <DropdownMenu>
@@ -237,10 +227,10 @@ const Navbar = () => {
             קטגוריות
           </Link>
 
-          {/* Product sub-links (always visible on mobile) */}
+          {/* Business sub-links (always visible on mobile) */}
           <div className="border-t border-border/30 pt-2 pb-1">
             <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider px-0 mb-1">
-              מוצר
+              לעסקים
             </p>
             {PRODUCT_LINKS.map(({ to, icon: Icon, label }) => (
               <Link
@@ -286,13 +276,6 @@ const Navbar = () => {
               onClick={() => setMobileOpen(false)}
             >
               אודות
-            </Link>
-            <Link
-              to="/business"
-              className="block text-sm py-3 min-h-[44px] flex items-center text-primary"
-              onClick={() => setMobileOpen(false)}
-            >
-              לעסקים
             </Link>
           </div>
 
