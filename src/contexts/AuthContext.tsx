@@ -519,7 +519,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       subscriptionTier, subscriptionEnd,
       isSubscribed: subscriptionTier !== "free",
       checkSubscription,
-      signUp, signIn, signInWithGoogle, signOut,
+      signUp, signIn, signInWithGoogle, signInWithApple, signOut,
       mfaEnroll, mfaVerifyEnrollment, mfaUnenroll,
       mfaChallenge, mfaVerify, mfaListFactors,
     }}>
