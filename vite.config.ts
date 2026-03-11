@@ -46,7 +46,7 @@ const CSP = [
   // Allow framing from self + Lovable preview panel (*.lovable.app).
   // X-Frame-Options is omitted in server.headers because it cannot whitelist
   // specific external origins — CSP frame-ancestors handles this instead.
-  "frame-ancestors 'self' https://*.lovable.app https://lovable.dev",
+  "frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev https://lovable.dev",
   // Upgrade insecure requests in production
   "upgrade-insecure-requests",
 ].join("; ");
