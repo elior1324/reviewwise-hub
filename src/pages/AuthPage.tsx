@@ -167,6 +167,16 @@ const AuthPage = () => {
     }
   };
 
+  // ── Apple OAuth ────────────────────────────────────────────────────────────
+  const handleAppleAuth = async () => {
+    setAppleLoading(true);
+    const { error } = await signInWithApple();
+    if (error) {
+      toast.error(error.message || "שגיאה בהתחברות עם Apple");
+      setAppleLoading(false);
+    }
+  };
+
   // ── MFA callbacks ──────────────────────────────────────────────────────────
   const handleMfaSuccess = () => {
     toast.success("התחברתם בהצלחה!");
