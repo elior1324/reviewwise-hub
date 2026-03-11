@@ -106,6 +106,7 @@ interface AuthContextType {
   signUp:           (email: string, password: string, displayName?: string, turnstileToken?: string) => Promise<{ data: any; error: any }>;
   signIn:           (email: string, password: string, turnstileToken?: string) => Promise<SignInResult>;
   signInWithGoogle: (redirectTo?: string)             => Promise<{ error: any }>;
+  signInWithApple:  ()                               => Promise<{ error: any }>;
   signOut:          ()                                => Promise<void>;
 
   // ── MFA ───────────────────────────────────────────────────────────────────
@@ -437,6 +438,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error };
   };
 
+  // ── signInWithApple ────────────────────────────────────────────────────────
+
+  const signInWithApple = async () => {
+    devLog("[Auth] signInWithApple called");
+    const { lovable } = await import("@/integrations/lovable/index");
+    const result = await lovable.auth.signInWithOAuth("apple", {
+      redirect_uri: window.location.origin,
+    });
+    const error = result?.error ?? null;
+    if (error) devErr("[Auth] signInWithApple error:", error);
+    return { error };
+  };
+
   // ── signOut ────────────────────────────────────────────────────────────────
 
   const signOut = doSignOut;
@@ -505,7 +519,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       subscriptionTier, subscriptionEnd,
       isSubscribed: subscriptionTier !== "free",
       checkSubscription,
-      signUp, signIn, signInWithGoogle, signOut,
+      signUp, signIn, signInWithGoogle, signInWithApple, signOut,
       mfaEnroll, mfaVerifyEnrollment, mfaUnenroll,
       mfaChallenge, mfaVerify, mfaListFactors,
     }}>
