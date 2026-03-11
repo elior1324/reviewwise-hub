@@ -12,15 +12,29 @@
  * Run: npm test -- ReviewCard
  */
 import React from "react";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { toast } from "sonner";
 import ReviewCard from "@/components/ReviewCard";
 import { mockAuthContext, MOCK_USER } from "@/test/mocks/auth-context";
 import { mockSupabase, chain } from "@/test/mocks/supabase";
 
+// ── Hoist toast so vi.mock factory can reference it without a top-level import.
+// vi.hoisted() runs before imports, making the value safe to use in any factory.
+const { toast } = vi.hoisted(() => ({
+  toast: Object.assign(vi.fn(), {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    message: vi.fn(),
+    loading: vi.fn(),
+    dismiss: vi.fn(),
+  }),
+}));
+
 // ── Module mocks ──────────────────────────────────────────────────────────────
+vi.mock("sonner", () => ({ toast, Toaster: () => null }));
 vi.mock("@/contexts/AuthContext", () => ({
   useAuth: vi.fn(),
 }));

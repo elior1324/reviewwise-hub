@@ -76,7 +76,7 @@ describe("Password strength bar", () => {
   it("shows 'חלשה' (level 1) for a short/simple password", async () => {
     renderAuth();
     await switchToSignup();
-    const pwInput = screen.getByLabelText(/סיסמה/i);
+    const pwInput = screen.getByLabelText(/^סיסמה\s*$/i);
     await userEvent.type(pwInput, "abc");
     expect(screen.getByText(/חוזק הסיסמה: חלשה/)).toBeInTheDocument();
   });
@@ -84,7 +84,7 @@ describe("Password strength bar", () => {
   it("shows 'בינונית' (level 2) for an 8-char password with letters and digits", async () => {
     renderAuth();
     await switchToSignup();
-    const pwInput = screen.getByLabelText(/סיסמה/i);
+    const pwInput = screen.getByLabelText(/^סיסמה\s*$/i);
     await userEvent.type(pwInput, "Secure77");
     expect(screen.getByText(/חוזק הסיסמה: בינונית/)).toBeInTheDocument();
   });
@@ -92,7 +92,7 @@ describe("Password strength bar", () => {
   it("shows 'חזקה' (level 3) for a 12+ char password", async () => {
     renderAuth();
     await switchToSignup();
-    const pwInput = screen.getByLabelText(/סיסמה/i);
+    const pwInput = screen.getByLabelText(/^סיסמה\s*$/i);
     await userEvent.type(pwInput, "Correct77Horse");
     expect(screen.getByText(/חוזק הסיסמה: חזקה/)).toBeInTheDocument();
   });
@@ -100,7 +100,7 @@ describe("Password strength bar", () => {
   it("shows 'חזקה' (level 3) for an 8+ char password with a special character", async () => {
     renderAuth();
     await switchToSignup();
-    const pwInput = screen.getByLabelText(/סיסמה/i);
+    const pwInput = screen.getByLabelText(/^סיסמה\s*$/i);
     await userEvent.type(pwInput, "Secure1!");
     expect(screen.getByText(/חוזק הסיסמה: חזקה/)).toBeInTheDocument();
   });
@@ -125,7 +125,7 @@ describe("Password show/hide toggle (aria-label)", () => {
 
   it("toggles the password input type between 'password' and 'text'", async () => {
     renderAuth();
-    const pwInput = screen.getByLabelText(/סיסמה/i) as HTMLInputElement;
+    const pwInput = screen.getByLabelText(/^סיסמה\s*$/i) as HTMLInputElement;
     expect(pwInput.type).toBe("password");
     await userEvent.click(screen.getByRole("button", { name: "הצג סיסמה" }));
     expect(pwInput.type).toBe("text");
@@ -158,7 +158,7 @@ describe("Loading state on submit", () => {
     await fillAndActivateTurnstile();
 
     const emailInput = screen.getByLabelText(/אימייל/i);
-    const pwInput    = screen.getByLabelText(/סיסמה/i);
+    const pwInput    = screen.getByLabelText(/^סיסמה\s*$/i);
     await userEvent.type(emailInput, "test@example.com");
     await userEvent.type(pwInput, "Secure1!");
 
@@ -185,7 +185,7 @@ describe("Loading state on submit", () => {
     await fillAndActivateTurnstile();
 
     await userEvent.type(screen.getByLabelText(/אימייל/i), "test@example.com");
-    await userEvent.type(screen.getByLabelText(/סיסמה/i), "wrongpassword1");
+    await userEvent.type(screen.getByLabelText(/^סיסמה\s*$/i), "wrongpassword1");
     await userEvent.click(screen.getByRole("button", { name: /התחברו$/ }));
 
     await waitFor(() => {
@@ -290,7 +290,7 @@ describe("Error handling", () => {
     renderAuth();
     await fillAndActivateTurnstile();
     await userEvent.type(screen.getByLabelText(/אימייל/i), "bad@example.com");
-    await userEvent.type(screen.getByLabelText(/סיסמה/i), "wrongpass1");
+    await userEvent.type(screen.getByLabelText(/^סיסמה\s*$/i), "wrongpass1");
     await userEvent.click(screen.getByRole("button", { name: /התחברו$/ }));
 
     await waitFor(() => {
