@@ -43,8 +43,10 @@ const CSP = [
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://challenges.cloudflare.com",
   // Objects: block Flash / Java plugins
   "object-src 'none'",
-  // No iframes of this site by others (clickjacking protection)
-  "frame-ancestors 'self'",
+  // Allow framing from self + Lovable preview panel (*.lovable.app).
+  // X-Frame-Options is omitted in server.headers because it cannot whitelist
+  // specific external origins — CSP frame-ancestors handles this instead.
+  "frame-ancestors 'self' https://*.lovable.app https://lovable.dev",
   // Upgrade insecure requests in production
   "upgrade-insecure-requests",
 ].join("; ");
@@ -61,7 +63,8 @@ export default defineConfig(({ mode }) => ({
       // ── Security Headers (dev server) ────────────────────────────────────
       "Content-Security-Policy": CSP,
       "X-Content-Type-Options": "nosniff",
-      "X-Frame-Options": "SAMEORIGIN",
+      // X-Frame-Options intentionally omitted — CSP frame-ancestors above handles
+      // clickjacking protection and supports the *.lovable.app whitelist.
       "X-XSS-Protection": "1; mode=block",
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Permissions-Policy": "camera=(), microphone=(), geolocation=()",

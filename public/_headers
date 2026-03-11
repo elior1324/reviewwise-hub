@@ -30,16 +30,18 @@
   # ── Content Security Policy ─────────────────────────────────────────────
   # Blocks XSS by whitelisting every resource origin.
   # Must stay in sync with the CSP in vite.config.ts.
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://challenges.cloudflare.com; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://challenges.cloudflare.com; object-src 'none'; frame-ancestors 'self' https://*.lovable.app https://lovable.dev; upgrade-insecure-requests
 
   # ── MIME-type sniffing protection ───────────────────────────────────────
   # Prevents browsers from guessing file types (e.g. treating a PNG as JS).
   X-Content-Type-Options: nosniff
 
   # ── Clickjacking protection ─────────────────────────────────────────────
-  # Only this origin may frame the site (redundant with CSP frame-ancestors,
-  # kept for legacy browser support).
-  X-Frame-Options: SAMEORIGIN
+  # X-Frame-Options removed — CSP frame-ancestors above supersedes it in all
+  # modern browsers. X-Frame-Options cannot whitelist specific external origins
+  # (only DENY / SAMEORIGIN), so it would block the Lovable preview iframe.
+  # The CSP frame-ancestors directive above provides equivalent protection
+  # while explicitly allowing *.lovable.app for the Lovable preview panel.
 
   # ── Legacy XSS filter ───────────────────────────────────────────────────
   # Triggers the browser's built-in XSS filter (IE / old Chrome). Modern
