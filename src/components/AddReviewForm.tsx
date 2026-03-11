@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeText } from "@/lib/sanitize";
 import {
   Tooltip,
   TooltipContent,
@@ -40,6 +41,7 @@ interface AddReviewFormProps {
 }
 
 const SUBJECT_MAX_LENGTH = 60;
+const REVIEW_MAX_LENGTH  = 2000;
 const ACCEPTED_FILE_TYPES = ".pdf,.jpg,.jpeg,.png,.webp,.csv";
 const MAX_FILE_SIZE_MB = 10;
 
@@ -116,6 +118,10 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
       toast.error("אנא אמתו שאתם לא רובוט");
       return;
     }
+
+    // Sanitize user-supplied text before it reaches the database
+    const cleanSubject    = sanitizeText(subject, SUBJECT_MAX_LENGTH);
+    const cleanReviewText = sanitizeText(reviewText, REVIEW_MAX_LENGTH);
 
     setSubmitting(true);
 
@@ -319,11 +325,18 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                     <Textarea
                       placeholder="שתפו את החוויה שלכם בהרחבה..."
                       value={reviewText}
-                      onChange={e => setReviewText(e.target.value)}
+                      onChange={e => {
+                        if (e.target.value.length <= REVIEW_MAX_LENGTH) {
+                          setReviewText(e.target.value);
+                        }
+                      }}
+                      maxLength={REVIEW_MAX_LENGTH}
                       rows={4}
                       className="glass border-border/50 resize-none"
                     />
-                    <p className="text-xs text-muted-foreground mt-1 text-left">{reviewText.length} תווים</p>
+                    <p className="text-xs text-muted-foreground mt-1 text-left">
+                      {reviewText.length}/{REVIEW_MAX_LENGTH} תווים
+                    </p>
                   </div>
 
                   {/* Training duration */}

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, Globe, Mail, Phone, Youtube, Instagram, Linkedin, Twitter, Facebook, MessageCircle } from "lucide-react";
 import type { Business } from "@/data/mockData";
 import { useRef } from "react";
+import { sanitizeUrl } from "@/lib/sanitize";
 
 // TikTok icon (not in lucide)
 const TikTokIcon = ({ size = 14 }: { size?: number }) => (
@@ -143,8 +144,8 @@ const BusinessHero = ({ business }: BusinessHeroProps) => {
 
             {/* Contact info */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
-              {business.website && (
-                <a href={business.website.startsWith("http") ? business.website : `https://${business.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-primary transition-colors">
+              {business.website && sanitizeUrl(business.website) && (
+                <a href={sanitizeUrl(business.website)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-primary transition-colors">
                   <Globe size={14} /> {business.website.replace(/^https?:\/\//, "")}
                 </a>
               )}
@@ -156,12 +157,13 @@ const BusinessHero = ({ business }: BusinessHeroProps) => {
             {hasSocials && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="flex gap-2 flex-wrap">
                 {SOCIAL_ICONS.map(({ key, Icon, label }) => {
-                  const url = socialLinks[key];
-                  if (!url) return null;
+                  const raw = socialLinks[key];
+                  const safeUrl = sanitizeUrl(raw);
+                  if (!safeUrl) return null;
                   return (
                     <a
                       key={key}
-                      href={url}
+                      href={safeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       title={label}

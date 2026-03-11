@@ -12,6 +12,11 @@ import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import ReceiptUploader from "@/components/ReceiptUploader";
+import TurnstileWidget from "@/components/TurnstileWidget";
+import { sanitizeText } from "@/lib/sanitize";
+
+const REVIEW_MIN_LENGTH = 10;
+const REVIEW_MAX_LENGTH = 2000;
 
 const WriteReview = () => {
   const { token } = useParams();
@@ -22,6 +27,7 @@ const WriteReview = () => {
   const [anonymous, setAnonymous] = useState(false);
   const [receiptVerified, setReceiptVerified] = useState<boolean | null>(null);
   const [showUploader, setShowUploader] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +35,19 @@ const WriteReview = () => {
       toast({ title: "אנא בחרו דירוג", variant: "destructive" });
       return;
     }
+    if (reviewText.trim().length < REVIEW_MIN_LENGTH) {
+      toast({ title: "הביקורת קצרה מדי", description: `כתבו לפחות ${REVIEW_MIN_LENGTH} תווים`, variant: "destructive" });
+      return;
+    }
+    if (!turnstileToken) {
+      toast({ title: "אנא אמתו שאתם לא רובוט", variant: "destructive" });
+      return;
+    }
+
+    // Sanitize before submission
+    const _cleanReviewText = sanitizeText(reviewText, REVIEW_MAX_LENGTH);
+    const _cleanName       = sanitizeText(name, 100);
+
     if (receiptVerified) {
       toast({
         title: "💥 בום! צברתם 200 נקודות (2x מאומת)!",
@@ -110,7 +129,18 @@ const WriteReview = () => {
 
                 <div>
                   <Label htmlFor="review" className="mb-2 block">הביקורת שלכם</Label>
-                  <Textarea id="review" placeholder="שתפו את החוויה שלכם עם הקורס..." value={reviewText} onChange={e => setReviewText(e.target.value)} rows={5} className="glass border-border/50" />
+                  <Textarea
+                    id="review"
+                    placeholder="שתפו את החוויה שלכם עם הקורס..."
+                    value={reviewText}
+                    onChange={e => { if (e.target.value.length <= REVIEW_MAX_LENGTH) setReviewText(e.target.value); }}
+                    maxLength={REVIEW_MAX_LENGTH}
+                    rows={5}
+                    className="glass border-border/50"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1 text-left">
+                    {reviewText.length}/{REVIEW_MAX_LENGTH} תווים
+                  </p>
                 </div>
 
                 {/* 2X Points Boost Section */}
@@ -177,7 +207,13 @@ const WriteReview = () => {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" size="lg">
+                <TurnstileWidget
+                  onSuccess={(token) => setTurnstileToken(token)}
+                  onError={() => setTurnstileToken(null)}
+                  className="flex justify-center mt-2"
+                />
+
+                <Button type="submit" disabled={!turnstileToken} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" size="lg">
                   שליחת ביקורת
                 </Button>
               </form>

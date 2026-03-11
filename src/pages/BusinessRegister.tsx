@@ -17,8 +17,14 @@ import { useNavigate } from "react-router-dom";
 import SocialLinksEditor, { type SocialLinksData } from "@/components/SocialLinksEditor";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
+import { sanitizeText, sanitizeUrl } from "@/lib/sanitize";
 
 const OTHER_VALUE = "__other__";
+
+// ── Field length limits ────────────────────────────────────────────────────────
+const BUSINESS_NAME_MAX  = 100;
+const DESCRIPTION_MAX    = 2000;
+const CUSTOM_CATEGORY_MAX = 100;
 
 const BusinessRegister = () => {
   const { toast } = useToast();
@@ -65,10 +71,22 @@ const BusinessRegister = () => {
       return;
     }
 
-    const isCustomCategory = form.category === OTHER_VALUE && form.customCategory.trim();
+    // ── URL validation ─────────────────────────────────────────────────────────
+    const websiteInput = canEditSocials ? (socialLinks.website || form.website) : form.website;
+    if (websiteInput && !sanitizeUrl(websiteInput)) {
+      toast({ title: "כתובת האתר אינה תקינה", description: "יש להזין כתובת http:// או https:// בלבד", variant: "destructive" });
+      return;
+    }
+
+    // ── Sanitize freeform text fields ──────────────────────────────────────────
+    const cleanBusinessName  = sanitizeText(form.businessName,  BUSINESS_NAME_MAX);
+    const cleanDescription   = sanitizeText(form.description,   DESCRIPTION_MAX);
+    const cleanCustomCategory = sanitizeText(form.customCategory, CUSTOM_CATEGORY_MAX);
+
+    const isCustomCategory = form.category === OTHER_VALUE && cleanCustomCategory.trim();
     const finalCategory = isCustomCategory ? "אחר" : form.category;
 
-    const slug = form.businessName
+    const slug = cleanBusinessName
       .toLowerCase()
       .replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "")
       .replace(/\s+/g, "-")
@@ -83,14 +101,14 @@ const BusinessRegister = () => {
       const { data: biz, error: bizError } = await supabase
         .from("businesses")
         .insert({
-          name: form.businessName,
+          name: cleanBusinessName,
           slug,
           category: finalCategory,
           owner_id: user.id,
           email: form.email,
           phone: form.phone || null,
-          website: canEditSocials ? (socialLinks.website || form.website || null) : (form.website || null),
-          description: form.description || null,
+          website: sanitizeUrl(canEditSocials ? (socialLinks.website || form.website) : form.website) || null,
+          description: cleanDescription || null,
           social_links: socialLinksJson,
         } as any)
         .select("id")
@@ -102,7 +120,7 @@ const BusinessRegister = () => {
       if (isCustomCategory && biz) {
         const { data: evalData, error: evalError } = await supabase.functions.invoke("evaluate-category", {
           body: {
-            suggested_name: form.customCategory.trim(),
+            suggested_name: cleanCustomCategory.trim(),
             type: form.businessType === "course-provider" ? "course" : "freelancer",
             business_id: biz.id,
           },
@@ -156,7 +174,13 @@ const BusinessRegister = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <Label className="mb-2 block">שם העסק *</Label>
-                  <Input placeholder="לדוגמה: אקדמיית שיווק דיגיטלי" value={form.businessName} onChange={e => update("businessName", e.target.value)} className="glass border-border/50" />
+                  <Input
+                    placeholder="לדוגמה: אקדמיית שיווק דיגיטלי"
+                    value={form.businessName}
+                    onChange={e => { if (e.target.value.length <= BUSINESS_NAME_MAX) update("businessName", e.target.value); }}
+                    maxLength={BUSINESS_NAME_MAX}
+                    className="glass border-border/50"
+                  />
                 </div>
 
                 <div>
@@ -198,7 +222,8 @@ const BusinessRegister = () => {
                     <Input
                       placeholder="לדוגמה: מסחר בשוק ההון, אימון אישי, ניהול מוצר..."
                       value={form.customCategory}
-                      onChange={e => update("customCategory", e.target.value)}
+                      onChange={e => { if (e.target.value.length <= CUSTOM_CATEGORY_MAX) update("customCategory", e.target.value); }}
+                      maxLength={CUSTOM_CATEGORY_MAX}
                       className="glass border-border/50"
                     />
                     <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
@@ -227,7 +252,17 @@ const BusinessRegister = () => {
 
                 <div>
                   <Label className="mb-2 block">תיאור העסק</Label>
-                  <Textarea placeholder="ספרו על העסק, הקורסים והשירותים שלכם..." value={form.description} onChange={e => update("description", e.target.value)} rows={4} className="glass border-border/50" />
+                  <Textarea
+                    placeholder="ספרו על העסק, הקורסים והשירותים שלכם..."
+                    value={form.description}
+                    onChange={e => { if (e.target.value.length <= DESCRIPTION_MAX) update("description", e.target.value); }}
+                    maxLength={DESCRIPTION_MAX}
+                    rows={4}
+                    className="glass border-border/50"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1 text-left">
+                    {form.description.length}/{DESCRIPTION_MAX}
+                  </p>
                 </div>
 
                 {/* Social Links Section */}
