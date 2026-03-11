@@ -40,6 +40,7 @@ export function mockAuthContext(overrides: AuthContextOverrides = {}) {
     signIn: overrides.signIn ?? vi.fn().mockResolvedValue({ data: {}, error: null }),
     signUp: overrides.signUp ?? vi.fn().mockResolvedValue({ data: { user: MOCK_USER }, error: null }),
     signInWithGoogle: overrides.signInWithGoogle ?? vi.fn().mockResolvedValue({ error: null }),
+    signInWithApple: vi.fn().mockResolvedValue({ error: null }),
     signOut: overrides.signOut ?? vi.fn().mockResolvedValue(undefined),
     // MFA stubs
     mfaEnroll: vi.fn().mockResolvedValue({ qrCode: "", secret: "", factorId: "", error: null }),
