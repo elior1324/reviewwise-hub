@@ -76,17 +76,28 @@ export default defineConfig(({ mode }) => ({
 }));
 
 /**
- * ── PRODUCTION: create public/_headers (Netlify / Cloudflare Pages) ──────────
+ * ── PRODUCTION: public/_headers and public/_redirects ────────────────────────
  *
- * Copy the block below into a file at:
- *   reviewwise-hub/public/_headers
+ * Both files now exist at:
+ *   reviewwise-hub/public/_headers   ← all security headers + HSTS
+ *   reviewwise-hub/public/_redirects ← SPA routing fallback
  *
- * /*
- *   Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://challenges.cloudflare.com; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests
- *   X-Content-Type-Options: nosniff
- *   X-Frame-Options: SAMEORIGIN
- *   X-XSS-Protection: 1; mode=block
- *   Referrer-Policy: strict-origin-when-cross-origin
- *   Permissions-Policy: camera=(), microphone=(), geolocation=()
- *   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+ * Netlify/Lovable picks these up automatically at deploy time.
+ * No manual copy needed.
+ *
+ * ── One remaining manual step ────────────────────────────────────────────────
+ * Enable "Force HTTPS" in your Lovable project settings:
+ *   Lovable Dashboard → Project → Settings → Domain → Force HTTPS (toggle ON)
+ *
+ * This redirects all http:// traffic to https:// at the CDN edge (301).
+ * The HSTS header in _headers then instructs browsers to skip HTTP entirely.
+ *
+ * ── TLS version enforcement ───────────────────────────────────────────────────
+ * TLS 1.0 and 1.1 are disabled automatically by Netlify CDN (no config needed).
+ * TLS 1.2 and TLS 1.3 are the only accepted protocols.
+ * Verify at: https://www.ssllabs.com/ssltest/analyze.html?d=your-domain.com
+ *
+ * ── SSL certificate ───────────────────────────────────────────────────────────
+ * Provisioned and auto-renewed every 60 days by Let's Encrypt via Lovable.
+ * No action required.
  */

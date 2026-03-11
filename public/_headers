@@ -1,0 +1,65 @@
+##############################################################################
+#  ReviewHub — Production HTTP Security Headers
+#  Platform: Lovable (Netlify CDN)
+#
+#  This file is processed by Netlify at build time and attached to every
+#  HTTP response served from the CDN edge.
+#
+#  ── How to verify ────────────────────────────────────────────────────────
+#  After deploy, run: https://securityheaders.com/?q=https://your-domain.com
+#  Target rating: A+
+#
+#  ── TLS / HTTPS ──────────────────────────────────────────────────────────
+#  TLS 1.0 / 1.1 are disabled automatically by Netlify CDN.
+#  TLS 1.2 and TLS 1.3 are the only accepted protocols.
+#  SSL certificate is provisioned and auto-renewed by Let's Encrypt via Lovable.
+#  To enforce HTTP → HTTPS redirect: enable "Force HTTPS" in your Lovable
+#  project settings (Project → Domain → Force HTTPS toggle).
+##############################################################################
+
+/*
+  # ── HSTS (HTTP Strict Transport Security) ──────────────────────────────
+  # Tells browsers: always use HTTPS for this domain for 2 years.
+  # includeSubDomains: applies to all subdomains (www, api, etc.)
+  # preload: eligible for browser preload lists (submit at hstspreload.org)
+  #
+  # ⚠️  Only add "preload" once the site is 100% on HTTPS — it is very hard
+  #     to undo (browsers cache it for 2 years from the preload list).
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+
+  # ── Content Security Policy ─────────────────────────────────────────────
+  # Blocks XSS by whitelisting every resource origin.
+  # Must stay in sync with the CSP in vite.config.ts.
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://supabase.co; font-src 'self'; frame-src https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://challenges.cloudflare.com; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests
+
+  # ── MIME-type sniffing protection ───────────────────────────────────────
+  # Prevents browsers from guessing file types (e.g. treating a PNG as JS).
+  X-Content-Type-Options: nosniff
+
+  # ── Clickjacking protection ─────────────────────────────────────────────
+  # Only this origin may frame the site (redundant with CSP frame-ancestors,
+  # kept for legacy browser support).
+  X-Frame-Options: SAMEORIGIN
+
+  # ── Legacy XSS filter ───────────────────────────────────────────────────
+  # Triggers the browser's built-in XSS filter (IE / old Chrome). Modern
+  # browsers ignore this — CSP is the real protection.
+  X-XSS-Protection: 1; mode=block
+
+  # ── Referrer policy ─────────────────────────────────────────────────────
+  # Full URL is sent as Referer only to same-origin requests.
+  # Cross-origin requests receive origin only (no path/query string).
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # ── Permissions policy ──────────────────────────────────────────────────
+  # Explicitly denies access to sensitive browser APIs.
+  # Remove a restriction only if a feature is deliberately used.
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=()
+
+  # ── Cross-Origin policies ───────────────────────────────────────────────
+  # COEP + COOP harden against Spectre-style side-channel attacks.
+  # Note: COEP "require-corp" can break third-party iframes (Stripe, Turnstile).
+  # Use "unsafe-none" if Stripe/Cloudflare iframes stop loading.
+  Cross-Origin-Embedder-Policy: unsafe-none
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-site

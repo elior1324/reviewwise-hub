@@ -1,0 +1,18 @@
+##############################################################################
+#  ReviewHub — Netlify Redirect Rules
+#  Platform: Lovable (Netlify CDN)
+#
+#  Rules are evaluated top-to-bottom; first match wins.
+#
+#  ── HTTP → HTTPS ─────────────────────────────────────────────────────────
+#  Netlify handles HTTP→HTTPS redirection at the CDN level when "Force HTTPS"
+#  is enabled in Lovable project settings. No rule needed here for that.
+#
+#  ── SPA Routing fallback ─────────────────────────────────────────────────
+#  React Router handles routing client-side. Without this rule, any direct
+#  URL access (e.g. /about, /biz/some-slug) returns a 404 from the CDN.
+#  The 200 status serves index.html while keeping the original URL intact.
+##############################################################################
+
+# SPA catch-all — must be the LAST rule
+/*    /index.html    200
