@@ -5,7 +5,7 @@ import {
   ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { isGmailAddress } from "@/components/GmailProtectedRoute";
 import NotificationBell from "./NotificationBell";
@@ -31,6 +31,13 @@ const PRODUCT_LINKS = [
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productOpen, setProductOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -43,7 +50,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="glass sticky top-0 z-50 border-b border-border/50">
+    <nav className={`glass fixed top-0 z-50 border-b border-border/50 w-full transition-shadow duration-300 ${scrolled ? "shadow-lg" : "shadow-none"}`}>
       <div className="container flex items-center justify-between h-16">
 
         {/* ── Left side: Logo + לעסקים dropdown ─────────────────────────────── */}

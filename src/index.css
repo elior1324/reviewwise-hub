@@ -152,6 +152,7 @@
   }
   body {
     overflow-x: hidden;
+    padding-top: 4rem; /* offset for fixed navbar (h-16 = 64px = 4rem) */
   }
   /* Prevent mobile keyboard from hiding focused inputs */
   input:focus,
