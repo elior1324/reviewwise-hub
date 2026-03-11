@@ -34,7 +34,7 @@ export const translateAuthError = (msg: string): string => {
   if (m.includes("invalid login credentials"))
     return "פרטי התחברות שגויים — בדקו אימייל וסיסמה.";
   if (m.includes("email not confirmed"))
-    return "האימייל טרם אומת. בדקו את תיבת הדואר.";
+    return "האימייל טרם עבר אימות. בדקו את תיבת הדואר.";
   if (m.includes("user already registered"))
     return "כתובת האימייל כבר רשומה. נסו להתחבר.";
   if (m.includes("email address is invalid"))
