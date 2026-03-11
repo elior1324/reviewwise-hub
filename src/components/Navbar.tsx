@@ -46,17 +46,70 @@ const Navbar = () => {
     <nav className="glass sticky top-0 z-50 border-b border-border/50">
       <div className="container flex items-center justify-between h-16">
 
-        {/* ── Logo ─────────────────────────────────────────────────────────── */}
-        <Link to="/" className="flex items-center gap-2.5">
-          <img
-            src={logoIcon}
-            alt="ReviewHub Logo"
-            className="w-10 h-10 rounded-xl shadow-lg object-cover"
-          />
-          <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
-        </Link>
+        {/* ── Left side: Logo + לעסקים dropdown ─────────────────────────────── */}
+        <div className="flex items-center gap-4">
+          <Link to="/" className="flex items-center gap-2.5">
+            <img
+              src={logoIcon}
+              alt="ReviewHub Logo"
+              className="w-10 h-10 rounded-xl shadow-lg object-cover"
+            />
+            <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
+          </Link>
 
-        {/* ── Desktop nav ───────────────────────────────────────────────────── */}
+          {/* ── "לעסקים" dropdown — anchored to the left next to the logo ──── */}
+          <div className="hidden md:block">
+            <DropdownMenu open={productOpen} onOpenChange={setProductOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 focus-visible:outline-none"
+                  aria-haspopup="menu"
+                  aria-expanded={productOpen}
+                >
+                  לעסקים
+                  <ChevronDown
+                    size={14}
+                    className={`transition-transform duration-200 ${productOpen ? "rotate-180" : ""}`}
+                    aria-hidden="true"
+                  />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-52" dir="rtl">
+                {PRODUCT_LINKS.map(({ to, icon: Icon, label }) => (
+                  <DropdownMenuItem key={to} asChild>
+                    <Link
+                      to={to}
+                      className="flex items-center gap-2 w-full"
+                      onClick={() => setProductOpen(false)}
+                    >
+                      <Icon size={15} className="text-muted-foreground shrink-0" aria-hidden="true" />
+                      {label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+
+                {/* Pricing — visible only to Gmail users */}
+                {canSeePricing && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/business/pricing"
+                        className="flex items-center gap-2 w-full"
+                        onClick={() => setProductOpen(false)}
+                      >
+                        <Tag size={15} className="text-primary shrink-0" aria-hidden="true" />
+                        <span className="text-primary font-medium">מחירים</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* ── Center nav ────────────────────────────────────────────────────── */}
         <div className="hidden md:flex items-center gap-6">
           <Link
             to="/"
@@ -71,56 +124,6 @@ const Navbar = () => {
           >
             קטגוריות
           </Link>
-
-          {/* ── "לעסקים" dropdown ───────────────────────────────────────────── */}
-          <DropdownMenu open={productOpen} onOpenChange={setProductOpen}>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 focus-visible:outline-none"
-                aria-haspopup="menu"
-                aria-expanded={productOpen}
-              >
-                לעסקים
-                <ChevronDown
-                  size={14}
-                  className={`transition-transform duration-200 ${productOpen ? "rotate-180" : ""}`}
-                  aria-hidden="true"
-                />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className="w-52" dir="rtl">
-              {PRODUCT_LINKS.map(({ to, icon: Icon, label }) => (
-                <DropdownMenuItem key={to} asChild>
-                  <Link
-                    to={to}
-                    className="flex items-center gap-2 w-full"
-                    onClick={() => setProductOpen(false)}
-                  >
-                    <Icon size={15} className="text-muted-foreground shrink-0" aria-hidden="true" />
-                    {label}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-
-              {/* Pricing — visible only to Gmail users */}
-              {canSeePricing && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/business/pricing"
-                      className="flex items-center gap-2 w-full"
-                      onClick={() => setProductOpen(false)}
-                    >
-                      <Tag size={15} className="text-primary shrink-0" aria-hidden="true" />
-                      <span className="text-primary font-medium">מחירים</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          {/* ── end Product dropdown ─────────────────────────────────────────── */}
 
           <Link
             to="/partner"
