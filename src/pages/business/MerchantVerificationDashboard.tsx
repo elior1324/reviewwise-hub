@@ -24,7 +24,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   XCircle,
-  FileHash,
+..., Hash, ...
   CalendarDays,
   Banknote,
   FileText,
