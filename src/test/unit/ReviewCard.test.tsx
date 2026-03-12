@@ -34,9 +34,21 @@ const { toast } = vi.hoisted(() => ({
 }));
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
-vi.mock("sonner", () => ({ toast, Toaster: () => null }));
-vi.mock("@/contexts/AuthContext", () => ({
-  useAuth: vi.fn(),
+vi.mock("sonner", async () => {
+  const { vi } = await import("vitest");
+
+  const toast = Object.assign(vi.fn(), {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    message: vi.fn(),
+    loading: vi.fn(),
+    dismiss: vi.fn(),
+  });
+
+  return { toast };
+});
 }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: mockSupabase,

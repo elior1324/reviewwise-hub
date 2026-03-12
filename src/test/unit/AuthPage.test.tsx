@@ -135,7 +135,7 @@ describe("Password show/hide toggle (aria-label)", () => {
 
   it("toggle button is accessible — no aria violations on the password field", () => {
     renderAuth();
-    const toggle = screen.getByRole("button", { name: /סיסמה/i });
+const toggle = screen.getByRole("button", { name: /^הצג סיסמה$|^הסתר סיסמה$/i });
     // Must have an accessible name (aria-label)
     expect(toggle).toHaveAttribute("aria-label");
     expect(toggle.getAttribute("aria-label")).not.toBe("");
