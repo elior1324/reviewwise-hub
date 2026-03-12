@@ -34,6 +34,8 @@ export interface Business {
   subcategory?: string;
   rating: number;
   reviewCount: number;
+  /** Count of purchase-verified (Tier-1) reviews only — feeds TrustScore */
+  verifiedReviewCount?: number;
   description: string;
   logo?: string;
   website?: string;

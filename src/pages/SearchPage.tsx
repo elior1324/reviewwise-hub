@@ -4,7 +4,7 @@ import BusinessCard from "@/components/BusinessCard";
 import CourseCard from "@/components/CourseCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown, Trophy, Star } from "lucide-react";
+import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown, Trophy, Star, ShieldCheck } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -20,11 +20,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type SortOption = "default" | "top5" | "alpha-asc" | "rating-desc" | "rating-asc" | "most-reviews" | "least-reviews";
+type SortOption = "default" | "top5" | "alpha-asc" | "rating-desc" | "rating-asc" | "most-reviews" | "least-reviews" | "most-verified";
 
 const SORT_LABELS: Record<SortOption, string> = {
   "default": "ברירת מחדל",
-  "top5": "טופ 5 הכי מוכרים",
+  "top5": "טופ 5 בציון האמון",
+  "most-verified": "הכי הרבה ביקורות מאומתות",
   "alpha-asc": "א׳–ב׳ (א–ת)",
   "rating-desc": "דירוג גבוה תחילה",
   "rating-asc": "דירוג נמוך תחילה",
@@ -36,7 +37,13 @@ function sortBusinesses(list: Business[], sort: SortOption): Business[] {
   const sorted = [...list];
   switch (sort) {
     case "top5":
-      return sorted.sort((a, b) => b.reviewCount - a.reviewCount).slice(0, 5);
+      return sorted.sort((a, b) => {
+        const aScore = (b.verifiedReviewCount ?? 0) * 2 + b.rating;
+        const bScore = (a.verifiedReviewCount ?? 0) * 2 + a.rating;
+        return aScore - bScore;
+      }).slice(0, 5);
+    case "most-verified":
+      return sorted.sort((a, b) => (b.verifiedReviewCount ?? 0) - (a.verifiedReviewCount ?? 0));
     case "alpha-asc":
       return sorted.sort((a, b) => a.name.localeCompare(b.name, "he"));
     case "rating-desc":
@@ -198,7 +205,10 @@ const SearchPage = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
       <div className="container py-10">
-        <h1 className="font-display font-bold text-3xl mb-6">חפשו בעלי מקצוע וקורסים</h1>
+        <h1 className="font-display font-bold text-3xl mb-2">בדקו ביקורות מאומתות — בחרו בביטחון</h1>
+        <p className="text-muted-foreground text-sm mb-6 max-w-xl">
+          ציון האמון מחושב מביקורות מאומתות רכישה בלבד. ביקורות ללא הוכחה מוצגות בנפרד ולא נכללות בחישוב.
+        </p>
 
         {/* Search */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -217,14 +227,14 @@ const SearchPage = () => {
             className="mb-8 rounded-xl border border-border/50 bg-card/50 p-5"
           >
             <div className="flex items-center gap-2 mb-1">
-              <Trophy size={20} className="text-primary" />
-              <h2 className="font-display font-bold text-lg text-foreground">טופ 5 — הכי הרבה ביקורות חיוביות</h2>
+              <ShieldCheck size={20} className="text-primary" />
+              <h2 className="font-display font-bold text-lg text-foreground">המדורגים הגבוהים ביותר בציון האמון</h2>
               {isAiRanked && (
                 <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">🤖 AI מעודכן</span>
               )}
             </div>
             {isAiRanked && top5Month && (
-              <p className="text-xs text-muted-foreground mb-3 mr-7">דירוג חודשי מבוסס AI — עודכן לאחרונה ב-{top5Month}</p>
+              <p className="text-xs text-muted-foreground mb-3 mr-7">דירוג חודשי מבוסס ביקורות מאומתות רכישה — עודכן לאחרונה ב-{top5Month}</p>
             )}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 auto-rows-fr">
               {top5Overall.map((biz, i) => (
@@ -290,7 +300,7 @@ const SearchPage = () => {
           <TabsList className="glass">
             <TabsTrigger value="freelancers" className="flex items-center gap-1.5">
               <UserCheck size={14} />
-              בעלי מקצוע ({freelancers.length})
+              ספקי שירות ({freelancers.length})
             </TabsTrigger>
             <TabsTrigger value="courses" className="flex items-center gap-1.5">
               <BookOpen size={14} />

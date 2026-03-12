@@ -272,7 +272,7 @@ const BusinessProfile = () => {
             → חזרה
           </Button>
         </div>
-        <BusinessHero business={business} />
+        <BusinessHero business={business} verifiedReviewCount={totalVerified} />
 
         {/* Courses */}
         {courses.length > 0 && (

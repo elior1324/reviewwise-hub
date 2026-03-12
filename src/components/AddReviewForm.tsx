@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, PenLine, LogIn, ShieldCheck, ShieldX, Plus, HelpCircle, Upload, X, FileText, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Star, PenLine, LogIn, ShieldCheck, ShieldX, Plus, HelpCircle, Upload, X, FileText, Image as ImageIcon, Loader2, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -60,6 +60,8 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [showTierDialog, setShowTierDialog] = useState(false);
+  const [reviewType, setReviewType] = useState<"verified" | "open" | null>(null);
   const [showIndemnity, setShowIndemnity] = useState(false);
   const [indemnityAcceptedAt, setIndemnityAcceptedAt] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
@@ -235,6 +237,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
       setReviewText("");
       setDuration("");
       setUploadedFiles([]);
+      setReviewType(null);
       setIsOpen(false);
     } catch {
       toast.error("אירעה שגיאה בשליחת הביקורת");
@@ -265,6 +268,56 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
   // Logged in — show toggle button or form
   return (
     <div>
+      {/* ── Step 0: Tier selection — choose before indemnity gate ─────────── */}
+      <Dialog open={showTierDialog} onOpenChange={setShowTierDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-lg">איזה סוג ביקורת תרצו לכתוב?</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mt-1">
+              ביקורות מאומתות רכישה נספרות בציון האמון של {businessName}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-3 mt-2">
+            {/* Option A — Verified Purchase */}
+            <button
+              type="button"
+              onClick={() => {
+                setReviewType("verified");
+                setShowTierDialog(false);
+                setShowIndemnity(true);
+              }}
+              className="flex items-start gap-4 p-4 rounded-xl border-2 border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/70 transition-all text-right group"
+            >
+              <ShieldCheck size={22} className="text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold text-foreground text-sm">ביקורת מאומתת רכישה</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                  יש לי קבלה / חשבונית. הביקורת תסומן ותיספר בחישוב ציון האמון.
+                </p>
+              </div>
+            </button>
+            {/* Option B — Open Community */}
+            <button
+              type="button"
+              onClick={() => {
+                setReviewType("open");
+                setShowTierDialog(false);
+                setShowIndemnity(true);
+              }}
+              className="flex items-start gap-4 p-4 rounded-xl border border-border/60 bg-muted/30 hover:bg-muted/50 hover:border-border transition-all text-right group"
+            >
+              <MessageSquare size={20} className="text-muted-foreground mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold text-foreground text-sm">משוב כללי</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                  אין לי הוכחת רכישה. המשוב יוצג בנפרד ולא ישפיע על ציון האמון.
+                </p>
+              </div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Indemnity gate — must accept before form opens */}
       <IndemnityModal
         open={showIndemnity}
@@ -278,12 +331,12 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
 
       {!isOpen ? (
         <Button
-          onClick={() => setShowIndemnity(true)}
+          onClick={() => setShowTierDialog(true)}
           className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
           size="lg"
         >
           <PenLine size={16} className="ml-2" />
-          הוספת תגובה
+          כתבו ביקורת
         </Button>
       ) : (
         <AnimatePresence>
@@ -305,12 +358,19 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                 <div className={`flex items-center gap-2 text-xs font-medium mt-2 px-3 py-1.5 rounded-lg w-fit ${
                   receiptVerified
                     ? "bg-trust-green-light text-trust-green"
-                    : "bg-muted text-muted-foreground"
+                    : reviewType === "open"
+                      ? "bg-muted/60 text-muted-foreground border border-border/40"
+                      : "bg-muted text-muted-foreground"
                 }`}>
                   {receiptVerified ? (
                     <>
                       <ShieldCheck size={14} />
-                      רכישה מאומתת — הביקורת תסומן כמאומתת
+                      רכישה מאומתת — הביקורת תסומן ותיספר בציון האמון
+                    </>
+                  ) : reviewType === "open" ? (
+                    <>
+                      <MessageSquare size={14} />
+                      משוב קהילה — לא ייספר בציון האמון
                     </>
                   ) : (
                     <>

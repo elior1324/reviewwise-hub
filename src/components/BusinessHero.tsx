@@ -1,10 +1,26 @@
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import StarRating from "./StarRating";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Globe, Mail, Phone, Youtube, Instagram, Linkedin, Twitter, Facebook, MessageCircle } from "lucide-react";
+import { ShieldCheck, Globe, Mail, Phone, Youtube, Instagram, Linkedin, Twitter, Facebook, MessageCircle, TrendingUp, BarChart2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { Business } from "@/data/mockData";
 import { useRef } from "react";
 import { sanitizeUrl } from "@/lib/sanitize";
+
+// ── Trust Grade computation ──────────────────────────────────────────────────
+// A lightweight display grade derived from rating + verifiedReviewCount.
+// This is NOT the full TrustScore formula — it is a visual indicator only.
+function computeTrustGrade(rating: number, verifiedCount: number): {
+  grade: string; color: string; bgColor: string; label: string;
+} {
+  if (verifiedCount === 0) return { grade: "—", color: "text-muted-foreground", bgColor: "bg-muted/60", label: "טרם אומת" };
+  if (rating >= 4.7 && verifiedCount >= 10) return { grade: "A+", color: "text-emerald-600", bgColor: "bg-emerald-50 dark:bg-emerald-950/40", label: "מצוין" };
+  if (rating >= 4.3 && verifiedCount >= 5)  return { grade: "A",  color: "text-emerald-500", bgColor: "bg-emerald-50 dark:bg-emerald-950/40", label: "טוב מאוד" };
+  if (rating >= 3.8 && verifiedCount >= 3)  return { grade: "B",  color: "text-blue-500",    bgColor: "bg-blue-50 dark:bg-blue-950/40",    label: "טוב" };
+  if (rating >= 3.2)                         return { grade: "C",  color: "text-amber-500",   bgColor: "bg-amber-50 dark:bg-amber-950/40",  label: "בינוני" };
+  if (rating >= 2.5)                         return { grade: "D",  color: "text-orange-500",  bgColor: "bg-orange-50 dark:bg-orange-950/40", label: "חלש" };
+  return                                            { grade: "F",  color: "text-red-500",      bgColor: "bg-red-50 dark:bg-red-950/40",      label: "גרוע" };
+}
 
 // TikTok icon (not in lucide)
 const TikTokIcon = ({ size = 14 }: { size?: number }) => (
@@ -29,6 +45,7 @@ const WhatsAppIcon = ({ size = 14 }: { size?: number }) => (
 
 interface BusinessHeroProps {
   business: Business;
+  verifiedReviewCount?: number;
 }
 
 const SOCIAL_ICONS = [
@@ -42,7 +59,9 @@ const SOCIAL_ICONS = [
   { key: "tiktok" as const, Icon: TikTokIcon, label: "TikTok" },
 ];
 
-const BusinessHero = ({ business }: BusinessHeroProps) => {
+const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
+  const verifiedCount = verifiedReviewCount ?? business.verifiedReviewCount ?? 0;
+  const trust = computeTrustGrade(business.rating, verifiedCount);
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -134,9 +153,14 @@ const BusinessHero = ({ business }: BusinessHeroProps) => {
                 </Badge>
               </motion.div>
             </div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-3 mb-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-3 mb-3 flex-wrap">
               <StarRating rating={business.rating} size={20} showValue />
-              <span className="text-muted-foreground text-sm">מבוסס על {business.reviewCount} ביקורות</span>
+              <span className="text-muted-foreground text-sm">
+                {business.reviewCount} ביקורות
+                {verifiedCount > 0 && (
+                  <> · <span className="text-primary font-medium">{verifiedCount} מאומתות</span></>
+                )}
+              </span>
             </motion.div>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-muted-foreground mb-4 max-w-2xl">
               {business.description}
@@ -177,6 +201,70 @@ const BusinessHero = ({ business }: BusinessHeroProps) => {
             )}
           </div>
         </div>
+
+        {/* ── Trust Signal Panel ───────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          className="mt-6 pt-5 border-t border-border/40 relative z-10"
+        >
+          <div className="flex flex-wrap items-start gap-3">
+
+            {/* Trust Grade */}
+            <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl ${trust.bgColor} border border-border/30`}>
+              <span className={`font-display font-bold text-2xl leading-none ${trust.color}`} aria-label={`ציון אמון ${trust.grade}`}>
+                {trust.grade}
+              </span>
+              <div>
+                <p className={`text-[10px] font-semibold uppercase tracking-wide ${trust.color}`}>ציון אמון</p>
+                <p className="text-[11px] text-muted-foreground">{trust.label}</p>
+              </div>
+            </div>
+
+            {/* Verified Reviews */}
+            <div className="flex items-center gap-2 bg-primary/5 border border-primary/15 rounded-xl px-3 py-2">
+              <ShieldCheck size={14} className="text-primary shrink-0" aria-hidden="true" />
+              <div>
+                <p className="text-[10px] font-semibold text-primary uppercase tracking-wide">ביקורות מאומתות</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {verifiedCount > 0 ? `${verifiedCount} רכישות מאומתות` : "אין עדיין"}
+                </p>
+              </div>
+            </div>
+
+            {/* Review Coverage */}
+            <div className="flex items-center gap-2 bg-muted/40 border border-border/30 rounded-xl px-3 py-2">
+              <BarChart2 size={14} className="text-muted-foreground shrink-0" aria-hidden="true" />
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">סך ביקורות</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {business.reviewCount > 0 ? `${business.reviewCount} ביקורות` : "אין עדיין"}
+                  {business.reviewCount > 0 && verifiedCount > 0 && (
+                    <> · {Math.round((verifiedCount / business.reviewCount) * 100)}% מאומת</>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* Methodology Link */}
+            <div className="flex items-center gap-1.5 mr-auto self-end">
+              <Link
+                to="/methodology"
+                className="text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                aria-label="כיצד מחושב ציון האמון?"
+              >
+                <TrendingUp size={11} aria-hidden="true" />
+                כיצד מחושב הציון?
+              </Link>
+            </div>
+
+          </div>
+          <p className="text-[10px] text-muted-foreground/60 mt-2">
+            ציון האמון מחושב מביקורות מאומתות רכישה בלבד — ביקורות קהילה אינן נספרות.
+          </p>
+        </motion.div>
+
       </motion.div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import StarRating from "./StarRating";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Instagram, Linkedin, Twitter, Facebook } from "lucide-react";
+import { ArrowLeft, Instagram, Linkedin, Twitter, Facebook, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import type { SocialLinks } from "@/data/mockData";
 import { sanitizeUrl } from "@/lib/sanitize";
@@ -34,12 +34,25 @@ interface BusinessCardProps {
   subcategory?: string;
   rating: number;
   reviewCount: number;
+  verifiedReviewCount?: number;
   description: string;
   logo?: string;
   socialLinks?: SocialLinks;
 }
 
-const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, description, logo, socialLinks }: BusinessCardProps) => {
+// Lightweight trust grade for card display
+function cardTrustGrade(rating: number, verifiedCount: number): { grade: string; color: string } {
+  if (verifiedCount === 0) return { grade: "—", color: "text-muted-foreground" };
+  if (rating >= 4.7 && verifiedCount >= 10) return { grade: "A+", color: "text-emerald-600" };
+  if (rating >= 4.3 && verifiedCount >= 5)  return { grade: "A",  color: "text-emerald-500" };
+  if (rating >= 3.8 && verifiedCount >= 3)  return { grade: "B",  color: "text-blue-500" };
+  if (rating >= 3.2)                         return { grade: "C",  color: "text-amber-500" };
+  if (rating >= 2.5)                         return { grade: "D",  color: "text-orange-500" };
+  return                                            { grade: "F",  color: "text-red-500" };
+}
+
+const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, verifiedReviewCount = 0, description, logo, socialLinks }: BusinessCardProps) => {
+  const trust = cardTrustGrade(rating, verifiedReviewCount);
   const activeSocials = socialLinks
     ? Object.entries(socialLinks).filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim() !== "")
     : [];
@@ -80,10 +93,21 @@ const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, 
             </div>
           </div>
           <h3 className="font-display font-semibold text-lg text-foreground mb-1">{name}</h3>
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <StarRating rating={rating} size={14} />
             <span className="text-sm text-muted-foreground">({reviewCount})</span>
+            {/* Trust grade chip */}
+            <span className={`text-xs font-bold ${trust.color} bg-transparent border border-border/40 rounded px-1 py-0.5 leading-none`}>
+              {trust.grade}
+            </span>
           </div>
+          {/* Verified count badge */}
+          {verifiedReviewCount > 0 && (
+            <div className="flex items-center gap-1 mb-3">
+              <ShieldCheck size={11} className="text-primary" aria-hidden="true" />
+              <span className="text-[11px] text-primary font-medium">{verifiedReviewCount} ביקורות מאומתות</span>
+            </div>
+          )}
           <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{description}</p>
 
           {/* Social links — only those the business owner added */}
@@ -113,7 +137,7 @@ const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, 
           )}
 
           <div className="mt-4 flex items-center text-primary text-sm font-medium group-hover:gap-2 gap-1 transition-all">
-            צפו בביקורות <ArrowLeft size={14} />
+            בדקו את ציון האמון <ArrowLeft size={14} />
           </div>
         </CardContent>
       </Card>
