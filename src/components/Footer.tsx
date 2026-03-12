@@ -38,7 +38,7 @@ const Footer = () => (
             <span className="font-display font-bold text-lg gradient-text">ReviewHub</span>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            הפלטפורמה שעוזרת לכם לבחור נכון ולבנות את העתיד.
+            מערכת אימות עצמאית לקורסים ופרילנסרים. נתוני אמון — לא שיווק.
           </p>
           <div className="flex gap-2 flex-wrap">
             {REVIEWHUB_SOCIALS.map(({ Icon, label, url }) => (
@@ -57,15 +57,21 @@ const Footer = () => (
           </div>
         </div>
 
-        {/* Product — mirrors the navbar "מוצר" dropdown (no Pricing: auth-gated) */}
+        {/* Product — mirrors the navbar "לעסקים" dropdown (no Pricing: auth-gated) */}
         <div>
-          <h4 className="font-display font-semibold mb-3 text-sm text-foreground">מוצר</h4>
+          <h4 className="font-display font-semibold mb-3 text-sm text-foreground">לעסקים</h4>
           <div className="space-y-2">
             <Link
               to="/business/solutions/reviews"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              ביקורות מאומתות
+              אימות ביקורות
+            </Link>
+            <Link
+              to="/business/solutions/analytics"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              לוח בקרה ונתונים
             </Link>
             <Link
               to="/business/solutions/widgets"
@@ -73,14 +79,8 @@ const Footer = () => (
             >
               ווידג'טים
             </Link>
-            <Link
-              to="/business/solutions/analytics"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              אנליטיקס
-            </Link>
             {/* Pricing intentionally omitted from the static footer:
-                it requires Gmail authentication and the footer has no auth context.
+                it requires authentication and the footer has no auth context.
                 The link is surfaced in the navbar dropdown for eligible users. */}
           </div>
         </div>
@@ -93,7 +93,7 @@ const Footer = () => (
               to="/search"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              עיון בקורסים
+              חיפוש ובדיקה
             </Link>
             <Link
               to="/compare"
@@ -105,13 +105,13 @@ const Footer = () => (
               to="/about"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              אודות
+              מתודולוגיה
             </Link>
             <Link
               to="/business"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              לעסקים
+              ליוצרים ועסקים
             </Link>
           </div>
         </div>
