@@ -48,6 +48,17 @@ vi.mock("@/components/ReviewResponse", () => ({ default: () => null }));
 vi.mock("@/components/ReportReviewDialog", () => ({ default: () => null }));
 vi.mock("@/components/VerifiedBadge", () => ({ default: () => null }));
 vi.mock("@/data/mockData", () => ({ getTimeSincePurchase: () => "לפני 3 חודשים" }));
+// Radix Tooltip requires <TooltipProvider> in the tree — stub it away so
+// unit tests don't need a provider wrapper. Pattern mirrors setup.ts framer-motion.
+vi.mock("@/components/ui/tooltip", () => {
+  const React = require("react");
+  return {
+    TooltipProvider: ({ children }: React.PropsWithChildren) => children,
+    Tooltip:         ({ children }: React.PropsWithChildren) => children,
+    TooltipTrigger:  ({ children }: React.PropsWithChildren) => children,
+    TooltipContent:  () => null,
+  };
+});
 
 import { useAuth } from "@/contexts/AuthContext";
 const mockUseAuth = vi.mocked(useAuth);
