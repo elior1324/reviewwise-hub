@@ -404,6 +404,8 @@ const ReviewCard = ({
           <div className="mt-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button
+aria-label={liked ? "ביטול מועיל" : "מועיל"}
+
                 variant="ghost"
                 size="sm"
                 onClick={handleLike}
