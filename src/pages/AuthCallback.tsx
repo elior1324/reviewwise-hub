@@ -32,7 +32,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 // Maximum time (ms) to wait for the SIGNED_IN event before giving up.
-const CALLBACK_TIMEOUT_MS = 10_000;
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -75,38 +74,38 @@ const AuthCallback = () => {
         navigate("/", { replace: true });
       }
     };
+    // ── Exchange the OAuth code for a session (PKCE) ───────────────────────
+    (async () => {
+      try {
+        const { error: exchangeError } =
+          await supabase.auth.exchangeCodeForSession(window.location.href);
 
-    // ── Listen for the SIGNED_IN event triggered by the PKCE code exchange ─
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        clearTimeout(timer);
-        subscription.unsubscribe();
+        if (exchangeError) {
+          fail(`exchangeCodeForSession failed: ${exchangeError.message}`);
+          return;
+        }
+
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          fail(`getSession failed: ${sessionError.message}`);
+          return;
+        }
+
+        const session = sessionData.session;
+        if (!session) {
+          fail("No session after code exchange");
+          return;
+        }
+
         await redirectForUser(session.user.id);
+      } catch (e) {
+        fail(`Unexpected error: ${String(e)}`);
       }
-    });
+    })();
 
-    // ── Safety timeout — give up after CALLBACK_TIMEOUT_MS ────────────────
-    const timer = setTimeout(() => {
-      subscription.unsubscribe();
-      fail("Timed out waiting for SIGNED_IN event");
-    }, CALLBACK_TIMEOUT_MS);
+    return () => {};
 
-    // ── Also check if a session already exists (fast path: page refresh) ───
-    // This handles the case where detectSessionInUrl already finished before
-    // our listener was registered.
-    supabase.auth.getSession().then(({ data, error }) => {
-      if (error) return; // let the timeout handle it
-      if (data.session) {
-        clearTimeout(timer);
-        subscription.unsubscribe();
-        redirectForUser(data.session.user.id);
-      }
-    });
 
-    return () => {
-      clearTimeout(timer);
-      subscription.unsubscribe();
-    };
   }, [navigate]);
 
   return (
