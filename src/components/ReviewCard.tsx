@@ -137,7 +137,7 @@ const ReviewCard = ({
     if (liked) {
       // Unlike
       setLiked(false);
-      const newCount = Math.max(likeCount - 1, 0);
+      const newCount = Math.max(Number(likeCount) - 1, 0);
       setLikeCount(newCount);
       onLikeUpdate?.(newCount);
 
@@ -150,7 +150,7 @@ const ReviewCard = ({
 
         if (deleteError) {
           setLiked(true);
-          setLikeCount(prev => prev + 1);
+          setLikeCount(prev =>Number( prev) + 1);
           toast.error("לא ניתן לבטל לייק");
         } else {
           await supabase.rpc("decrement_review_likes", { review_id: id });
@@ -159,7 +159,7 @@ const ReviewCard = ({
     } else {
       // Like
       setLiked(true);
-      const newCount = likeCount + 1;
+      const newCount =Number( likeCount) + 1;
       setLikeCount(newCount);
       setAnimating(true);
       setTimeout(() => setAnimating(false), 600);
@@ -172,8 +172,7 @@ const ReviewCard = ({
 
         if (insertError) {
           setLiked(false);
-          setLikeCount(prev => prev - 1);
-          toast.error("לא ניתן לעדכן לייק");
+          setLikeCount((prev) => Math.max(Number(prev) - 1, 0));          toast.error("לא ניתן לעדכן לייק");
         } else {
           await supabase.rpc("increment_review_likes", { review_id: id });
         }

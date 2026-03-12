@@ -143,39 +143,36 @@ describe("useEffect cleanup (review_likes fetch)", () => {
 describe("Like / unlike interaction", () => {
   it("optimistically increments like count when user clicks like", async () => {
     mockUseAuth.mockReturnValue(mockAuthContext({ user: MOCK_USER }));
-    mockSupabase.from.mockReturnValue(
-      chain({ data: [{ id: "new-like" }], error: null }),
-    );
+
+    mockSupabase.from
+      .mockImplementationOnce(() => chain({ data: null, error: null }))
+      .mockImplementationOnce(() => chain({ data: [{ id: "new-like" }], error: null }));
 
     render(<ReviewCard {...BASE_PROPS} likeCount={3} />);
 
     await userEvent.click(screen.getByRole("button", { name: /מועיל/i }));
 
-    // Optimistic update: count should be 4 immediately, before DB confirms
     expect(screen.getByText("4")).toBeInTheDocument();
   });
 
   it("rolls back like count if DB insert fails", async () => {
     mockUseAuth.mockReturnValue(mockAuthContext({ user: MOCK_USER }));
-    mockSupabase.from.mockReturnValue(
-      chain({ data: null, error: { message: "DB error" } }),
-    );
+
+    mockSupabase.from
+      .mockImplementationOnce(() => chain({ data: null, error: null }))
+      .mockImplementationOnce(() => chain({ data: null, error: { message: "DB error" } }));
 
     render(<ReviewCard {...BASE_PROPS} likeCount={3} />);
 
     await userEvent.click(screen.getByRole("button", { name: /מועיל/i }));
 
     await waitFor(() => {
-      // After rollback the count returns to 3
       expect(screen.getByText("3")).toBeInTheDocument();
       expect(toast.error).toHaveBeenCalledWith(expect.stringMatching(/לא ניתן/));
     });
   });
 });
 
-// ═════════════════════════════════════════════════════════════════════════════
-// 3. Like requires auth
-// ═════════════════════════════════════════════════════════════════════════════
 describe("Like requires authenticated user", () => {
   it("shows 'יש להתחבר' error toast for anonymous users", async () => {
     mockUseAuth.mockReturnValue(mockAuthContext({ user: null }));
