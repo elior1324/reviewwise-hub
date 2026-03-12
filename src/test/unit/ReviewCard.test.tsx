@@ -11,16 +11,28 @@
  *
  * Run: npm test -- ReviewCard
  */
+import React from "react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+// sonner: setup.ts mocks "sonner" globally. Importing toast here gives us the
+// same vi.fn() instance ReviewCard.tsx uses at runtime → spy calls are shared.
+import { toast } from "sonner";
+
+import ReviewCard from "@/components/ReviewCard";
+import { mockAuthContext, MOCK_USER } from "@/test/mocks/auth-context";
+import { mockSupabase, chain } from "@/test/mocks/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ALL vi.mock() calls must appear before any import statements so vitest can
-// hoist them correctly. The rule: never reference a module-level import inside
-// a synchronous vi.mock() factory — the factory runs before imports resolve.
+// vi.mock() calls — Vitest auto-hoists these above all imports at compile time.
+// RULE: never reference a module-scope import inside a synchronous vi.mock()
+// factory — the factory runs before imports resolve. Use require() or async
+// factory + await import() instead.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Radix Tooltip requires <TooltipProvider> in the tree; stub it away for unit
-// tests. Mirrors the framer-motion pattern in setup.ts (require() is available
-// inside vi.mock factories per Vitest docs).
+// Radix Tooltip requires <TooltipProvider> in the tree; stub it away.
 vi.mock("@/components/ui/tooltip", () => {
   const React = require("react");
   return {
@@ -37,9 +49,9 @@ vi.mock("@/components/ui/tooltip", () => {
 // Stub auth context so every test controls the current user.
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: vi.fn() }));
 
-// Async factory + dynamic import: mockSupabase is a statically-imported value.
-// A synchronous factory would reference it before the import is initialised
-// (hoisting race). Async factory + await import() avoids this; Vitest's module
+// Async factory + dynamic import: the synchronous import of `mockSupabase`
+// above would NOT be initialised yet when a synchronous factory runs (hoisting
+// race). An async factory with await import() avoids this; Vitest's module
 // cache guarantees both the factory and the static import get the same object.
 vi.mock("@/integrations/supabase/client", async () => {
   const { mockSupabase } = await import("@/test/mocks/supabase");
@@ -47,32 +59,17 @@ vi.mock("@/integrations/supabase/client", async () => {
 });
 
 // Stub sub-components that have deep dependency trees.
-vi.mock("@/components/ReviewResponse",     () => ({ default: () => null }));
+vi.mock("@/components/ReviewResponse", () => ({ default: () => null }));
 vi.mock("@/components/ReportReviewDialog", () => ({ default: () => null }));
-vi.mock("@/components/VerifiedBadge",      () => ({ default: () => null }));
+vi.mock("@/components/VerifiedBadge", () => ({ default: () => null }));
 vi.mock("@/data/mockData", () => ({ getTimeSincePurchase: () => "לפני 3 חודשים" }));
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Imports — resolved AFTER the mocks above are registered.
+// Typed reference to the mocked useAuth
 // ─────────────────────────────────────────────────────────────────────────────
-import React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-
-// sonner: setup.ts mocks "sonner" globally. Importing toast here gives us the
-// same vi.fn() instance ReviewCard.tsx uses at runtime → spy calls are shared.
-// No vi.hoisted() or per-file vi.mock("sonner") needed.
-import { toast } from "sonner";
-
-import ReviewCard from "@/components/ReviewCard";
-import { mockAuthContext, MOCK_USER } from "@/test/mocks/auth-context";
-import { mockSupabase, chain }         from "@/test/mocks/supabase";
-import { useAuth }                     from "@/contexts/AuthContext";
-
 const mockUseAuth = vi.mocked(useAuth);
 
-// ── Default props ─────────────────────────────────────────────────────────────
+// ── Default props ────────────────────────────────────────────────────────────
 const BASE_PROPS = {
   id: "review-uuid-1234",
   reviewerName: "ישראל ישראלי",
@@ -105,7 +102,7 @@ describe("useEffect cleanup (review_likes fetch)", () => {
     const neverQuery = new Promise((res) => { resolveQuery = res; });
     mockSupabase.from.mockReturnValue({
       select: vi.fn().mockReturnThis(),
-      eq:     vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockReturnThis(),
       then: (cb: (v: unknown) => void) => neverQuery.then(cb),
     });
@@ -215,10 +212,10 @@ describe("Edit flow", () => {
     let resolveSave!: (v: unknown) => void;
     const pendingSave = new Promise((res) => { resolveSave = res; });
     mockSupabase.from.mockReturnValue({
-      select:     vi.fn().mockReturnThis(),
-      update:     vi.fn().mockReturnThis(),
-      delete:     vi.fn().mockReturnThis(),
-      eq:         vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockReturnThis(),
       then: (cb: (v: unknown) => void) => pendingSave.then(cb),
     });
