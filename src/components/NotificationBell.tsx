@@ -115,7 +115,7 @@ const NotificationBell = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.15 }}
-            className="absolute left-0 md:left-auto md:right-0 top-12 w-[340px] max-w-[calc(100vw-2rem)] rounded-xl glass border border-border/50 shadow-2xl z-[100] overflow-hidden"
+            className="absolute left-0 top-12 w-[340px] max-w-[calc(100vw-2rem)] rounded-xl glass border border-border/50 shadow-2xl z-[100] overflow-hidden"
           >
             <div className="flex items-center justify-between p-4 border-b border-border/50">
               <h3 className="font-display font-semibold text-sm">התראות</h3>
