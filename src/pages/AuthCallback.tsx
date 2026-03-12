@@ -110,8 +110,8 @@ const AuthCallback = () => {
           return;
         }
 
-        const session = sessionData.session;
-        if (!session) {
+          const currentSession = sessionData.session;
+          if (!currentSession) {
           fail("No session after code exchange");
           return;
         }
