@@ -226,22 +226,20 @@ const Index = () => {
         <motion.div className="container py-16 md:py-24 relative" style={{ opacity: heroOpacity, y: heroY }}>
           <motion.div className="max-w-4xl mx-auto text-center" initial="hidden" animate="visible">
             <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
-              {/* Icon is decorative — label text "רק ביקורות מאומתות" conveys the meaning */}
-              <ShieldCheck size={16} aria-hidden="true" /> רק ביקורות מאומתות
+              {/* Icon is decorative — label text conveys the meaning */}
+              <ShieldCheck size={16} aria-hidden="true" /> אימות עצמאי · ללא פרסום בתשלום · נתונים ממקור ראשון
             </motion.div>
             {/*
               id="hero-heading" is referenced by aria-labelledby on the <section>
               so screen readers announce the heading when navigating by landmarks.
             */}
             <motion.h1 id="hero-heading" variants={fadeUp} custom={1} className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-4">
-              מצאו את{" "}
-              <span className="gradient-text glow-text">בעל המקצוע</span>
-              {" "}או{" "}
-              <span className="gradient-text glow-text">הקורס</span>
-              {" "}המושלם
+              <span className="gradient-text glow-text">בדקו</span>
+              {" "}לפני שאתם{" "}
+              <span className="gradient-text glow-text">משלמים</span>
             </motion.h1>
             <motion.p variants={fadeUp} custom={2} className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-              פרילנסרים, קורסים, סדנאות, הרצאות ומנטורינג — עם ביקורות מאומתות מלקוחות שבאמת רכשו.
+              ReviewHub מחובר למערכות תשלום ומפיק נתוני אמון אמיתיים. לא דעות — רשומות מסחריות מאומתות מיוצרי קורסים ופרילנסרים.
             </motion.p>
             {/*
               role="search" identifies this as the site's primary search form for
@@ -253,8 +251,8 @@ const Index = () => {
                 {/* Search icon is decorative — the input's aria-label conveys the purpose */}
                 <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
-                  placeholder="חפשו פרילנסרים, קורסים או קטגוריות..."
-                  aria-label="חיפוש פרילנסרים, קורסים ושירותים"
+                  placeholder="חפשו יוצר, קורס או כלי AI — בדקו לפני שאתם רוכשים"
+                  aria-label="חיפוש יוצרים, קורסים ושירותים לאימות"
                   className="pr-10 h-12 glass border-border/50 w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -398,10 +396,10 @@ const Index = () => {
             variants={staggerContainer}
           >
             {[
-              { icon: Star, label: "ביקורות", value: stats.reviews > 0 ? stats.reviews.toLocaleString() : "0" },
-              { icon: Users, label: "עסקים ופרילנסרים", value: stats.businesses > 0 ? stats.businesses.toLocaleString() : "0" },
-              { icon: ShieldCheck, label: "מאומתות", value: "100%" },
-              { icon: TrendingUp, label: "פלטפורמה חדשה", value: "🚀" },
+              { icon: Star, label: "ביקורות מאומתות", value: stats.reviews > 0 ? stats.reviews.toLocaleString() : "0" },
+              { icon: Users, label: "יוצרים ופרילנסרים", value: stats.businesses > 0 ? stats.businesses.toLocaleString() : "0" },
+              { icon: ShieldCheck, label: "רכישה מאומתת", value: "100%" },
+              { icon: TrendingUp, label: "מתודולוגיה פתוחה לציבור", value: "✓" },
             ].map(({ icon: Icon, label, value }) => (
               <motion.div key={label} variants={scaleIn}>
                 <motion.div
@@ -522,19 +520,18 @@ const Index = () => {
         )}
       </section>
 
-      {/* Trust Points */}
-      <section id="trust-points" className="container py-20">
+      {/* How Verification Works — institutional methodology section */}
+      <section id="how-it-works" className="container py-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="rounded-2xl relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.10), hsl(210 100% 50% / 0.06), hsl(45 100% 51% / 0.06))" }}
+          style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.07), hsl(220 80% 40% / 0.05))" }}
         >
           <div className="absolute inset-0 noise-overlay opacity-30" />
           <div className="absolute top-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-72 h-72 bg-accent/10 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2" />
 
           <div className="relative p-6 md:p-16 text-center">
             <motion.div
@@ -544,8 +541,8 @@ const Index = () => {
               transition={{ delay: 0.1, duration: 0.5 }}
               className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6"
             >
-              <UserCheck size={16} />
-              נקודות אמון (Trust Points)
+              <ShieldCheck size={16} aria-hidden="true" />
+              איך האימות עובד
             </motion.div>
 
             <motion.h2
@@ -555,7 +552,7 @@ const Index = () => {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="font-display font-bold text-3xl md:text-5xl text-foreground mb-4"
             >
-              בנו מוניטין אמיתי
+              נתונים, לא טענות
             </motion.h2>
 
             <motion.p
@@ -565,14 +562,26 @@ const Index = () => {
               transition={{ delay: 0.3, duration: 0.5 }}
               className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto"
             >
-              כל ביקורת אמיתית מחזקת את האמון בפלטפורמה, ומעניקה לכם <span className="text-foreground font-semibold">נקודות אמון</span> שמייצגות מומחיות ותרומה לקהילה.
+              כל ציון אמון מחושב מנתוני מסחר ממשיים. המתודולוגיה פתוחה לציבור — אתם יכולים לבדוק בדיוק איך כל מספר מתקבל.
             </motion.p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
               {[
-                { step: "01", title: "כתבו ביקורת", desc: "ביקורת רגילה מעניקה 100 נקודות אמון." },
-                { step: "02", title: "אמתו רכישה", desc: "ביקורת מאומתת מעניקה סה\"כ 200 נקודות אמון (100 + בונוס אימות)." },
-                { step: "03", title: "קבלו סטטוס", desc: "צברו דרגות, תגיות מומחיות ותג Verified Reviewer." },
+                {
+                  step: "01",
+                  title: "אימות רכישה",
+                  desc: "רק מי שרכש בפועל יכול לכתוב ביקורת. אנחנו מאמתים מול מערכות תשלום — לא על בסיס הצהרה עצמית.",
+                },
+                {
+                  step: "02",
+                  title: "חישוב ציון אמון",
+                  desc: "ציון האמון מורכב משלושה מרכיבים: נפח ביקורות (עד 40 נקודות), בריאות החזרים (עד 35 נקודות), ותקופת פעילות מאומתת (עד 25 נקודות).",
+                },
+                {
+                  step: "03",
+                  title: "שקיפות מלאה",
+                  desc: "ציונים אינם למכירה. ביקורות אינן ניתנות למחיקה על ידי בעל העסק. המתודולוגיה מפורסמת ונגישה לכל.",
+                },
               ].map((item, i) => (
                 <motion.div
                   key={item.step}
@@ -592,10 +601,6 @@ const Index = () => {
               ))}
             </div>
 
-            <p className="text-xs text-muted-foreground/80 mt-6 max-w-2xl mx-auto leading-relaxed">
-              נקודות אמון הן מדד מוניטין בלבד. אין להן ערך כספי ואי אפשר להמיר, למשוך, להעביר או לפדות אותן.
-            </p>
-
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -603,9 +608,9 @@ const Index = () => {
               transition={{ delay: 0.45, duration: 0.5 }}
               className="flex gap-3 justify-center flex-wrap mt-8"
             >
-              <Link to="/leaderboard">
+              <Link to="/about">
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
-                  ראו את המובילים
+                  קראו על המתודולוגיה
                 </Button>
               </Link>
               <Link to="/search">
@@ -626,16 +631,16 @@ const Index = () => {
               <HelpCircle size={14} /> שאלות נפוצות
             </motion.div>
             <motion.h2 variants={fadeUp} custom={1} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">שאלות ותשובות</motion.h2>
-            <motion.p variants={fadeUp} custom={2} className="text-muted-foreground max-w-xl mx-auto">כל מה שצריך לדעת על ReviewHub</motion.p>
+            <motion.p variants={fadeUp} custom={2} className="text-muted-foreground max-w-xl mx-auto">על המתודולוגיה, האימות, והעצמאות שלנו</motion.p>
           </motion.div>
           <div className="max-w-3xl mx-auto space-y-3">
             {[
-              { q: "מה זה ReviewHub?", a: "ReviewHub היא פלטפורמת ביקורות מאומתות מובילה בישראל. רק מי שרכש בפועל קורס או שירות יכול לכתוב ביקורת — כך אנחנו מבטיחים אמינות מוחלטת." },
-              { q: "איך אני יודע שהביקורות אמיתיות?", a: "כל משתמש רשום יכול לכתוב ביקורת על קורס או שירות. עם זאת, רק מי שמעלה קבלה או חשבונית ומאמת שהוא אכן רכש את הקורס — מקבל את התג \"רכישה מאומתת\". כך תוכלו להבדיל בין ביקורת רגילה לביקורת של מי שבאמת רכש ולמד." },
-              { q: "מה הן נקודות אמון (Trust Points)?", a: "נקודות אמון הן נקודות מוניטין בלבד. הן משמשות לדרגות, תגים ודירוג כותבים בקהילה. אין להן ערך כספי ואי אפשר להמיר/למשוך/להעביר אותן." },
-              { q: "האם השימוש באתר עולה כסף?", a: "לא! השימוש באתר לצרכנים הוא חינמי לחלוטין — קריאת ביקורות, חיפוש, השוואות וכתיבת ביקורות. ללא עלויות נסתרות." },
-              { q: "איך כותבים ביקורת?", a: "הירשמו לאתר (חינם), ואז תוכלו לכתוב ביקורת על קורס או שירות שרכשתם — דרך קישור ייעודי שתקבלו מהספק, או דרך עמוד הקורס/הפרילנסר באתר." },
-              { q: "אפשר לכתוב ביקורת בעילום שם?", a: "כן! בעת כתיבת ביקורת תוכלו לסמן \"ביקורת אנונימית\" — גם אם אימתתם רכישה עם קבלה או חשבונית. שמכם לא יוצג, אבל תג \"רכישה מאומתת\" עדיין יופיע כדי לשמור על אמינות הביקורת." },
+              { q: "מה זה ReviewHub?", a: "ReviewHub היא מערכת אימות עצמאית לקורסים ופרילנסרים בישראל. אנחנו מחברים למערכות תשלום ומפיקים ציוני אמון המבוססים על נתוני מסחר ממשיים — לא על דעות, לא על פרסום בתשלום." },
+              { q: "איך אני יודע שהביקורות אמיתיות?", a: "אנחנו מאמתים מול מערכות תשלום — לא על בסיס הצהרה עצמית. רק מי שרכש בפועל יכול לכתוב ביקורת. ביקורות מאומתות מסומנות במפורש. ביקורות לא ניתנות למחיקה על ידי בעל העסק — גם אם הן שליליות." },
+              { q: "איך מחושב ציון האמון?", a: "ציון האמון (0–100) מורכב משלושה מרכיבים: נפח ביקורות מאומתות (עד 40 נקודות), יחס החזרים ותלונות (עד 35 נקודות), ותקופת פעילות מאומתת (עד 25 נקודות). המתודולוגיה המלאה פתוחה לציבור." },
+              { q: "האם השימוש באתר עולה כסף?", a: "לא. עיון בביקורות, חיפוש, השוואות וכתיבת ביקורות — הכל חינמי לצרכנים. ללא עלויות נסתרות." },
+              { q: "איך כותבים ביקורת?", a: "הירשמו לאתר (חינם), ואז תוכלו לכתוב ביקורת על קורס או שירות שרכשתם — דרך קישור ייעודי שתקבלו מהספק, או דרך עמוד היוצר באתר. נדרש אימות רכישה." },
+              { q: "אפשר לכתוב ביקורת בעילום שם?", a: "כן. בעת כתיבת ביקורת תוכלו לסמן ביקורת אנונימית — גם אם אימתתם רכישה. שמכם לא יוצג, אבל תג \"רכישה מאומתת\" עדיין יופיע כדי לשמור על אמינות הנתון." },
             ].map(({ q, a }, i) => (
               <motion.div
                 key={i}

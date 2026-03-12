@@ -44,7 +44,7 @@ const PRO_FEATURES: Feature[] = [
   { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת.", tooltip: "לוח בקרה עם גרפים ונתונים בזמן אמת — דירוגים, מגמות, ביקורות חדשות ואחוזי מענה." },
   { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת.", tooltip: "קוד קצר שמטמיע קרוסלת ביקורות או תג דירוג ישירות באתר שלכם — ללא מתכנת." },
   { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות.", tooltip: "שלחו ללקוחות קישור אישי לכתיבת ביקורת, או העלו רשימת רכישות ותנו למערכת לעשות את השאר." },
-  { icon: TrendingUp, title: "מערכת אפיליאט (שיווק שותפים)", desc: "קישורי הפניה עם מעקב קליקים, המרות והכנסות. פרטי העמלה זמינים לאחר הרשמה.", tooltip: "צרו קישורי הפניה ייחודיים ועקבו אחרי קליקים, המרות והכנסות — פרטי שיעורי העמלה זמינים בדאשבורד לאחר הרשמה." },
+  { icon: TrendingUp, title: "קישורי הפניה (Affiliate)", desc: "קישורי הפניה עם מעקב קליקים והמרות. כל קישור מגיע עם גילוי נאות מובנה — הגולש רואה שהקישור הוא קישור שותף. ציון האמון אינו מושפע.", tooltip: "קישורי ההפניה מציגים גילוי נאות ברור לגולשים. ציון האמון של העסק מחושב באופן עצמאי ואינו מושפע מהשתתפות בתוכנית." },
   { icon: Globe, title: "רשתות חברתיות ואתר", desc: "חברו YouTube, Instagram, TikTok, LinkedIn, Facebook ואתר האינטרנט שלכם לפרופיל העסקי.", tooltip: "הוסיפו קישורים לכל הרשתות החברתיות שלכם ולאתר — הכל מופיע בפרופיל העסקי." },
   { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור.", tooltip: "כל שבוע תקבלו דוח AI שמנתח את הביקורות, מזהה מגמות ונותן המלצות לשיפור." },
   { icon: Headphones, title: "תמיכה בעדיפות", desc: "תמיכה מהירה עם מענה תוך 4 שעות בימי עבודה.", tooltip: "פניות שלכם מטופלות לפני כולם — מענה מובטח תוך 4 שעות בימי עבודה." },
@@ -216,14 +216,15 @@ const BusinessLanding = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
               <div>
                 <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
-                  <Zap size={16} /> לבעלי עסקים
+                  <ShieldCheck size={16} /> ליוצרים ובעלי עסקים
                 </motion.div>
                 <motion.h1 variants={fadeUp} custom={1} className="text-3xl md:text-5xl font-display font-bold text-foreground leading-tight mb-6">
-                  בנו אמון אמיתי עם{" "}
-                  <span className="gradient-text glow-text">ביקורות מאומתות</span>
+                  ציון אמון{" "}
+                  <span className="gradient-text glow-text">שמבוסס על נתונים</span>
+                  {" "}— לא על שיווק
                 </motion.h1>
                 <motion.p variants={fadeUp} custom={2} className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                  הצטרפו למאות עסקים בישראל שמשתמשים ב-ReviewHub כדי לאסוף ביקורות מאומתות, לבנות מוניטין ולהגדיל מכירות.
+                  ReviewHub מחברת את העסק שלכם למנגנון אימות עצמאי. כשלקוחות פוטנציאליים רואים את הציון שלכם — הם יודעים שהוא לא נרכש.
                 </motion.p>
                 <motion.div variants={fadeUp} custom={3} className="flex gap-3 flex-wrap">
                   {user ? (
@@ -261,10 +262,10 @@ const BusinessLanding = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { label: "דירוג ממוצע", value: "4.8 ⭐" },
-                      { label: "ביקורות החודש", value: "+23" },
-                      { label: "אחוז מענה", value: "92%" },
-                      { label: "קליקי אפיליאט", value: "1,240" },
+                      { label: "ציון אמון", value: "87/100" },
+                      { label: "ביקורות מאומתות", value: "23" },
+                      { label: "יחס החזרים", value: "2.1%" },
+                      { label: "תקופת פעילות", value: "14 חו׳" },
                     ].map(({ label, value }) => (
                       <div key={label} className="rounded-lg bg-secondary p-3">
                         <p className="text-xs text-muted-foreground">{label}</p>
@@ -273,8 +274,8 @@ const BusinessLanding = () => {
                     ))}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-primary">
-                    <TrendingUp size={14} />
-                    <span>ההמרות עלו ב-34% החודש</span>
+                    <ShieldCheck size={14} />
+                    <span>כל הנתונים מאומתים באופן עצמאי</span>
                   </div>
                 </div>
               </motion.div>
@@ -308,7 +309,7 @@ const BusinessLanding = () => {
           <Link to="/business/dashboard" className="flex items-center justify-center gap-3 group">
             <Eye size={18} className="text-primary" />
             <span className="font-display font-semibold text-foreground group-hover:text-primary transition-colors">
-              🎯 רוצים לראות איך זה נראה מבפנים? נסו את הדמו בחינם
+              ראו איך הדאשבורד נראה — כניסה לדמו ללא התחייבות
             </span>
             <ArrowLeft size={16} className="text-primary group-hover:translate-x-[-4px] transition-transform" />
           </Link>
@@ -318,10 +319,10 @@ const BusinessLanding = () => {
       <section className="container py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { value: "850+", label: "עסקים רשומים" },
+            { value: "850+", label: "יוצרים ופרילנסרים" },
             { value: "12,400+", label: "ביקורות מאומתות" },
-            { value: "34%", label: "עלייה ממוצעת בהמרות" },
-            { value: "98%", label: "שביעות רצון עסקית" },
+            { value: "100%", label: "ביקורות מאומתות רכישה" },
+            { value: "פתוחה", label: "מתודולוגיית חישוב" },
           ].map(({ value, label }, i) => (
             <motion.div key={label} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
               <p className="font-display font-bold text-3xl md:text-4xl text-foreground"><AnimatedCounter value={value} /></p>
@@ -338,8 +339,8 @@ const BusinessLanding = () => {
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
               חינם לתמיד
             </div>
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">התחילו ללא עלות</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">כל הכלים הבסיסיים שצריך כדי להתחיל לאסוף ביקורות מאומתות</p>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">התחילו באימות</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">פרופיל עסקי ציבורי עם ציון אמון מאומת — ללא עלות</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {FREE_FEATURES.map(({ icon: Icon, title, desc, preview, tooltip }, i) => (
@@ -389,8 +390,8 @@ const BusinessLanding = () => {
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
             <Sparkles size={14} /> תוכנית מקצועי{user ? " — ₪189/חודש" : ""}
           </div>
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">כלים מתקדמים לצמיחה</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה ואפיליאט — הכל בחבילה אחת</p>
+          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">כלים מתקדמים לניהול נתונים</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה וכלי גילוי — הכל מבוסס על נתוני אמון אמיתיים</p>
         </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {PRO_FEATURES.map(({ icon: Icon, title, desc, preview, tooltip }, i) => (
@@ -617,10 +618,10 @@ const BusinessLanding = () => {
             <div className="absolute inset-0 bg-primary/5 blur-3xl" />
             <div className="relative">
               <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
-                מוכנים לבנות אמון אמיתי?
+                הציון שלכם — בלתי תלוי
               </h2>
               <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-                שדרגו את התוכנית שלכם ופתחו את כל הכלים המתקדמים.
+                שדרגו לכלים מתקדמים — הציון שלכם ממשיך להיות מחושב באופן עצמאי, ללא קשר לתוכנית.
               </p>
               <Link to="/business/dashboard">
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary gap-2">
@@ -644,12 +645,12 @@ const BusinessLanding = () => {
           </div>
           <div className="max-w-3xl mx-auto space-y-3">
             {[
-              { q: "מה זה ReviewHub?", a: "ReviewHub היא פלטפורמת ביקורות מאומתות מובילה בישראל. רק לקוחות שרכשו בפועל יכולים לכתוב ביקורת — כך אנחנו מבטיחים שהביקורות אמיתיות ואמינות." },
+              { q: "מה זה ReviewHub?", a: "ReviewHub היא מערכת אימות עצמאית לקורסים ופרילנסרים. אנחנו מחברים למערכות תשלום ומפיקים ציוני אמון המבוססים על נתוני מסחר ממשיים — לא על דעות, לא על פרסום בתשלום. ציון האמון אינו למכירה." },
               { q: "מה ההבדל בין התוכניות?", a: "סטארטר — חינם, פרופיל בסיסי. מקצועי — ביקורות ללא הגבלה, דאשבורד אנליטיקס, וידג'טים, אפיליאט ודוחות AI שבועיים. אנטרפרייז — כל מה שבמקצועי + CRM, API, Webhook, דוחות AI יומיים ומנהל הצלחה." },
               { q: "איך מאמתים שהביקורת אמיתית?", a: "אימות רכישה מתבצע דרך חשבונית שהלקוח מעלה, אימות אוטומטי מול מערכת התשלומים, או קישור ביקורת ייעודי שנשלח רק ללקוחות שרכשו. ביקורות מאומתות מסומנות ב-✅." },
               { q: "מה קורה אם לקוח כותב ביקורת שלילית?", a: "תוכלו להגיב באופן מקצועי מלוח הבקרה. מחקרים מראים שתגובה מקצועית לביקורת שלילית דווקא מגבירה אמון. ביקורות שמפרות כללים ניתן לדווח ונבדוק תוך 24-48 שעות." },
               { q: "איך מטמיעים וידג'ט באתר שלי?", a: "מלוח הבקרה, גשו ל'וידג'ט להטמעה'. תקבלו קוד HTML/JavaScript פשוט — הדביקו אותו באתר שלכם. הוידג'ט מציג את הדירוג והביקורות ומתעדכן אוטומטית. זמין מתוכנית מקצועי." },
-              { q: "מה זה מערכת אפיליאט?", a: "מערכת האפיליאט מייצרת קישורי הפניה ייחודיים לשירותים שלכם. אתם מקבלים עמלה על כל מכירה דרך ReviewHub, ויכולים לעקוב אחרי קליקים, המרות והכנסות. זמין מתוכנית מקצועי." },
+              { q: "מה זה מערכת קישורי ההפניה?", a: "קישורי ההפניה מאפשרים לכם לעקוב אחרי קליקים והמרות. כל קישור מגיע עם גילוי נאות מובנה — הגולש רואה שהקישור הוא קישור שותף. ציון האמון אינו מושפע מהשתתפות בתוכנית. זמין מתוכנית מקצועי." },
               { q: "מה כולל דוח ה-AI?", a: "דוח ה-AI מנתח את הביקורות שלכם ומזהה חוזקות, חולשות, מגמות והמלצות קונקרטיות לצמיחה. במקצועי: שבועי, באנטרפרייז: יומי." },
               { q: "יש תקופת ניסיון?", a: "כן! תוכנית מקצועי כוללת 14 ימי ניסיון חינם. תוכלו לבטל בכל עת ללא חיוב." },
               { q: "אפשר לבטל את המנוי?", a: "כן, תוכלו לבטל בכל עת. לאחר הביטול, החשבון ירד לתוכנית סטארטר. כל הביקורות שנאספו נשמרות." },

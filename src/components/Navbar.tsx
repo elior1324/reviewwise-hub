@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
-  ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag,
+  ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
@@ -22,9 +22,9 @@ import DeleteAccountButton from "./DeleteAccountButton";
 // Pricing is intentionally excluded here; it is appended conditionally below
 // based on Gmail authentication status.
 const PRODUCT_LINKS = [
-  { to: "/business/solutions/reviews",   icon: ShieldCheck,     label: "ביקורות מאומתות" },
-  { to: "/business/solutions/widgets",   icon: LayoutDashboard, label: "ווידג'טים"          },
-  { to: "/business/solutions/analytics", icon: BarChart3,       label: "אנליטיקס"           },
+  { to: "/business/solutions/reviews",   icon: ShieldCheck,     label: "אימות ביקורות"      },
+  { to: "/business/solutions/analytics", icon: BarChart3,       label: "לוח בקרה ונתונים"   },
+  { to: "/business/solutions/widgets",   icon: LayoutDashboard, label: "ווידג'טים"           },
 ] as const;
 
 const Navbar = () => {
@@ -149,9 +149,10 @@ const Navbar = () => {
 
           <Link
             to="/about"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
           >
-            אודות
+            <BookOpen size={14} aria-hidden="true" />
+            מתודולוגיה
           </Link>
         </div>
 
@@ -284,7 +285,7 @@ const Navbar = () => {
               className="block text-sm py-3 min-h-[44px] flex items-center"
               onClick={() => setMobileOpen(false)}
             >
-              אודות
+              מתודולוגיה
             </Link>
           </div>
 
