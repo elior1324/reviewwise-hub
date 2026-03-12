@@ -49,9 +49,8 @@ vi.mock("sonner", async () => {
 
   return { toast };
 });
-}));
-vi.mock("@/integrations/supabase/client", () => ({
-  supabase: mockSupabase,
+  vi.mock("@/integrations/supabase/client", () => ({
+supabase: mockSupabase,
 }));
 // Stub sub-components that have deep dependency trees
 vi.mock("@/components/ReviewResponse", () => ({ default: () => null }));
