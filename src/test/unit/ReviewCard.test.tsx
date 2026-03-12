@@ -34,24 +34,15 @@ const { toast } = vi.hoisted(() => ({
 }));
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
-vi.mock("sonner", async () => {
-  const { vi } = await import("vitest");
-
-  const toast = Object.assign(vi.fn(), {
-    success: vi.fn(),
-    error: vi.fn(),
-    info: vi.fn(),
-    warning: vi.fn(),
-    message: vi.fn(),
-    loading: vi.fn(),
-    dismiss: vi.fn(),
-  });
-
-  return { toast };
+// Use the hoisted toast directly — no factory-level "const toast" needed.
+vi.mock("sonner", () => ({ toast, Toaster: () => null }));
+vi.mock("@/contexts/AuthContext", () => ({ useAuth: vi.fn() }));
+// Use async factory + dynamic import so mockSupabase (an import) is reachable
+// even after vi.mock hoists this call above the static import statements.
+vi.mock("@/integrations/supabase/client", async () => {
+  const { mockSupabase } = await import("@/test/mocks/supabase");
+  return { supabase: mockSupabase };
 });
-  vi.mock("@/integrations/supabase/client", () => ({
-supabase: mockSupabase,
-}));
 // Stub sub-components that have deep dependency trees
 vi.mock("@/components/ReviewResponse", () => ({ default: () => null }));
 vi.mock("@/components/ReportReviewDialog", () => ({ default: () => null }));
