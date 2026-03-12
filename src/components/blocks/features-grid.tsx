@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import {
   ShieldCheck,
-  DollarSign,
+  BadgeCheck,
   Search,
   Lock,
   Sparkles,
@@ -80,12 +80,18 @@ export function FeaturesGrid() {
           description="כל ביקורת עוברת אימות רכישה. אנחנו מוודאים שהמשתמש אכן שילם לפני שמפרסמים את חוות דעתו — אפס ביקורות מזויפות."
         />
 
-        {/* ② Medium — Partner program */}
+        {/* ② Medium — Trust points */}
         <GridItem
           area="md:[grid-area:1/7/2/13] xl:[grid-area:2/1/3/5]"
-          icon={<DollarSign className="h-4 w-4" />}
-          title="תוכנית שותפים 50/50"
-          description="50% מכלל עמלות הפלטפורמה מחולקים לקהילה. ככל שהביקורת שלכם מקבלת יותר לייקים — הנתח שלכם גדל."
+          icon={<BadgeCheck className="h-4 w-4" />}
+          title="נקודות אמון וסטטוס"
+          description={
+            <>
+              כתבו ביקורות והרוויחו <strong>נקודות אמון</strong>, דרגות ותג
+              <strong> Verified Reviewer</strong> לאחר אימות רכישה.
+              הנקודות הן מוניטין בלבד ללא ערך כספי.
+            </>
+          }
         />
 
         {/* ③ Tall — Smart search */}

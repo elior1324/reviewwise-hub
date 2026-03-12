@@ -18,7 +18,7 @@ export interface FeatureAccess {
   prioritySupport: boolean;
   weeklyAiSummaries: boolean;
 
-  // Premium
+  // Enterprise
   unlimitedBusinesses: boolean;
   dailyAiReports: boolean;
   crmIntegration: boolean;
@@ -32,7 +32,7 @@ export interface FeatureAccess {
 const TIER_ORDER: Record<SubscriptionTier, number> = {
   free: 0,
   pro: 1,
-  premium: 2,
+  enterprise: 2,
 };
 
 function hasAtLeast(current: SubscriptionTier, required: SubscriptionTier): boolean {
@@ -42,7 +42,7 @@ function hasAtLeast(current: SubscriptionTier, required: SubscriptionTier): bool
 export function useFeatureGating(tier: SubscriptionTier): FeatureAccess {
   return useMemo(() => {
     const isPro = hasAtLeast(tier, "pro");
-    const isPremium = hasAtLeast(tier, "premium");
+    const isEnterprise = hasAtLeast(tier, "enterprise");
 
     return {
       // Basic — always available
@@ -61,40 +61,54 @@ export function useFeatureGating(tier: SubscriptionTier): FeatureAccess {
       prioritySupport: isPro,
       weeklyAiSummaries: isPro,
 
-      // Premium only
-      unlimitedBusinesses: isPremium,
-      dailyAiReports: isPremium,
-      crmIntegration: isPremium,
-      leadsManagement: isPremium,
-      webhooks: isPremium,
-      googleAdsStars: isPremium,
-      fullApiAccess: isPremium,
-      personalSuccessManager: isPremium,
+      // Enterprise only
+      unlimitedBusinesses: isEnterprise,
+      dailyAiReports: isEnterprise,
+      crmIntegration: isEnterprise,
+      leadsManagement: isEnterprise,
+      webhooks: isEnterprise,
+      googleAdsStars: isEnterprise,
+      fullApiAccess: isEnterprise,
+      personalSuccessManager: isEnterprise,
     };
   }, [tier]);
 }
 
 export function getTierLabel(tier: SubscriptionTier): string {
   switch (tier) {
-    case "free": return "סטארטר";
-    case "pro": return "מקצועי";
-    case "premium": return "פרימיום";
+    case "free":
+      return "סטארטר";
+    case "pro":
+      return "מקצועי";
+    case "enterprise":
+      return "אנטרפרייז";
   }
 }
 
 export function getRequiredTierForFeature(feature: keyof FeatureAccess): SubscriptionTier {
-  const premiumFeatures: (keyof FeatureAccess)[] = [
-    "unlimitedBusinesses", "dailyAiReports", "crmIntegration",
-    "leadsManagement", "webhooks", "googleAdsStars",
-    "fullApiAccess", "personalSuccessManager",
-  ];
-  const proFeatures: (keyof FeatureAccess)[] = [
-    "unlimitedReviews", "socialLinks", "analyticsDashboard",
-    "embedWidgets", "autoReviewRequests", "affiliateSystem",
-    "prioritySupport", "weeklyAiSummaries",
+  const enterpriseFeatures: (keyof FeatureAccess)[] = [
+    "unlimitedBusinesses",
+    "dailyAiReports",
+    "crmIntegration",
+    "leadsManagement",
+    "webhooks",
+    "googleAdsStars",
+    "fullApiAccess",
+    "personalSuccessManager",
   ];
 
-  if (premiumFeatures.includes(feature)) return "premium";
+  const proFeatures: (keyof FeatureAccess)[] = [
+    "unlimitedReviews",
+    "socialLinks",
+    "analyticsDashboard",
+    "embedWidgets",
+    "autoReviewRequests",
+    "affiliateSystem",
+    "prioritySupport",
+    "weeklyAiSummaries",
+  ];
+
+  if (enterpriseFeatures.includes(feature)) return "enterprise";
   if (proFeatures.includes(feature)) return "pro";
   return "free";
 }

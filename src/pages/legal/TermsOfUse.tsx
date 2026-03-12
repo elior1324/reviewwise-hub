@@ -9,7 +9,7 @@ import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   Scale, FileText, Users, CreditCard, Lock, AlertTriangle,
-  Globe, RefreshCw, Mail, Ban, Handshake, DollarSign, Shield, Gavel,
+  Globe, RefreshCw, Mail, Ban, Handshake, BadgeCheck, Shield, Gavel,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -310,19 +310,28 @@ const TermsOfUse = () => (
           </p>
         </Section>
 
-        {/* 10 — Partner program */}
-        <Section icon={DollarSign} title="תוכנית שותפים 50/50">
+        {/* 10 — Trust Points & Affiliate Disclosure */}
+        <Section icon={BadgeCheck} title="נקודות אמון ותגים">
           <p className="mb-3">
-            ReviewHub מפעילה תוכנית שותפים ייחודית המחלקת 50% מכלל העמלות של הפלטפורמה עם
-            קהילת כותבי הביקורות.
+            ReviewHub עשויה להציג נקודות אמון (Trust Points), דרגות ותגים קהילתיים עבור כותבי ביקורות.
+            נקודות אלה נועדו למדידת מוניטין ותרומה בלבד.
           </p>
           <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-            <li><strong>קופת הקהילה:</strong> 50% מכלל העמלות (10% על כל מכירה) מוקצות לקופה המשותפת.</li>
-            <li><strong>נקודות בסיס:</strong> כל ביקורת מאומתת — 100 נקודות בסיס.</li>
-            <li><strong>בונוס ויראלי:</strong> כל 10 לייקים — מכפיל ×2 (עד ×10).</li>
-            <li><strong>אמינות:</strong> ביקורות מזויפות / לייקים מלאכותיים — סיום מיידי וביטול רווחים.</li>
-            <li><strong>שקיפות:</strong> גובה הקופה וסך הנקודות גלויים בדאשבורד <a href="/partner" className="text-primary hover:underline">/partner</a>.</li>
+            <li><strong>100 נקודות אמון</strong> עבור ביקורת רגילה.</li>
+            <li><strong>200 נקודות אמון</strong> עבור ביקורת מאומתת (כולל בונוס אימות).</li>
+            <li><strong>אפס ערך כספי:</strong> לא ניתן להמיר, למשוך, להעביר או לפדות נקודות אמון.</li>
           </ul>
+        </Section>
+
+        <Section icon={Handshake} title="קישורי הפניה ועמלות פלטפורמה">
+          <p className="mb-3">
+            במקרים מסוימים ReviewHub עשויה להפנות אתכם לאתרים של צדדים שלישיים באמצעות קישורים ייעודיים.
+            אם תבוצע רכישה דרך קישורים אלה, ReviewHub עשויה לקבל עמלה מהעסק או מהספק.
+          </p>
+          <p className="mb-3">
+            <strong>העמלה שייכת לפלטפורמה בלבד.</strong> משתמשים ו/או כותבי ביקורות אינם זכאים לשום חלוקת הכנסה,
+            תשלום או תגמול כספי מכל סוג.
+          </p>
         </Section>
 
         {/* 11 — Liability */}

@@ -7,8 +7,6 @@ import LockedOverlay from "@/components/LockedOverlay";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
 import DevControlPanel from "@/components/DevControlPanel";
 import UpgradeModal from "@/components/UpgradeModal";
-import LeaderboardWidget from "@/components/LeaderboardWidget";
-import GamificationNotifications from "@/components/GamificationNotifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -85,7 +83,7 @@ const DEMO_AI_REPORT = {
   ],
 };
 
-type DemoTier = "free" | "pro" | "premium";
+type DemoTier = "free" | "pro" | "enterprise";
 
 const BusinessDashboard = () => {
   const navigate = useNavigate();
@@ -115,16 +113,16 @@ const BusinessDashboard = () => {
   const [dbTier, setDbTier] = useState<SubscriptionTier>("free");
   const [monthlyReviewCount, setMonthlyReviewCount] = useState(0);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
-  const [upgradeModalTier, setUpgradeModalTier] = useState<"pro" | "premium">("pro");
+  const [upgradeModalTier, setUpgradeModalTier] = useState<"pro" | "enterprise">("pro");
   const [upgradeModalFeature, setUpgradeModalFeature] = useState<string | undefined>();
 
   // Determine tier — use DB tier for real users, demo tier for demo mode
   const currentTier: SubscriptionTier = !isDemo ? dbTier : demoTier;
-  const isPremium = currentTier === "premium";
-  const isPro = currentTier === "pro" || currentTier === "premium";
+  const isEnterprise = currentTier === "enterprise";
+  const isPro = currentTier === "pro" || currentTier === "enterprise";
   const isFree = currentTier === "free";
 
-  const handleUpgradeWithModal = (tier: "pro" | "premium" = "pro", featureName?: string) => {
+  const handleUpgradeWithModal = (tier: "pro" | "enterprise" = "pro", featureName?: string) => {
     setUpgradeModalTier(tier);
     setUpgradeModalFeature(featureName);
     setUpgradeModalOpen(true);
@@ -381,9 +379,9 @@ const BusinessDashboard = () => {
     setUpgradeModalOpen(true);
   };
 
-  const PremiumBadge = () => (
+  const EnterpriseBadge = () => (
     <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-[10px] px-1.5 py-0.5 rounded-full font-bold mr-1">
-      <Crown size={10} /> פרימיום
+      <Crown size={10} /> אנטרפרייז
     </span>
   );
 
@@ -496,14 +494,14 @@ const BusinessDashboard = () => {
               {([
                 { id: "free", label: "סטארטר", sublabel: "חינם", icon: null, desc: "פיצ׳רים בסיסיים" },
                 { id: "pro", label: "מקצועי", sublabel: "Pro", icon: Sparkles, desc: "כלים מתקדמים" },
-                { id: "premium", label: "פרימיום", sublabel: "Premium", icon: Crown, desc: "גישה מלאה" },
+                { id: "enterprise", label: "אנטרפרייז", sublabel: "Enterprise", icon: Crown, desc: "גישה מלאה" },
               ] as { id: DemoTier; label: string; sublabel: string; icon: any; desc: string }[]).map(({ id, label, sublabel, icon: Icon, desc }) => (
                 <button
                   key={id}
                   onClick={() => setDemoTier(id)}
                   className={`relative flex flex-col items-center gap-1 rounded-lg border px-3 py-3 text-center transition-all ${
                     demoTier === id
-                      ? id === "premium"
+                      ? id === "enterprise"
                         ? "border-primary bg-primary/10 shadow-sm"
                         : id === "pro"
                         ? "border-accent bg-accent/10 shadow-sm"
@@ -511,8 +509,8 @@ const BusinessDashboard = () => {
                       : "border-border/30 hover:border-border hover:bg-muted/50"
                   }`}
                 >
-                  {Icon && <Icon size={14} className={demoTier === id ? (id === "premium" ? "text-primary" : "text-accent") : "text-muted-foreground"} />}
-                  <span className={`text-xs font-bold ${demoTier === id ? (id === "premium" ? "text-primary" : id === "pro" ? "text-accent" : "text-foreground") : "text-muted-foreground"}`}>
+                  {Icon && <Icon size={14} className={demoTier === id ? (id === "enterprise" ? "text-primary" : "text-accent") : "text-muted-foreground"} />}
+                  <span className={`text-xs font-bold ${demoTier === id ? (id === "enterprise" ? "text-primary" : id === "pro" ? "text-accent" : "text-foreground") : "text-muted-foreground"}`}>
                     {label}
                   </span>
                   <span className={`text-[10px] ${demoTier === id ? "text-muted-foreground" : "text-muted-foreground/60"}`}>{desc}</span>
@@ -616,32 +614,32 @@ const BusinessDashboard = () => {
               </TabsList>
             </div>
 
-            {/* Premium tier tabs */}
+            {/* Enterprise tier tabs */}
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
                 <Crown size={10} className="text-primary" />
-                <span className="text-primary/80">פרימיום בלבד</span>
+                <span className="text-primary/80">אנטרפרייז בלבד</span>
               </p>
               <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
                 <TabsTrigger value="ai-report" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Brain size={13} className="ml-1" /> דוח AI שבועי
-                  {!isPremium && <PremiumBadge />}
+                  {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
                 <TabsTrigger value="daily-ai" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <CalendarClock size={13} className="ml-1" /> דוחות AI יומיים
-                  {!isPremium && <PremiumBadge />}
+                  {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
                 <TabsTrigger value="crm" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Contact size={13} className="ml-1" /> CRM ולידים
-                  {!isPremium && <PremiumBadge />}
+                  {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
                 <TabsTrigger value="webhooks" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Webhook size={13} className="ml-1" /> Webhooks & API
-                  {!isPremium && <PremiumBadge />}
+                  {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
                 <TabsTrigger value="integrations" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Link2 size={13} className="ml-1" /> אינטגרציות
-                  {!isPremium && <PremiumBadge />}
+                  {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -707,7 +705,6 @@ const BusinessDashboard = () => {
 
               {/* Leaderboard Sidebar */}
               <div>
-                <LeaderboardWidget />
               </div>
             </div>
           </TabsContent>
@@ -847,7 +844,7 @@ const BusinessDashboard = () => {
           </TabsContent>
 
           <TabsContent value="ai-report">
-            <LockedOverlay isLocked={!isPremium} onUpgrade={handleUpgrade}>
+            <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
             <Card className="shadow-card bg-card mb-6">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
@@ -935,7 +932,7 @@ const BusinessDashboard = () => {
               <p className="text-muted-foreground text-sm mb-4">
                 העלו עד 5 סרטונים או תמונות של לקוחות מרוצים. ניתן להעלות קבצים ישירות או להוסיף קישורי YouTube / TikTok.
                 <br />
-                <span className="text-xs text-primary">זמין למנויי Professional ו-Premium בלבד.</span>
+                <span className="text-xs text-primary">זמין למנויי Professional ו-Enterprise בלבד.</span>
               </p>
               <TestimonialMediaUploader businessId={businessId || "demo"} maxItems={5} />
             </div>
@@ -946,7 +943,7 @@ const BusinessDashboard = () => {
 
           {/* CRM & Leads */}
           <TabsContent value="crm">
-            <LockedOverlay isLocked={!isPremium} onUpgrade={handleUpgrade}>
+            <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="shadow-card bg-card">
                   <CardHeader>
@@ -1016,7 +1013,7 @@ const BusinessDashboard = () => {
 
           {/* Webhooks & API */}
           <TabsContent value="webhooks">
-            <LockedOverlay isLocked={!isPremium} onUpgrade={handleUpgrade}>
+            <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
               <Card className="shadow-card bg-card">
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
@@ -1088,7 +1085,7 @@ const BusinessDashboard = () => {
 
           {/* Daily AI Reports */}
           <TabsContent value="daily-ai">
-            <LockedOverlay isLocked={!isPremium} onUpgrade={handleUpgrade}>
+            <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
               <Card className="shadow-card bg-card">
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
@@ -1171,15 +1168,14 @@ const BusinessDashboard = () => {
           <TabsContent value="integrations">
             <IntegrationsTab
               businessId={businessId || "demo"}
-              isPremium={isPremium}
+              isEnterprise={isEnterprise}
               isDemo={isDemo}
-              onUpgrade={() => handleUpgradeWithModal("premium", "אינטגרציות")}
+              onUpgrade={() => handleUpgradeWithModal("enterprise", "אינטגרציות")}
             />
           </TabsContent>
         </Tabs>
       </div>
       <BusinessFooter />
-      <GamificationNotifications />
       <UpgradeModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}

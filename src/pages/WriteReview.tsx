@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldCheck, Star, DollarSign, Sparkles, BadgeCheck, Clock } from "lucide-react";
+import { ShieldCheck, Star, Sparkles, BadgeCheck, Clock } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -51,7 +51,7 @@ const WriteReview = () => {
     if (receiptVerified) {
       toast({
         title: "💥 בום! צברתם 200 נקודות (2x מאומת)!",
-        description: "ביקורת מאומתת = כפול נקודות! תמשיכו לטפס בלידרבורד — 70% הנחה ממתינה למקום הראשון!",
+        description: "ביקורת מאומתת מקבלת יותר נקודות אמון ותג Verified Reviewer.",
       });
     } else if (receiptVerified === false) {
       toast({
@@ -61,7 +61,7 @@ const WriteReview = () => {
     } else {
       toast({
         title: "💥 בום! צברתם 100 נקודות!",
-        description: "הביקורת נשלחה! תמשיכו לכתוב ולטפס בדירוג — 70% הנחה ממתינה למקום הראשון!",
+        description: "הביקורת נשלחה! המשיכו לכתוב, לצבור נקודות אמון ולקבל תגים.",
       });
     }
   };
@@ -88,10 +88,10 @@ const WriteReview = () => {
               </div>
               <div>
                 <p className="text-sm font-display font-semibold text-foreground">
-                  ביקורת מאומתת = הכנסה פאסיבית 💰
+                  ביקורת מאומתת = אמון גבוה יותר
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  כשמישהו רוכש בזכות הביקורת שלכם — אתם מרוויחים חלק מההכנסות. בלי מאמץ נוסף.
+                  אימות רכישה מעניק תג <strong className="text-foreground">Verified Reviewer</strong> ומחזק את משקל הביקורת בדירוגים.
                 </p>
               </div>
             </div>

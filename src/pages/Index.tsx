@@ -4,14 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Search, ShieldCheck, Star, TrendingUp, Users,
-  UserCheck, BookOpen, DollarSign, HelpCircle, ChevronDown
+  UserCheck, BookOpen, HelpCircle, ChevronDown
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import BusinessCard from "@/components/BusinessCard";
 import ReviewCard from "@/components/ReviewCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { TestimonialsSection } from "@/components/blocks/testimonials-with-marquee";
 import { FeaturesGrid } from "@/components/blocks/features-grid";
@@ -19,7 +18,6 @@ import { useState, useRef, useEffect } from "react";
 import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, type Business, type Review } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -54,21 +52,6 @@ const Index = () => {
   const [freelancerCatCounts, setFreelancerCatCounts] = useState<Record<string, number>>({});
   const [courseCatCounts, setCourseCatCounts] = useState<Record<string, number>>({});
   const [stats, setStats] = useState({ reviews: 0, businesses: 0 });
-
-  const { data: communityPool } = useQuery({
-    queryKey: ["community-pool-homepage"],
-    queryFn: async () => {
-      const now = new Date();
-      const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-      const { data } = await supabase
-        .from("rewards_pool")
-        .select("community_pool, total_points")
-        .eq("month_year", monthYear)
-        .maybeSingle();
-      return data ?? { community_pool: 0, total_points: 0 };
-    },
-    refetchInterval: 30000,
-  });
 
   useEffect(() => {
     // Fetch top freelancers
@@ -225,7 +208,6 @@ const Index = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
 
-      <FloatingEarnCTA />
 
       {/* Hero — Audience-First */}
       {/*
@@ -540,30 +522,30 @@ const Index = () => {
         )}
       </section>
 
-      {/* Earn Money CTA */}
-      <section id="earn-money" className="container py-20">
+      {/* Trust Points */}
+      <section id="trust-points" className="container py-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="rounded-2xl relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, hsl(45 100% 51% / 0.12), hsl(35 100% 50% / 0.06), hsl(160 84% 39% / 0.08))" }}
+          style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.10), hsl(210 100% 50% / 0.06), hsl(45 100% 51% / 0.06))" }}
         >
           <div className="absolute inset-0 noise-overlay opacity-30" />
           <div className="absolute top-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
           <div className="absolute bottom-0 right-0 w-72 h-72 bg-accent/10 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2" />
-          
+
           <div className="relative p-6 md:p-16 text-center">
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1, duration: 0.5 }}
               className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6"
             >
-              <DollarSign size={16} />
-              תוכנית שותפים 50/50
+              <UserCheck size={16} />
+              נקודות אמון (Trust Points)
             </motion.div>
 
             <motion.h2
@@ -573,138 +555,62 @@ const Index = () => {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="font-display font-bold text-3xl md:text-5xl text-foreground mb-4"
             >
-              אנחנו מחלקים את הרווחים 50/50 💰
+              בנו מוניטין אמיתי
             </motion.h2>
-            
+
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-lg text-muted-foreground mb-3 max-w-2xl mx-auto"
+              className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto"
             >
-              <span className="text-foreground font-semibold">50% מכלל העמלות של ReviewHub הולכים ישירות לקהילה.</span>
-              {" "}כתבו ביקורת מאומתת, צברו לייקים, וקחו את הנתח שלכם מהקופה.
+              כל ביקורת אמיתית מחזקת את האמון בפלטפורמה, ומעניקה לכם <span className="text-foreground font-semibold">נקודות אמון</span> שמייצגות מומחיות ותרומה לקהילה.
             </motion.p>
 
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto"
-            >
-              כל ביקורת = 100 נקודות. כל 10 לייקים = מכפיל x2 (עד x10).
-              <span className="text-primary font-medium"> ככל שהביקורת שלכם טובה יותר — הנתח שלכם מהקופה גדל. 🚀</span>
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.45, duration: 0.5 }}
-              className="mx-auto mb-10 max-w-sm"
-            >
-              <div className="relative rounded-xl border border-primary/20 bg-card/80 backdrop-blur-sm p-6 text-center overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
-                <div className="relative">
-                  <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wider">קופת הקהילה החודשית</p>
-                  <p className="font-display font-bold text-4xl text-primary">
-                    ₪<AnimatedCounter value={String(Math.round(communityPool?.community_pool ?? 0))} duration={1500} />
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">מחכים לחלוקה בסוף החודש</p>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-10"
-            >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
               {[
-                { step: "01", title: "כתבו ביקורת", desc: "קבלו 100 נקודות בסיס על כל ביקורת מאומתת" },
-                { step: "02", title: "צברו לייקים", desc: "כל 10 לייקים = מכפיל x2 לנקודות (עד x10)" },
-                { step: "03", title: "קחו את הנתח שלכם", desc: "הרווח = (הנקודות שלכם / סה״כ) × 50% מהעמלות" },
-              ].map(({ step, title, desc }, i) => (
+                { step: "01", title: "כתבו ביקורת", desc: "ביקורת רגילה מעניקה 100 נקודות אמון." },
+                { step: "02", title: "אמתו רכישה", desc: "ביקורת מאומתת מעניקה סה\"כ 200 נקודות אמון (100 + בונוס אימות)." },
+                { step: "03", title: "קבלו סטטוס", desc: "צברו דרגות, תגיות מומחיות ותג Verified Reviewer." },
+              ].map((item, i) => (
                 <motion.div
-                  key={step}
-                  initial={{ opacity: 0, y: 20 }}
+                  key={item.step}
+                  initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.5 + i * 0.1, duration: 0.4 }}
-                  className="bg-card/60 backdrop-blur-sm border border-border/40 rounded-xl p-5 text-center"
+                  transition={{ delay: 0.15 + i * 0.08, duration: 0.5 }}
+                  className="rounded-xl border border-border/50 bg-card/60 backdrop-blur-sm p-5 text-right"
                 >
-                  <span className="text-primary/40 font-display font-bold text-3xl">{step}</span>
-                  <h3 className="font-display font-bold text-foreground mt-1">{title}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{desc}</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-muted-foreground">{item.step}</span>
+                    <ShieldCheck size={16} className="text-primary" aria-hidden="true" />
+                  </div>
+                  <p className="font-display font-bold text-foreground mb-1">{item.title}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
+
+            <p className="text-xs text-muted-foreground/80 mt-6 max-w-2xl mx-auto leading-relaxed">
+              נקודות אמון הן מדד מוניטין בלבד. אין להן ערך כספי ואי אפשר להמיר, למשוך, להעביר או לפדות אותן.
+            </p>
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.7, duration: 0.5 }}
+              transition={{ delay: 0.45, duration: 0.5 }}
+              className="flex gap-3 justify-center flex-wrap mt-8"
             >
-              <Link to="/partner">
-                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-base glow-primary px-10">
-                  גלו כמה אתם יכולים להרוויח
-                </Button>
-              </Link>
-            </motion.div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* About CTA */}
-      <section className="container pb-20">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="rounded-2xl p-6 md:p-16 text-center relative overflow-hidden animated-border"
-          style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}
-        >
-          <div className="absolute inset-0 bg-primary/5 blur-3xl" />
-          <div className="relative">
-            <motion.h2
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.15, duration: 0.5 }}
-              className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4"
-            >
-              בעלי מקצוע ויוצרי קורסים? הצטרפו עכשיו
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.25, duration: 0.5 }}
-              className="text-muted-foreground mb-8 max-w-lg mx-auto"
-            >
-              בנו אמון אמיתי עם ביקורות מאומתות והגדילו את העסק שלכם.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.35, duration: 0.5 }}
-              className="flex gap-3 justify-center flex-wrap"
-            >
-              <Link to="/business">
+              <Link to="/leaderboard">
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
-                  גלו את הפלטפורמה לעסקים
+                  ראו את המובילים
                 </Button>
               </Link>
-              <Link to="/about">
+              <Link to="/search">
                 <Button size="lg" variant="outline" className="border-border/50 font-semibold">
-                  קראו עוד על ReviewHub
+                  חפשו ביקורות מאומתות
                 </Button>
               </Link>
             </motion.div>
@@ -726,7 +632,7 @@ const Index = () => {
             {[
               { q: "מה זה ReviewHub?", a: "ReviewHub היא פלטפורמת ביקורות מאומתות מובילה בישראל. רק מי שרכש בפועל קורס או שירות יכול לכתוב ביקורת — כך אנחנו מבטיחים אמינות מוחלטת." },
               { q: "איך אני יודע שהביקורות אמיתיות?", a: "כל משתמש רשום יכול לכתוב ביקורת על קורס או שירות. עם זאת, רק מי שמעלה קבלה או חשבונית ומאמת שהוא אכן רכש את הקורס — מקבל את התג \"רכישה מאומתת\". כך תוכלו להבדיל בין ביקורת רגילה לביקורת של מי שבאמת רכש ולמד." },
-              { q: "מה זה תוכנית השותפים 50/50?", a: "אנחנו מחלקים 50% מכלל העמלות של האתר עם הקהילה. כל ביקורת מאומתת = 100 נקודות. כל 10 לייקים = מכפיל x2 (עד x10). הרווח שלכם = (הנקודות שלכם / סה״כ נקודות) × הקופה המשותפת. ככל שהביקורת שלכם איכותית ומקבלת יותר לייקים — אתם מרוויחים יותר!" },
+              { q: "מה הן נקודות אמון (Trust Points)?", a: "נקודות אמון הן נקודות מוניטין בלבד. הן משמשות לדרגות, תגים ודירוג כותבים בקהילה. אין להן ערך כספי ואי אפשר להמיר/למשוך/להעביר אותן." },
               { q: "האם השימוש באתר עולה כסף?", a: "לא! השימוש באתר לצרכנים הוא חינמי לחלוטין — קריאת ביקורות, חיפוש, השוואות וכתיבת ביקורות. ללא עלויות נסתרות." },
               { q: "איך כותבים ביקורת?", a: "הירשמו לאתר (חינם), ואז תוכלו לכתוב ביקורת על קורס או שירות שרכשתם — דרך קישור ייעודי שתקבלו מהספק, או דרך עמוד הקורס/הפרילנסר באתר." },
               { q: "אפשר לכתוב ביקורת בעילום שם?", a: "כן! בעת כתיבת ביקורת תוכלו לסמן \"ביקורת אנונימית\" — גם אם אימתתם רכישה עם קבלה או חשבונית. שמכם לא יוצג, אבל תג \"רכישה מאומתת\" עדיין יופיע כדי לשמור על אמינות הביקורת." },

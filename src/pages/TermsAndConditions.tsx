@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { Shield, FileText, Users, CreditCard, Lock, AlertTriangle, Scale, Globe, RefreshCw, Mail, Ban, Handshake, DollarSign } from "lucide-react";
+import { Shield, FileText, Users, CreditCard, Lock, AlertTriangle, Scale, Globe, RefreshCw, Mail, Ban, Handshake, BadgeCheck } from "lucide-react";
 import { ReactNode } from "react";
 
 const fadeUp = {
@@ -251,38 +251,27 @@ const TermsAndConditions = () => {
             </p>
           </Section>
 
-          {/* Partner Reward Program */}
-          <Section icon={DollarSign} title="תוכנית שותפים 50/50">
+          {/* Trust Points & Affiliate Disclosure */}
+          <Section icon={BadgeCheck} title="נקודות אמון ותגים">
             <p className="mb-3">
-              ReviewHub מפעילה תוכנית שותפים ייחודית המחלקת 50% מכלל העמלות של הפלטפורמה עם קהילת כותבי הביקורות.
+              ReviewHub עשויה להציג נקודות אמון (Trust Points), דרגות ותגים קהילתיים עבור כותבי ביקורות.
+              נקודות אלה נועדו למדידת מוניטין ותרומה בלבד.
             </p>
-            <p className="font-semibold text-foreground mb-2">מנגנון הנקודות:</p>
             <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-              <li><strong>קופת הקהילה:</strong> 50% מכלל העמלות שהאתר גובה (10% על כל מכירה) מוקצות ל&quot;קופת הקהילה&quot;.</li>
-              <li><strong>נקודות בסיס:</strong> כל ביקורת מאומתת מעניקה 100 נקודות בסיס.</li>
-              <li><strong>בונוס ויראלי:</strong> כל 10 לייקים שהביקורת מקבלת מעניקים מכפיל x2 לנקודות (מקסימום מכפיל x10).</li>
-              <li><strong>חישוב הרווח:</strong> הרווח החודשי של המשתמש = (סה&quot;כ הנקודות שלו / סה&quot;כ הנקודות בפלטפורמה) × קופת הקהילה.</li>
-              <li><strong>משיכת כספים:</strong> ניתן למשוך רווחים מסכום מינימלי של ₪100.</li>
+              <li><strong>100 נקודות אמון</strong> עבור ביקורת רגילה.</li>
+              <li><strong>200 נקודות אמון</strong> עבור ביקורת מאומתת (כולל בונוס אימות).</li>
+              <li><strong>אפס ערך כספי:</strong> לא ניתן להמיר, למשוך, להעביר או לפדות נקודות אמון.</li>
             </ul>
-            <p className="font-semibold text-foreground mb-2">עמלה לשותפים עסקיים:</p>
-            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-              <li>שותפים עסקיים רשומים מרוויחים 10% מהכנסות העסק על כל מכירה שבוצעה דרך ReviewHub. פרטי העמלה זמינים לשותפים רשומים בלבד.</li>
-            </ul>
-            <p className="font-semibold text-foreground mb-2">חובות המשתתף:</p>
-            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-              <li><strong>גילוי נאות:</strong> כל שותף המפרסם קישור הפניה של ReviewHub מחויב לציין בצורה ברורה וגלויה כי מדובר בקישור שותפים שעשוי להניב לו עמלה, בהתאם לחוק הגנת הצרכן, התשמ&quot;א-1981.</li>
-              <li><strong>דיווח מס:</strong> הכנסות מתוכנית השותפים חייבות בדיווח לרשויות המס בהתאם לפקודת מס הכנסה [נוסח חדש], התשכ&quot;א-1961. ReviewHub אינה אחראית לחובות המס של המשתתף.</li>
-              <li><strong>אמינות:</strong> אסור ליצור ביקורות מזויפות, לבצע קליקים/לייקים מלאכותיים או לנקוט בכל פעולה מניפולטיבית. כל חשד להונאה יוביל לסיום מיידי של ההשתתפות בתוכנית ולביטול כל הרווחים שנצברו.</li>
-              <li><strong>תוכן שיווקי:</strong> אסור לפרסם תוכן מטעה, שקרי או פוגעני בהקשר לתוכנית השותפים או לשירותים של ReviewHub.</li>
-            </ul>
-            <p className="font-semibold text-foreground mb-2">זכויות ReviewHub:</p>
-            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-              <li>ReviewHub רשאית לשנות את מנגנון הנקודות, גובה הקופה, תנאי התוכנית או לסיים את התוכנית בכל עת עם הודעה מוקדמת של 30 ימים.</li>
-              <li>ReviewHub רשאית להסיר משתתף מהתוכנית מיידית במקרה של הפרת תנאים אלה.</li>
-              <li>רווחים משולמים רק לאחר אימות ולאחר תום תקופת ביטול העסקה (14 ימים בהתאם לחוק הגנת הצרכן).</li>
-            </ul>
-            <p className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-foreground text-sm">
-              💡 <strong>שקיפות מלאה:</strong> גובה הקופה המשותפת וסך הנקודות בפלטפורמה גלויים לכל המשתמשים בדאשבורד השותפים בכתובת <a href="/partner" className="text-primary hover:underline">/partner</a>.
+          </Section>
+
+          <Section icon={Handshake} title="קישורי הפניה ועמלות פלטפורמה">
+            <p className="mb-3">
+              במקרים מסוימים ReviewHub עשויה להפנות אתכם לאתרים של צדדים שלישיים באמצעות קישורים ייעודיים.
+              אם תבוצע רכישה דרך קישורים אלה, ReviewHub עשויה לקבל עמלה מהעסק או מהספק.
+            </p>
+            <p className="mb-3">
+              <strong>העמלה שייכת לפלטפורמה בלבד.</strong> משתמשים ו/או כותבי ביקורות אינם זכאים לשום חלוקת הכנסה,
+              תשלום או תגמול כספי מכל סוג.
             </p>
           </Section>
 

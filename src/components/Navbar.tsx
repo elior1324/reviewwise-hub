@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  Menu, X, LogOut, User, Scale, DollarSign,
+  Menu, X, LogOut, User, Scale, Trophy,
   ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
@@ -132,11 +132,11 @@ const Navbar = () => {
           </Link>
 
           <Link
-            to="/partner"
+            to="/leaderboard"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
           >
-            <DollarSign size={14} aria-hidden="true" />
-            שותפים
+            <Trophy size={14} aria-hidden="true" />
+            קהילה
           </Link>
 
           <Link
@@ -266,11 +266,11 @@ const Navbar = () => {
 
           <div className="border-t border-border/30 pt-1">
             <Link
-              to="/partner"
+              to="/leaderboard"
               className="block text-sm py-3 min-h-[44px] flex items-center"
               onClick={() => setMobileOpen(false)}
             >
-              שותפים
+              קהילה
             </Link>
             <Link
               to="/compare"

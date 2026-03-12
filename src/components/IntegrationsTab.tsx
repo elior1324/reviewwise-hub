@@ -15,7 +15,7 @@ import { toast } from "@/hooks/use-toast";
 
 interface IntegrationsTabProps {
   businessId: string;
-  isPremium: boolean;
+  isEnterprise: boolean;
   isDemo: boolean;
   onUpgrade: () => void;
 }
@@ -69,7 +69,7 @@ const APP_ICONS = [
   { name: "Google Drive", icon: GoogleDriveIcon, color: "bg-[#0066DA]/10" },
 ];
 
-const IntegrationsTab = ({ businessId, isPremium, isDemo, onUpgrade }: IntegrationsTabProps) => {
+const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: IntegrationsTabProps) => {
   const [sheetsUrl, setSheetsUrl] = useState("");
   const [sheetsActive, setSheetsActive] = useState(false);
   const [sheetsSaving, setSheetsSaving] = useState(false);
@@ -84,7 +84,7 @@ const IntegrationsTab = ({ businessId, isPremium, isDemo, onUpgrade }: Integrati
   const [loading, setLoading] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  const disabled = !isPremium;
+  const disabled = !isEnterprise;
 
   useEffect(() => {
     if (isDemo || !businessId) {
@@ -206,7 +206,7 @@ const IntegrationsTab = ({ businessId, isPremium, isDemo, onUpgrade }: Integrati
                   🔓 שחררו אוטומציות ללא הגבלה
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  שדרגו לתוכנית פרימיום וחברו את העסק שלכם ל-6,000+ אפליקציות דרך Zapier & Make.
+                  שדרגו לתוכנית אנטרפרייז וחברו את העסק שלכם ל-6,000+ אפליקציות דרך Zapier & Make.
                 </p>
 
                 <div className="bg-muted/50 rounded-xl p-4 space-y-2.5 text-right">
@@ -234,7 +234,7 @@ const IntegrationsTab = ({ businessId, isPremium, isDemo, onUpgrade }: Integrati
                   onClick={() => { setShowUpgradeModal(false); onUpgrade(); }}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base font-semibold gap-2"
                 >
-                  <Crown size={16} /> שדרגו לפרימיום
+                  <Crown size={16} /> שדרגו לאנטרפרייז
                 </Button>
 
                 <button
@@ -268,7 +268,7 @@ const IntegrationsTab = ({ businessId, isPremium, isDemo, onUpgrade }: Integrati
                 <CardTitle className="text-lg font-display font-bold flex items-center gap-2 flex-wrap">
                   התחברו ל-6,000+ אפליקציות דרך Zapier & Make
                   <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-2">
-                    <Crown size={10} className="ml-1" /> פרימיום
+                    <Crown size={10} className="ml-1" /> אנטרפרייז
                   </Badge>
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
@@ -308,7 +308,7 @@ const IntegrationsTab = ({ businessId, isPremium, isDemo, onUpgrade }: Integrati
                 >
                   <div className="flex items-center gap-2 bg-card/90 border border-primary/20 rounded-lg px-4 py-2.5 shadow-lg">
                     <Lock size={16} className="text-primary" />
-                    <span className="text-sm font-semibold text-foreground">שדרגו לפרימיום לגישה</span>
+                    <span className="text-sm font-semibold text-foreground">שדרגו לאנטרפרייז לגישה</span>
                     <ArrowRight size={14} className="text-primary" />
                   </div>
                 </div>
@@ -404,7 +404,7 @@ const IntegrationsTab = ({ businessId, isPremium, isDemo, onUpgrade }: Integrati
                 <CardTitle className="text-base font-display font-bold flex items-center gap-2 flex-wrap">
                   HubSpot CRM
                   <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-2">
-                    <Crown size={10} className="ml-1" /> פרימיום
+                    <Crown size={10} className="ml-1" /> אנטרפרייז
                   </Badge>
                 </CardTitle>
                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -433,7 +433,7 @@ const IntegrationsTab = ({ businessId, isPremium, isDemo, onUpgrade }: Integrati
               >
                 <div className="flex items-center gap-2 bg-card/90 border border-primary/20 rounded-lg px-4 py-2.5 shadow-lg">
                   <Lock size={16} className="text-primary" />
-                  <span className="text-sm font-semibold text-foreground">שדרגו לפרימיום לגישה</span>
+                  <span className="text-sm font-semibold text-foreground">שדרגו לאנטרפרייז לגישה</span>
                   <ArrowRight size={14} className="text-primary" />
                 </div>
               </div>

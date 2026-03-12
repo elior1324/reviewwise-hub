@@ -64,14 +64,14 @@ import {
 
 // ── Public types ──────────────────────────────────────────────────────────────
 
-export type SubscriptionTier = "free" | "pro" | "premium";
+export type SubscriptionTier = "free" | "pro" | "enterprise";
 
 export const STRIPE_TIERS = {
   pro: {
     price_id:   "price_1T8cKLJdw1St4rwXDsoVlfQ1",
     product_id: "prod_U6q0bcJeR70YPv",
   },
-  premium: {
+  enterprise: {
     price_id:   "price_1T8cLBJdw1St4rwXLJVIU3ar",
     product_id: "prod_U6q1CwTI9xXEeK",
   },
@@ -137,7 +137,7 @@ export const useAuth = () => {
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 function productIdToTier(productId: string | null): SubscriptionTier {
-  if (productId === STRIPE_TIERS.premium.product_id) return "premium";
+  if (productId === STRIPE_TIERS.enterprise.product_id) return "enterprise";
   if (productId === STRIPE_TIERS.pro.product_id)     return "pro";
   return "free";
 }

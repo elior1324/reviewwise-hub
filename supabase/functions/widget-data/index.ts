@@ -42,9 +42,9 @@ serve(async (req) => {
       });
     }
 
-    // Only Pro and Premium can use the widget
-    if (biz.subscription_tier !== "pro" && biz.subscription_tier !== "premium") {
-      return new Response(JSON.stringify({ error: "Widget available for Pro and Premium plans only" }), {
+    // Only Pro and Enterprise can use the widget
+    if (biz.subscription_tier !== "pro" && biz.subscription_tier !== "enterprise") {
+      return new Response(JSON.stringify({ error: "Widget available for Pro and Enterprise plans only" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

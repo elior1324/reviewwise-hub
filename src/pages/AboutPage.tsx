@@ -1,6 +1,5 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import { motion } from "framer-motion";
 import { ShieldCheck, Target, BookOpen, Users, Award, TrendingUp, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,6 @@ const AboutPage = () => {
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
-      <FloatingEarnCTA />
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />

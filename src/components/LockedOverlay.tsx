@@ -7,12 +7,12 @@ import UpgradeModal from "@/components/UpgradeModal";
 interface LockedOverlayProps {
   children: React.ReactNode;
   isLocked: boolean;
-  tier?: "pro" | "premium";
+  tier?: "pro" | "enterprise";
   onUpgrade?: () => void;
   featureName?: string;
 }
 
-const LockedOverlay = ({ children, isLocked, tier = "premium", onUpgrade, featureName }: LockedOverlayProps) => {
+const LockedOverlay = ({ children, isLocked, tier = "enterprise", onUpgrade, featureName }: LockedOverlayProps) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   if (!isLocked) return <>{children}</>;
@@ -46,13 +46,13 @@ const LockedOverlay = ({ children, isLocked, tier = "premium", onUpgrade, featur
             <div className="flex items-center justify-center gap-2 mb-2">
               {isPro ? <Sparkles size={16} className="text-primary" /> : <Crown size={16} className="text-primary" />}
               <span className="text-sm font-bold text-primary font-display">
-                {isPro ? "פיצ׳ר מקצועי" : "פיצ׳ר פרימיום"}
+                {isPro ? "פיצ׳ר מקצועי" : "פיצ׳ר אנטרפרייז"}
               </span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {isPro
                 ? <>פיצ׳ר זה זמין מתוכנית מקצועי ומעלה.<br />שדרגו כדי לקבל גישה לכלים מתקדמים.</>
-                : <>פיצ׳ר זה זמין למנויי תוכנית פרימיום בלבד.<br />שדרגו כדי לקבל גישה מלאה לכל הכלים המתקדמים.</>
+                : <>פיצ׳ר זה זמין למנויי תוכנית אנטרפרייז בלבד.<br />שדרגו כדי לקבל גישה מלאה לכל הכלים המתקדמים.</>
               }
             </p>
           </div>
@@ -60,7 +60,7 @@ const LockedOverlay = ({ children, isLocked, tier = "premium", onUpgrade, featur
             onClick={handleClick}
             className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2"
           >
-            {isPro ? <><Sparkles size={14} /> שדרגו למקצועי</> : <><Crown size={14} /> שדרגו לפרימיום</>}
+            {isPro ? <><Sparkles size={14} /> שדרגו למקצועי</> : <><Crown size={14} /> שדרגו לאנטרפרייז</>}
           </Button>
         </div>
       </motion.div>

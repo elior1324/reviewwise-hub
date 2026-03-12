@@ -74,7 +74,7 @@ serve(async (req) => {
     if (hasActiveSub && productId) {
       const tierMap: Record<string, string> = {
         "prod_U6q0bcJeR70YPv": "pro",
-        "prod_U6q1CwTI9xXEeK": "premium",
+        "prod_U6q1CwTI9xXEeK": "enterprise",
       };
       const newTier = tierMap[productId as string] || "pro";
       await supabaseClient

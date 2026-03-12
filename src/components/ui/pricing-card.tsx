@@ -458,9 +458,9 @@ export const REVIEWHUB_PLANS: [PricingTier, PricingTier, PricingTier] = [
     ],
   },
 
-  // ── PREMIUM — Anchoring: highest price seen first sets reference point ───
+  // ── ENTERPRISE — Anchoring: highest price seen first sets reference point ───
   {
-    id: "premium",
+    id: "enterprise",
     name: "Enterprise",
     nameHe: "ארגוני ואוטומציה",
     // NLP future pacing: "שליטה מלאה" triggers control-oriented identity

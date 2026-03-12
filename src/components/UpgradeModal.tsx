@@ -9,13 +9,13 @@ import { useState } from "react";
 interface UpgradeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  requiredTier?: "pro" | "premium";
+  requiredTier?: "pro" | "enterprise";
   featureName?: string;
 }
 
 // NLP-optimised feature lists:
 //   Pro  — benefit-oriented language + specificity bias
-//   Premium — future pacing + identity ("שליטה מלאה")
+//   Enterprise — future pacing + identity ("שליטה מלאה")
 const PLANS = [
   {
     tier: "pro" as const,
@@ -34,8 +34,8 @@ const PLANS = [
     ],
   },
   {
-    tier: "premium" as const,
-    name: "פרימיום",
+    tier: "enterprise" as const,
+    name: "אנטרפרייז",
     price: "₪479",
     period: "/חודש",
     icon: Crown,
@@ -58,7 +58,7 @@ const UpgradeModal = ({ open, onOpenChange, requiredTier = "pro", featureName }:
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
 
-  const handleCheckout = async (tier: "pro" | "premium") => {
+  const handleCheckout = async (tier: "pro" | "enterprise") => {
     if (!user) {
       toast({ title: "יש להתחבר תחילה", variant: "destructive" });
       return;
@@ -87,7 +87,7 @@ const UpgradeModal = ({ open, onOpenChange, requiredTier = "pro", featureName }:
           </DialogTitle>
           <DialogDescription className="text-center">
             {featureName
-              ? `הפיצ׳ר "${featureName}" דורש חבילת ${requiredTier === "premium" ? "פרימיום" : "מקצועי"} ומעלה.`
+              ? `הפיצ׳ר "${featureName}" דורש חבילת ${requiredTier === "enterprise" ? "אנטרפרייז" : "מקצועי"} ומעלה.`
               : "בחרו את החבילה המתאימה לצרכים שלכם."}
           </DialogDescription>
         </DialogHeader>
@@ -109,7 +109,7 @@ const UpgradeModal = ({ open, onOpenChange, requiredTier = "pro", featureName }:
                   <div className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">⭐ מומלץ</div>
                 )}
                 <div className="flex items-center gap-2 mb-3">
-                  <Icon size={20} className={plan.tier === "premium" ? "text-primary" : "text-accent"} />
+                  <Icon size={20} className={plan.tier === "enterprise" ? "text-primary" : "text-accent"} />
                   <h3 className="font-display font-bold text-lg">{plan.name}</h3>
                 </div>
                 <div className="mb-4">
@@ -126,7 +126,7 @@ const UpgradeModal = ({ open, onOpenChange, requiredTier = "pro", featureName }:
                 </ul>
                 <Button
                   className={`w-full ${
-                    plan.tier === "premium"
+                    plan.tier === "enterprise"
                       ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
                       : "bg-accent text-accent-foreground hover:bg-accent/90"
                   }`}

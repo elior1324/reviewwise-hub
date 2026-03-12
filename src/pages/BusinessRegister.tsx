@@ -49,7 +49,7 @@ const BusinessRegister = () => {
 
   const categories = form.businessType === "freelancer" ? freelancerCats : courseCats;
   const filteredCategories = categories.filter(c => c !== "אחר");
-  const canEditSocials = subscriptionTier === "pro" || subscriptionTier === "premium";
+  const canEditSocials = subscriptionTier === "pro" || subscriptionTier === "enterprise";
 
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
   const updateSocial = (key: keyof SocialLinksData, value: string) => setSocialLinks(prev => ({ ...prev, [key]: value }));

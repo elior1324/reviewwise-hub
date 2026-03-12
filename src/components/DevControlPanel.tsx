@@ -16,7 +16,7 @@ interface DevControlPanelProps {
 const TIERS = [
   { id: "free", label: "סטארטר (Basic)", icon: Shield, color: "border-border bg-secondary text-foreground" },
   { id: "pro", label: "מקצועי (Professional)", icon: Sparkles, color: "border-accent bg-accent/10 text-accent" },
-  { id: "premium", label: "פרימיום (Premium)", icon: Crown, color: "border-primary bg-primary/10 text-primary" },
+  { id: "enterprise", label: "אנטרפרייז (Enterprise)", icon: Crown, color: "border-primary bg-primary/10 text-primary" },
 ] as const;
 
 const DevControlPanel = ({ businessId, currentTier, onTierChanged, onDataChanged }: DevControlPanelProps) => {

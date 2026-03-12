@@ -97,10 +97,10 @@ const PLANS = [
     highlighted: true,
   },
   {
-    name: "פרימיום",
+    name: "אנטרפרייז",
     price: "₪479",
     period: "/חודש",
-    tier: "premium" as const,
+    tier: "enterprise" as const,
     features: [
       "הכל מהמקצועי, ועוד:",
       "עסקים ללא הגבלה בחשבון אחד",
@@ -114,9 +114,9 @@ const PLANS = [
       "מנהל הצלחה אישי",
     ],
     excluded: [],
-    cta: "שדרגו לפרימיום",
+    cta: "שדרגו לאנטרפרייז",
     highlighted: false,
-    premium: true,
+    enterprise: true,
   },
 ];
 
@@ -184,7 +184,7 @@ const BusinessLanding = () => {
     setExpandedFeature(prev => prev === title ? null : title);
   };
 
-  const handleCheckout = async (tier: "pro" | "premium") => {
+  const handleCheckout = async (tier: "pro" | "enterprise") => {
     if (!user) {
       toast({ title: "יש להתחבר תחילה", variant: "destructive" });
       return;
@@ -433,12 +433,12 @@ const BusinessLanding = () => {
           </div>
       </section>
 
-      {/* Premium Features — shown with lock icons */}
+      {/* Enterprise Features — shown with lock icons */}
       <section className="border-y border-border/50">
         <div className="container py-20">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-foreground text-background text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-              <Crown size={14} /> תוכנית פרימיום{user ? " — ₪479/חודש" : ""}
+              <Crown size={14} /> תוכנית אנטרפרייז{user ? " — ₪479/חודש" : ""}
             </div>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">CRM, לידים ואינטגרציות</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">חברו את ReviewHub לכל המערכות שלכם והפכו ביקורות ללידים</p>
@@ -470,7 +470,7 @@ const BusinessLanding = () => {
                     </TooltipProvider>
                   )}
                   <div className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
-                    <Lock size={10} /> פרימיום
+                    <Lock size={10} /> אנטרפרייז
                   </div>
                 </div>
                 <div className="flex items-start justify-between">
@@ -509,7 +509,7 @@ const BusinessLanding = () => {
                 className={`rounded-xl p-6 border ${
                   plan.highlighted
                     ? "bg-card border-primary/50 shadow-card-hover relative scale-[1.03]"
-                    : plan.premium
+                    : plan.enterprise
                     ? "bg-gradient-to-b from-card to-primary/5 border-primary/30 relative"
                     : "bg-card border-border/50"
                 }`}
@@ -519,7 +519,7 @@ const BusinessLanding = () => {
                     <Sparkles size={12} /> הכי פופולרי
                   </div>
                 )}
-                {plan.premium && (
+                {plan.enterprise && (
                   <div className="absolute -top-3 right-4 bg-foreground text-background text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
                     <Crown size={12} /> הכל כולל הכל
                   </div>
@@ -560,12 +560,12 @@ const BusinessLanding = () => {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => handleCheckout(plan.tier as "pro" | "premium")}
+                    onClick={() => handleCheckout(plan.tier as "pro" | "enterprise")}
                     disabled={checkoutLoading === plan.tier || subscriptionTier === plan.tier}
                     className={`w-full ${
                       plan.highlighted
                         ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
-                        : plan.premium
+                        : plan.enterprise
                         ? "bg-foreground text-background hover:bg-foreground/90"
                         : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                     }`}
@@ -645,17 +645,17 @@ const BusinessLanding = () => {
           <div className="max-w-3xl mx-auto space-y-3">
             {[
               { q: "מה זה ReviewHub?", a: "ReviewHub היא פלטפורמת ביקורות מאומתות מובילה בישראל. רק לקוחות שרכשו בפועל יכולים לכתוב ביקורת — כך אנחנו מבטיחים שהביקורות אמיתיות ואמינות." },
-              { q: "מה ההבדל בין התוכניות?", a: "סטארטר — חינם, פרופיל בסיסי. מקצועי — ביקורות ללא הגבלה, דאשבורד אנליטיקס, וידג'טים, אפיליאט ודוחות AI שבועיים. פרימיום — כל מה שבמקצועי + CRM, API, Webhook, דוחות AI יומיים ומנהל הצלחה." },
+              { q: "מה ההבדל בין התוכניות?", a: "סטארטר — חינם, פרופיל בסיסי. מקצועי — ביקורות ללא הגבלה, דאשבורד אנליטיקס, וידג'טים, אפיליאט ודוחות AI שבועיים. אנטרפרייז — כל מה שבמקצועי + CRM, API, Webhook, דוחות AI יומיים ומנהל הצלחה." },
               { q: "איך מאמתים שהביקורת אמיתית?", a: "אימות רכישה מתבצע דרך חשבונית שהלקוח מעלה, אימות אוטומטי מול מערכת התשלומים, או קישור ביקורת ייעודי שנשלח רק ללקוחות שרכשו. ביקורות מאומתות מסומנות ב-✅." },
               { q: "מה קורה אם לקוח כותב ביקורת שלילית?", a: "תוכלו להגיב באופן מקצועי מלוח הבקרה. מחקרים מראים שתגובה מקצועית לביקורת שלילית דווקא מגבירה אמון. ביקורות שמפרות כללים ניתן לדווח ונבדוק תוך 24-48 שעות." },
               { q: "איך מטמיעים וידג'ט באתר שלי?", a: "מלוח הבקרה, גשו ל'וידג'ט להטמעה'. תקבלו קוד HTML/JavaScript פשוט — הדביקו אותו באתר שלכם. הוידג'ט מציג את הדירוג והביקורות ומתעדכן אוטומטית. זמין מתוכנית מקצועי." },
               { q: "מה זה מערכת אפיליאט?", a: "מערכת האפיליאט מייצרת קישורי הפניה ייחודיים לשירותים שלכם. אתם מקבלים עמלה על כל מכירה דרך ReviewHub, ויכולים לעקוב אחרי קליקים, המרות והכנסות. זמין מתוכנית מקצועי." },
-              { q: "מה כולל דוח ה-AI?", a: "דוח ה-AI מנתח את הביקורות שלכם ומזהה חוזקות, חולשות, מגמות והמלצות קונקרטיות לצמיחה. במקצועי: שבועי, בפרימיום: יומי." },
+              { q: "מה כולל דוח ה-AI?", a: "דוח ה-AI מנתח את הביקורות שלכם ומזהה חוזקות, חולשות, מגמות והמלצות קונקרטיות לצמיחה. במקצועי: שבועי, באנטרפרייז: יומי." },
               { q: "יש תקופת ניסיון?", a: "כן! תוכנית מקצועי כוללת 14 ימי ניסיון חינם. תוכלו לבטל בכל עת ללא חיוב." },
               { q: "אפשר לבטל את המנוי?", a: "כן, תוכלו לבטל בכל עת. לאחר הביטול, החשבון ירד לתוכנית סטארטר. כל הביקורות שנאספו נשמרות." },
               { q: "האם המידע שלי מאובטח?", a: "בהחלט. אנחנו משתמשים בהצפנת SSL, בקרת גישה ברמת שורה (RLS), ותשתית מאובטחת. המידע העסקי שלכם מוגן ולא נמכר לצדדים שלישיים. ספקי שירות חיוניים (כגון עיבוד תשלומים) מקבלים גישה מינימלית הנדרשת לתפעול בלבד." },
-              { q: "כמה עולה להירשם?", a: "יש תוכנית חינמית עם פרופיל בסיסי ועד 10 ביקורות בחודש. תוכניות מתקדמות: מקצועי (₪189/חודש) ופרימיום (₪479/חודש) עם פיצ'רים מתקדמים." },
-              { q: "איך יוצרים קשר?", a: "לשאלות מהירות — השתמשו בצ'אטבוט ה-AI שלנו (הכפתור למטה). ליצירת קשר אנושית — שלחו מייל ל-reviewhub.il@gmail.com. מנויי מקצועי ופרימיום מקבלים מענה בעדיפות." },
+              { q: "כמה עולה להירשם?", a: "יש תוכנית חינמית עם פרופיל בסיסי ועד 10 ביקורות בחודש. תוכניות מתקדמות: מקצועי (₪189/חודש) ואנטרפרייז (₪479/חודש) עם פיצ'רים מתקדמים." },
+              { q: "איך יוצרים קשר?", a: "לשאלות מהירות — השתמשו בצ'אטבוט ה-AI שלנו (הכפתור למטה). ליצירת קשר אנושית — שלחו מייל ל-reviewhub.il@gmail.com. מנויי מקצועי ואנטרפרייז מקבלים מענה בעדיפות." },
             ].map(({ q, a }, i) => (
               <motion.div
                 key={i}

@@ -8,7 +8,6 @@ import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown, Trophy, Star } f
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import FloatingEarnCTA from "@/components/FloatingEarnCTA";
 import { FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, FREELANCER_CATEGORIES, type Business, type Course } from "@/data/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
@@ -198,7 +197,6 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
-      <FloatingEarnCTA />
       <div className="container py-10">
         <h1 className="font-display font-bold text-3xl mb-6">חפשו בעלי מקצוע וקורסים</h1>
 

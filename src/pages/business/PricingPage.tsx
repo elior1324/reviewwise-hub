@@ -19,7 +19,7 @@ const PricingPage = () => {
       navigate("/business/dashboard");
       return;
     }
-    setSelectedPlan(planId === "pro" ? "מקצועי" : "פרימיום");
+    setSelectedPlan(planId === "pro" ? "מקצועי" : "אנטרפרייז");
     setShowPopup(true);
   };
 
