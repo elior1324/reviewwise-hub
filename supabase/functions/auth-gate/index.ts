@@ -57,11 +57,17 @@ function fail(error: string, extra: Record<string, unknown> = {}, cors: Record<s
 // ── Main handler ───────────────────────────────────────────────────────────
 
 serve(async (req: Request) => {
-  const cors = getCorsHeaders(req);
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
 
-  // Pre-flight
-  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
-  if (req.method !== "POST")    return fail("Method not allowed", {}, cors);
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  if (req.method !== "POST")    return fail("Method not allowed", {}, corsHeaders);
 
   // ── Environment ────────────────────────────────────────────────────────
   const TURNSTILE_SECRET_KEY      = Deno.env.get("TURNSTILE_SECRET_KEY") ?? "";
