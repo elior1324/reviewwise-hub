@@ -304,7 +304,7 @@ export default function MerchantVerificationDashboard() {
 
           {/* Filter + refresh */}
           <div className="flex items-center justify-between mb-5">
-            <div className="flex gap-2">
+              <div className="flex gap-2">
               {(["pending", "all"] as const).map((f) => (
                 <button
                   key={f}
@@ -355,7 +355,7 @@ export default function MerchantVerificationDashboard() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, height: 0 }}
-                    className={`bg-card border rounded-2xl overflow-hidden shadow-sm ${
+                    className={` bg-card border rounded-2xl overflow-hidden shadow-sm ${
                       item.status === "pending"  ? "border-amber-200 dark:border-amber-800"
                     : item.status === "confirmed" ? "border-emerald-200 dark:border-emerald-800"
                     : item.status === "rejected"  ? "border-red-200 dark:border-red-800"
@@ -410,7 +410,7 @@ export default function MerchantVerificationDashboard() {
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                         <div className="bg-muted/50 rounded-lg p-3">
                           <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                            <FileHash size={12} />
+                            <Hash size={12} />
                             <span className="text-[10px] font-semibold uppercase tracking-wide">Hash</span>
                           </div>
                           <p className="text-xs font-mono text-foreground truncate" title={item.invoice_hash}>
