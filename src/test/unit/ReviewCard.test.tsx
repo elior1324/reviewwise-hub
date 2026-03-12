@@ -11,56 +11,65 @@
  *
  * Run: npm test -- ReviewCard
  */
-import React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import ReviewCard from "@/components/ReviewCard";
-import { mockAuthContext, MOCK_USER } from "@/test/mocks/auth-context";
-import { mockSupabase, chain } from "@/test/mocks/supabase";
 
-// ── Hoist toast so vi.mock factory can reference it without a top-level import.
-// vi.hoisted() runs before imports, making the value safe to use in any factory.
-const { toast } = vi.hoisted(() => ({
-  toast: Object.assign(vi.fn(), {
-    success: vi.fn(),
-    error: vi.fn(),
-    info: vi.fn(),
-    warning: vi.fn(),
-    message: vi.fn(),
-    loading: vi.fn(),
-    dismiss: vi.fn(),
-  }),
-}));
+// ─────────────────────────────────────────────────────────────────────────────
+// ALL vi.mock() calls must appear before any import statements so vitest can
+// hoist them correctly. The rule: never reference a module-level import inside
+// a synchronous vi.mock() factory — the factory runs before imports resolve.
+// ─────────────────────────────────────────────────────────────────────────────
 
-// ── Module mocks ──────────────────────────────────────────────────────────────
-// Use the hoisted toast directly — no factory-level "const toast" needed.
-vi.mock("sonner", () => ({ toast, Toaster: () => null }));
+// Radix Tooltip requires <TooltipProvider> in the tree; stub it away for unit
+// tests. Mirrors the framer-motion pattern in setup.ts (require() is available
+// inside vi.mock factories per Vitest docs).
+vi.mock("@/components/ui/tooltip", () => {
+  const React = require("react");
+  return {
+    TooltipProvider: ({ children }: React.PropsWithChildren) =>
+      React.createElement(React.Fragment, null, children ?? null),
+    Tooltip: ({ children }: React.PropsWithChildren) =>
+      React.createElement(React.Fragment, null, children ?? null),
+    TooltipTrigger: ({ children }: React.PropsWithChildren) =>
+      React.createElement(React.Fragment, null, children ?? null),
+    TooltipContent: () => null,
+  };
+});
+
+// Stub auth context so every test controls the current user.
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: vi.fn() }));
-// Use async factory + dynamic import so mockSupabase (an import) is reachable
-// even after vi.mock hoists this call above the static import statements.
+
+// Async factory + dynamic import: mockSupabase is a statically-imported value.
+// A synchronous factory would reference it before the import is initialised
+// (hoisting race). Async factory + await import() avoids this; Vitest's module
+// cache guarantees both the factory and the static import get the same object.
 vi.mock("@/integrations/supabase/client", async () => {
   const { mockSupabase } = await import("@/test/mocks/supabase");
   return { supabase: mockSupabase };
 });
-// Stub sub-components that have deep dependency trees
-vi.mock("@/components/ReviewResponse", () => ({ default: () => null }));
-vi.mock("@/components/ReportReviewDialog", () => ({ default: () => null }));
-vi.mock("@/components/VerifiedBadge", () => ({ default: () => null }));
-vi.mock("@/data/mockData", () => ({ getTimeSincePurchase: () => "לפני 3 חודשים" }));
-// Radix Tooltip requires <TooltipProvider> in the tree — stub it away so
-// unit tests don't need a provider wrapper. Pattern mirrors setup.ts framer-motion.
-vi.mock("@/components/ui/tooltip", () => {
-  const React = require("react");
-  return {
-    TooltipProvider: ({ children }: React.PropsWithChildren) => children,
-    Tooltip:         ({ children }: React.PropsWithChildren) => children,
-    TooltipTrigger:  ({ children }: React.PropsWithChildren) => children,
-    TooltipContent:  () => null,
-  };
-});
 
-import { useAuth } from "@/contexts/AuthContext";
+// Stub sub-components that have deep dependency trees.
+vi.mock("@/components/ReviewResponse",     () => ({ default: () => null }));
+vi.mock("@/components/ReportReviewDialog", () => ({ default: () => null }));
+vi.mock("@/components/VerifiedBadge",      () => ({ default: () => null }));
+vi.mock("@/data/mockData", () => ({ getTimeSincePurchase: () => "לפני 3 חודשים" }));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Imports — resolved AFTER the mocks above are registered.
+// ─────────────────────────────────────────────────────────────────────────────
+import React from "react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+// sonner: setup.ts mocks "sonner" globally. Importing toast here gives us the
+// same vi.fn() instance ReviewCard.tsx uses at runtime → spy calls are shared.
+// No vi.hoisted() or per-file vi.mock("sonner") needed.
+import { toast } from "sonner";
+
+import ReviewCard from "@/components/ReviewCard";
+import { mockAuthContext, MOCK_USER } from "@/test/mocks/auth-context";
+import { mockSupabase, chain }         from "@/test/mocks/supabase";
+import { useAuth }                     from "@/contexts/AuthContext";
+
 const mockUseAuth = vi.mocked(useAuth);
 
 // ── Default props ─────────────────────────────────────────────────────────────
@@ -77,10 +86,8 @@ const BASE_PROPS = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // Default: no liked row found
-  mockSupabase.from.mockReturnValue(
-    chain({ data: null, error: null })
-  );
+  // Default: no liked row, RPC resolves clean
+  mockSupabase.from.mockReturnValue(chain({ data: null, error: null }));
   mockSupabase.rpc.mockResolvedValue({ data: null, error: null });
   mockUseAuth.mockReturnValue(mockAuthContext({ user: null }));
 });
@@ -89,16 +96,16 @@ beforeEach(() => {
 // 1. useEffect cleanup — no stale setState after unmount
 // ═════════════════════════════════════════════════════════════════════════════
 describe("useEffect cleanup (review_likes fetch)", () => {
-  it("does NOT update state when unmounted before the query resolves", async () => {
+  it("does NOT call setState when unmounted before the query resolves", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     mockUseAuth.mockReturnValue(mockAuthContext({ user: MOCK_USER }));
 
-    // Make the query take long enough to unmount first
+    // Delay the query so we can unmount before it resolves
     let resolveQuery!: (v: unknown) => void;
     const neverQuery = new Promise((res) => { resolveQuery = res; });
     mockSupabase.from.mockReturnValue({
       select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
+      eq:     vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockReturnThis(),
       then: (cb: (v: unknown) => void) => neverQuery.then(cb),
     });
@@ -106,13 +113,12 @@ describe("useEffect cleanup (review_likes fetch)", () => {
     const { unmount } = render(<ReviewCard {...BASE_PROPS} />);
     unmount(); // unmount BEFORE query resolves
 
-    // Now resolve the query — the cancelled flag should prevent setState
     resolveQuery({ data: { id: "like-1" }, error: null });
     await Promise.resolve(); // flush microtasks
 
-    // No React "update on unmounted component" error
+    // The cancelled flag in useEffect should prevent any setState call
     expect(consoleSpy).not.toHaveBeenCalledWith(
-      expect.stringContaining("unmounted")
+      expect.stringContaining("unmounted"),
     );
     consoleSpy.mockRestore();
   });
@@ -120,15 +126,13 @@ describe("useEffect cleanup (review_likes fetch)", () => {
   it("sets liked=true when query resolves before unmount", async () => {
     mockUseAuth.mockReturnValue(mockAuthContext({ user: MOCK_USER }));
     mockSupabase.from.mockReturnValue(
-      chain({ data: { id: "like-1" }, error: null })
+      chain({ data: { id: "like-1" }, error: null }),
     );
 
     render(<ReviewCard {...BASE_PROPS} />);
 
-    // The like button should reflect the liked state
     await waitFor(() => {
-      const likeBtn = screen.getByRole("button", { name: /ביטול/i });
-      expect(likeBtn).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /ביטול/i })).toBeInTheDocument();
     });
   });
 });
@@ -139,24 +143,22 @@ describe("useEffect cleanup (review_likes fetch)", () => {
 describe("Like / unlike interaction", () => {
   it("optimistically increments like count when user clicks like", async () => {
     mockUseAuth.mockReturnValue(mockAuthContext({ user: MOCK_USER }));
-    // insert succeeds
     mockSupabase.from.mockReturnValue(
-      chain({ data: [{ id: "new-like" }], error: null })
+      chain({ data: [{ id: "new-like" }], error: null }),
     );
 
     render(<ReviewCard {...BASE_PROPS} likeCount={3} />);
 
-    const likeBtn = screen.getByRole("button", { name: /מועיל/i });
-    await userEvent.click(likeBtn);
+    await userEvent.click(screen.getByRole("button", { name: /מועיל/i }));
 
-    // Optimistic update: count should be 4 immediately
+    // Optimistic update: count should be 4 immediately, before DB confirms
     expect(screen.getByText("4")).toBeInTheDocument();
   });
 
   it("rolls back like count if DB insert fails", async () => {
     mockUseAuth.mockReturnValue(mockAuthContext({ user: MOCK_USER }));
     mockSupabase.from.mockReturnValue(
-      chain({ data: null, error: { message: "DB error" } })
+      chain({ data: null, error: { message: "DB error" } }),
     );
 
     render(<ReviewCard {...BASE_PROPS} likeCount={3} />);
@@ -164,7 +166,7 @@ describe("Like / unlike interaction", () => {
     await userEvent.click(screen.getByRole("button", { name: /מועיל/i }));
 
     await waitFor(() => {
-      // After rollback, count should be 3 again
+      // After rollback the count returns to 3
       expect(screen.getByText("3")).toBeInTheDocument();
       expect(toast.error).toHaveBeenCalledWith(expect.stringMatching(/לא ניתן/));
     });
@@ -183,7 +185,7 @@ describe("Like requires authenticated user", () => {
 
     expect(toast.error).toHaveBeenCalledWith(
       expect.stringMatching(/להתחבר/),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 });
@@ -193,9 +195,8 @@ describe("Like requires authenticated user", () => {
 // ═════════════════════════════════════════════════════════════════════════════
 describe("Edit flow", () => {
   it("shows edit button only for the review owner", () => {
-    // Owner user
     mockUseAuth.mockReturnValue(
-      mockAuthContext({ user: { ...MOCK_USER, id: "owner-id" } })
+      mockAuthContext({ user: { ...MOCK_USER, id: "owner-id" } }),
     );
     render(<ReviewCard {...BASE_PROPS} userId="owner-id" />);
     expect(screen.getByRole("button", { name: /עריכה/i })).toBeInTheDocument();
@@ -203,7 +204,7 @@ describe("Edit flow", () => {
 
   it("does NOT show edit button for a different user", () => {
     mockUseAuth.mockReturnValue(
-      mockAuthContext({ user: { ...MOCK_USER, id: "other-id" } })
+      mockAuthContext({ user: { ...MOCK_USER, id: "other-id" } }),
     );
     render(<ReviewCard {...BASE_PROPS} userId="owner-id" />);
     expect(screen.queryByRole("button", { name: /עריכה/i })).not.toBeInTheDocument();
@@ -211,16 +212,16 @@ describe("Edit flow", () => {
 
   it("shows spinner while saving edit, then updates displayed text", async () => {
     mockUseAuth.mockReturnValue(
-      mockAuthContext({ user: { ...MOCK_USER, id: "owner-id" } })
+      mockAuthContext({ user: { ...MOCK_USER, id: "owner-id" } }),
     );
 
     let resolveSave!: (v: unknown) => void;
     const pendingSave = new Promise((res) => { resolveSave = res; });
     mockSupabase.from.mockReturnValue({
-      select: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      delete: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
+      select:     vi.fn().mockReturnThis(),
+      update:     vi.fn().mockReturnThis(),
+      delete:     vi.fn().mockReturnThis(),
+      eq:         vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockReturnThis(),
       then: (cb: (v: unknown) => void) => pendingSave.then(cb),
     });
@@ -231,9 +232,9 @@ describe("Edit flow", () => {
     const textarea = screen.getByRole("textbox");
     await userEvent.clear(textarea);
     await userEvent.type(textarea, "ביקורת מעודכנת ועם עוד תוכן");
-
     await userEvent.click(screen.getByRole("button", { name: /שמירה/i }));
-    // Spinner visible while saving
+
+    // Spinner visible during the pending save
     expect(screen.getByText("שומר...")).toBeInTheDocument();
 
     resolveSave({ data: null, error: null });
@@ -249,13 +250,7 @@ describe("Edit flow", () => {
 // ═════════════════════════════════════════════════════════════════════════════
 describe("Flagged review styling", () => {
   it("shows the flag reason when flagged=true", () => {
-    render(
-      <ReviewCard
-        {...BASE_PROPS}
-        flagged={true}
-        flagReason="תוכן לא הולם"
-      />
-    );
+    render(<ReviewCard {...BASE_PROPS} flagged={true} flagReason="תוכן לא הולם" />);
     expect(screen.getByText(/תוכן לא הולם/)).toBeInTheDocument();
   });
 
