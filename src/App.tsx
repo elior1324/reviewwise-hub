@@ -71,7 +71,7 @@ const App = () => (
           {/* Floating scroll-to-top button — visible on all pages */}
           <ScrollToTopButton />
           <Routes>
-            {/* Consumer routes */}
+            {/* Consumer ָroutes */}
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
@@ -133,7 +133,8 @@ const App = () => (
             {/* /pricing → canonical URL */}
             <Route path="/pricing" element={<Navigate to="/business/pricing" replace />} />
 
-            <Route path="*" element={<NotFound />} />
+<Route path="/auth" element={<Navigate to="/business/login" replace />} />            
+<Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
