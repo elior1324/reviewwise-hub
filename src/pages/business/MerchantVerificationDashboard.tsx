@@ -19,19 +19,19 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldCheck,
-  ShieldX,
-  Clock,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  FileHash,
-  CalendarDays,
-  Banknote,
-  FileText,
-  Loader2,
-  RefreshCw,
-  Info,
-  Lock,
+ShieldX,
+Clock,
+AlertTriangle,
+CheckCircle2,
+XCircle,
+Hash,
+CalendarDays,
+Banknote,
+FileText,
+Loader2,
+RefreshCw,
+Info,
+Lock,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
