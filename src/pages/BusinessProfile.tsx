@@ -10,6 +10,7 @@ import TestimonialCarousel from "@/components/TestimonialCarousel";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { ShieldCheck, MessageSquare } from "lucide-react";
 import { useState, useEffect } from "react";
 import { generateReviewSummary, FREELANCER_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
@@ -183,6 +184,14 @@ const BusinessProfile = () => {
   const filteredReviews = filterRating ? reviews.filter(r => r.rating === filterRating) : reviews;
   const summary = generateReviewSummary(reviews);
 
+  // ── Hybrid review tiers ────────────────────────────────────────────────────
+  // Tier 1: purchase-verified reviews → count toward trust score, shown first
+  // Tier 2: open community reviews    → no purchase proof, NOT in trust score
+  const verifiedFiltered = filteredReviews.filter(r => r.verified);
+  const openFiltered     = filteredReviews.filter(r => !r.verified);
+  const totalVerified    = reviews.filter(r => r.verified).length;
+  const totalOpen        = reviews.filter(r => !r.verified).length;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background noise-overlay">
@@ -210,9 +219,14 @@ const BusinessProfile = () => {
   }
 
   // ── JSON-LD structured data for Google Review Stars ───────────────────────
-  // rating and reviewCount are now computed from real reviews above (not from
-  // non-existent DB columns), so these values will never be "0" incorrectly.
-  const jsonLd = business && business.reviewCount > 0 ? {
+  // Use only VERIFIED reviews for the aggregate rating — consistent with the
+  // institutional model where trust score is derived from verified data only.
+  const verifiedReviews = reviews.filter(r => r.verified);
+  const verifiedAvgRating = verifiedReviews.length > 0
+    ? verifiedReviews.reduce((sum, r) => sum + r.rating, 0) / verifiedReviews.length
+    : 0;
+
+  const jsonLd = business && verifiedReviews.length > 0 ? {
     "@context": "https://schema.org",
     "@type": business.type === "freelancer" ? "LocalBusiness" : "EducationalOrganization",
     "name": business.name,
@@ -220,10 +234,10 @@ const BusinessProfile = () => {
     ...(business.website ? { "url": business.website } : {}),
     "aggregateRating": {
       "@type": "AggregateRating",
-      "ratingValue": business.rating.toFixed(1),
+      "ratingValue": verifiedAvgRating.toFixed(1),
       "bestRating": "5",
       "worstRating": "1",
-      "reviewCount": business.reviewCount.toString(),
+      "reviewCount": verifiedReviews.length.toString(),
     },
   } : null;
 
@@ -282,7 +296,10 @@ const BusinessProfile = () => {
 
         {/* Add Review */}
         <div className="mb-8">
-          <h2 className="font-display font-bold text-xl mb-4">הוסיפו תגובה</h2>
+          <h2 className="font-display font-bold text-xl mb-1">כתבו ביקורת</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            ביקורת עם הוכחת רכישה תסומן כ"מאומתת" ותיספר בציון האמון.
+          </p>
           <AddReviewForm
             businessSlug={business.slug}
             businessName={business.name}
@@ -307,20 +324,71 @@ const BusinessProfile = () => {
           ))}
         </div>
 
-        {/* Reviews */}
-        <div className="space-y-4">
-          {filteredReviews.length > 0 ? (
-            filteredReviews.map((review, i) => (
-              <motion.div
-                key={review.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04 }}
-              >
-                <ReviewCard {...review} />
-              </motion.div>
-            ))
-          ) : (
+        {/* Reviews — two-tier: verified purchase first, open community after */}
+        <div className="space-y-6">
+
+          {/* Trust score notice */}
+          {totalVerified > 0 && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-lg px-3 py-2.5">
+              <ShieldCheck size={13} className="text-primary shrink-0" />
+              <span>
+                ציון האמון מחושב מ-<strong className="text-foreground">{totalVerified} ביקורות מאומתות רכישה</strong> בלבד
+                {totalOpen > 0 && ` · ${totalOpen} משובי קהילה מוצגים בנפרד ואינם נספרים`}
+              </span>
+            </div>
+          )}
+
+          {/* ── Tier 1: Verified Purchase reviews ─────────────────────────────── */}
+          {verifiedFiltered.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <ShieldCheck size={15} className="text-primary" aria-hidden="true" />
+                <h3 className="font-display font-semibold text-sm text-foreground">ביקורות מאומתות רכישה</h3>
+                <span className="text-xs text-muted-foreground">({verifiedFiltered.length})</span>
+              </div>
+              <div className="space-y-4">
+                {verifiedFiltered.map((review, i) => (
+                  <motion.div
+                    key={review.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                  >
+                    <ReviewCard {...review} reviewTier="verified" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Tier 2: Open Community reviews ────────────────────────────────── */}
+          {openFiltered.length > 0 && (
+            <div className={verifiedFiltered.length > 0 ? "border-t border-border/30 pt-6" : ""}>
+              <div className="flex items-center gap-2 mb-1">
+                <MessageSquare size={14} className="text-muted-foreground" aria-hidden="true" />
+                <h3 className="font-display font-semibold text-sm text-foreground">משוב קהילה</h3>
+                <span className="text-xs text-muted-foreground">({openFiltered.length})</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">
+                משובים אלו לא עברו אימות רכישה ואינם נספרים בחישוב ציון האמון.
+              </p>
+              <div className="space-y-4">
+                {openFiltered.map((review, i) => (
+                  <motion.div
+                    key={review.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                  >
+                    <ReviewCard {...review} reviewTier="open" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {filteredReviews.length === 0 && (
             <p className="text-center text-muted-foreground py-10">
               {reviews.length === 0 ? "עדיין אין ביקורות לעסק זה." : "אין ביקורות עם הסינון הנבחר."}
             </p>

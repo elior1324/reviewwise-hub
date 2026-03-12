@@ -3,7 +3,7 @@ import StarRating from "./StarRating";
 import VerifiedBadge from "./VerifiedBadge";
 import ReviewResponse from "./ReviewResponse";
 import ReportReviewDialog from "./ReportReviewDialog";
-import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2 } from "lucide-react";
+import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2, MessageSquare } from "lucide-react";
 import { getTimeSincePurchase } from "@/data/mockData";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -61,6 +61,11 @@ interface ReviewCardProps {
   onHelpfulReply?: () => void;
   onDelete?: (reviewId: string) => void;
   onEdit?: (reviewId: string, newText: string) => void;
+  /**
+   * "verified" — purchase-verified review, counts toward trust score (default)
+   * "open"     — community review, no purchase proof, NOT counted in trust score
+   */
+  reviewTier?: "verified" | "open";
 }
 
 const ReviewCard = ({
@@ -89,6 +94,7 @@ const ReviewCard = ({
   onHelpfulReply,
   onDelete,
   onEdit,
+  reviewTier = "verified",
 }: ReviewCardProps) => {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [liked, setLiked] = useState(false);
@@ -224,7 +230,7 @@ const ReviewCard = ({
 
   return (
     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.2, ease: "easeOut" }}>
-      <Card className={`shadow-card hover:shadow-card-hover transition-all duration-500 animated-border bg-card relative ${flagged ? "border-destructive/30" : ""} ${isDisputed ? "border-amber-500/40" : ""}`}>
+      <Card className={`shadow-card hover:shadow-card-hover transition-all duration-500 animated-border bg-card relative ${reviewTier === "open" ? "opacity-90 bg-card/70" : ""} ${flagged ? "border-destructive/30" : ""} ${isDisputed ? "border-amber-500/40" : ""}`}>
         {/* ── Disputed overlay — blurs content while under investigation ── */}
         {isDisputed && (
           <div className="absolute inset-0 z-10 rounded-[inherit] overflow-hidden flex flex-col items-center justify-center gap-2 backdrop-blur-sm bg-background/60 border border-amber-500/30">
@@ -242,10 +248,18 @@ const ReviewCard = ({
           </div>
         )}
         <CardContent className={`p-6 ${isDisputed ? "blur-[2px] pointer-events-none select-none" : ""}`}>
-          {/* Verified badge — top left */}
-          {verified && (
+          {/* Tier badge — top left */}
+          {reviewTier === "verified" && verified && (
             <div className="absolute top-3 left-3">
               <VerifiedBadge showBoost />
+            </div>
+          )}
+          {reviewTier === "open" && (
+            <div className="absolute top-3 left-3">
+              <div className="inline-flex items-center gap-1 bg-muted/60 border border-border/50 rounded-full px-2 py-0.5 text-[10px] text-muted-foreground font-medium">
+                <MessageSquare size={9} aria-hidden="true" />
+                משוב קהילה
+              </div>
             </div>
           )}
 
@@ -395,8 +409,15 @@ const ReviewCard = ({
             </div>
           )}
 
+          {/* Open-tier notice */}
+          {reviewTier === "open" && (
+            <p className="mt-3 text-[10px] text-muted-foreground/50 leading-snug border-t border-border/30 pt-2">
+              משוב זה לא עבר אימות רכישה — אינו נספר בחישוב ציון האמון.
+            </p>
+          )}
+
           {/* Safe Harbor disclaimer */}
-          <p className="mt-3 text-[10px] text-muted-foreground/60 leading-snug">
+          <p className="mt-2 text-[10px] text-muted-foreground/60 leading-snug">
             ביקורת זו משקפת את דעתו האישית של המשתמש שפרסם אותה. ReviewHub אינה מאמתת את דיוק העובדות.
           </p>
 
