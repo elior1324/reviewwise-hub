@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ interface BusinessAuthProps {
 
 const BusinessAuth = ({ mode }: BusinessAuthProps) => {
   const [email, setEmail] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -49,7 +51,13 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
           setLoading(false);
           return;
         }
-        const { data, error } = await signUp(email, password, name);
+        if (!turnstileToken) {
+  toast.error("אנא השלימו את אימות האנושיות");
+  setLoading(false);
+  return;
+}
+const { data, error } = await signUp(email, password, name, turnstileToken);
+ await signUp(email, password, name,turnstileToken);
 
         if (error) throw error;
         if (!data?.user) {
@@ -211,6 +219,13 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
               )}
 
               {mode === "login" && <FormPrivacyNotice className="mt-1" />}
+               ...
+               <Turnstile
+                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                onSuccess={(token) => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken(null)}
+                onError={() => setTurnstileToken(null)}
+               />
 
               <Button
                 type="submit"
