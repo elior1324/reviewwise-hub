@@ -45,7 +45,7 @@ const AuthCallback = () => {
     const fail = (reason: string) => {
       console.error("[AuthCallback] OAuth callback failed:", reason);
       toast.error("ההתחברות עם Google נכשלה. נסו שוב.");
-      navigate("/auth", { replace: true });
+      navigate("/business/login", { replace: true });
     };
 
     // ── Check for an error param in the URL (e.g. user denied access) ─────
@@ -80,12 +80,31 @@ const AuthCallback = () => {
         const { error: exchangeError } =
           await supabase.auth.exchangeCodeForSession(window.location.href);
 
-        if (exchangeError) {
+        // If PKCE verifier is missing, Supabase may still have created a session.
+        // Do not show a failure toast until we confirm there's no session.
+        const verifierMissing =
+          !!exchangeError?.message &&
+          exchangeError.message.includes("PKCE code verifier not found in storage");
+
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          fail(`getSession failed: ${sessionError.message}`);
+          return;
+        }
+
+        const session = sessionData.session;
+        if (session) {
+          await redirectForUser(session.user.id);
+          return;
+        }
+
+        if (exchangeError && !verifierMissing) {
           fail(`exchangeCodeForSession failed: ${exchangeError.message}`);
           return;
         }
 
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        fail("No session after code exchange (PKCE verifier missing). Start login from /business/login in the same tab.");
+
         if (sessionError) {
           fail(`getSession failed: ${sessionError.message}`);
           return;
