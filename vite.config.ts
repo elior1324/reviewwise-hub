@@ -76,6 +76,13 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // ── SECURITY: never expose source maps in production builds ─────────────
+    // Source maps would reveal the original TypeScript source to anyone who
+    // opens DevTools, making reverse-engineering and vulnerability discovery
+    // significantly easier for attackers.
+    sourcemap: false,
+  },
 }));
 
 /**

@@ -209,6 +209,37 @@ serve(async (req: Request) => {
       return jsonResp({ error: "Business not found" }, 404, cors);
     }
 
+    // ── SECURITY FIX: Server-side verified purchase validation ────────────
+    // VULNERABILITY (before fix): Client sent verifiedPurchase=true and the
+    // server trusted it unconditionally — anyone could forge a "Verified
+    // Purchase" badge on their review with no actual purchase.
+    //
+    // FIX: Query the purchases table and only set verified_purchase=true if
+    // a matching record exists for this user+course combination.
+    // Fallback: if no courseId was provided, verified_purchase is always false.
+    let serverVerifiedPurchase = false;
+    let serverVerificationStatus = "anonymous";
+
+    if (courseId && typeof courseId === "string") {
+      // Check purchases by user_id first (most reliable), then by email fallback
+      const { data: purchaseRow } = await adminClient
+        .from("purchases")
+        .select("id, verified")
+        .eq("course_id", courseId)
+        .or(`customer_user_id.eq.${user.id},customer_email.eq.${user.email ?? ""}`)
+        .maybeSingle();
+
+      if (purchaseRow) {
+        // Purchase record found — honour verified flag from the DB record
+        serverVerifiedPurchase  = purchaseRow.verified ?? true;
+        serverVerificationStatus = serverVerifiedPurchase
+          ? "purchase_verified"
+          : "email_verified";
+      }
+      // If no purchase record: leave serverVerifiedPurchase = false
+      // (client's verifiedPurchase claim is silently ignored)
+    }
+
     // Capture audit metadata for legal compliance (Pillar 3)
     const submissionIp = req.headers.get("CF-Connecting-IP") ?? req.headers.get("X-Forwarded-For") ?? null;
     const submissionUa = req.headers.get("User-Agent") ?? null;
@@ -223,7 +254,8 @@ serve(async (req: Request) => {
         review_text:           cleanReviewText,
         subject:               cleanSubject,
         training_duration:     trainingDuration,
-        verified_purchase:     Boolean(verifiedPurchase),
+        // ✅ FIXED: server-verified value only — client's claim is ignored
+        verified_purchase:     serverVerifiedPurchase,
         reviewer_name:         cleanReviewerName,
         anonymous:             false,
         submission_ip:         submissionIp,
@@ -233,7 +265,8 @@ serve(async (req: Request) => {
         indemnity_accepted_at: indemnityAcceptedAt && typeof indemnityAcceptedAt === "string"
           ? indemnityAcceptedAt
           : new Date().toISOString(),
-        verification_status:   cleanVerificationStatus,
+        // ✅ FIXED: server-computed status — not the client-supplied value
+        verification_status:   serverVerificationStatus,
       });
 
     if (insertError) {
@@ -249,7 +282,7 @@ serve(async (req: Request) => {
       return jsonResp({ error: "Failed to save review" }, 500, cors);
     }
 
-    return jsonResp({ success: true, verifiedPurchase: Boolean(verifiedPurchase) }, 200, cors);
+    return jsonResp({ success: true, verifiedPurchase: serverVerifiedPurchase }, 200, cors);
 
   } catch (err) {
     console.error("[submit-review] unexpected error:", err);

@@ -67,6 +67,17 @@ export default function WidgetPage() {
   const [widgetProps, setWidgetProps] = useState<Omit<TrustWidgetProps, "variant"> | null>(null);
   const [error, setError] = useState(false);
 
+  // ── Inject noindex into <head> — not body (where React renders) ──────────
+  // The X-Robots-Tag HTTP header in _headers already handles server-side
+  // noindex. This is a belt-and-suspenders client-side complement.
+  useEffect(() => {
+    const meta = document.createElement("meta");
+    meta.name    = "robots";
+    meta.content = "noindex, nofollow";
+    document.head.appendChild(meta);
+    return () => { document.head.removeChild(meta); };
+  }, []);
+
   useEffect(() => {
     if (!slug) { setError(true); return; }
 
@@ -127,11 +138,7 @@ export default function WidgetPage() {
 
   // ── Transparent shell — just the widget, nothing else ──────────────────────
   return (
-    <>
-      {/* noindex so search bots don't index the bare iframe URL */}
-      <meta name="robots" content="noindex, nofollow" />
-
-      <div
+    <div
         dir="rtl"
         style={{
           background: "transparent",
@@ -172,6 +179,5 @@ export default function WidgetPage() {
           </div>
         )}
       </div>
-    </>
   );
 }

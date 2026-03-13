@@ -65,3 +65,34 @@
   Cross-Origin-Embedder-Policy: unsafe-none
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-site
+
+##############################################################################
+#  /widget/* — Embeddable widget pages
+#
+#  These pages are intentionally served inside <iframe> on EXTERNAL websites
+#  (business owners embed them via copy-paste code). They require:
+#    • frame-ancestors * — allows embedding on any third-party domain
+#    • X-Robots-Tag noindex — prevents search engines from indexing bare iframes
+#    • Relaxed COEP/COOP — needed because the widget may load inside various
+#      cross-origin shells
+#
+#  SECURITY NOTE: These pages load no user credentials and expose only public
+#  review data. The permissive frame-ancestors is intentional and safe here.
+##############################################################################
+/widget/*
+  # Allow embedding on any external website (this IS the point of the widget)
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://supabase.co; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; frame-ancestors *; upgrade-insecure-requests
+
+  # Prevent search engines from indexing the bare widget URL
+  X-Robots-Tag: noindex, nofollow
+
+  # Keep HSTS and MIME protection
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Relax COOP so the page can open links in the parent frame context
+  Cross-Origin-Opener-Policy: unsafe-none
+  Cross-Origin-Embedder-Policy: unsafe-none
+  Cross-Origin-Resource-Policy: cross-origin
+
