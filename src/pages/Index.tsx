@@ -81,6 +81,7 @@ const Index = () => {
         category: b.category,
         rating: Number(b.rating) || 0,
         reviewCount: b.review_count || 0,
+        verifiedReviewCount: b.verified_review_count || 0,
         description: b.description || "",
         logo: b.logo_url || undefined,
         website: b.website || undefined,
@@ -422,8 +423,8 @@ const Index = () => {
 
       {/* Trustpilot-style testimonials marquee */}
       <TestimonialsSection
-        title="מה אומרים עלינו?"
-        description="ביקורות אמיתיות מלקוחות שבאמת רכשו שירותים וקורסים דרך ReviewHub"
+        title="ביקורות מאומתות — ממשתמשים שרכשו בפועל"
+        description="כל ביקורת קושרה לרכישה ממשית לפני שהתפרסמה. לא ניתן לרכוש מיקום, להסיר ביקורת שלילית, או לכתוב ביקורת ללא אימות."
         className="border-t border-border/40"
         testimonials={[
           {
@@ -504,8 +505,8 @@ const Index = () => {
       {/* Recent Reviews */}
       <section className="container py-20">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}>
-          <motion.h2 variants={fadeUp} custom={0} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">ביקורות אחרונות</motion.h2>
-          <motion.p variants={fadeUp} custom={1} className="text-muted-foreground mb-10">משוב אמיתי מלקוחות מאומתים</motion.p>
+          <motion.h2 variants={fadeUp} custom={0} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">רשומות אחרונות מהמאגר</motion.h2>
+          <motion.p variants={fadeUp} custom={1} className="text-muted-foreground mb-10">ביקורות מאומתות שנוספו לאחרונה — מסומנות לפי סוג הרכישה</motion.p>
         </motion.div>
         {recentReviews.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

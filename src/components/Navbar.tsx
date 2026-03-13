@@ -128,7 +128,7 @@ const Navbar = () => {
             to="/search"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            קטגוריות
+            ספריית מאומתים
           </Link>
 
           <Link
@@ -234,7 +234,7 @@ const Navbar = () => {
             className="block text-sm py-3 min-h-[44px] flex items-center"
             onClick={() => setMobileOpen(false)}
           >
-            קטגוריות
+            ספריית מאומתים
           </Link>
 
           {/* Business sub-links (always visible on mobile) */}
