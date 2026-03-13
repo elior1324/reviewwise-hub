@@ -1,11 +1,8 @@
 // src/components/blocks/features-grid.tsx
 //
-// ReviewHub "why us" bento feature grid, powered by GlowingEffect.
-// Adapts the Aceternity UI GlowingEffectDemo layout for the ReviewHub brand:
-//   - Hebrew copy, RTL text direction
-//   - Five feature tiles matching ReviewHub's core value props
-//   - Bento grid: same responsive 12-column layout from the original demo
-//   - Lucide-react icons only (no external icon assets)
+// ReviewHub "Why ReviewHub?" bento feature grid.
+// Five tiles represent the five institutional pillars that distinguish
+// ReviewHub from generic review platforms (Trustpilot / Zap / Easy).
 //
 // Placement: rendered on the Index (homepage) between the Stats strip and
 // the TestimonialsSection so it reinforces platform trust before social proof.
@@ -14,12 +11,13 @@ import { cn } from "@/lib/utils";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import {
   ShieldCheck,
-  BadgeCheck,
-  Search,
+  BarChart2,
   Lock,
-  Sparkles,
+  BookOpen,
+  Search,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 
@@ -51,77 +49,106 @@ export function FeaturesGrid() {
           custom={0}
           className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-4"
         >
-          <Sparkles size={15} />
-          למה ReviewHub?
+          <ShieldCheck size={15} />
+          תשתית אמון — לא פלטפורמת שיווק
         </motion.div>
         <motion.h2
           variants={fadeUp}
           custom={1}
           className="font-display font-bold text-2xl md:text-4xl text-foreground mb-3"
         >
-          הפלטפורמה שבנויה על אמון אמיתי
+          מה שמבדיל אותנו
         </motion.h2>
         <motion.p
           variants={fadeUp}
           custom={2}
           className="text-muted-foreground max-w-lg mx-auto"
         >
-          כל תכונה תוכננה כדי להגן עליכם, לשפר את חוויית הגלישה ולוודא שכל ביקורת שתראו — אמיתית.
+          ReviewHub בנויה על עקרונות אחרים לחלוטין מאתרי הביקורות המוכרים.
+          כל החלטות האדריכלות שלנו נועדו לשמור על אמון — לא להגדיל הכנסות על חשבונו.
         </motion.p>
       </motion.div>
 
       {/* Bento grid */}
       <ul className="grid grid-cols-1 grid-rows-none gap-4 md:grid-cols-12 md:grid-rows-3 lg:gap-4 xl:max-h-[34rem] xl:grid-rows-2">
-        {/* ① Large — Verified reviews */}
+
+        {/* ① Large — Verified records only */}
         <GridItem
           area="md:[grid-area:1/1/2/7] xl:[grid-area:1/1/2/5]"
           icon={<ShieldCheck className="h-4 w-4" />}
-          title="ביקורות מאומתות בלבד"
-          description="כל ביקורת עוברת אימות רכישה. אנחנו מוודאים שהמשתמש אכן שילם לפני שמפרסמים את חוות דעתו — אפס ביקורות מזויפות."
+          title="רשומות מאומתות — לא דעות"
+          description={
+            <>
+              כל ביקורת שנספרת בציון האמון קשורה לרכישה ממשית — אומתה מול
+              מערכות תשלום, לא על בסיס הצהרה עצמית.{" "}
+              <strong>ביקורת ללא הוכחת רכישה מוצגת בנפרד ואינה נספרת.</strong>
+            </>
+          }
         />
 
-        {/* ② Medium — Trust points */}
+        {/* ② — TrustScore formula */}
         <GridItem
           area="md:[grid-area:1/7/2/13] xl:[grid-area:2/1/3/5]"
-          icon={<BadgeCheck className="h-4 w-4" />}
-          title="נקודות אמון וסטטוס"
+          icon={<BarChart2 className="h-4 w-4" />}
+          title="ציון אמון — לא דירוג כוכבים"
           description={
             <>
-              כתבו ביקורות והרוויחו <strong>נקודות אמון</strong>, דרגות ותג
-              <strong> Verified Reviewer</strong> לאחר אימות רכישה.
-              הנקודות הן מוניטין בלבד ללא ערך כספי.
+              ציון האמון (0–100) מחושב מ-3 מרכיבים:{" "}
+              <strong>נפח ביקורות</strong> (40 נק׳),{" "}
+              <strong>בריאות החזרים</strong> (35 נק׳),{" "}
+              <strong>ותק פעילות</strong> (25 נק׳).
+              הנוסחה פתוחה — ניתן לבדוק כל מספר.
             </>
           }
         />
 
-        {/* ③ Tall — Smart search */}
+        {/* ③ Tall — Complete independence */}
         <GridItem
           area="md:[grid-area:2/1/3/7] xl:[grid-area:1/5/3/8]"
-          icon={<Search className="h-4 w-4" />}
-          title="חיפוש חכם ומסננים מתקדמים"
+          icon={<Lock className="h-4 w-4" />}
+          title="עצמאות מוחלטת"
           description={
             <>
-              מצאו פרילנסרים, קורסים וסדנאות לפי קטגוריה, דירוג, מחיר וקהל יעד.{" "}
-              <strong>אלגוריתם החיפוש שלנו</strong> מדרג לפי אמינות הביקורות,
-              לא לפי תשלום.
+              ציוני האמון <strong>אינם למכירה.</strong>{" "}
+              בעל עסק לא יכול לרכוש ציון גבוה יותר, לשלם על מיקום עדיף
+              בתוצאות החיפוש, או למחוק ביקורת שלילית.{" "}
+              ביקורות מוסרות רק אם הן מפרות כללים מוגדרים ועוברות בדיקה עצמאית.
+              <br /><br />
+              כאשר קיימים קישורי שותפים, זה מצוין במפורש —
+              ציון האמון נשאר בלתי תלוי לחלוטין.
             </>
           }
         />
 
-        {/* ④ Wide — Privacy */}
+        {/* ④ Wide — Open methodology */}
         <GridItem
           area="md:[grid-area:2/7/3/13] xl:[grid-area:1/8/2/13]"
-          icon={<Lock className="h-4 w-4" />}
-          title="פרטיות ואנונימיות"
-          description="בחרו לפרסם ביקורת בשמכם המלא או באנונימיות — הבחירה שלכם. הנתונים שלכם מוצפנים ולעולם לא נמכרים לצד שלישי."
+          icon={<BookOpen className="h-4 w-4" />}
+          title="מתודולוגיה פתוחה לציבור"
+          description={
+            <>
+              הנוסחה לחישוב ציון האמון,{" "}
+              <strong>כולל כל המרכיבים, משקולות והסבר מלא</strong>,
+              מפורסמת ונגישה לכל.{" "}
+              אתם יכולים לבדוק בדיוק איך כל מספר מתקבל — ולהחליט בעצמכם.
+            </>
+          }
+          link={{ to: "/about", label: "קראו את המתודולוגיה המלאה" }}
         />
 
-        {/* ⑤ Full-width — UX & accessibility */}
+        {/* ⑤ Full-width — Trust-first search */}
         <GridItem
           area="md:[grid-area:3/1/4/13] xl:[grid-area:2/8/3/13]"
-          icon={<Sparkles className="h-4 w-4" />}
-          title="ממשק נגיש, מהיר ודו-לשוני"
-          description="תמיכה מלאה בעברית ב-RTL, ממשק נגיש לפי תקן WCAG 2.1, ותצוגה אופטימלית בכל מכשיר — מובייל, טאבלט ומחשב."
+          icon={<Search className="h-4 w-4" />}
+          title="חיפוש ממוקד אמון — לא פרסום"
+          description={
+            <>
+              תוצאות החיפוש מדורגות לפי{" "}
+              <strong>ציון אמון ונפח ביקורות מאומתות</strong>,
+              לא לפי תשלום. ספק לא יכול לרכוש מיקום בולט יותר
+              מאשר ספק עם ציון אמון גבוה יותר — לעולם.
+            </>
+          }
         />
       </ul>
     </section>
@@ -135,9 +162,10 @@ interface GridItemProps {
   icon: React.ReactNode;
   title: string;
   description: React.ReactNode;
+  link?: { to: string; label: string };
 }
 
-function GridItem({ area, icon, title, description }: GridItemProps) {
+function GridItem({ area, icon, title, description, link }: GridItemProps) {
   return (
     <li className={cn("min-h-[14rem] list-none", area)}>
       <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
@@ -153,7 +181,7 @@ function GridItem({ area, icon, title, description }: GridItemProps) {
 
         {/* Card body — must be relative so it layers above the glow */}
         <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] border-border/30 bg-background p-6 shadow-sm shadow-black/20 md:p-6">
-          <div className="relative flex flex-1 flex-col justify-between gap-3">
+          <div className="relative flex h-full flex-1 flex-col justify-between gap-3">
             {/* Icon badge */}
             <div className="w-fit rounded-lg border-[0.75px] border-border bg-muted p-2 text-primary">
               {icon}
@@ -167,6 +195,14 @@ function GridItem({ area, icon, title, description }: GridItemProps) {
               <p className="font-body text-sm leading-[1.125rem] md:text-base md:leading-[1.375rem] text-muted-foreground [&_strong]:font-semibold [&_strong]:text-foreground/80">
                 {description}
               </p>
+              {link && (
+                <Link
+                  to={link.to}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline mt-1"
+                >
+                  {link.label} ←
+                </Link>
+              )}
             </div>
           </div>
         </div>

@@ -47,6 +47,7 @@ import PricingPage from "./pages/business/PricingPage";
 
 // Partners / widgets
 import TrustBadgePage from "./pages/partners/TrustBadgePage";
+import PrestigeBadgesPage from "./pages/partners/PrestigeBadgesPage";
 
 // Business solutions
 import ReviewsSolution from "./pages/business/solutions/ReviewsSolution";
@@ -125,6 +126,7 @@ const App = () => (
 
             {/* Partner / widget pages */}
             <Route path="/partners/trust-badge" element={<TrustBadgePage />} />
+            <Route path="/partners/prestige-badges" element={<PrestigeBadgesPage />} />
 
             {/* Business solution pages — any authenticated user required */}
             <Route element={<AuthProtectedRoute />}>

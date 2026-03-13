@@ -8,7 +8,11 @@ import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown, Trophy, Star, Sh
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, FREELANCER_CATEGORIES, type Business, type Course } from "@/data/mockData";
+import {
+  FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, FREELANCER_CATEGORIES, SAAS_CATEGORIES,
+  SAAS_SUBCATEGORIES, PRICING_MODEL_LABELS, type Business, type Course, type PricingModel,
+} from "@/data/mockData";
+import { Cpu } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { useCategories } from "@/hooks/useCategories";
@@ -66,6 +70,9 @@ const SearchPage = () => {
   const [selectedFreelancerCat, setSelectedFreelancerCat] = useState("הכל");
   const [selectedSubcat, setSelectedSubcat] = useState<string | null>(null);
   const [selectedCourseCat, setSelectedCourseCat] = useState("הכל");
+  const [selectedSaasCat, setSelectedSaasCat] = useState("הכל");
+  const [selectedSaasSubcat, setSelectedSaasSubcat] = useState<string | null>(null);
+  const [selectedPricingModel, setSelectedPricingModel] = useState<PricingModel | "הכל">("הכל");
   const [minRating, setMinRating] = useState(0);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
   const [sortOption, setSortOption] = useState<SortOption>("default");
@@ -87,16 +94,23 @@ const SearchPage = () => {
         const mapped: Business[] = bizData.map((b: any) => ({
           slug: b.slug,
           name: b.name,
-          type: FREELANCER_CATEGORIES.includes(b.category) ? "freelancer" as const : "course-provider" as const,
+          type: FREELANCER_CATEGORIES.includes(b.category)
+            ? "freelancer" as const
+            : SAAS_CATEGORIES.includes(b.category)
+              ? "saas" as const
+              : "course-provider" as const,
           category: b.category,
           rating: Number(b.rating) || 0,
           reviewCount: b.review_count || 0,
+          verifiedReviewCount: b.verified_review_count || 0,
           description: b.description || "",
           logo: b.logo_url || undefined,
           website: b.website || undefined,
           email: b.email || undefined,
           phone: b.phone || undefined,
           socialLinks: b.social_links as any || undefined,
+          pricingModel: b.pricing_model || undefined,
+          founderName: b.founder_name || undefined,
         }));
         setAllBusinesses(mapped);
       }
@@ -196,9 +210,41 @@ const SearchPage = () => {
     return matchesQuery && matchesCat && matchesRating && matchesPrice;
   });
 
+  // ── SaaS / AI Tools filtering ────────────────────────────────────────────
+  const saasProducts = allBusinesses.filter(b => {
+    if (b.type !== "saas") return false;
+    const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query);
+    const matchesCat = selectedSaasCat === "הכל" || b.category === selectedSaasCat;
+    const matchesSubcat = !selectedSaasSubcat || b.subcategory === selectedSaasSubcat;
+    const matchesRating = b.rating >= minRating;
+    const matchesPricing = selectedPricingModel === "הכל" || b.pricingModel === selectedPricingModel;
+    return matchesQuery && matchesCat && matchesSubcat && matchesRating && matchesPricing;
+  });
+  const sortedSaasProducts = useMemo(() => sortBusinesses(saasProducts, sortOption), [saasProducts, sortOption]);
+
+  // Top Trusted SaaS — sorted by TrustScore composite
+  const topTrustedSaas = useMemo(() =>
+    [...allBusinesses]
+      .filter(b => b.type === "saas" && b.rating >= 4.0)
+      .sort((a, b) => (b.verifiedReviewCount ?? 0) * 2 + b.rating - ((a.verifiedReviewCount ?? 0) * 2 + a.rating))
+      .slice(0, 4),
+    [allBusinesses]
+  );
+
+  // Free / Freemium tools — easy entry for first-time users
+  const freeTools = useMemo(() =>
+    allBusinesses.filter(b => b.type === "saas" && (b.pricingModel === "free" || b.pricingModel === "freemium")),
+    [allBusinesses]
+  );
+
   const handleCatSelect = (cat: string) => {
     setSelectedFreelancerCat(cat);
     setSelectedSubcat(null);
+  };
+
+  const handleSaasCatSelect = (cat: string) => {
+    setSelectedSaasCat(cat);
+    setSelectedSaasSubcat(null);
   };
 
   return (
@@ -305,6 +351,10 @@ const SearchPage = () => {
             <TabsTrigger value="courses" className="flex items-center gap-1.5">
               <BookOpen size={14} />
               קורסים והכשרות ({filteredCourses.length})
+            </TabsTrigger>
+            <TabsTrigger value="saas" className="flex items-center gap-1.5">
+              <Cpu size={14} />
+              SaaS &amp; AI ({sortedSaasProducts.length})
             </TabsTrigger>
           </TabsList>
 
@@ -420,6 +470,109 @@ const SearchPage = () => {
             </div>
             {filteredCourses.length === 0 && courseProviders.length === 0 && (
               <p className="text-center text-muted-foreground py-16">לא נמצאו קורסים או ספקים התואמים לחיפוש.</p>
+            )}
+          </TabsContent>
+
+          {/* ── SaaS & AI Tools Tab ──────────────────────────────────────────── */}
+          <TabsContent value="saas">
+
+            {/* Discovery strip — Top Trusted & Free tools */}
+            {topTrustedSaas.length > 0 && !query && selectedSaasCat === "הכל" && (
+              <div className="mb-8 rounded-xl border border-border/50 bg-card/50 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldCheck size={16} className="text-primary" />
+                  <h3 className="font-display font-semibold text-foreground">כלי AI ו-SaaS ישראלים מובילים בציון האמון</h3>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {topTrustedSaas.map((biz, i) => (
+                    <motion.div key={biz.slug} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+                      <BusinessCard {...biz} />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pricing model filter */}
+            <div className="flex gap-2 flex-wrap mb-4 items-center">
+              <span className="text-xs text-muted-foreground ml-1">מחיר:</span>
+              {(["הכל", "free", "freemium", "subscription", "one-time", "enterprise"] as const).map(pm => (
+                <Button
+                  key={pm}
+                  variant={selectedPricingModel === pm ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedPricingModel(pm)}
+                >
+                  {pm === "הכל" ? "הכל" : PRICING_MODEL_LABELS[pm]}
+                </Button>
+              ))}
+            </div>
+
+            {/* Category chips */}
+            <div className="flex gap-2 flex-wrap mb-3">
+              {["הכל", ...SAAS_CATEGORIES].map(cat => (
+                <Button
+                  key={cat}
+                  variant={selectedSaasCat === cat ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleSaasCatSelect(cat)}
+                >
+                  {cat}
+                  {SAAS_SUBCATEGORIES[cat] && selectedSaasCat !== cat && (
+                    <ChevronDown size={12} className="mr-1 opacity-50" />
+                  )}
+                </Button>
+              ))}
+            </div>
+
+            {/* Subcategory chips */}
+            {selectedSaasCat !== "הכל" && SAAS_SUBCATEGORIES[selectedSaasCat]?.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                transition={{ duration: 0.3 }}
+                className="flex gap-2 flex-wrap mb-6 pr-4 border-r-2 border-primary/30"
+              >
+                <Button
+                  variant={selectedSaasSubcat === null ? "default" : "ghost"}
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => setSelectedSaasSubcat(null)}
+                >
+                  כל {selectedSaasCat}
+                </Button>
+                {SAAS_SUBCATEGORIES[selectedSaasCat].map(sub => (
+                  <Button
+                    key={sub}
+                    variant={selectedSaasSubcat === sub ? "default" : "ghost"}
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setSelectedSaasSubcat(sub)}
+                  >
+                    {sub}
+                  </Button>
+                ))}
+              </motion.div>
+            )}
+
+            {/* Results grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sortedSaasProducts.map((biz, i) => (
+                <motion.div key={biz.slug} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                  <BusinessCard {...biz} />
+                </motion.div>
+              ))}
+            </div>
+
+            {sortedSaasProducts.length === 0 && (
+              <div className="text-center py-16">
+                <Cpu size={32} className="mx-auto mb-3 text-muted-foreground/40" />
+                <p className="text-muted-foreground font-medium mb-1">אין כלי SaaS / AI תואמים</p>
+                <p className="text-sm text-muted-foreground">
+                  ייתכן שהמוצר טרם נרשם למאגר.{" "}
+                  <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">בקשו הוספה</a>
+                </p>
+              </div>
             )}
           </TabsContent>
         </Tabs>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Search, ShieldCheck, Star, TrendingUp, Users,
-  UserCheck, BookOpen, HelpCircle, ChevronDown
+  UserCheck, BookOpen, HelpCircle, ChevronDown, Cpu
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import BusinessCard from "@/components/BusinessCard";
@@ -15,7 +15,7 @@ import AnimatedCounter from "@/components/AnimatedCounter";
 import { TestimonialsSection } from "@/components/blocks/testimonials-with-marquee";
 import { FeaturesGrid } from "@/components/blocks/features-grid";
 import { useState, useRef, useEffect } from "react";
-import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, type Business, type Review } from "@/data/mockData";
+import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, SAAS_CATEGORIES, type Business, type Review } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -48,6 +48,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [topFreelancers, setTopFreelancers] = useState<Business[]>([]);
   const [topCourseProviders, setTopCourseProviders] = useState<Business[]>([]);
+  const [topSaasTools, setTopSaasTools] = useState<Business[]>([]);
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [freelancerCatCounts, setFreelancerCatCounts] = useState<Record<string, number>>({});
   const [courseCatCounts, setCourseCatCounts] = useState<Record<string, number>>({});
@@ -77,7 +78,11 @@ const Index = () => {
       const mapped: Business[] = allBiz.map((b: any) => ({
         slug: b.slug,
         name: b.name,
-        type: FREELANCER_CATEGORIES.includes(b.category) ? "freelancer" as const : "course-provider" as const,
+        type: FREELANCER_CATEGORIES.includes(b.category)
+          ? "freelancer" as const
+          : SAAS_CATEGORIES.includes(b.category)
+            ? "saas" as const
+            : "course-provider" as const,
         category: b.category,
         rating: Number(b.rating) || 0,
         reviewCount: b.review_count || 0,
@@ -88,12 +93,19 @@ const Index = () => {
         email: b.email || undefined,
         phone: b.phone || undefined,
         socialLinks: b.social_links as any || undefined,
+        pricingModel: b.pricing_model || undefined,
+        founderName: b.founder_name || undefined,
       }));
 
       const freelancers = mapped.filter(b => b.type === "freelancer").slice(0, 4);
       const courseProvs = mapped.filter(b => b.type === "course-provider").slice(0, 4);
+      const saasTools = mapped
+        .filter(b => b.type === "saas")
+        .sort((a, b) => (b.verifiedReviewCount ?? 0) * 2 + b.rating - ((a.verifiedReviewCount ?? 0) * 2 + a.rating))
+        .slice(0, 4);
       setTopFreelancers(freelancers);
       setTopCourseProviders(courseProvs);
+      setTopSaasTools(saasTools);
 
       // Category counts
       const fCounts: Record<string, number> = {};
@@ -228,7 +240,7 @@ const Index = () => {
           <motion.div className="max-w-4xl mx-auto text-center" initial="hidden" animate="visible">
             <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
               {/* Icon is decorative — label text conveys the meaning */}
-              <ShieldCheck size={16} aria-hidden="true" /> אימות עצמאי · ללא פרסום בתשלום · נתונים ממקור ראשון
+              <ShieldCheck size={16} aria-hidden="true" /> תשתית אמון עצמאית · ציון לא למכירה · נתונים ממערכות תשלום
             </motion.div>
             {/*
               id="hero-heading" is referenced by aria-labelledby on the <section>
@@ -274,9 +286,9 @@ const Index = () => {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <UserCheck size={22} className="text-primary" />
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">בעלי מקצוע מובילים</h2>
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">ציוני אמון מובילים — פרילנסרים</h2>
             </div>
-            <p className="text-muted-foreground mt-1">פרילנסרים מוערכים עם ביקורות מאומתות</p>
+            <p className="text-muted-foreground mt-1">מדורגים לפי נפח ביקורות מאומתות ויחס החזרים — לא לפי פרסום</p>
           </div>
           <Link to="/search?tab=freelancers">
             <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
@@ -301,9 +313,9 @@ const Index = () => {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <BookOpen size={22} className="text-primary" />
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">מוכרי קורסים מובילים</h2>
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">ציוני אמון מובילים — קורסים ויוצרים</h2>
             </div>
-            <p className="text-muted-foreground mt-1">קורסים, סדנאות והכשרות מאומתים</p>
+            <p className="text-muted-foreground mt-1">קורסים, סדנאות והכשרות — מדורגים לפי ציון אמון מאומת</p>
           </div>
           <Link to="/search?tab=courses">
             <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
@@ -321,6 +333,31 @@ const Index = () => {
           <p className="text-center text-muted-foreground py-10">עדיין אין ספקי קורסים רשומים. היו הראשונים!</p>
         )}
       </section>
+
+      {/* Top SaaS & AI Tools */}
+      {topSaasTools.length > 0 && (
+        <section className="container py-10">
+          <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Cpu size={22} className="text-primary" />
+                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">כלי SaaS ו-AI ישראליים מאומתים</h2>
+              </div>
+              <p className="text-muted-foreground mt-1">מוצרים דיגיטליים של יזמים ישראלים — מדורגים לפי ציון אמון, לא לפי פרסום</p>
+            </div>
+            <Link to="/search?tab=saas">
+              <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topSaasTools.map((biz, i) => (
+              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <BusinessCard {...biz} />
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Freelancer Categories */}
       {FREELANCER_CATS_DISPLAY.length > 0 && (

@@ -1,9 +1,10 @@
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import StarRating from "./StarRating";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Globe, Mail, Phone, Youtube, Instagram, Linkedin, Twitter, Facebook, MessageCircle, TrendingUp, BarChart2 } from "lucide-react";
+import { ShieldCheck, Globe, Mail, Phone, Youtube, Instagram, Linkedin, Twitter, Facebook, MessageCircle, TrendingUp, BarChart2, Cpu, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Business } from "@/data/mockData";
+import { PRICING_MODEL_LABELS } from "@/data/mockData";
 import { useRef } from "react";
 import { sanitizeUrl } from "@/lib/sanitize";
 
@@ -147,10 +148,15 @@ const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
               <motion.h1 initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="font-display font-bold text-2xl md:text-3xl text-foreground">
                 {business.name}
               </motion.h1>
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }}>
+              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }} className="flex items-center gap-2">
                 <Badge className="bg-trust-green-light text-trust-green border-0 gap-1">
                   <ShieldCheck size={14} /> מאומת
                 </Badge>
+                {business.type === "saas" && (
+                  <Badge variant="outline" className="gap-1 border-primary/30 text-primary text-[10px]">
+                    <Cpu size={11} /> מוצר דיגיטלי
+                  </Badge>
+                )}
               </motion.div>
             </div>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-3 mb-3 flex-wrap">
@@ -166,7 +172,7 @@ const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
               {business.description}
             </motion.p>
 
-            {/* Contact info */}
+            {/* Contact info + SaaS-specific metadata */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
               {business.website && sanitizeUrl(business.website) && (
                 <a href={sanitizeUrl(business.website)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-primary transition-colors">
@@ -175,6 +181,18 @@ const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
               )}
               {business.email && <span className="flex items-center gap-1"><Mail size={14} /> {business.email}</span>}
               {business.phone && <span className="flex items-center gap-1"><Phone size={14} /> {business.phone}</span>}
+              {/* SaaS-specific: pricing model */}
+              {business.pricingModel && (
+                <span className="flex items-center gap-1 bg-muted/60 px-2 py-0.5 rounded border border-border/40 text-xs">
+                  {PRICING_MODEL_LABELS[business.pricingModel]}
+                </span>
+              )}
+              {/* SaaS-specific: founder */}
+              {business.founderName && (
+                <span className="flex items-center gap-1 text-xs">
+                  <User size={12} aria-hidden="true" /> מייסד: {business.founderName}
+                </span>
+              )}
             </motion.div>
 
             {/* Social links */}
@@ -246,6 +264,17 @@ const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
                 </p>
               </div>
             </div>
+
+            {/* SaaS: Pricing model signal */}
+            {business.pricingModel && (
+              <div className="flex items-center gap-2 bg-muted/40 border border-border/30 rounded-xl px-3 py-2">
+                <Cpu size={14} className="text-primary shrink-0" aria-hidden="true" />
+                <div>
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">מודל מחיר</p>
+                  <p className="text-[11px] text-muted-foreground">{PRICING_MODEL_LABELS[business.pricingModel]}</p>
+                </div>
+              </div>
+            )}
 
             {/* Methodology Link */}
             <div className="flex items-center gap-1.5 mr-auto self-end">

@@ -1,9 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import StarRating from "./StarRating";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Instagram, Linkedin, Twitter, Facebook, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Instagram, Linkedin, Twitter, Facebook, ShieldCheck, Cpu } from "lucide-react";
 import { motion } from "framer-motion";
-import type { SocialLinks } from "@/data/mockData";
+import type { SocialLinks, PricingModel } from "@/data/mockData";
+import { PRICING_MODEL_LABELS } from "@/data/mockData";
 import { sanitizeUrl } from "@/lib/sanitize";
 
 const TelegramIcon = ({ size = 14 }: { size?: number }) => (
@@ -30,6 +31,7 @@ const SOCIAL_ICON_MAP: Record<string, { Icon: any; label: string }> = {
 interface BusinessCardProps {
   slug: string;
   name: string;
+  type?: string;
   category: string;
   subcategory?: string;
   rating: number;
@@ -38,6 +40,8 @@ interface BusinessCardProps {
   description: string;
   logo?: string;
   socialLinks?: SocialLinks;
+  pricingModel?: PricingModel;
+  founderName?: string;
 }
 
 // Lightweight trust grade for card display
@@ -51,8 +55,9 @@ function cardTrustGrade(rating: number, verifiedCount: number): { grade: string;
   return                                            { grade: "F",  color: "text-red-500" };
 }
 
-const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, verifiedReviewCount = 0, description, logo, socialLinks }: BusinessCardProps) => {
+const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewCount, verifiedReviewCount = 0, description, logo, socialLinks, pricingModel, founderName }: BusinessCardProps) => {
   const trust = cardTrustGrade(rating, verifiedReviewCount);
+  const isSaas = type === "saas";
   const activeSocials = socialLinks
     ? Object.entries(socialLinks).filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim() !== "")
     : [];
@@ -86,6 +91,11 @@ const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, 
               )}
             </motion.div>
             <div className="flex flex-col items-end gap-1">
+              {isSaas && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">
+                  <Cpu size={9} aria-hidden="true" /> SaaS
+                </span>
+              )}
               <span className="text-xs text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">{category}</span>
               {subcategory && (
                 <span className="text-[10px] text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full">{subcategory}</span>
@@ -103,9 +113,20 @@ const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, 
           </div>
           {/* Verified count badge */}
           {verifiedReviewCount > 0 && (
-            <div className="flex items-center gap-1 mb-3">
+            <div className="flex items-center gap-1 mb-1">
               <ShieldCheck size={11} className="text-primary" aria-hidden="true" />
               <span className="text-[11px] text-primary font-medium">{verifiedReviewCount} ביקורות מאומתות</span>
+            </div>
+          )}
+          {/* SaaS: pricing model + founder */}
+          {isSaas && pricingModel && (
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <span className="text-[10px] font-medium bg-muted/60 text-muted-foreground px-2 py-0.5 rounded border border-border/40">
+                {PRICING_MODEL_LABELS[pricingModel]}
+              </span>
+              {founderName && (
+                <span className="text-[10px] text-muted-foreground">מייסד: {founderName}</span>
+              )}
             </div>
           )}
           <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{description}</p>
@@ -137,7 +158,7 @@ const BusinessCard = ({ slug, name, category, subcategory, rating, reviewCount, 
           )}
 
           <div className="mt-4 flex items-center text-primary text-sm font-medium group-hover:gap-2 gap-1 transition-all">
-            בדקו את ציון האמון <ArrowLeft size={14} />
+            {isSaas ? "ראו רשומת האמון" : "בדקו את ציון האמון"} <ArrowLeft size={14} />
           </div>
         </CardContent>
       </Card>

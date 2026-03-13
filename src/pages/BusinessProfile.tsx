@@ -8,11 +8,12 @@ import BusinessHero from "@/components/BusinessHero";
 import AddReviewForm from "@/components/AddReviewForm";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import { Button } from "@/components/ui/button";
-import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ShieldCheck, MessageSquare } from "lucide-react";
-import { useState, useEffect } from "react";
-import { generateReviewSummary, FREELANCER_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink } from "lucide-react";
+import { PrestigeBadge, computeEligibleBadges, buildBadgeEmbedCode, BADGE_CONFIG } from "@/components/PrestigeBadge";
+import { useState, useEffect, useMemo } from "react";
+import { generateReviewSummary, FREELANCER_CATEGORIES, SAAS_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
 
 const BusinessProfile = () => {
@@ -116,7 +117,7 @@ const BusinessProfile = () => {
         const mappedBiz: Business = {
           slug: bizData.slug,
           name: bizData.name || "",
-          type: FREELANCER_CATEGORIES.includes(bizData.category) ? "freelancer" : "course-provider",
+          type: FREELANCER_CATEGORIES.includes(bizData.category) ? "freelancer" : SAAS_CATEGORIES.includes(bizData.category) ? "saas" : "course-provider",
           category: bizData.category || "",
           rating: Math.round(avgRating * 10) / 10, // computed from reviews
           reviewCount: totalReviews,               // computed from reviews
@@ -161,7 +162,7 @@ const BusinessProfile = () => {
         const mappedBiz: Business = {
           slug: bizData.slug,
           name: bizData.name || "",
-          type: FREELANCER_CATEGORIES.includes(bizData.category) ? "freelancer" : "course-provider",
+          type: FREELANCER_CATEGORIES.includes(bizData.category) ? "freelancer" : SAAS_CATEGORIES.includes(bizData.category) ? "saas" : "course-provider",
           category: bizData.category || "",
           rating: 0,
           reviewCount: 0,
@@ -206,13 +207,40 @@ const BusinessProfile = () => {
 
   if (!business) {
     return (
-      <div className="min-h-screen bg-background noise-overlay">
+      <div className="min-h-screen bg-background noise-overlay flex flex-col">
         <Navbar />
-        <div className="container py-20 text-center">
-          <h1 className="font-display font-bold text-2xl mb-4">העסק לא נמצא</h1>
-          <p className="text-muted-foreground mb-6">ייתכן שהכתובת שגויה או שהעסק עדיין לא רשום.</p>
-          <Button onClick={() => navigate("/search")}>חזרו לחיפוש</Button>
-        </div>
+        <main className="flex-1 flex items-center justify-center px-4 py-20">
+          <div className="text-center max-w-lg mx-auto">
+            <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <ShieldCheck size={36} className="text-primary" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-3">
+              ישות זו אינה במאגר
+            </h1>
+            <p className="text-muted-foreground mb-4 text-base leading-relaxed">
+              <strong className="text-foreground">{slug}</strong> טרם נרשמה למערכת האימות של ReviewHub — או שהכתובת שגויה.
+            </p>
+            <div className="flex items-start gap-3 text-right bg-card/60 border border-border/40 rounded-xl p-4 mb-8 text-sm text-muted-foreground">
+              <MessageSquare size={16} className="text-primary shrink-0 mt-0.5" />
+              <p>
+                <strong className="text-foreground">היעדר רשומה הוא מידע בפני עצמו.</strong>{" "}
+                אם ישות אינה מופיעה במאגר, פירוש הדבר שציון האמון שלה טרם אומת — ולא ניתן להסתמך על ביקורות שאינן מקושרות לרכישה.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 w-full sm:w-auto" onClick={() => navigate("/search")}>
+                חפשו ישויות מאומתות
+              </Button>
+              <Button variant="outline" className="border-border/50 gap-2 w-full sm:w-auto" onClick={() => navigate("/")}>
+                עמוד הבית
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              מכירים את העסק ורוצים לראותו במאגר?{" "}
+              <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">בקשו אימות</a>
+            </p>
+          </div>
+        </main>
         <Footer />
       </div>
     );
@@ -274,6 +302,35 @@ const BusinessProfile = () => {
         </div>
         <BusinessHero business={business} verifiedReviewCount={totalVerified} />
 
+        {/* Audit record strip — institutional framing */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-border/40 bg-card/40 rounded-xl px-4 py-3 mb-8 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck size={12} className="text-primary shrink-0" />
+            <span>
+              <strong className="text-foreground">רשומת אמון</strong> — נתונים מאומתים מול מערכות תשלום
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <MessageSquare size={12} className="text-muted-foreground shrink-0" />
+            <span>
+              {totalVerified} ביקורות מאומתות · {totalOpen} משובי קהילה
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 mr-auto">
+            <span className="text-muted-foreground/60">ציון האמון מחושב מביקורות מאומתות בלבד</span>
+          </div>
+        </div>
+
+        {/* ── Prestige Badges ─────────────────────────────────────────────── */}
+        <EarnedBadgesSection
+          slug={business.slug}
+          name={business.name}
+          rating={business.rating}
+          verifiedCount={totalVerified}
+          type={business.type}
+          category={business.category}
+        />
+
         {/* Courses */}
         {courses.length > 0 && (
           <div className="mb-10">
@@ -296,9 +353,9 @@ const BusinessProfile = () => {
 
         {/* Add Review */}
         <div className="mb-8">
-          <h2 className="font-display font-bold text-xl mb-1">כתבו ביקורת</h2>
+          <h2 className="font-display font-bold text-xl mb-1">הוסיפו רשומה למאגר</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            ביקורת עם הוכחת רכישה תסומן כ"מאומתת" ותיספר בציון האמון.
+            ביקורת מאומתת רכישה נספרת בציון האמון ומוצגת ראשונה. משוב קהילה מוצג בנפרד ואינו משפיע על הציון.
           </p>
           <AddReviewForm
             businessSlug={business.slug}
@@ -401,3 +458,145 @@ const BusinessProfile = () => {
 };
 
 export default BusinessProfile;
+
+// ── EarnedBadgesSection ────────────────────────────────────────────────────────
+// Shown on the profile page when the business qualifies for ≥1 prestige badge.
+// Renders live badge previews + copy-paste embed code per badge.
+
+interface EarnedBadgesSectionProps {
+  slug: string;
+  name: string;
+  rating: number;
+  verifiedCount: number;
+  type: string;
+  category: string;
+}
+
+function BadgeEmbedPanel({ slug, type, grade, rating }: {
+  slug: string;
+  type: import("@/components/PrestigeBadge").PrestigeBadgeType;
+  grade: string;
+  rating: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const cfg = BADGE_CONFIG[type];
+  const snippet = buildBadgeEmbedCode(type, slug, grade);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(snippet);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
+  };
+
+  return (
+    <div className="rounded-xl border border-border/40 bg-card/30 p-4 flex flex-col gap-3">
+      {/* Badge preview */}
+      <div className="flex items-center justify-center py-3">
+        <PrestigeBadge type={type} slug={slug} name="" grade={grade} rating={rating} size="md" noLink />
+      </div>
+
+      {/* Label */}
+      <div className="text-center">
+        <p className="text-xs font-semibold text-foreground">{cfg.label}</p>
+        <p className="text-[10px] text-muted-foreground mt-0.5">{cfg.sublabel}</p>
+      </div>
+
+      {/* Embed toggle */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="text-[11px] font-medium text-primary/70 hover:text-primary transition-colors text-center"
+      >
+        {open ? "הסתר קוד הטמעה" : "קוד הטמעה לאתר שלכם"}
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            className="overflow-hidden"
+          >
+            <div className="rounded-lg border border-border/40 overflow-hidden">
+              <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-border/40 bg-muted/30">
+                <span className="text-[9px] font-mono text-muted-foreground/60">embed.html</span>
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {copied ? <CheckCheck size={11} className="text-emerald-500" /> : <Copy size={11} />}
+                  {copied ? "הועתק!" : "העתק"}
+                </button>
+              </div>
+              <pre className="p-3 text-[9px] leading-relaxed overflow-x-auto text-primary/80 bg-muted/20 whitespace-pre-wrap">
+                <code>{snippet}</code>
+              </pre>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function EarnedBadgesSection({ slug, name, rating, verifiedCount, type, category }: EarnedBadgesSectionProps) {
+  const eligibleBadges = useMemo(
+    () => computeEligibleBadges({ rating, verifiedCount, type, category }),
+    [rating, verifiedCount, type, category],
+  );
+
+  if (eligibleBadges.length === 0) return null;
+
+  // Compute grade string for embed code
+  const grade = (() => {
+    if (rating >= 4.7 && verifiedCount >= 10) return "A+";
+    if (rating >= 4.3 && verifiedCount >= 5)  return "A";
+    if (rating >= 3.8 && verifiedCount >= 3)  return "B";
+    if (rating >= 3.2)                         return "C";
+    if (rating >= 2.5)                         return "D";
+    return verifiedCount > 0 ? "F" : "—";
+  })();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="mb-8"
+    >
+      {/* Section heading */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Award size={16} className="text-primary" />
+          <h2 className="font-display font-semibold text-base text-foreground">
+            תגי פרסטיז׳ שהוענקו לרשומה זו
+          </h2>
+        </div>
+        <Link
+          to="/partners/prestige-badges"
+          className="text-[11px] text-primary/60 hover:text-primary flex items-center gap-1 transition-colors"
+        >
+          מה זה? <ExternalLink size={10} />
+        </Link>
+      </div>
+
+      <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+        תגי פרסטיז׳ מוענקים אוטומטית לפי ציון האמון. הציגו אותם באתר שלכם — כל לחיצה על התג מחזירה ללקוח לפרופיל זה לאימות עצמאי.
+      </p>
+
+      <div className={`grid gap-4 ${eligibleBadges.length === 1 ? "grid-cols-1 max-w-xs" : eligibleBadges.length === 2 ? "grid-cols-1 sm:grid-cols-2 max-w-xl" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
+        {eligibleBadges.map(badgeType => (
+          <BadgeEmbedPanel
+            key={badgeType}
+            slug={slug}
+            type={badgeType}
+            grade={grade}
+            rating={rating}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+}

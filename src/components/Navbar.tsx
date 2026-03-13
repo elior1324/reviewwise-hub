@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
-  ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen,
+  ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen, Award,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
@@ -154,6 +154,14 @@ const Navbar = () => {
             <BookOpen size={14} aria-hidden="true" />
             מתודולוגיה
           </Link>
+
+          <Link
+            to="/partners/prestige-badges"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+          >
+            <Award size={14} aria-hidden="true" />
+            תגי אמון
+          </Link>
         </div>
 
         {/* ── Right side ───────────────────────────────────────────────────── */}
@@ -286,6 +294,14 @@ const Navbar = () => {
               onClick={() => setMobileOpen(false)}
             >
               מתודולוגיה
+            </Link>
+            <Link
+              to="/partners/prestige-badges"
+              className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setMobileOpen(false)}
+            >
+              <Award size={14} aria-hidden="true" />
+              תגי אמון
             </Link>
           </div>
 

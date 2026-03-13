@@ -1,7 +1,13 @@
 // Centralized types, categories, and utilities for ReviewHub
 // All fake data has been removed — data comes from the database.
 
-export type BusinessType = "freelancer" | "course-provider";
+export type BusinessType = "freelancer" | "course-provider" | "saas";
+
+/**
+ * Pricing model for SaaS / digital products.
+ * Used to render the pricing chip on BusinessCard and BusinessHero.
+ */
+export type PricingModel = "free" | "freemium" | "subscription" | "one-time" | "enterprise";
 
 export interface Course {
   id: string;
@@ -42,6 +48,9 @@ export interface Business {
   email?: string;
   phone?: string;
   socialLinks?: SocialLinks;
+  /** SaaS / digital-product fields */
+  pricingModel?: PricingModel;
+  founderName?: string;
 }
 
 export interface Review {
@@ -109,6 +118,86 @@ export const COURSE_CATEGORIES = [
   "שפות",
   "מוזיקה ואומנות",
 ];
+
+// ─── SaaS & AI Tool Categories ──────────────────────────
+// Top-level categories for the "SaaS & AI Tools" registry tab.
+// These must NOT overlap with FREELANCER_CATEGORIES so the type-detection
+// logic in SearchPage / Index can correctly identify "saas" entities.
+export const SAAS_CATEGORIES = [
+  "כלי AI",
+  "כלי שיווק",
+  "אוטומציה",
+  "כלי פיתוח",
+  "No-code",
+  "פרודקטיביטי",
+  "תוכנה עסקית",
+  "כלי סטארטאפ",
+];
+
+// Sub-specialties shown when the user picks a SaaS top-level category
+export const SAAS_SUBCATEGORIES: Record<string, string[]> = {
+  "כלי AI": [
+    "AI לכתיבה ותוכן",
+    "AI לתמונה ועיצוב",
+    "AI לוידאו",
+    "AI לקוד",
+    "AI לנתונים ו-BI",
+    "AI לאוטומציית מכירות",
+  ],
+  "כלי שיווק": [
+    "אוטומציית מיילים",
+    "ניתוח נתוני פרסום",
+    "כלי SEO",
+    "ניהול סושיאל",
+    "A/B Testing",
+  ],
+  "אוטומציה": [
+    "אוטומציה עסקית",
+    "אוטומציה לפיתוח",
+    "Workflow & Integration",
+    "RPA",
+  ],
+  "כלי פיתוח": [
+    "IDE & Editors",
+    "CI/CD & DevOps",
+    "ניטור ולוגים",
+    "API & Backend tools",
+    "Testing",
+  ],
+  "No-code": [
+    "בוני אתרים",
+    "אוטומציה ללא קוד",
+    "מסדי נתונים ויזואליים",
+    "App builders",
+  ],
+  "פרודקטיביטי": [
+    "ניהול פרויקטים",
+    "תקשורת צוות",
+    "ניהול זמן ומשימות",
+    "כלי פגישות",
+  ],
+  "תוכנה עסקית": [
+    "CRM",
+    "פיננסים וחשבונאות",
+    "HR ומשאבי אנוש",
+    "BI ואנליטיקה",
+  ],
+  "כלי סטארטאפ": [
+    "כלי fundraising",
+    "מדדים ומוצר",
+    "Pitch & Investor tools",
+    "Legal & Compliance",
+  ],
+};
+
+/** Human-readable pricing model labels for display */
+export const PRICING_MODEL_LABELS: Record<PricingModel, string> = {
+  free:         "חינמי לחלוטין",
+  freemium:     "Freemium",
+  subscription: "מנוי חודשי / שנתי",
+  "one-time":   "תשלום חד-פעמי",
+  enterprise:   "Enterprise",
+};
 
 // ─── Plural forms for "All X" button ────────────────────
 export const CATEGORY_PLURAL: Record<string, string> = {
