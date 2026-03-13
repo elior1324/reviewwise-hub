@@ -127,7 +127,7 @@ const Index = () => {
       // Fetch recent reviews via the secure public_reviews view
       const { data } = await supabase
         .from("reviews")
-        .select("*, courses(name), review_responses(response_text, created_at)")
+        .select("*, courses(name), business_responses(text, created_at)")
         .order("created_at", { ascending: false })
         .limit(6);
 
@@ -153,25 +153,25 @@ const Index = () => {
 
         const mapped: Review[] = data.slice(0, 3).map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating,
-          text: r.review_text || "",
+          text: r.text,
           courseName: r.courses?.name || "",
           courseId: r.course_id,
           businessSlug: "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified_purchase || false,
+          verified: r.verified || false,
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at !== r.created_at ? new Date(r.updated_at).toLocaleDateString("he-IL") : undefined,
-          flagged: false,
-          flagReason: undefined,
+          flagged: r.flagged || false,
+          flagReason: r.flag_reason || undefined,
           likeCount: r.like_count || 0,
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: (expertCounts[r.user_id] || 0) >= 3,
-          ownerResponse: r.review_responses?.[0] ? {
-            text: r.review_responses[0].response_text || "",
-            date: new Date(r.review_responses[0].created_at).toLocaleDateString("he-IL"),
+          ownerResponse: r.business_responses?.[0] ? {
+            text: r.business_responses[0].text,
+            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
         }));
         setRecentReviews(mapped);

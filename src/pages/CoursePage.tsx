@@ -68,7 +68,7 @@ const CoursePage = () => {
       // NOTE: business_responses does NOT exist.
       const { data: reviewData } = await supabase
         .from("reviews")
-        .select("*, review_responses(response_text, created_at)")
+        .select("*, business_responses(text, created_at)")
         .eq("course_id", courseId)
         .order("created_at", { ascending: false });
 
@@ -77,7 +77,7 @@ const CoursePage = () => {
       const avgRating = totalReviews > 0
         ? (reviewData || []).reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / totalReviews
         : 0;
-      const verifiedCount = (reviewData || []).filter((r: any) => r.verified_purchase).length;
+      const verifiedCount = (reviewData || []).filter((r: any) => r.verified).length;
 
       setCourse({
         id: courseData.id,
@@ -110,28 +110,28 @@ const CoursePage = () => {
 
         setReviews(reviewData.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating || 0,
-          text: r.review_text || "",
+          text: r.text || "",
           courseName: courseData.name || "",
           courseId: r.course_id || "",
           businessSlug: (courseData.businesses as any)?.slug || "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified_purchase || false,
+          verified: r.verified || false,
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at && r.updated_at !== r.created_at
             ? new Date(r.updated_at).toLocaleDateString("he-IL")
             : undefined,
-          flagged: false,
-          flagReason: undefined,
+          flagged: r.flagged || false,
+          flagReason: r.flag_reason || undefined,
           likeCount: r.like_count || 0,
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: r.user_id ? (expertCounts[r.user_id] || 0) >= 3 : false,
           userId: r.user_id || undefined,
-          ownerResponse: r.review_responses?.[0] ? {
-            text: r.review_responses[0].response_text || "",
-            date: new Date(r.review_responses[0].created_at).toLocaleDateString("he-IL"),
+          ownerResponse: r.business_responses?.[0] ? {
+            text: r.business_responses[0].text || "",
+            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
         })));
       }

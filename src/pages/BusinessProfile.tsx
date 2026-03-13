@@ -88,7 +88,7 @@ const BusinessProfile = () => {
       // reviews has business_id directly
       const { data: reviewDataFinal } = await supabase
         .from("reviews")
-        .select("*, courses(name), review_responses(response_text, created_at)")
+        .select("*, courses(name), business_responses(text, created_at)")
         .eq("business_id", bizData.id)
         .order("created_at", { ascending: false });
 
@@ -136,7 +136,7 @@ const BusinessProfile = () => {
           reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
           rating: r.rating || 0,
           text: r.review_text || "",              // ✅ review_text (NOT .text)
-          courseName: r.courses?.name || "",
+          courseName: r.courses?.course_name || "", // ✅ course_name (NOT courses.name)
           courseId: r.course_id || "",
           businessSlug: bizData.slug,
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
