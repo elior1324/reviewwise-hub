@@ -401,10 +401,10 @@ export const REVIEWHUB_PLANS: [PricingTier, PricingTier, PricingTier] = [
       { name: F.profile,      isIncluded: true  },
       { name: F.reply,        isIncluded: true  },
       { name: F.badge,        isIncluded: true  },
+      { name: F.widget,       isIncluded: true  }, // ✓ free for all plans
       { name: F.unlimited,    isIncluded: false }, // loss aversion ✗
       { name: F.autoRequests, isIncluded: false }, // loss aversion ✗
       // ── Comparison table only (hidden in card) ──
-      { name: F.widget,       isIncluded: false },
       { name: F.analytics,    isIncluded: false },
       { name: F.social,       isIncluded: false },
       { name: F.affiliate,    isIncluded: false },

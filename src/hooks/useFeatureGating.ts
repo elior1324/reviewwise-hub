@@ -55,7 +55,7 @@ export function useFeatureGating(tier: SubscriptionTier): FeatureAccess {
       unlimitedReviews: isPro,
       socialLinks: isPro,
       analyticsDashboard: isPro,
-      embedWidgets: isPro,
+      embedWidgets: true,        // available on all plans including free
       autoReviewRequests: isPro,
       affiliateSystem: isPro,
       prioritySupport: isPro,
@@ -101,7 +101,7 @@ export function getRequiredTierForFeature(feature: keyof FeatureAccess): Subscri
     "unlimitedReviews",
     "socialLinks",
     "analyticsDashboard",
-    "embedWidgets",
+    // embedWidgets is FREE — not in this list
     "autoReviewRequests",
     "affiliateSystem",
     "prioritySupport",

@@ -139,7 +139,7 @@ const WidgetsSolution = () => {
               הוסיפו ביקורות לאתר שלכם היום
             </h2>
             <p className="text-muted-foreground mb-6">
-              הוידג׳טים זמינים בתכנית Pro ומעלה — התחילו בחינם ושדרגו בכל עת.
+              הוידג׳טים זמינים בכל המסלולים — כולל החינמי. הרשמו עכשיו והתחילו להטמיע.
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
               <Link to="/business/signup">

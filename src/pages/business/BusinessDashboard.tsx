@@ -609,7 +609,6 @@ const BusinessDashboard = () => {
                 </TabsTrigger>
                 <TabsTrigger value="widget" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
                   <Code2 size={13} className="ml-1" /> ווידג׳ט להטמעה
-                  {isFree && <ProBadge />}
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -1133,35 +1132,33 @@ const BusinessDashboard = () => {
             </LockedOverlay>
           </TabsContent>
 
-          {/* Trust Badge / Embed Widget */}
+          {/* Trust Badge / Embed Widget — available on all plans */}
           <TabsContent value="widget">
-            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
-              <TrustBadgeDashboard
-                businessSlug={isDemo ? "demo-business" : (businessId ? businessSlug : "demo-business")}
-                businessName={isDemo ? "העסק שלכם" : displayBusiness.name}
-                rating={isDemo ? 4.8 : (Number(displayStats[0]?.value) || 0)}
-                reviewCount={isDemo ? 124 : (Number(displayStats[1]?.value) || 0)}
-                reviews={isDemo ? DEMO_REVIEWS.map(r => ({
-                  id: r.id,
-                  rating: r.rating,
-                  text: r.text,
-                  reviewerName: r.reviewerName,
-                  anonymous: r.anonymous,
-                  verified: r.verified,
-                  courseName: r.courseName,
-                  date: r.date,
-                })) : realReviews.map(r => ({
-                  id: r.id,
-                  rating: r.rating,
-                  text: r.text,
-                  reviewerName: r.reviewerName,
-                  anonymous: r.anonymous,
-                  verified: r.verified,
-                  courseName: r.courseName,
-                  date: r.date,
-                }))}
-              />
-            </LockedOverlay>
+            <TrustBadgeDashboard
+              businessSlug={isDemo ? "demo-business" : (businessId ? businessSlug : "demo-business")}
+              businessName={isDemo ? "העסק שלכם" : displayBusiness.name}
+              rating={isDemo ? 4.8 : (Number(displayStats[0]?.value) || 0)}
+              reviewCount={isDemo ? 124 : (Number(displayStats[1]?.value) || 0)}
+              reviews={isDemo ? DEMO_REVIEWS.map(r => ({
+                id: r.id,
+                rating: r.rating,
+                text: r.text,
+                reviewerName: r.reviewerName,
+                anonymous: r.anonymous,
+                verified: r.verified,
+                courseName: r.courseName,
+                date: r.date,
+              })) : realReviews.map(r => ({
+                id: r.id,
+                rating: r.rating,
+                text: r.text,
+                reviewerName: r.reviewerName,
+                anonymous: r.anonymous,
+                verified: r.verified,
+                courseName: r.courseName,
+                date: r.date,
+              }))}
+            />
           </TabsContent>
 
           {/* Integrations */}

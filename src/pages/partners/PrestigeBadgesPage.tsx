@@ -7,15 +7,21 @@
  *
  * Route: /partners/prestige-badges
  * Direct widget deep-link: /partners/prestige-badges?tab=widgets
+ *
+ * Personalisation:
+ *   When a business owner is logged in, the embed code is automatically
+ *   pre-filled with their business slug — no manual editing needed.
+ *   The live preview updates to show their own business name, rating and
+ *   review count so they see exactly what visitors will see on their site.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldCheck, Copy, CheckCheck, ExternalLink,
   ArrowLeft, Award, Link2, BarChart2,
-  Layers, Minimize2, PanelRight, Star, Lock, Code2,
-  Layout, Monitor, Zap,
+  Layers, Minimize2, PanelRight, Star, Code2,
+  Layout, Monitor, Zap, UserCheck, LogIn, AlertCircle,
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import BusinessNavbar from "@/components/BusinessNavbar";
@@ -27,8 +33,168 @@ import {
   PrestigeBadge,
   buildBadgeEmbedCode,
   BADGE_CONFIG,
+  computeEligibleBadges,
   type PrestigeBadgeType,
 } from "@/components/PrestigeBadge";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface OwnerBusiness {
+  id:                string;
+  slug:              string;
+  name:              string;
+  rating:            number | null;
+  review_count:      number | null;
+  category:          string;
+  verified:          boolean | null;
+  subscription_tier: string;
+  logo_url:          string | null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Hook: fetch the business that belongs to the currently logged-in user
+// ─────────────────────────────────────────────────────────────────────────────
+
+function useOwnerBusiness() {
+  const { user, loading: authLoading } = useAuth();
+  const [business, setBusiness] = useState<OwnerBusiness | null>(null);
+  const [bLoading, setBLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      setBusiness(null);
+      return;
+    }
+    setBLoading(true);
+    supabase
+      .from("businesses")
+      .select("id, slug, name, rating, review_count, category, verified, subscription_tier, logo_url")
+      .eq("owner_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setBusiness((data as OwnerBusiness | null) ?? null);
+        setBLoading(false);
+      });
+  }, [user?.id]);
+
+  return { user, authLoading, business, bLoading };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Utility: compute trust grade from aggregate numbers
+// ─────────────────────────────────────────────────────────────────────────────
+
+function computeGrade(rating: number | null, reviewCount: number | null): string {
+  const r = rating    ?? 0;
+  const c = reviewCount ?? 0;
+  if (r >= 4.7 && c >= 10) return "A+";
+  if (r >= 4.3 && c >= 5)  return "A";
+  if (r >= 3.8 && c >= 1)  return "B";
+  if (r >= 3.0)             return "C";
+  if (r >= 2.0)             return "D";
+  return "F";
+}
+
+const SAAS_CATS = ["כלי AI", "כלי שיווק", "אוטומציה", "כלי פיתוח", "No-code", "פרודקטיביטי", "תוכנה עסקית", "כלי סטארטאפ"];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AccountStatusBanner
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface AccountStatusBannerProps {
+  user:        ReturnType<typeof useOwnerBusiness>["user"];
+  authLoading: boolean;
+  business:    OwnerBusiness | null;
+  bLoading:    boolean;
+}
+
+function AccountStatusBanner({ user, authLoading, business, bLoading }: AccountStatusBannerProps) {
+  if (authLoading || bLoading) return null;
+
+  // Logged in + has business — green banner
+  if (user && business) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="mx-4 mb-6"
+      >
+        <div className="mx-auto max-w-3xl flex items-center gap-3 px-5 py-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/8">
+          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/20 shrink-0">
+            <UserCheck size={15} className="text-emerald-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-emerald-300 leading-snug">
+              מחובר לחשבון: <span className="text-white">{business.name}</span>
+            </p>
+            <p className="text-xs text-emerald-400/60 mt-0.5">
+              קוד ההטמעה מוגדר אוטומטית לעסק שלכם — אין צורך לערוך אותו
+            </p>
+          </div>
+          <Link
+            to={`/biz/${business.slug}`}
+            target="_blank"
+            className="flex items-center gap-1 text-xs text-emerald-400/60 hover:text-emerald-300 transition-colors shrink-0"
+          >
+            <span>פרופיל</span>
+            <ExternalLink size={11} />
+          </Link>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Logged in but no business yet
+  if (user && !business) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="mx-4 mb-6"
+      >
+        <div className="mx-auto max-w-3xl flex items-center gap-3 px-5 py-3.5 rounded-2xl border border-amber-500/25 bg-amber-500/8">
+          <AlertCircle size={16} className="text-amber-400 shrink-0" />
+          <p className="text-sm text-amber-300/80 flex-1">
+            פרופיל עסקי עדיין לא נוצר — קוד ההטמעה מוצג לדוגמה בלבד.{" "}
+            <Link to="/business/signup" className="underline underline-offset-2 font-medium hover:text-amber-200">
+              צרו פרופיל עסקי ←
+            </Link>
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Not logged in
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="mx-4 mb-6"
+    >
+      <div className="mx-auto max-w-3xl flex items-center gap-3 px-5 py-3.5 rounded-2xl border border-white/10 bg-white/3">
+        <LogIn size={15} className="text-white/40 shrink-0" />
+        <p className="text-sm text-white/50 flex-1">
+          כדי לקבל קוד הטמעה מותאם אישית לעסק שלכם —{" "}
+          <Link to="/business/login" className="text-primary/80 hover:text-primary underline underline-offset-2 font-medium">
+            כניסה לחשבון
+          </Link>
+          {" "}או{" "}
+          <Link to="/business/signup" className="text-primary/80 hover:text-primary underline underline-offset-2 font-medium">
+            רישום חינם
+          </Link>
+        </p>
+      </div>
+    </motion.div>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared helpers
@@ -104,13 +270,25 @@ const BADGE_CATALOGUE: Array<{
   },
 ];
 
-function BadgeCard({ item }: { item: typeof BADGE_CATALOGUE[0] }) {
+interface BadgeCardProps {
+  item:         typeof BADGE_CATALOGUE[0];
+  ownerBusiness: OwnerBusiness | null;
+}
+
+function BadgeCard({ item, ownerBusiness }: BadgeCardProps) {
   const [open, setOpen] = useState(false);
   const cfg = BADGE_CONFIG[item.type];
-  const demoSlug = "your-business-slug";
-  const demoGrade = item.type === "verified" ? "B" : "A+";
-  const demoRating = item.type === "verified" ? 3.9 : 4.8;
-  const snippet = buildBadgeEmbedCode(item.type, demoSlug, demoGrade);
+
+  // Use owner's real data if available, otherwise show demo
+  const slug   = ownerBusiness?.slug  ?? "your-business-slug";
+  const grade  = ownerBusiness
+    ? computeGrade(ownerBusiness.rating, ownerBusiness.review_count)
+    : (item.type === "verified" ? "B" : "A+");
+  const rating = ownerBusiness?.rating ?? (item.type === "verified" ? 3.9 : 4.8);
+  const name   = ownerBusiness?.name  ?? "Your Business";
+
+  const snippet = buildBadgeEmbedCode(item.type, slug, grade);
+  const isPersonalised = !!ownerBusiness;
 
   return (
     <motion.div
@@ -128,7 +306,7 @@ function BadgeCard({ item }: { item: typeof BADGE_CATALOGUE[0] }) {
           <p className="text-xs text-white/45 mt-1 leading-relaxed">{cfg.sublabel}</p>
         </div>
         <div className="flex items-center justify-center py-6 rounded-xl border" style={{ background: "hsl(0 0% 8%)", borderColor: "hsl(0 0% 12%)" }}>
-          <PrestigeBadge type={item.type} slug={demoSlug} name="Your Business" grade={demoGrade} rating={demoRating} size="md" noLink />
+          <PrestigeBadge type={item.type} slug={slug} name={name} grade={grade} rating={rating} size="md" noLink />
         </div>
       </div>
 
@@ -162,9 +340,16 @@ function BadgeCard({ item }: { item: typeof BADGE_CATALOGUE[0] }) {
                   <code>{snippet}</code>
                 </pre>
               </div>
-              <p className="text-[10px] text-white/30 mt-2 leading-relaxed">
-                החליפו <code className="text-white/50">your-business-slug</code> בכתובת הפרופיל שלכם ב-ReviewHub.
-              </p>
+              {isPersonalised ? (
+                <p className="text-[10px] text-emerald-400/60 mt-2 flex items-center gap-1.5">
+                  <UserCheck size={10} />
+                  הקוד כבר מוגדר לעסק שלכם — הדביקו ישירות באתר
+                </p>
+              ) : (
+                <p className="text-[10px] text-white/30 mt-2 leading-relaxed">
+                  החליפו <code className="text-white/50">your-business-slug</code> בכתובת הפרופיל שלכם ב-ReviewHub.
+                </p>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -179,9 +364,54 @@ const HOW_STEPS = [
   { num: "03", title: "הטמיעו את התג", body: "העתיקו את קוד ה-HTML, הדביקו באתר שלכם. הלינק מתחת לתג מוביל חזרה לפרופיל האמון שלכם — ומייצר לכם backlink.", icon: Link2 },
 ];
 
-function BadgesTab() {
+interface BadgesTabProps {
+  ownerBusiness: OwnerBusiness | null;
+}
+
+function BadgesTab({ ownerBusiness }: BadgesTabProps) {
+  // Show which badges the owner has actually earned
+  const earnedBadges = useMemo(() => {
+    if (!ownerBusiness) return [] as PrestigeBadgeType[];
+    return computeEligibleBadges({
+      rating:        ownerBusiness.rating ?? 0,
+      verifiedCount: ownerBusiness.review_count ?? 0,
+      type:          SAAS_CATS.includes(ownerBusiness.category) ? "saas" : "other",
+      category:      ownerBusiness.category,
+    });
+  }, [ownerBusiness]);
+
   return (
     <div className="space-y-20">
+      {/* Earned badges highlight (only when owner is connected) */}
+      {ownerBusiness && earnedBadges.length > 0 && (
+        <section className="px-4">
+          <div className="mx-auto max-w-3xl">
+            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <UserCheck size={15} className="text-emerald-400" />
+                <p className="text-sm font-semibold text-emerald-300">
+                  {ownerBusiness.name} — תגים שהרווחתם
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {earnedBadges.map(type => (
+                  <PrestigeBadge
+                    key={type}
+                    type={type}
+                    slug={ownerBusiness.slug}
+                    name={ownerBusiness.name}
+                    grade={computeGrade(ownerBusiness.rating, ownerBusiness.review_count)}
+                    rating={ownerBusiness.rating ?? 0}
+                    size="sm"
+                    noLink
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Badge gallery */}
       <section className="px-4">
         <div className="mx-auto max-w-5xl">
@@ -190,7 +420,9 @@ function BadgesTab() {
             <p className="text-sm text-white/40 max-w-lg mx-auto">כל תג מבוסס על נתונים אמיתיים — ניתן לאימות בלחיצה. ככל שהציון גבוה יותר, כך התג מרשים יותר.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {BADGE_CATALOGUE.map(item => <BadgeCard key={item.type} item={item} />)}
+            {BADGE_CATALOGUE.map(item => (
+              <BadgeCard key={item.type} item={item} ownerBusiness={ownerBusiness} />
+            ))}
           </div>
         </div>
       </section>
@@ -260,7 +492,15 @@ function BadgesTab() {
             {(["sm", "md", "lg"] as const).map(sz => (
               <div key={sz} className="flex flex-col items-center gap-2">
                 <p className="text-[10px] font-medium text-white/30 uppercase tracking-widest">{sz.toUpperCase()}</p>
-                <PrestigeBadge type="highly-trusted" slug="demo" name="Demo Business" grade="A+" rating={4.9} size={sz} noLink />
+                <PrestigeBadge
+                  type="highly-trusted"
+                  slug={ownerBusiness?.slug ?? "demo"}
+                  name={ownerBusiness?.name ?? "Demo Business"}
+                  grade={ownerBusiness ? computeGrade(ownerBusiness.rating, ownerBusiness.review_count) : "A+"}
+                  rating={ownerBusiness?.rating ?? 4.9}
+                  size={sz}
+                  noLink
+                />
               </div>
             ))}
           </div>
@@ -274,12 +514,13 @@ function BadgesTab() {
 // ── TAB B: LIVE WIDGETS ───────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Fallback demo data used when no owner business is available */
 const DEMO_WIDGET_PROPS: Omit<TrustWidgetProps, "variant"> = {
   businessName: "אקדמיה לשיווק דיגיטלי",
-  slug: "demo",
-  rating: 4.8,
-  reviewCount: 318,
-  profileUrl: "#",
+  slug:         "demo",
+  rating:       4.8,
+  reviewCount:  318,
+  profileUrl:   "#",
   reviews: [
     { id: "d1", rating: 5, text: "הקורס שינה לי את הדרך שבה אני מסתכל על שיווק. כלים מעשיים שאני משתמש בהם כבר ביום הראשון.", reviewerName: "שרה ל.", anonymous: false, verified: true, courseName: "שיווק דיגיטלי מאסטרקלאס", date: "5 במרץ 2026" },
     { id: "d2", rating: 5, text: "המרצה מסביר בצורה ברורה ומעניינת, הדוגמאות מהעולם האמיתי עוזרות להבין כל מושג.", reviewerName: "דני א.", anonymous: false, verified: true, courseName: "יסודות SEO", date: "28 בפברואר 2026" },
@@ -291,9 +532,9 @@ const DEMO_WIDGET_PROPS: Omit<TrustWidgetProps, "variant"> = {
 };
 
 const WIDGET_VARIANTS = [
-  { id: "full"    as const, label: "קרוסלה מלאה", icon: Layers,   desc: "ווידג׳ט רחב ל-Hero Section ולדפי נחיתה" },
-  { id: "mini"    as const, label: "תג מינימלי",  icon: Minimize2, desc: "תג קומפקטי לסרגל הניווט או לכותרת" },
-  { id: "sidebar" as const, label: "עמודת צד",    icon: PanelRight, desc: "רשימה אנכית מפורטת לסידבר או ל-Sticky panel" },
+  { id: "full"    as const, label: "קרוסלה מלאה", icon: Layers,    desc: "ווידג׳ט רחב ל-Hero Section ולדפי נחיתה" },
+  { id: "mini"    as const, label: "תג מינימלי",   icon: Minimize2, desc: "תג קומפקטי לסרגל הניווט או לכותרת" },
+  { id: "sidebar" as const, label: "עמודת צד",     icon: PanelRight, desc: "רשימה אנכית מפורטת לסידבר או ל-Sticky panel" },
 ];
 
 const WIDGET_FEATURES = [
@@ -319,10 +560,30 @@ function buildEmbedSnippet(slug: string, variant: "full" | "mini" | "sidebar") {
 ></iframe>`;
 }
 
-function WidgetsTab() {
+interface WidgetsTabProps {
+  ownerBusiness: OwnerBusiness | null;
+}
+
+function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
   const [activeVariant, setActiveVariant] = useState<"full" | "mini" | "sidebar">("full");
   const [showFixed, setShowFixed] = useState(false);
-  const snippet = buildEmbedSnippet("your-business-slug", activeVariant);
+
+  // Use real slug in embed code when owner is connected
+  const embedSlug = ownerBusiness?.slug ?? "your-business-slug";
+  const isPersonalised = !!ownerBusiness;
+  const snippet = buildEmbedSnippet(embedSlug, activeVariant);
+
+  // Widget preview: real metadata when available, demo reviews as placeholder
+  const previewProps: Omit<TrustWidgetProps, "variant"> = ownerBusiness
+    ? {
+        businessName: ownerBusiness.name,
+        slug:         ownerBusiness.slug,
+        rating:       ownerBusiness.rating    ?? 0,
+        reviewCount:  ownerBusiness.review_count ?? 0,
+        profileUrl:   `/biz/${ownerBusiness.slug}`,
+        reviews:      DEMO_WIDGET_PROPS.reviews, // demo review cards (real ones load via iframe on their site)
+      }
+    : DEMO_WIDGET_PROPS;
 
   return (
     <div className="space-y-16">
@@ -361,7 +622,9 @@ function WidgetsTab() {
                 <div className="w-3 h-3 rounded-full bg-amber-400/50" />
                 <div className="w-3 h-3 rounded-full bg-emerald-400/50" />
               </div>
-              <div className="flex-1 mx-4 px-3 py-1 rounded bg-white/5 text-xs text-white/25 text-right">yourwebsite.co.il</div>
+              <div className="flex-1 mx-4 px-3 py-1 rounded bg-white/5 text-xs text-white/25 text-right">
+                {ownerBusiness?.slug ? `yourwebsite.co.il — /${ownerBusiness.slug}` : "yourwebsite.co.il"}
+              </div>
             </div>
             {/* Preview */}
             <div className="min-h-64 flex items-center justify-center p-8">
@@ -374,12 +637,19 @@ function WidgetsTab() {
                   transition={{ duration: 0.25 }}
                   className={activeVariant === "full" ? "w-full" : activeVariant === "sidebar" ? "w-full max-w-sm" : "w-full max-w-xs"}
                 >
-                  <TrustWidget variant={activeVariant} {...DEMO_WIDGET_PROPS} />
+                  <TrustWidget variant={activeVariant} {...previewProps} />
                 </motion.div>
               </AnimatePresence>
             </div>
           </div>
-          <p className="text-center text-xs text-white/30 mt-3">* מוצג דאטה לדוגמה — לאחר כניסה לחשבון ייטענו נתוני העסק שלכם</p>
+          {isPersonalised ? (
+            <p className="text-center text-xs text-emerald-400/60 mt-3 flex items-center justify-center gap-1.5">
+              <UserCheck size={11} />
+              מציג נתונים של {ownerBusiness!.name} — ביקורות חיות יופיעו כשהווידג'ט יוטמע באתר שלכם
+            </p>
+          ) : (
+            <p className="text-center text-xs text-white/30 mt-3">* מוצג דאטה לדוגמה — לאחר כניסה לחשבון ייטענו נתוני העסק שלכם</p>
+          )}
         </div>
       </section>
 
@@ -398,7 +668,7 @@ function WidgetsTab() {
           </button>
         </div>
         <AnimatePresence>
-          {showFixed && <FixedMiniBadge position="bottom-left" {...DEMO_WIDGET_PROPS} />}
+          {showFixed && <FixedMiniBadge position="bottom-left" {...previewProps} />}
         </AnimatePresence>
       </section>
 
@@ -409,8 +679,18 @@ function WidgetsTab() {
             <div className="p-2 rounded-lg bg-primary/15 border border-primary/25"><Code2 size={16} className="text-primary" /></div>
             <div>
               <h2 className="text-lg font-bold text-white">קוד ההטמעה</h2>
-              <p className="text-xs text-white/40">העתיקו את הקוד והדביקו ב-HTML של האתר שלכם</p>
+              <p className="text-xs text-white/40">
+                {isPersonalised
+                  ? `מוגדר אוטומטית לחשבון ${ownerBusiness!.name} — הדביקו ישירות ב-HTML של האתר שלכם`
+                  : "העתיקו את הקוד והדביקו ב-HTML של האתר שלכם"}
+              </p>
             </div>
+            {isPersonalised && (
+              <div className="mr-auto flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-500/25 bg-emerald-500/8">
+                <UserCheck size={11} className="text-emerald-400" />
+                <span className="text-[10px] font-medium text-emerald-400">מחובר</span>
+              </div>
+            )}
           </div>
           <div className="rounded-2xl border border-white/8 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/8 bg-white/3">
@@ -428,7 +708,11 @@ function WidgetsTab() {
             </pre>
           </div>
           <p className="text-xs text-white/30 mt-3 leading-relaxed">
-            הביקורות והדירוג מתעדכנים אוטומטית — אין צורך לשנות את הקוד לאחר ההטמעה. יש שאלות?{" "}
+            {isPersonalised ? (
+              <>הביקורות והדירוג מתעדכנים אוטומטית — אין צורך לשנות את הקוד. יש שאלות?{" "}</>
+            ) : (
+              <>הביקורות והדירוג מתעדכנים אוטומטית — אין צורך לשנות את הקוד לאחר ההטמעה. יש שאלות?{" "}</>
+            )}
             <a href="mailto:support@reviewshub.info" className="text-primary/60 hover:text-primary underline underline-offset-2">צרו קשר עם התמיכה</a>.
           </p>
         </div>
@@ -450,16 +734,6 @@ function WidgetsTab() {
         </div>
       </section>
 
-      {/* Upgrade CTA for widgets */}
-      <section className="px-4">
-        <div className="mx-auto max-w-5xl flex items-center gap-4 px-6 py-4 rounded-2xl border border-amber-500/20 bg-amber-500/5">
-          <Lock size={16} className="text-amber-400 shrink-0" />
-          <p className="text-sm text-amber-300/80">
-            ווידג'ט האמון זמין לתכניות Pro ו-Premium.{" "}
-            <Link to="/business/pricing" className="underline underline-offset-2 hover:text-amber-200 font-medium">ראו את התכניות ←</Link>
-          </p>
-        </div>
-      </section>
     </div>
   );
 }
@@ -476,6 +750,8 @@ export default function PrestigeBadgesPage() {
     const t = searchParams.get("tab");
     return t === "widgets" ? "widgets" : "badges";
   });
+
+  const { user, authLoading, business, bLoading } = useOwnerBusiness();
 
   // Keep URL in sync
   useEffect(() => {
@@ -516,7 +792,7 @@ export default function PrestigeBadgesPage() {
           <div className="mx-auto max-w-md">
             <div className="flex rounded-2xl border border-white/10 bg-white/4 p-1 gap-1">
               {([
-                { id: "badges"  as Tab, label: "תגי פרסטיז׳", icon: Award },
+                { id: "badges"  as Tab, label: "תגי פרסטיז׳",    icon: Award },
                 { id: "widgets" as Tab, label: "ווידג'טים לאתר", icon: Layout },
               ] as const).map(({ id, label, icon: Icon }) => (
                 <button
@@ -536,6 +812,14 @@ export default function PrestigeBadgesPage() {
           </div>
         </div>
 
+        {/* ── Account status banner ─────────────────────────────────────────── */}
+        <AccountStatusBanner
+          user={user}
+          authLoading={authLoading}
+          business={business}
+          bLoading={bLoading}
+        />
+
         {/* ── Tab content ───────────────────────────────────────────────────── */}
         <div className="pb-20">
           <AnimatePresence mode="wait">
@@ -546,7 +830,10 @@ export default function PrestigeBadgesPage() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
             >
-              {activeTab === "badges" ? <BadgesTab /> : <WidgetsTab />}
+              {activeTab === "badges"
+                ? <BadgesTab  ownerBusiness={business} />
+                : <WidgetsTab ownerBusiness={business} />
+              }
             </motion.div>
           </AnimatePresence>
         </div>
