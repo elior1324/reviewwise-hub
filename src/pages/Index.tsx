@@ -431,8 +431,7 @@ const Index = () => {
             author: {
               name: "דנה לוי",
               handle: "@dana_levy",
-              avatar:
-                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=dana-levy&backgroundColor=b6e3f4",
             },
             text: "הקורס שינה לי את הדרך שאני חושבת על שיווק. תוצאות אמיתיות תוך שלושה שבועות — ממש לא ציפיתי לזה.",
           },
@@ -440,8 +439,7 @@ const Index = () => {
             author: {
               name: "יובל כהן",
               handle: "@yuval_cohen",
-              avatar:
-                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=yuval-cohen&backgroundColor=c0aede",
             },
             text: "עבדתי עם המעצבת על האתר שלי — מקצועית, מדויקת, ועומדת בזמנים. פשוט תענוג לעבוד איתה.",
           },
@@ -449,8 +447,7 @@ const Index = () => {
             author: {
               name: "שיר מזרחי",
               handle: "@shir_mizrachi",
-              avatar:
-                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=shir-mizrachi&backgroundColor=d1f4e0",
             },
             text: "המנטור לא רק לימד — הוא ממש ישב איתי על הפרויקט. קיבלתי ידע שאני משתמשת בו כל יום.",
           },
@@ -458,8 +455,7 @@ const Index = () => {
             author: {
               name: "אורי גרין",
               handle: "@uri_green",
-              avatar:
-                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=uri-green&backgroundColor=ffd5dc",
             },
             text: "סוף סוף מצאתי פרילנסרית שכתבה תוכן בדיוק לפי קול המותג שלנו. ממליץ בחום לכל עסק קטן.",
           },
@@ -467,8 +463,7 @@ const Index = () => {
             author: {
               name: "נועה בן-דוד",
               handle: "@noa_bendavid",
-              avatar:
-                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=noa-bendavid&backgroundColor=b6e3f4",
             },
             text: "קורס הנתונים הוא הכי פרקטי שמצאתי ברשת. כל שיעור מסתיים בפרויקט אמיתי — ממש לא תיאורטי.",
           },
@@ -476,8 +471,7 @@ const Index = () => {
             author: {
               name: "עמיר ברק",
               handle: "@amir_barak",
-              avatar:
-                "https://images.unsplash.com/photo-1570295999897-c9c4c55e7839?w=150&h=150&fit=crop&crop=face",
+              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=amir-barak&backgroundColor=c0aede",
             },
             text: "חסכתי חצי שנה של לימוד עצמי. הקורס בנוי חכם — מתחיל מאפס ומגיע לדברים מורכבים בצעדים הגיוניים.",
           },
@@ -485,8 +479,7 @@ const Index = () => {
             author: {
               name: "מיה רוזן",
               handle: "@mia_rosen",
-              avatar:
-                "https://images.unsplash.com/photo-1517365830279-8d4dead2e554?w=150&h=150&fit=crop&crop=face",
+              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=mia-rosen&backgroundColor=d1f4e0",
             },
             text: "הייתה לי שאלה שנה אחרי שסיימתי את הקורס — המרצה ענה תוך 24 שעות. שירות כזה לא מוצאים בשום מקום.",
           },
@@ -494,8 +487,7 @@ const Index = () => {
             author: {
               name: "לירן אזולאי",
               handle: "@liran_azulay",
-              avatar:
-                "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
+              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=liran-azulay&backgroundColor=ffd5dc",
             },
             text: "הביקורות באתר הן אמיתיות לחלוטין. ReviewHub היא הפלטפורמה הראשונה שאני באמת סומך עליה.",
           },
