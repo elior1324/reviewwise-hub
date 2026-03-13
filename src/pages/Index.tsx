@@ -458,7 +458,7 @@ const Index = () => {
       {/* "Why ReviewHub?" bento feature grid with glowing border effect */}
       <FeaturesGrid />
 
-      {/* Trustpilot-style testimonials marquee */}
+      {/* Scrolling testimonials marquee */}
       <TestimonialsSection
         title="ביקורות מאומתות — ממשתמשים שרכשו בפועל"
         description="כל ביקורת קושרה לרכישה ממשית לפני שהתפרסמה. לא ניתן לרכוש מיקום, להסיר ביקורת שלילית, או לכתוב ביקורת ללא אימות."

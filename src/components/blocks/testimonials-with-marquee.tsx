@@ -1,6 +1,6 @@
 // src/components/blocks/testimonials-with-marquee.tsx
 //
-// Trustpilot-style scrolling testimonials strip.
+// Scrolling testimonials strip with continuous marquee animation.
 // Source structure from serafimcloud/testimonials-with-marquee, adapted for:
 //   - ReviewHub brand (Hebrew, RTL page layout)
 //   - Dark-mode design tokens (--background, --muted, --foreground)

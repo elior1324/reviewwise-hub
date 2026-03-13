@@ -2,7 +2,7 @@
 //
 // ReviewHub "Why ReviewHub?" bento feature grid.
 // Five tiles represent the five institutional pillars that distinguish
-// ReviewHub from generic review platforms (Trustpilot / Zap / Easy).
+// ReviewHub from generic review and directory platforms.
 //
 // Placement: rendered on the Index (homepage) between the Stats strip and
 // the TestimonialsSection so it reinforces platform trust before social proof.

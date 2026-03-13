@@ -53,7 +53,7 @@ const SidebarReviewItem = ({
   </motion.div>
 );
 
-// ─── Rating bar (like Trustpilot's breakdown) ─────────────────────────────────
+// ─── Rating bar — star distribution breakdown ─────────────────────────────────
 
 const RatingBar = ({
   label,

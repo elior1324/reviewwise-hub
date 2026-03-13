@@ -1,6 +1,6 @@
 // src/components/ReviewsMarquee.tsx
 //
-// Trustpilot-style scrolling testimonial strip for ReviewHub.
+// Scrolling testimonial strip for ReviewHub — continuous marquee social-proof wall.
 // Two rows of review cards scroll in opposite directions (LTR / RTL-neutral),
 // creating a social-proof "wall of trust" effect.
 //
@@ -385,7 +385,7 @@ export function ReviewsMarquee({
           viewport={{ once: true, margin: "-60px" }}
           variants={sectionFade}
         >
-          {/* Trustpilot-style trust badge row */}
+          {/* Trust badge row */}
           <div className="flex items-center justify-center gap-2 mb-4">
             <span className="flex gap-0.5">
               {[1, 2, 3, 4, 5].map((i) => (
