@@ -280,35 +280,8 @@ const Index = () => {
         </motion.div>
       </section>
 
-      {/* Top Freelancers */}
+      {/* Top Course Providers — 1st */}
       <section className="container py-10 md:py-20">
-        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <UserCheck size={22} className="text-primary" />
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">ציוני אמון מובילים — פרילנסרים</h2>
-            </div>
-            <p className="text-muted-foreground mt-1">מדורגים לפי נפח ביקורות מאומתות ויחס החזרים — לא לפי פרסום</p>
-          </div>
-          <Link to="/search?tab=freelancers">
-            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
-          </Link>
-        </div>
-        {topFreelancers.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {topFreelancers.map((biz, i) => (
-              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-                <BusinessCard {...biz} />
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-muted-foreground py-10">עדיין אין בעלי מקצוע רשומים. היו הראשונים!</p>
-        )}
-      </section>
-
-      {/* Top Course Providers */}
-      <section className="container py-10">
         <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -334,21 +307,21 @@ const Index = () => {
         )}
       </section>
 
-      {/* Top SaaS & AI Tools */}
-      {topSaasTools.length > 0 && (
-        <section className="container py-10">
-          <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Cpu size={22} className="text-primary" />
-                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">כלי SaaS ו-AI ישראליים מאומתים</h2>
-              </div>
-              <p className="text-muted-foreground mt-1">מוצרים דיגיטליים של יזמים ישראלים — מדורגים לפי ציון אמון, לא לפי פרסום</p>
+      {/* Top SaaS & AI Tools — 2nd */}
+      <section className="container py-10">
+        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Cpu size={22} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">ציוני אמון מובילים — SaaS & AI</h2>
             </div>
-            <Link to="/search?tab=saas">
-              <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
-            </Link>
+            <p className="text-muted-foreground mt-1">מוצרים דיגיטליים של יזמים ישראלים — מדורגים לפי ציון אמון, לא לפי פרסום</p>
           </div>
+          <Link to="/search?tab=saas">
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+          </Link>
+        </div>
+        {topSaasTools.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {topSaasTools.map((biz, i) => (
               <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
@@ -356,8 +329,37 @@ const Index = () => {
               </motion.div>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <p className="text-center text-muted-foreground py-10">עדיין אין כלי SaaS ו-AI רשומים. היו הראשונים!</p>
+        )}
+      </section>
+
+      {/* Top Service Providers — 3rd */}
+      <section className="container py-10">
+        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <UserCheck size={22} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">ציוני אמון מובילים — ספקי שירות</h2>
+            </div>
+            <p className="text-muted-foreground mt-1">מדורגים לפי נפח ביקורות מאומתות ויחס החזרים — לא לפי פרסום</p>
+          </div>
+          <Link to="/search?tab=freelancers">
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+          </Link>
+        </div>
+        {topFreelancers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topFreelancers.map((biz, i) => (
+              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <BusinessCard {...biz} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-10">עדיין אין ספקי שירות רשומים. היו הראשונים!</p>
+        )}
+      </section>
 
       {/* Freelancer Categories */}
       {FREELANCER_CATS_DISPLAY.length > 0 && (
@@ -435,7 +437,7 @@ const Index = () => {
           >
             {[
               { icon: Star, label: "ביקורות מאומתות", value: stats.reviews > 0 ? stats.reviews.toLocaleString() : "0" },
-              { icon: Users, label: "יוצרים ופרילנסרים", value: stats.businesses > 0 ? stats.businesses.toLocaleString() : "0" },
+              { icon: Users, label: "יוצרים וספקי שירות", value: stats.businesses > 0 ? stats.businesses.toLocaleString() : "0" },
               { icon: ShieldCheck, label: "רכישה מאומתת", value: "100%" },
               { icon: TrendingUp, label: "מתודולוגיה פתוחה לציבור", value: "✓" },
             ].map(({ icon: Icon, label, value }) => (
