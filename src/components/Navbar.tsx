@@ -169,7 +169,7 @@ const Navbar = () => {
             className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
           >
             <BookOpen size={14} aria-hidden="true" />
-            מתודולוגיה
+            אודות
           </Link>
         </div>
 
@@ -302,7 +302,7 @@ const Navbar = () => {
               className="block text-sm py-3 min-h-[44px] flex items-center"
               onClick={() => setMobileOpen(false)}
             >
-              מתודולוגיה
+              אודות
             </Link>
           </div>
 

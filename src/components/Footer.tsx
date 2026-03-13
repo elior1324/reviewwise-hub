@@ -105,7 +105,7 @@ const Footer = () => (
               to="/about"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              מתודולוגיה
+              אודות
             </Link>
             <Link
               to="/business"
