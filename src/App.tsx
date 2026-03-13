@@ -46,12 +46,10 @@ import BusinessAuth from "./pages/business/BusinessAuth";
 import PricingPage from "./pages/business/PricingPage";
 
 // Partners / widgets
-import TrustBadgePage from "./pages/partners/TrustBadgePage";
 import PrestigeBadgesPage from "./pages/partners/PrestigeBadgesPage";
 
 // Business solutions
 import ReviewsSolution from "./pages/business/solutions/ReviewsSolution";
-import WidgetsSolution from "./pages/business/solutions/WidgetsSolution";
 import AnalyticsSolution from "./pages/business/solutions/AnalyticsSolution";
 
 // Business resources
@@ -125,15 +123,17 @@ const App = () => (
             <Route path="/course-finder" element={<Navigate to="/search" replace />} />
 
             {/* Partner / widget pages */}
-            <Route path="/partners/trust-badge" element={<TrustBadgePage />} />
+            <Route path="/partners/trust-badge" element={<Navigate to="/partners/prestige-badges?tab=widgets" replace />} />
             <Route path="/partners/prestige-badges" element={<PrestigeBadgesPage />} />
 
             {/* Business solution pages — any authenticated user required */}
             <Route element={<AuthProtectedRoute />}>
               <Route path="/business/solutions/reviews" element={<ReviewsSolution />} />
-              <Route path="/business/solutions/widgets" element={<WidgetsSolution />} />
               <Route path="/business/solutions/analytics" element={<AnalyticsSolution />} />
             </Route>
+
+            {/* Widgets solution merged into prestige-badges page */}
+            <Route path="/business/solutions/widgets" element={<Navigate to="/partners/prestige-badges?tab=widgets" replace />} />
 
             {/* Business resource pages */}
             <Route path="/business/resources/docs" element={<DocsPage />} />

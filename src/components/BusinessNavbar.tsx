@@ -49,7 +49,7 @@ const BusinessNavbar = () => {
             אימות ביקורות
           </Link>
           <Link
-            to="/business/solutions/widgets"
+            to="/partners/prestige-badges?tab=widgets"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
           >
             <LayoutDashboard size={14} aria-hidden="true" />
@@ -125,7 +125,7 @@ const BusinessNavbar = () => {
             <ShieldCheck size={14} /> אימות ביקורות
           </Link>
           <Link
-            to="/business/solutions/widgets"
+            to="/partners/prestige-badges?tab=widgets"
             className="flex items-center gap-2 text-sm py-2 text-muted-foreground"
             onClick={() => setMobileOpen(false)}
           >
