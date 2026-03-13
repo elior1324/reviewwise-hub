@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
-  ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen, Award,
+  ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
@@ -19,12 +19,12 @@ import {
 import DeleteAccountButton from "./DeleteAccountButton";
 
 // ── "לעסקים" dropdown items ───────────────────────────────────────────────────
-// Pricing is intentionally excluded here; it is appended conditionally below
-// based on Gmail authentication status.
+// Gateway for business owners who land on the public site.
+// Pricing is appended conditionally based on auth status.
 const PRODUCT_LINKS = [
-  { to: "/business/solutions/reviews",   icon: ShieldCheck,     label: "אימות ביקורות"      },
-  { to: "/business/solutions/analytics", icon: BarChart3,       label: "לוח בקרה ונתונים"   },
-  { to: "/business/solutions/widgets",   icon: LayoutDashboard, label: "ווידג'טים"           },
+  { to: "/business",                     icon: ShieldCheck,     label: "כל הפתרונות לעסקים" },
+  { to: "/business/solutions/reviews",   icon: BarChart3,       label: "אימות ביקורות"      },
+  { to: "/business/solutions/analytics", icon: LayoutDashboard, label: "לוח בקרה ונתונים"   },
 ] as const;
 
 const Navbar = () => {
@@ -94,7 +94,7 @@ const Navbar = () => {
                   </DropdownMenuItem>
                 ))}
 
-                {/* Pricing — visible only to Gmail users */}
+                {/* Pricing — visible only to logged-in users */}
                 {canSeePricing && (
                   <>
                     <DropdownMenuSeparator />
@@ -106,6 +106,23 @@ const Navbar = () => {
                       >
                         <Tag size={15} className="text-primary shrink-0" aria-hidden="true" />
                         <span className="text-primary font-medium">מחירים</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+
+                {/* Business login CTA — only when not logged in */}
+                {!user && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/business/login"
+                        className="flex items-center gap-2 w-full font-medium text-primary"
+                        onClick={() => setProductOpen(false)}
+                      >
+                        <ShieldCheck size={15} className="text-primary shrink-0" aria-hidden="true" />
+                        כניסה לפורטל העסקי
                       </Link>
                     </DropdownMenuItem>
                   </>
@@ -153,14 +170,6 @@ const Navbar = () => {
           >
             <BookOpen size={14} aria-hidden="true" />
             מתודולוגיה
-          </Link>
-
-          <Link
-            to="/partners/prestige-badges"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-          >
-            <Award size={14} aria-hidden="true" />
-            תגי אמון
           </Link>
         </div>
 
@@ -294,14 +303,6 @@ const Navbar = () => {
               onClick={() => setMobileOpen(false)}
             >
               מתודולוגיה
-            </Link>
-            <Link
-              to="/partners/prestige-badges"
-              className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => setMobileOpen(false)}
-            >
-              <Award size={14} aria-hidden="true" />
-              תגי אמון
             </Link>
           </div>
 

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User, Award, LayoutDashboard, ShieldCheck } from "lucide-react";
 import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
@@ -40,11 +40,32 @@ const BusinessNavbar = () => {
         </div>
 
         {/* Center nav */}
-        <div className="hidden lg:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-5">
+          <Link
+            to="/business/solutions/reviews"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+          >
+            <ShieldCheck size={14} aria-hidden="true" />
+            אימות ביקורות
+          </Link>
+          <Link
+            to="/business/solutions/widgets"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+          >
+            <LayoutDashboard size={14} aria-hidden="true" />
+            ווידג'טים
+          </Link>
+          <Link
+            to="/partners/prestige-badges"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+          >
+            <Award size={14} aria-hidden="true" />
+            תגי אמון
+          </Link>
           {canSeePricing && (
             <Link
               to="/business/pricing"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
             >
               מחירים
             </Link>
@@ -96,8 +117,29 @@ const BusinessNavbar = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="lg:hidden border-t border-border/50 p-4 space-y-3 glass">
+          <Link
+            to="/business/solutions/reviews"
+            className="flex items-center gap-2 text-sm py-2 text-muted-foreground"
+            onClick={() => setMobileOpen(false)}
+          >
+            <ShieldCheck size={14} /> אימות ביקורות
+          </Link>
+          <Link
+            to="/business/solutions/widgets"
+            className="flex items-center gap-2 text-sm py-2 text-muted-foreground"
+            onClick={() => setMobileOpen(false)}
+          >
+            <LayoutDashboard size={14} /> ווידג'טים
+          </Link>
+          <Link
+            to="/partners/prestige-badges"
+            className="flex items-center gap-2 text-sm py-2 text-muted-foreground"
+            onClick={() => setMobileOpen(false)}
+          >
+            <Award size={14} /> תגי אמון
+          </Link>
           {canSeePricing && (
-            <Link to="/business/pricing" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>מחירים</Link>
+            <Link to="/business/pricing" className="block text-sm py-2 text-primary font-medium" onClick={() => setMobileOpen(false)}>מחירים</Link>
           )}
           <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
           <div className="border-t border-border/30 my-2" />
