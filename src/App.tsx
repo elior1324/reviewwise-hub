@@ -47,6 +47,7 @@ import PricingPage from "./pages/business/PricingPage";
 
 // Partners / widgets
 import PrestigeBadgesPage from "./pages/partners/PrestigeBadgesPage";
+import WidgetPage from "./pages/WidgetPage";
 
 // Business solutions
 import ReviewsSolution from "./pages/business/solutions/ReviewsSolution";
@@ -80,6 +81,9 @@ const App = () => (
             <Route path="/biz/:slug" element={<BusinessProfile />} />
             <Route path="/course/:courseId" element={<CoursePage />} />
             <Route path="/go/:courseId" element={<AffiliateRedirect />} />
+
+            {/* Embeddable widget page — bare iframe, no navbar/footer */}
+            <Route path="/widget/:slug" element={<WidgetPage />} />
 
             {/* Auth */}
             <Route path="/auth" element={<AuthPage />} />

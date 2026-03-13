@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, Award, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { Menu, X, LogOut, User, LayoutDashboard, ShieldCheck } from "lucide-react";
 import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
@@ -49,18 +49,11 @@ const BusinessNavbar = () => {
             אימות ביקורות
           </Link>
           <Link
-            to="/partners/prestige-badges?tab=widgets"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-          >
-            <LayoutDashboard size={14} aria-hidden="true" />
-            ווידג'טים
-          </Link>
-          <Link
             to="/partners/prestige-badges"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
           >
-            <Award size={14} aria-hidden="true" />
-            תגי אמון
+            <LayoutDashboard size={14} aria-hidden="true" />
+            ווידג'טים ותגי אמון
           </Link>
           {canSeePricing && (
             <Link
@@ -125,18 +118,11 @@ const BusinessNavbar = () => {
             <ShieldCheck size={14} /> אימות ביקורות
           </Link>
           <Link
-            to="/partners/prestige-badges?tab=widgets"
-            className="flex items-center gap-2 text-sm py-2 text-muted-foreground"
-            onClick={() => setMobileOpen(false)}
-          >
-            <LayoutDashboard size={14} /> ווידג'טים
-          </Link>
-          <Link
             to="/partners/prestige-badges"
             className="flex items-center gap-2 text-sm py-2 text-muted-foreground"
             onClick={() => setMobileOpen(false)}
           >
-            <Award size={14} /> תגי אמון
+            <LayoutDashboard size={14} /> ווידג'טים ותגי אמון
           </Link>
           {canSeePricing && (
             <Link to="/business/pricing" className="block text-sm py-2 text-primary font-medium" onClick={() => setMobileOpen(false)}>מחירים</Link>

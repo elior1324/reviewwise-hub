@@ -547,16 +547,23 @@ const WIDGET_FEATURES = [
 ];
 
 function buildEmbedSnippet(slug: string, variant: "full" | "mini" | "sidebar") {
-  const base = "https://reviewhub.co.il";
+  const base   = "https://reviewhub.co.il";
+  const width  = variant === "sidebar" ? "320" : variant === "mini" ? "280" : "100%";
+  const height = variant === "sidebar" ? "520" : variant === "mini" ? "68"  : "224";
+
+  // allow="popups" lets target="_blank" links inside the iframe open a new
+  // browser tab pointing to reviewhub.co.il/biz/{slug} — the business profile.
   return `<!-- ReviewHub Widget (${variant}) -->
+<!-- לחיצה על הווידג'ט תפתח את דף הביקורות של העסק ב-ReviewHub -->
 <iframe
   src="${base}/widget/${slug}?v=${variant}"
-  width="${variant === "sidebar" ? "320" : variant === "mini" ? "260" : "100%"}"
-  height="${variant === "sidebar" ? "520" : variant === "mini" ? "68" : "220"}"
+  width="${width}"
+  height="${height}"
   frameborder="0"
   scrolling="no"
-  title="ReviewHub — ביקורות מאומתות"
-  style="border:none;overflow:hidden;"
+  allow="popups"
+  title="ReviewHub — ביקורות מאומתות של ${slug}"
+  style="border:none;overflow:hidden;border-radius:16px;"
 ></iframe>`;
 }
 
