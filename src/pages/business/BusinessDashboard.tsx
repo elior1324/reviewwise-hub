@@ -188,15 +188,15 @@ const BusinessDashboard = () => {
       if (reviewData) {
         setRealReviews(reviewData.map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
+          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
           rating: r.rating,
-          text: r.text,
+          text: r.review_text || "",
           courseName: r.courses?.name || "",
           courseId: r.course_id,
           businessSlug: biz.slug,
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified || false,
+          verified: r.verified_purchase || false,
           anonymous: r.anonymous || false,
         })));
       }
