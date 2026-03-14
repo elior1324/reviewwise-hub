@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
   ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen, Briefcase,
-  UserCircle,
+  UserCircle, ArrowLeftRight,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
@@ -250,25 +250,28 @@ const Navbar = () => {
           <AccessibilityMenu />
           {user && <NotificationBell />}
 
-          {/* ── Switch Mode button (logged-in only) ──────────────────────── */}
+          {/* ── Mode switch pill — consumer → business ───────────────────── */}
           {user && !isBusinessMode && (
             <button
               onClick={handleSwitchToBusiness}
-              className="hidden md:flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/60 transition-all"
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-primary/40 bg-primary/8 text-primary hover:bg-primary/15 hover:border-primary/70 transition-all"
               aria-label="עבור למצב עסקי"
+              title="עבור לפרופיל העסקי"
             >
-              <Briefcase size={13} aria-hidden="true" />
-              מצב עסקי
+              <ArrowLeftRight size={12} aria-hidden="true" />
+              <span className="hidden sm:inline">פרופיל עסקי</span>
             </button>
           )}
+          {/* ── Mode switch pill — business → consumer ───────────────────── */}
           {user && isBusinessMode && (
             <button
               onClick={handleSwitchToConsumer}
-              className="hidden md:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-white/40 transition-all"
-              aria-label="חזרה לחשבון רגיל"
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-zinc-700/60 border border-zinc-600 text-zinc-200 hover:bg-zinc-600 hover:text-white hover:border-zinc-500 transition-all"
+              aria-label="עבור לגלישה רגילה"
+              title="עבור לגלישה רגילה"
             >
-              <UserCircle size={13} aria-hidden="true" />
-              חזרה לחשבון רגיל
+              <ArrowLeftRight size={12} aria-hidden="true" />
+              <span className="hidden sm:inline">גלישה רגילה</span>
             </button>
           )}
 
@@ -285,21 +288,14 @@ const Navbar = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem className="text-xs text-muted-foreground cursor-default">
+                <DropdownMenuItem className="text-xs text-muted-foreground cursor-default select-none">
                   {user.email}
                 </DropdownMenuItem>
-                {!isBusinessMode && (
-                  <DropdownMenuItem onClick={handleSwitchToBusiness}>
-                    <Briefcase size={14} className="ml-2" aria-hidden="true" />
-                    לוח בקרה עסקי
-                  </DropdownMenuItem>
-                )}
-                {isBusinessMode && (
-                  <DropdownMenuItem onClick={handleSwitchToConsumer}>
-                    <UserCircle size={14} className="ml-2" aria-hidden="true" />
-                    עבור למצב צרכן
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={isBusinessMode ? handleSwitchToConsumer : handleSwitchToBusiness}>
+                  <ArrowLeftRight size={14} className="ml-2" aria-hidden="true" />
+                  {isBusinessMode ? "גלישה רגילה" : "פרופיל עסקי"}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut size={14} className="ml-2" aria-hidden="true" />

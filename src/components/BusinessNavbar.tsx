@@ -101,41 +101,58 @@ const BusinessNavbar = () => {
             </Link>
           )}
 
-          {/* מוצר dropdown — always visible */}
-          <DropdownMenu open={productOpen} onOpenChange={setProductOpen}>
-            <DropdownMenuTrigger asChild>
-              <button
-                className={`text-sm transition-colors flex items-center gap-1 focus-visible:outline-none relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
-                  PRODUCT_ITEMS.some(i => isActive(i.to))
-                    ? "text-white font-semibold after:bg-white"
-                    : "text-zinc-300 hover:text-white after:bg-transparent"
-                }`}
-                aria-haspopup="menu"
-                aria-expanded={productOpen}
+          {/* מוצר dropdown — hover-based (no long-click needed) */}
+          <div
+            className="relative"
+            onMouseEnter={() => setProductOpen(true)}
+            onMouseLeave={() => setProductOpen(false)}
+          >
+            <button
+              onClick={() => setProductOpen(v => !v)}
+              className={`text-sm transition-colors flex items-center gap-1 focus-visible:outline-none py-1 relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
+                PRODUCT_ITEMS.some(i => isActive(i.to))
+                  ? "text-white font-semibold after:bg-white"
+                  : "text-zinc-300 hover:text-white after:bg-transparent"
+              }`}
+              aria-haspopup="menu"
+              aria-expanded={productOpen}
+            >
+              מוצר
+              <ChevronDown
+                size={13}
+                className={`transition-transform duration-200 ${productOpen ? "rotate-180" : ""}`}
+                aria-hidden="true"
+              />
+            </button>
+
+            {/* Floating panel */}
+            {productOpen && (
+              <div
+                className="absolute top-[calc(100%+6px)] right-1/2 translate-x-1/2 w-52 rounded-xl border border-zinc-700/80 bg-zinc-800/95 backdrop-blur-sm shadow-2xl py-1.5 z-50"
+                style={{ direction: "rtl" }}
+                role="menu"
               >
-                מוצר
-                <ChevronDown
-                  size={13}
-                  className={`transition-transform duration-200 ${productOpen ? "rotate-180" : ""}`}
-                  aria-hidden="true"
-                />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className="w-52" style={{ direction: "rtl" }}>
-              {PRODUCT_ITEMS.map(({ to, icon: Icon, label }) => (
-                <DropdownMenuItem key={to} asChild>
+                {/* Arrow pointer */}
+                <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-zinc-800 border-l border-t border-zinc-700/80" />
+                {PRODUCT_ITEMS.map(({ to, icon: Icon, label }) => (
                   <Link
+                    key={to}
                     to={to}
-                    className={`flex items-center gap-2 w-full ${isActive(to) ? "font-semibold text-primary" : ""}`}
+                    role="menuitem"
+                    className={`flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors ${
+                      isActive(to)
+                        ? "text-primary font-semibold bg-primary/10"
+                        : "text-zinc-200 hover:text-white hover:bg-zinc-700/50"
+                    }`}
                     onClick={() => setProductOpen(false)}
                   >
-                    <Icon size={15} className={isActive(to) ? "text-primary" : "text-muted-foreground"} aria-hidden="true" />
+                    <Icon size={15} className={isActive(to) ? "text-primary" : "text-zinc-400"} aria-hidden="true" />
                     {label}
                   </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* מחירון — always visible, highlighted */}
           <Link
@@ -155,15 +172,16 @@ const BusinessNavbar = () => {
         <div className="flex items-center gap-2">
           <AccessibilityMenu />
 
-          {/* Switch to Consumer Mode — only for logged-in users */}
+          {/* Mode switch — always visible when logged-in */}
           {user && (
             <button
               onClick={handleSwitchToUser}
-              className="hidden md:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-white/40 transition-all"
-              aria-label="חזרה לחשבון רגיל"
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-zinc-700/60 border border-zinc-600 text-zinc-200 hover:bg-zinc-600 hover:text-white hover:border-zinc-500 transition-all"
+              aria-label="עבור לגלישה רגילה"
+              title="עבור לגלישה רגילה"
             >
-              <ArrowLeftRight size={13} aria-hidden="true" />
-              חזרה לחשבון רגיל
+              <ArrowLeftRight size={12} aria-hidden="true" />
+              <span className="hidden sm:inline">גלישה רגילה</span>
             </button>
           )}
 
