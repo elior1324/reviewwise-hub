@@ -254,12 +254,12 @@ const Navbar = () => {
           {user && !isBusinessMode && (
             <button
               onClick={handleSwitchToBusiness}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-primary/40 bg-primary/8 text-primary hover:bg-primary/15 hover:border-primary/70 transition-all"
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/70 transition-all"
               aria-label="עבור למצב עסקי"
               title="עבור לפרופיל העסקי"
             >
               <ArrowLeftRight size={12} aria-hidden="true" />
-              <span className="hidden sm:inline">פרופיל עסקי</span>
+              פרופיל עסקי
             </button>
           )}
           {/* ── Mode switch pill — business → consumer ───────────────────── */}
@@ -271,7 +271,7 @@ const Navbar = () => {
               title="עבור לגלישה רגילה"
             >
               <ArrowLeftRight size={12} aria-hidden="true" />
-              <span className="hidden sm:inline">גלישה רגילה</span>
+              גלישה רגילה
             </button>
           )}
 

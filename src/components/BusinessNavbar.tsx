@@ -27,10 +27,10 @@ import {
 
 /** Sub-items for the "מוצר" dropdown — always visible to all visitors */
 const PRODUCT_ITEMS = [
-  { to: "/business/solutions/reviews",  icon: ShieldCheck,  label: "ביקורות מאומתות" },
-  { to: "/partners/prestige-badges",    icon: Tag,          label: "ווידג׳טים"         },
-  { to: "/business/solutions/analytics",icon: BarChart3,    label: "אנליטיקס"          },
-  { to: "/business/pricing",            icon: Package,      label: "מחירים"            },
+  { to: "/business/solutions/reviews",   icon: ShieldCheck,     label: "אימות וביקורות"    },
+  { to: "/business/solutions/analytics", icon: BarChart3,       label: "לוח בקרה ונתונים" },
+  { to: "/partners/prestige-badges",     icon: Tag,             label: "ווידג׳טים"          },
+  { to: "/business/pricing",             icon: Package,         label: "מחירים"             },
 ] as const;
 
 const BusinessNavbar = () => {
@@ -181,7 +181,7 @@ const BusinessNavbar = () => {
               title="עבור לגלישה רגילה"
             >
               <ArrowLeftRight size={12} aria-hidden="true" />
-              <span className="hidden sm:inline">גלישה רגילה</span>
+              גלישה רגילה
             </button>
           )}
 
