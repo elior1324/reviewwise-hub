@@ -93,7 +93,7 @@ const Navbar = () => {
 
         {/* ── Left side: Logo + לעסקים dropdown ─────────────────────────────── */}
         <div className="flex items-center gap-4">
-          <Link to={isBusinessMode ? "/business/dashboard" : "/"} className="flex items-center gap-2.5">
+          <Link to={isBusinessMode ? "/business" : "/"} className="flex items-center gap-2.5">
             <img
               src={logoIcon}
               alt="ReviewHub Logo"
@@ -180,43 +180,79 @@ const Navbar = () => {
 
         {/* ── Center nav ────────────────────────────────────────────────────── */}
         <div className="hidden md:flex items-center gap-6">
-          <Link
-            to="/"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            עמוד הבית
-          </Link>
+          {isBusinessMode ? (
+            /* ── Business mode nav ── */
+            <>
+              <Link
+                to="/business"
+                className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                דף הבית
+              </Link>
+              <Link
+                to="/business/dashboard"
+                className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                <LayoutDashboard size={14} aria-hidden="true" />
+                לוח הבקרה
+              </Link>
+              <Link
+                to="/business/pricing"
+                className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                <Tag size={14} aria-hidden="true" />
+                תמחור
+              </Link>
+              <Link
+                to="/business/solutions/reviews"
+                className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                <ShieldCheck size={14} aria-hidden="true" />
+                אימות ביקורות
+              </Link>
+            </>
+          ) : (
+            /* ── Consumer mode nav ── */
+            <>
+              <Link
+                to="/"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                עמוד הבית
+              </Link>
 
-          <Link
-            to="/search"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ספריית האמון
-          </Link>
+              <Link
+                to="/search"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ספריית האמון
+              </Link>
 
-          <Link
-            to="/leaderboard"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-          >
-            <Trophy size={14} aria-hidden="true" />
-            קהילה
-          </Link>
+              <Link
+                to="/leaderboard"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+              >
+                <Trophy size={14} aria-hidden="true" />
+                קהילה
+              </Link>
 
-          <Link
-            to="/compare"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-          >
-            <Scale size={14} aria-hidden="true" />
-            השוואה
-          </Link>
+              <Link
+                to="/compare"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+              >
+                <Scale size={14} aria-hidden="true" />
+                השוואה
+              </Link>
 
-          <Link
-            to="/about"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-          >
-            <BookOpen size={14} aria-hidden="true" />
-            אודות
-          </Link>
+              <Link
+                to="/about"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+              >
+                <BookOpen size={14} aria-hidden="true" />
+                אודות
+              </Link>
+            </>
+          )}
         </div>
 
         {/* ── Right side ───────────────────────────────────────────────────── */}
@@ -310,102 +346,158 @@ const Navbar = () => {
 
       {/* ── Mobile menu ───────────────────────────────────────────────────── */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border/50 p-4 space-y-1 glass" dir="rtl">
-          <Link
-            to="/"
-            className="block text-sm py-3 min-h-[44px] flex items-center"
-            onClick={() => setMobileOpen(false)}
-          >
-            עמוד הבית
-          </Link>
-          <Link
-            to="/search"
-            className="block text-sm py-3 min-h-[44px] flex items-center"
-            onClick={() => setMobileOpen(false)}
-          >
-            ספריית האמון
-          </Link>
-
-          {/* Business sub-links (always visible on mobile) */}
-          <div className="border-t border-border/30 pt-2 pb-1">
-            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider px-0 mb-1">
-              לעסקים
-            </p>
-            {PRODUCT_LINKS.map(({ to, icon: Icon, label }) => (
+        <div className={`md:hidden border-t p-4 space-y-1 ${isBusinessMode ? "bg-zinc-900 border-zinc-700/60" : "glass border-border/50"}`} dir="rtl">
+          {isBusinessMode ? (
+            /* ── Business mode mobile nav ── */
+            <>
               <Link
-                key={to}
-                to={to}
-                className="flex items-center gap-2 text-sm py-2.5 min-h-[44px] text-muted-foreground hover:text-foreground transition-colors"
+                to="/business"
+                className="block text-sm py-3 min-h-[44px] flex items-center text-zinc-200 hover:text-white"
                 onClick={() => setMobileOpen(false)}
               >
-                <Icon size={14} aria-hidden="true" />
-                {label}
+                דף הבית
               </Link>
-            ))}
-            {canSeePricing && (
+              <Link
+                to="/business/dashboard"
+                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
+                onClick={() => setMobileOpen(false)}
+              >
+                <LayoutDashboard size={14} aria-hidden="true" />
+                לוח הבקרה
+              </Link>
               <Link
                 to="/business/pricing"
-                className="flex items-center gap-2 text-sm py-2.5 min-h-[44px] text-primary font-medium"
+                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
                 onClick={() => setMobileOpen(false)}
               >
                 <Tag size={14} aria-hidden="true" />
-                מחירים
+                תמחור
               </Link>
-            )}
-          </div>
-
-          <div className="border-t border-border/30 pt-1">
-            <Link
-              to="/leaderboard"
-              className="block text-sm py-3 min-h-[44px] flex items-center"
-              onClick={() => setMobileOpen(false)}
-            >
-              קהילה
-            </Link>
-            <Link
-              to="/compare"
-              className="block text-sm py-3 min-h-[44px] flex items-center"
-              onClick={() => setMobileOpen(false)}
-            >
-              השוואה חכמה
-            </Link>
-            <Link
-              to="/about"
-              className="block text-sm py-3 min-h-[44px] flex items-center"
-              onClick={() => setMobileOpen(false)}
-            >
-              אודות
-            </Link>
-          </div>
-
-          <div className="border-t border-border/30 pt-1">
-            {user && (
-              <button
-                onClick={() => { handleSwitchToBusiness(); setMobileOpen(false); }}
-                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-primary font-medium w-full"
-              >
-                <Briefcase size={14} aria-hidden="true" />
-                מצב עסקי
-              </button>
-            )}
-            {!user && (
               <Link
-                to="/auth"
-                className="block text-sm py-3 min-h-[44px] flex items-center text-primary"
+                to="/business/solutions/reviews"
+                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
                 onClick={() => setMobileOpen(false)}
               >
-                התחברו / צרו חשבון
+                <ShieldCheck size={14} aria-hidden="true" />
+                אימות ביקורות
               </Link>
-            )}
-            {user && (
-              <button
-                onClick={() => { handleSignOut(); setMobileOpen(false); }}
-                className="block text-sm py-3 min-h-[44px] flex items-center text-destructive w-full"
+              <div className="border-t border-zinc-700/60 pt-1">
+                <button
+                  onClick={() => { handleSwitchToConsumer(); setMobileOpen(false); }}
+                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-amber-400 w-full"
+                >
+                  <UserCircle size={14} aria-hidden="true" />
+                  מצב צרכן
+                </button>
+                <button
+                  onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-destructive w-full"
+                >
+                  <LogOut size={14} aria-hidden="true" />
+                  התנתקו
+                </button>
+              </div>
+            </>
+          ) : (
+            /* ── Consumer mode mobile nav ── */
+            <>
+              <Link
+                to="/"
+                className="block text-sm py-3 min-h-[44px] flex items-center"
+                onClick={() => setMobileOpen(false)}
               >
-                התנתקו
-              </button>
-            )}
-          </div>
+                עמוד הבית
+              </Link>
+              <Link
+                to="/search"
+                className="block text-sm py-3 min-h-[44px] flex items-center"
+                onClick={() => setMobileOpen(false)}
+              >
+                ספריית האמון
+              </Link>
+
+              {/* Business sub-links */}
+              <div className="border-t border-border/30 pt-2 pb-1">
+                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider px-0 mb-1">
+                  לעסקים
+                </p>
+                {PRODUCT_LINKS.map(({ to, icon: Icon, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    className="flex items-center gap-2 text-sm py-2.5 min-h-[44px] text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <Icon size={14} aria-hidden="true" />
+                    {label}
+                  </Link>
+                ))}
+                {canSeePricing && (
+                  <Link
+                    to="/business/pricing"
+                    className="flex items-center gap-2 text-sm py-2.5 min-h-[44px] text-primary font-medium"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <Tag size={14} aria-hidden="true" />
+                    מחירים
+                  </Link>
+                )}
+              </div>
+
+              <div className="border-t border-border/30 pt-1">
+                <Link
+                  to="/leaderboard"
+                  className="block text-sm py-3 min-h-[44px] flex items-center"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  קהילה
+                </Link>
+                <Link
+                  to="/compare"
+                  className="block text-sm py-3 min-h-[44px] flex items-center"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  השוואה חכמה
+                </Link>
+                <Link
+                  to="/about"
+                  className="block text-sm py-3 min-h-[44px] flex items-center"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  אודות
+                </Link>
+              </div>
+
+              <div className="border-t border-border/30 pt-1">
+                {user && (
+                  <button
+                    onClick={() => { handleSwitchToBusiness(); setMobileOpen(false); }}
+                    className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-primary font-medium w-full"
+                  >
+                    <Briefcase size={14} aria-hidden="true" />
+                    מצב עסקי
+                  </button>
+                )}
+                {!user && (
+                  <Link
+                    to="/auth"
+                    className="block text-sm py-3 min-h-[44px] flex items-center text-primary"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    התחברו / צרו חשבון
+                  </Link>
+                )}
+                {user && (
+                  <button
+                    onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                    className="block text-sm py-3 min-h-[44px] flex items-center text-destructive w-full"
+                  >
+                    התנתקו
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
     </nav>
