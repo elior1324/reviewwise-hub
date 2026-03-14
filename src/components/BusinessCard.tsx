@@ -42,7 +42,16 @@ interface BusinessCardProps {
   socialLinks?: SocialLinks;
   pricingModel?: PricingModel;
   founderName?: string;
+  verifiedRatio?: number;
+  trustTier?: "elite" | "highly_trusted" | "trusted" | "emerging" | "unrated";
 }
+
+const TRUST_TIER_DISPLAY: Record<string, { label: string; cls: string; iconCls: string }> = {
+  elite:         { label: "Elite", cls: "bg-amber-500/15 border-amber-500/40 text-amber-600 dark:text-amber-400", iconCls: "text-amber-500" },
+  highly_trusted: { label: "Highly Trusted", cls: "bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-400", iconCls: "text-emerald-500" },
+  trusted:       { label: "Trusted", cls: "bg-primary/10 border-primary/20 text-primary", iconCls: "text-primary" },
+  emerging:      { label: "Emerging", cls: "bg-muted/50 border-border/40 text-muted-foreground", iconCls: "text-muted-foreground" },
+};
 
 // Lightweight trust grade for card display
 function cardTrustGrade(rating: number, verifiedCount: number): { grade: string; color: string } {
@@ -55,8 +64,9 @@ function cardTrustGrade(rating: number, verifiedCount: number): { grade: string;
   return                                            { grade: "F",  color: "text-red-500" };
 }
 
-const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewCount, verifiedReviewCount = 0, description, logo, socialLinks, pricingModel, founderName }: BusinessCardProps) => {
+const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewCount, verifiedReviewCount = 0, description, logo, socialLinks, pricingModel, founderName, verifiedRatio, trustTier }: BusinessCardProps) => {
   const trust = cardTrustGrade(rating, verifiedReviewCount);
+  const tierDisplay = trustTier && trustTier !== "unrated" ? TRUST_TIER_DISPLAY[trustTier] : null;
   const isSaas = type === "saas";
   const activeSocials = socialLinks
     ? Object.entries(socialLinks).filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim() !== "")
@@ -116,6 +126,16 @@ const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewC
             <div className="flex items-center gap-1 mb-1">
               <ShieldCheck size={11} className="text-primary" aria-hidden="true" />
               <span className="text-[11px] text-primary font-medium">{verifiedReviewCount} ביקורות מאומתות</span>
+            </div>
+          )}
+          {/* Trust tier badge from DB */}
+          {tierDisplay && (
+            <div className={`inline-flex items-center gap-1 text-[10px] font-semibold border rounded-full px-2 py-0.5 mb-1 ${tierDisplay.cls}`}>
+              <ShieldCheck size={9} className={tierDisplay.iconCls} aria-hidden="true" />
+              {tierDisplay.label}
+              {verifiedRatio != null && (
+                <span className="opacity-70 ml-0.5">({Math.round(verifiedRatio * 100)}%)</span>
+              )}
             </div>
           )}
           {/* SaaS: pricing model + founder */}

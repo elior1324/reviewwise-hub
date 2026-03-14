@@ -3,7 +3,7 @@ import StarRating from "./StarRating";
 import VerifiedBadge from "./VerifiedBadge";
 import ReviewResponse from "./ReviewResponse";
 import ReportReviewDialog from "./ReportReviewDialog";
-import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2, MessageSquare } from "lucide-react";
+import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2, MessageSquare, AlertTriangle, Eye, HelpCircle } from "lucide-react";
 import { getTimeSincePurchase } from "@/data/mockData";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -66,6 +66,17 @@ interface ReviewCardProps {
    * "open"     — community review, no purchase proof, NOT counted in trust score
    */
   reviewTier?: "verified" | "open";
+  /**
+   * Moderation status from the trust & compliance system:
+   * "pending"      — awaiting initial moderation pass
+   * "verified"     — cleared by AI + human review
+   * "flagged"      — flagged by AI classifier, pending decision
+   * "under_review" — formal investigation open
+   * "removed"      — removed by compliance decision
+   */
+  moderationStatus?: "pending" | "verified" | "flagged" | "under_review" | "removed";
+  /** AI decision reason shown to business owner in dashboard */
+  aiDecisionReason?: string | null;
 }
 
 const ReviewCard = ({
@@ -95,6 +106,8 @@ const ReviewCard = ({
   onDelete,
   onEdit,
   reviewTier = "verified",
+  moderationStatus,
+  aiDecisionReason,
 }: ReviewCardProps) => {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [liked, setLiked] = useState(false);
@@ -349,6 +362,53 @@ const ReviewCard = ({
             <div className="mt-2 text-xs text-destructive bg-destructive/10 rounded px-2 py-1 inline-block">
               ⚠️ {flagReason}
             </div>
+          )}
+
+          {/* ── Moderation Status Badge ──────────────────────────────────── */}
+          {moderationStatus && moderationStatus !== "verified" && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className={`mt-2 inline-flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 cursor-help border ${
+                  moderationStatus === "pending"
+                    ? "bg-muted/60 text-muted-foreground border-border/40"
+                    : moderationStatus === "flagged"
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                    : moderationStatus === "under_review"
+                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30"
+                    : moderationStatus === "removed"
+                    ? "bg-destructive/10 text-destructive border-destructive/30"
+                    : ""
+                }`}>
+                  {moderationStatus === "pending" && <><HelpCircle size={10} /> ממתין לאימות</>}
+                  {moderationStatus === "flagged" && <><AlertTriangle size={10} /> מסומן לבדיקה</>}
+                  {moderationStatus === "under_review" && <><Eye size={10} /> בחקירה</>}
+                  {moderationStatus === "removed" && <><X size={10} /> הוסרה</>}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs max-w-[280px] leading-snug">
+                {moderationStatus === "pending" && (
+                  <p>ביקורת זו ממתינה לעיבור מערכת האימות האוטומטית.</p>
+                )}
+                {moderationStatus === "flagged" && (
+                  <>
+                    <p className="font-semibold mb-1">ביקורת זו מסומנת לבדיקה</p>
+                    <p>{aiDecisionReason || "מסיבות ציות הביקורת נמצאת בבחינה."}</p>
+                  </>
+                )}
+                {moderationStatus === "under_review" && (
+                  <>
+                    <p className="font-semibold mb-1">חקירה פתוחה</p>
+                    <p>{aiDecisionReason || "צוות ReviewHub בוחן ביקורת זו. תגיע הכרעה תוך 72 שעות."}</p>
+                  </>
+                )}
+                {moderationStatus === "removed" && (
+                  <>
+                    <p className="font-semibold mb-1">ביקורת הוסרה</p>
+                    <p>{aiDecisionReason || "ביקורת זו הוסרה לאחר בחינת ציות."}</p>
+                  </>
+                )}
+              </TooltipContent>
+            </Tooltip>
           )}
 
           {/* ── Public Transparency Log Badge ────────────────────────────── */}

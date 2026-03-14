@@ -24,17 +24,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type SortOption = "default" | "top5" | "alpha-asc" | "rating-desc" | "rating-asc" | "most-reviews" | "least-reviews" | "most-verified";
+type SortOption = "default" | "top5" | "alpha-asc" | "rating-desc" | "rating-asc" | "most-reviews" | "least-reviews" | "most-verified" | "most-trusted";
 
 const SORT_LABELS: Record<SortOption, string> = {
   "default": "ברירת מחדל",
   "top5": "טופ 5 בציון האמון",
+  "most-trusted": "הכי מהימן (יחס ביקורות מאומתות)",
   "most-verified": "הכי הרבה ביקורות מאומתות",
   "alpha-asc": "א׳–ב׳ (א–ת)",
   "rating-desc": "דירוג גבוה תחילה",
   "rating-asc": "דירוג נמוך תחילה",
   "most-reviews": "הכי הרבה ביקורות",
   "least-reviews": "הכי פחות ביקורות",
+};
+
+// Trust tier ordering for ranking
+const TRUST_TIER_RANK: Record<string, number> = {
+  elite: 5, highly_trusted: 4, trusted: 3, emerging: 2, unrated: 1,
 };
 
 function sortBusinesses(list: Business[], sort: SortOption): Business[] {
@@ -46,6 +52,15 @@ function sortBusinesses(list: Business[], sort: SortOption): Business[] {
         const bScore = (a.verifiedReviewCount ?? 0) * 2 + a.rating;
         return aScore - bScore;
       }).slice(0, 5);
+    case "most-trusted":
+      // Primary: trust tier rank; secondary: verified ratio; tertiary: rating
+      return sorted.sort((a, b) => {
+        const tierDiff = (TRUST_TIER_RANK[b.trustTier ?? "unrated"] ?? 1) - (TRUST_TIER_RANK[a.trustTier ?? "unrated"] ?? 1);
+        if (tierDiff !== 0) return tierDiff;
+        const ratioDiff = (b.verifiedRatio ?? 0) - (a.verifiedRatio ?? 0);
+        if (Math.abs(ratioDiff) > 0.01) return ratioDiff;
+        return b.rating - a.rating;
+      });
     case "most-verified":
       return sorted.sort((a, b) => (b.verifiedReviewCount ?? 0) - (a.verifiedReviewCount ?? 0));
     case "alpha-asc":
@@ -112,6 +127,8 @@ const SearchPage = () => {
           socialLinks: b.social_links as any || undefined,
           pricingModel: b.pricing_model || undefined,
           founderName: b.founder_name || undefined,
+          verifiedRatio: b.verified_ratio != null ? Number(b.verified_ratio) : undefined,
+          trustTier: b.trust_tier || undefined,
         }));
         setAllBusinesses(mapped);
       }

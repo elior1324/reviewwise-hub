@@ -51,6 +51,10 @@ export interface Business {
   /** SaaS / digital-product fields */
   pricingModel?: PricingModel;
   founderName?: string;
+  /** Ratio of verified reviews — 0–1 NUMERIC(5,4) from DB trigger */
+  verifiedRatio?: number;
+  /** Trust tier computed from verifiedRatio + verifiedReviewCount */
+  trustTier?: "elite" | "highly_trusted" | "trusted" | "emerging" | "unrated";
 }
 
 export interface Review {

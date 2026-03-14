@@ -15,7 +15,7 @@ import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
   Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2, Link2, Handshake,
-  ExternalLink, Tag, BarChart2
+  ExternalLink, Tag, BarChart2, Shield, CheckCircle2, XCircle, Clock
 } from "lucide-react";
 import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
 import IntegrationsTab from "@/components/IntegrationsTab";
@@ -88,6 +88,77 @@ const DEMO_AI_REPORT = {
 
 type DemoTier = "free" | "pro" | "enterprise";
 
+// ── Compliance helper components ──────────────────────────────────────────────
+
+const STATUS_META: Record<string, { label: string; cls: string; bg: string; icon: any }> = {
+  pending:      { label: "ממתין לאימות", cls: "text-muted-foreground", bg: "bg-muted/40", icon: Clock },
+  verified:     { label: "מאומת", cls: "text-green-600 dark:text-green-400", bg: "bg-green-500/10", icon: CheckCircle2 },
+  flagged:      { label: "מסומן לבדיקה", cls: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10", icon: AlertTriangle },
+  under_review: { label: "בחקירה", cls: "text-blue-600 dark:text-blue-400", bg: "bg-blue-500/10", icon: Eye },
+  removed:      { label: "הוסר", cls: "text-destructive", bg: "bg-destructive/10", icon: XCircle },
+};
+
+const ReviewStatusRow = ({
+  text, course, status, reason, aiDecision, date,
+}: { text: string; course: string; status: string; reason?: string | null; aiDecision?: string | null; date?: string }) => {
+  const meta = STATUS_META[status] || STATUS_META.pending;
+  const Icon = meta.icon;
+  return (
+    <div className="flex items-start gap-3 py-3 border-b border-border/30 last:border-0">
+      <div className={`w-7 h-7 rounded-md ${meta.bg} flex items-center justify-center shrink-0 mt-0.5`}>
+        <Icon size={13} className={meta.cls} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-foreground/80 truncate">{text}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{course}{date ? ` · ${date}` : ""}</p>
+        {reason && (
+          <p className="text-[11px] text-muted-foreground/70 mt-1 font-mono bg-muted/30 rounded px-2 py-1 leading-snug">
+            {reason}
+          </p>
+        )}
+      </div>
+      <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${meta.bg} ${meta.cls} border-current/20`}>
+        {meta.label}
+      </span>
+    </div>
+  );
+};
+
+const REPORT_STATUS_META: Record<string, { label: string; cls: string }> = {
+  open:         { label: "פתוח", cls: "text-amber-600 dark:text-amber-400" },
+  investigating: { label: "בחקירה", cls: "text-blue-600 dark:text-blue-400" },
+  resolved:     { label: "נסגר", cls: "text-green-600 dark:text-green-400" },
+  rejected:     { label: "נדחה", cls: "text-muted-foreground" },
+};
+
+const ReportRow = ({
+  reason, status, aiDecision, aiReason, date,
+}: { reason: string; status: string; aiDecision?: string | null; aiReason?: string | null; date?: string }) => {
+  const meta = REPORT_STATUS_META[status] || REPORT_STATUS_META.open;
+  return (
+    <div className="flex items-start gap-3 py-3 border-b border-border/30 last:border-0">
+      <div className="w-7 h-7 rounded-md bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
+        <AlertTriangle size={13} className="text-amber-500" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-foreground/80">{reason}</p>
+        {date && <p className="text-xs text-muted-foreground mt-0.5">{date}</p>}
+        {aiReason && (
+          <p className="text-[11px] text-muted-foreground/70 mt-1 font-mono bg-muted/30 rounded px-2 py-1 leading-snug">
+            AI: {aiReason}
+          </p>
+        )}
+        {aiDecision && (
+          <p className="text-[10px] text-primary/70 mt-1">החלטה: <span className="font-semibold">{aiDecision}</span></p>
+        )}
+      </div>
+      <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted/30 ${meta.cls}`}>
+        {meta.label}
+      </span>
+    </div>
+  );
+};
+
 const BusinessDashboard = () => {
   const navigate = useNavigate();
   const { user, subscriptionTier } = useAuth();
@@ -123,6 +194,10 @@ const BusinessDashboard = () => {
   const [collabConfig, setCollabConfig] = useState<CollabConfig>({ active: false, method: null, coupon: null });
   const [referralClickCount, setReferralClickCount] = useState(0);
   const [referralClicksData, setReferralClicksData] = useState<{ date: string; clicks: number }[]>([]);
+
+  // Compliance panel state
+  const [complianceReviews, setComplianceReviews] = useState<any[]>([]);
+  const [openReports, setOpenReports] = useState<any[]>([]);
 
   // Determine tier — use DB tier for real users, demo tier for demo mode
   const currentTier: SubscriptionTier = !isDemo ? dbTier : demoTier;
@@ -327,6 +402,25 @@ const BusinessDashboard = () => {
         });
         setReferralClicksData(Object.entries(byDay).map(([date, clicks]) => ({ date, clicks })));
       }
+
+      // Fetch compliance reviews (flagged / under_review / removed)
+      const { data: compReviewData } = await supabase
+        .from("reviews")
+        .select("id, text, rating, status, ai_decision, ai_reason, created_at, courses(name)")
+        .eq("business_id", biz.id)
+        .in("status", ["flagged", "under_review", "removed", "pending"])
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (compReviewData) setComplianceReviews(compReviewData);
+
+      // Fetch open reports against this business
+      const { data: reportsData } = await supabase
+        .from("reports")
+        .select("id, reason, moderation_status, ai_decision, ai_reason, created_at, review_id")
+        .eq("business_id", biz.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (reportsData) setOpenReports(reportsData);
 
       setLoadingData(false);
     };
@@ -640,6 +734,14 @@ const BusinessDashboard = () => {
                     <Handshake size={13} className="ml-1" /> שיתוף פעולה
                     {collabConfig.active && !isDemo && (
                       <span className="mr-1 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="compliance" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                    <Shield size={13} className="ml-1" /> ציות ואימות
+                    {!isDemo && complianceReviews.filter(r => r.status === "flagged" || r.status === "under_review").length > 0 && (
+                      <span className="mr-1.5 bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">
+                        {complianceReviews.filter(r => r.status === "flagged" || r.status === "under_review").length}
+                      </span>
                     )}
                   </TabsTrigger>
                 </TabsList>
@@ -1405,6 +1507,152 @@ const BusinessDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* ── Compliance & Moderation Panel ─────────────────────────── */}
+          <TabsContent value="compliance">
+            <div className="space-y-6">
+
+              {/* KPI strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                  {
+                    icon: CheckCircle2, label: "מאומתות",
+                    value: isDemo ? 12 : complianceReviews.filter(r => r.status === "verified").length + (isDemo ? 0 : 0),
+                    cls: "text-green-600 dark:text-green-400", bg: "bg-green-500/10",
+                  },
+                  {
+                    icon: Clock, label: "ממתינות",
+                    value: isDemo ? 3 : complianceReviews.filter(r => r.status === "pending").length,
+                    cls: "text-muted-foreground", bg: "bg-muted/40",
+                  },
+                  {
+                    icon: AlertTriangle, label: "מסומנות לבדיקה",
+                    value: isDemo ? 2 : complianceReviews.filter(r => r.status === "flagged").length,
+                    cls: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10",
+                  },
+                  {
+                    icon: XCircle, label: "הוסרו",
+                    value: isDemo ? 1 : complianceReviews.filter(r => r.status === "removed").length,
+                    cls: "text-destructive", bg: "bg-destructive/10",
+                  },
+                ].map(({ icon: Icon, label, value, cls, bg }) => (
+                  <Card key={label} className="shadow-card bg-card">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
+                        <Icon size={18} className={cls} />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-display font-bold text-foreground">{value}</p>
+                        <p className="text-xs text-muted-foreground">{label}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Review status list */}
+              <Card className="shadow-card bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Shield size={16} /> סטטוס ביקורות — מערכת ציות
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isDemo ? (
+                    <div className="space-y-3">
+                      {[
+                        { text: "קורס מצוין! ממליץ בחום.", course: "שיווק דיגיטלי מאסטרקלאס", status: "verified", reason: null },
+                        { text: "המרצה אמר שקורסים אחרים גרועים ממנו.", course: "יסודות SEO", status: "flagged", reason: "RULE_2: opinion_disagreement — המשפט מבטא דעה ולא עובדה." },
+                        { text: "buy now click here limited offer discount", course: "הסמכת Google Ads", status: "removed", reason: "RULE_4: spam_pattern — תבנית ספאם זוהתה ב-AI." },
+                        { text: "המחיר שרשמת לא נכון — ₪500 ולא ₪1000.", course: "אנליטיקס מתקדם", status: "under_review", reason: "RULE_3: factual_falsehood — נטען מידע עובדתי שנוי במחלוקת. ממתין לראיות." },
+                      ].map((r, i) => (
+                        <ReviewStatusRow key={i} text={r.text} course={r.course} status={r.status} reason={r.reason} />
+                      ))}
+                    </div>
+                  ) : complianceReviews.length === 0 ? (
+                    <div className="text-center py-8">
+                      <CheckCircle2 size={32} className="text-green-500 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">כל הביקורות תקינות — אין פריטים הדורשים תשומת לב.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {complianceReviews.map((r: any) => (
+                        <ReviewStatusRow
+                          key={r.id}
+                          text={r.text}
+                          course={r.courses?.name || ""}
+                          status={r.status}
+                          reason={r.ai_reason}
+                          aiDecision={r.ai_decision}
+                          date={r.created_at ? new Date(r.created_at).toLocaleDateString("he-IL") : undefined}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Open reports */}
+              <Card className="shadow-card bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <AlertTriangle size={16} /> תלונות פתוחות על ביקורות
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isDemo ? (
+                    <div className="space-y-3">
+                      {[
+                        { reason: "המידע בביקורת לא נכון", status: "open", aiDecision: "freeze_request_proof", aiReason: "RULE_3: נטען מידע עובדתי — הכותב התבקש לספק ראיות תוך 72 שעות." },
+                        { reason: "ביקורת שנכתבה מחשבון מזויף", status: "rejected", aiDecision: "reject_report", aiReason: "RULE_2: התלונה מבוססת על חוסר הסכמה ולא על עובדה." },
+                      ].map((rp, i) => (
+                        <ReportRow key={i} reason={rp.reason} status={rp.status} aiDecision={rp.aiDecision} aiReason={rp.aiReason} />
+                      ))}
+                    </div>
+                  ) : openReports.length === 0 ? (
+                    <div className="text-center py-8">
+                      <CheckCircle2 size={32} className="text-green-500 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">אין תלונות פתוחות כרגע.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {openReports.map((rp: any) => (
+                        <ReportRow
+                          key={rp.id}
+                          reason={rp.reason}
+                          status={rp.moderation_status}
+                          aiDecision={rp.ai_decision}
+                          aiReason={rp.ai_reason}
+                          date={rp.created_at ? new Date(rp.created_at).toLocaleDateString("he-IL") : undefined}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Explainer card */}
+              <Card className="shadow-card bg-card border-primary/20">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Brain size={18} className="text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground mb-1">כיצד עובדת מערכת ה-AI לציות?</p>
+                      <div className="space-y-1.5 text-xs text-muted-foreground">
+                        <p><span className="font-medium text-foreground">שלב 1:</span> כל ביקורת חדשה עוברת סריקת כללים אוטומטית: גסויות, PII, ספאם.</p>
+                        <p><span className="font-medium text-foreground">שלב 2:</span> תלונות עסקים נבדקות — ביקורות דעה נשמרות, מידע עובדתי שנוי נשלח לבדיקה.</p>
+                        <p><span className="font-medium text-foreground">שלב 3:</span> GPT-4o מסווג מקרים שלא זוהו בכללים.</p>
+                        <p><span className="font-medium text-foreground">שלב 4:</span> כל החלטה נרשמת ב-Audit Log בלתי-ניתן-לשינוי.</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
             </div>
           </TabsContent>
         </Tabs>
