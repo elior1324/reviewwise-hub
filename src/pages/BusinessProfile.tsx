@@ -542,6 +542,14 @@ const BusinessProfile = () => {
             </div>
           )}
 
+          {/* ── Platform transparency disclosure ────────────────────────────── */}
+          <div className="flex items-start gap-2 text-[11px] text-muted-foreground/70 border border-border/30 rounded-lg px-3 py-2.5 bg-muted/20">
+            <Info size={11} className="shrink-0 mt-0.5" />
+            <span>
+              חלק מהכותבים עשויים להיות בעלי עסקים הרשומים בפלטפורמה. ReviewHub מאפשרת לבעלי עסקים לדרג עסקים אחרים בתחומים שאינם מתחרים. ביקורת מסוג זה כפופה לאותן דרישות אימות ומדיניות ציות.
+            </span>
+          </div>
+
           {/* ── Tier 1: Verified Purchase reviews ─────────────────────────────── */}
           {verifiedFiltered.length > 0 && (
             <div>

@@ -99,9 +99,15 @@ export const DeleteAccountModal = ({ open, onOpenChange }: DeleteAccountModalPro
     setLoading(true);
 
     try {
-      // Call soft-delete edge function
+      // Send password + feedback to the edge function.
+      // The edge function re-verifies the password server-side,
+      // so the deletion cannot be triggered by bypassing this modal
+      // and calling the API directly — even with a valid JWT.
       const { data, error } = await supabase.functions.invoke("request-account-deletion", {
-        body: { feedback: feedback.trim() || null },
+        body: {
+          password: password,                  // server-side re-verification
+          feedback: feedback.trim() || null,
+        },
       });
 
       if (error) throw error;

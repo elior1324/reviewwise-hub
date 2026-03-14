@@ -11,7 +11,8 @@
  *       user_id        → NULL   (unlinks the review from the account)
  *     Reviews are KEPT on the platform so trust scores remain intact.
  *  3. Deletes personal data rows:
- *       profiles, review_likes (authored), notifications (recipient), referral_clicks
+ *       purchase_verifications (authored), profiles, review_likes (authored),
+ *       notifications (recipient), public.users (soft-delete marker)
  *  4. Writes an immutable audit log entry (service_role only — no user FK) so
  *     legal / compliance teams can prove deletion was executed.
  *  5. Calls supabase.auth.admin.deleteUser() to remove the auth identity.
@@ -136,11 +137,22 @@ Deno.serve(async (req: Request) => {
     errors.push(`notifications deletion: ${notifErr.message}`);
   }
 
-  // ── Step 4: Delete referral_clicks tied to this user ────────────────────────
+  // ── Step 4: Delete purchase_verifications rows for this user ────────────────
+  // Must happen before auth.deleteUser() to avoid orphaned FK records.
+  const { error: pvErr } = await admin
+    .from("purchase_verifications")
+    .delete()
+    .eq("user_id", targetUserId);
+
+  if (pvErr) {
+    errors.push(`purchase_verifications deletion: ${pvErr.message}`);
+  }
+
+  // ── Step 5: Delete referral_clicks tied to this user ────────────────────────
   // referral_clicks stores no direct user_id — nothing to delete here.
   // If the table ever gains a user_id FK, add deletion here.
 
-  // ── Step 5: Delete profile row ───────────────────────────────────────────────
+  // ── Step 6: Delete profile row ───────────────────────────────────────────────
   const { error: profileErr } = await admin
     .from("profiles")
     .delete()
@@ -150,7 +162,22 @@ Deno.serve(async (req: Request) => {
     errors.push(`profile deletion: ${profileErr.message}`);
   }
 
-  // ── Step 6: Write immutable audit log (no user_id FK — only actor_id text) ──
+  // ── Step 6b: Delete public.users row (soft-delete marker + personal data) ───
+  // The public.users row holds pending_deletion flags, deletion timestamps,
+  // and inline deletion_feedback. It must be removed as part of the hard delete.
+  const { error: pubUserErr } = await admin
+    .from("users")
+    .delete()
+    .eq("id", targetUserId);
+
+  if (pubUserErr) {
+    // Non-fatal if the row doesn't exist (user may never have had one)
+    if (!pubUserErr.message?.includes("No rows")) {
+      errors.push(`public.users deletion: ${pubUserErr.message}`);
+    }
+  }
+
+  // ── Step 7: Write immutable audit log (no user_id FK — only actor_id text) ──
   // NOTE: actor_id is stored as a plain string for legal traceability even after
   // the auth user is deleted. The audit_logs table has no FK to auth.users.
   const { error: auditErr } = await admin.from("audit_logs").insert({
@@ -173,7 +200,7 @@ Deno.serve(async (req: Request) => {
     console.error("[account-deletion] AUDIT LOG FAILED:", auditErr);
   }
 
-  // ── Step 7: Delete the auth.users record (irreversible) ─────────────────────
+  // ── Step 8: Delete the auth.users record (irreversible) ─────────────────────
   const { error: authDeleteErr } = await admin.auth.admin.deleteUser(targetUserId);
 
   if (authDeleteErr) {

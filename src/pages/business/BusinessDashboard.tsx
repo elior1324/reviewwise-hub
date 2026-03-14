@@ -14,7 +14,7 @@ import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
   Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2, Link2, Handshake,
-  ExternalLink, Tag, BarChart2, Shield, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp
+  ExternalLink, Tag, BarChart2, Shield, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Briefcase
 } from "lucide-react";
 import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
 import IntegrationsTab from "@/components/IntegrationsTab";
@@ -243,11 +243,18 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
   const handleAction = async (id: string, newStatus: "approved" | "rejected") => {
     if (isDemo) return;
     setActioning(id);
-    await supabase
+    // Capture state for rollback before optimistic update
+    const snapshot = rows;
+    setRows(r => r.map(x => x.id === id ? { ...x, status: newStatus } : x));
+    const { error } = await supabase
       .from("purchase_verifications")
       .update({ status: newStatus, reviewed_at: new Date().toISOString() })
       .eq("id", id);
-    setRows(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+    if (error) {
+      // Rollback on failure (e.g. RLS rejection)
+      setRows(snapshot);
+      console.error("[PurchaseVerificationQueue] update failed:", error.message);
+    }
     setActioning(null);
   };
 
@@ -277,8 +284,8 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
           </div>
         ) : (
           <div className="space-y-2">
-            {/* Header */}
-            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 text-[11px] text-muted-foreground font-semibold px-2 pb-1 border-b border-border/30">
+            {/* Header — desktop only */}
+            <div className="hidden sm:grid grid-cols-[1fr_auto_auto_auto] gap-3 text-[11px] text-muted-foreground font-semibold px-2 pb-1 border-b border-border/30">
               <span>ביקורת</span>
               <span>סוג</span>
               <span>תאריך</span>
@@ -287,17 +294,21 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
             {rows.map((row) => {
               const meta = PV_STATUS[row.status] || PV_STATUS.pending;
               return (
-                <div key={row.id} className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-center py-2.5 border-b border-border/20 last:border-0 px-2">
-                  <div className="min-w-0">
+                /* Desktop: 4-col grid  |  Mobile: stacked card */
+                <div key={row.id} className="sm:grid sm:grid-cols-[1fr_auto_auto_auto] gap-3 items-center py-2.5 border-b border-border/20 last:border-0 px-2 flex flex-col sm:flex-none">
+                  <div className="min-w-0 w-full sm:w-auto">
                     <p className="text-sm truncate">{row.reviews?.review_text || "—"}</p>
                     <p className="text-xs text-muted-foreground">{row.reviews?.reviewer_name || "—"}</p>
                     {row.rejection_reason && (
                       <p className="text-[10px] text-destructive/70 mt-0.5">{row.rejection_reason}</p>
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground shrink-0">{proofTypeLabel[row.proof_type] || row.proof_type}</span>
-                  <span className="text-xs text-muted-foreground shrink-0">{new Date(row.submitted_at).toLocaleDateString("he-IL")}</span>
-                  <div className="flex items-center gap-1 shrink-0">
+                  {/* On mobile: show meta inline below review text */}
+                  <div className="flex items-center gap-2 sm:contents text-xs text-muted-foreground">
+                    <span className="shrink-0">{proofTypeLabel[row.proof_type] || row.proof_type}</span>
+                    <span className="shrink-0">{new Date(row.submitted_at).toLocaleDateString("he-IL")}</span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0 sm:justify-end">
                     {row.status === "pending" && !isDemo ? (
                       <>
                         <button
@@ -735,17 +746,26 @@ const BusinessDashboard = () => {
           </div>
         )}
 
-        {/* Real mode: logged-in banner */}
+        {/* Real mode: Business Mode identity band */}
         {!isDemo && (
-          <div className="mb-6 flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
-            <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-              {displayBusiness.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
+          <div className="mb-6 rounded-xl border border-zinc-700/40 bg-zinc-900/90 px-4 py-3 flex items-center gap-3 shadow-sm">
+            {/* Mode badge */}
+            <span className="flex items-center gap-1.5 bg-primary/15 border border-primary/30 text-primary text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0">
+              <Briefcase size={11} />
+              מצב עסקי
+            </span>
+            {/* Avatar + identity */}
+            <div className="h-8 w-8 rounded-full bg-zinc-700 flex items-center justify-center text-zinc-100 font-bold text-xs shrink-0">
+              {displayBusiness.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2)}
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">מחובר כ: {displayBusiness.name}</p>
-              <p className="text-xs text-muted-foreground">{displayBusiness.email}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-zinc-100 truncate">{displayBusiness.name}</p>
+              <p className="text-xs text-zinc-400 truncate">{displayBusiness.email}</p>
             </div>
-            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">מנהל</span>
+            {/* Tier chip */}
+            <span className="text-[10px] font-semibold bg-zinc-800 border border-zinc-600/50 text-zinc-300 px-2.5 py-1 rounded-full shrink-0 uppercase tracking-wide">
+              {currentTier === "enterprise" ? "Enterprise" : currentTier === "pro" ? "Pro" : "Free"}
+            </span>
           </div>
         )}
 
@@ -843,12 +863,12 @@ const BusinessDashboard = () => {
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="font-display font-bold text-3xl">לוח בקרה עסקי</h1>
-            <p className="text-muted-foreground">עקבו אחר ביקורות, קליקים, המרות ותובנות AI.</p>
+            <h1 className="font-display font-bold text-2xl sm:text-3xl">לוח בקרה עסקי</h1>
+            <p className="text-muted-foreground text-sm">עקבו אחר ביקורות, קליקים, המרות ותובנות AI.</p>
           </div>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary self-start sm:self-auto shrink-0">
             <BarChart3 size={16} className="ml-2" /> ייצוא דוח
           </Button>
         </div>
