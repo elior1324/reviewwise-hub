@@ -783,16 +783,6 @@ const BusinessDashboard = () => {
             <span className="text-[10px] font-semibold bg-zinc-800 border border-zinc-600/50 text-zinc-300 px-2.5 py-1 rounded-full shrink-0 uppercase tracking-wide">
               {currentTier === "enterprise" ? "Enterprise" : currentTier === "pro" ? "Pro" : "Free"}
             </span>
-            {/* Pricing shortcut — hidden for Enterprise (already on top tier) */}
-            {currentTier !== "enterprise" && (
-              <button
-                onClick={() => navigate("/business/pricing")}
-                className="hidden sm:flex items-center gap-1 text-[10px] font-semibold text-primary/80 hover:text-primary border border-primary/30 hover:border-primary/60 bg-primary/5 hover:bg-primary/10 px-2.5 py-1 rounded-full shrink-0 transition-all"
-              >
-                <Tag size={10} aria-hidden="true" />
-                שדרג
-              </button>
-            )}
           </div>
         )}
 
@@ -886,16 +876,6 @@ const BusinessDashboard = () => {
                   <span className={`text-[10px] ${demoTier === id ? "text-muted-foreground" : "text-muted-foreground/60"}`}>{desc}</span>
                 </button>
               ))}
-            </div>
-            {/* Shortcut to full pricing page */}
-            <div className="mt-3 text-center">
-              <button
-                onClick={() => navigate("/business/pricing")}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary/80 hover:text-primary transition-colors"
-              >
-                <Tag size={12} aria-hidden="true" />
-                ראו את כל החבילות והמחירים ←
-              </button>
             </div>
           </div>
         )}
