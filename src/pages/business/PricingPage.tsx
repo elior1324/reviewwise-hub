@@ -5,8 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import { PricingComponent, REVIEWHUB_PLANS, type BillingCycle } from "@/components/ui/pricing-card";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
-import { Zap, Star, MessageSquare, ArrowLeft } from "lucide-react";
+import { Zap, MessageSquare, ArrowLeft, BarChart3, TrendingUp, Bell, LineChart, Target, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+// ── Analytics features (merged from AnalyticsSolution) ────────────────────────
+const ANALYTICS_FEATURES = [
+  { icon: BarChart3,  title: "דאשבורד בזמן אמת",   desc: "עקבו אחר דירוגים, ביקורות חדשות, אחוזי מענה ומגמות — הכל במקום אחד." },
+  { icon: TrendingUp, title: "ניתוח מגמות",          desc: "ראו כיצד הדירוג שלכם משתנה לאורך זמן וזהו נקודות שיפור ונקודות חוזק." },
+  { icon: Bell,       title: "התרעות חכמות",          desc: "קבלו עדכון מיידי על ביקורת שלילית חדשה כדי לטפל בה לפני שתתפשט." },
+  { icon: LineChart,  title: "דוחות שבועיים",         desc: "דוח שבועי אוטומטי עם סיכום ביצועים, ביקורות בולטות ותובנות AI." },
+  { icon: Target,     title: "השוואה לתחום",           desc: "ראו כיצד הדירוג שלכם ביחס לעסקים דומים בתחום שלכם." },
+  { icon: Eye,        title: "ניתוח סנטימנט",          desc: "AI מנתח את הטון של הביקורות ומזהה נושאים חוזרים — חיובי ושלילי." },
+];
 
 const PricingPage = () => {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
@@ -50,6 +60,60 @@ const PricingPage = () => {
             </p>
           </motion.div>
         </div>
+      </section>
+
+      {/* ── Analytics & Dashboard section ───────────────────────────────── */}
+      <section className="container py-16 border-b border-border/40" id="analytics">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center gap-2 justify-center mb-3">
+            <BarChart3 size={18} className="text-primary" />
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">לוח בקרה ונתונים</span>
+          </div>
+          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground text-center mb-3">
+            הנתונים שעוזרים לכם לצמוח
+          </h2>
+          <p className="text-muted-foreground text-center max-w-xl mx-auto mb-10 text-sm leading-relaxed">
+            לוח בקרה מקיף עם כל המידע שאתם צריכים — מדירוגים ועד תובנות AI.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {ANALYTICS_FEATURES.map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.07, duration: 0.4 }}
+                className="glass rounded-2xl p-5 border border-border/50 hover:border-primary/30 transition-colors"
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                  <f.icon size={17} className="text-primary" />
+                </div>
+                <h3 className="font-semibold text-foreground text-sm mb-1.5">{f.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Stats bar */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 text-center">
+            {[
+              { value: "+42%",  label: "גידול ממוצע בהמרות" },
+              { value: "4.8★",  label: "דירוג ממוצע לעסקים פעילים" },
+              { value: "<24h",  label: "זמן תגובה ממוצע בהתרעות" },
+            ].map((s) => (
+              <div key={s.label} className="glass rounded-xl px-4 py-4 border border-border/40">
+                <div className="text-2xl font-display font-bold text-primary mb-1">{s.value}</div>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </section>
 
       {/* Pricing component — cards + comparison table */}

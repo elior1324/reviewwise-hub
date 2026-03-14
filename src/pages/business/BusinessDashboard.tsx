@@ -747,7 +747,7 @@ const BusinessDashboard = () => {
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
-      <div className="container py-10">
+      <div className="container pt-20 pb-10">
 
         {/* Demo Banner */}
         {isDemo && (

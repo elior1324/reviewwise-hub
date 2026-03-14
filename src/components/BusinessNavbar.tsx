@@ -20,10 +20,9 @@ import { useAppMode } from "@/contexts/ModeContext";
 
 /** Sub-items for the "מוצר" dropdown — always visible to all visitors */
 const PRODUCT_ITEMS = [
-  { to: "/business/solutions/reviews",   icon: ShieldCheck,     label: "אימות וביקורות"    },
-  { to: "/business/solutions/analytics", icon: BarChart3,       label: "לוח בקרה ונתונים" },
-  { to: "/partners/prestige-badges",     icon: Tag,             label: "ווידג׳טים"          },
-  { to: "/business/pricing",             icon: Package,         label: "מחירים"             },
+  { to: "/business/solutions/reviews", icon: ShieldCheck, label: "אימות וביקורות"    },
+  { to: "/business/pricing",           icon: BarChart3,   label: "לוח בקרה ונתונים" },
+  { to: "/partners/prestige-badges",   icon: Tag,         label: "ווידג׳טים"          },
 ] as const;
 
 const BusinessNavbar = () => {
@@ -58,7 +57,7 @@ const BusinessNavbar = () => {
 
   return (
     <nav
-      className="sticky top-0 z-50 border-b bg-zinc-900 border-zinc-700/60 shadow-lg"
+      className="fixed top-0 z-50 w-full border-b bg-zinc-900 border-zinc-700/60 shadow-lg"
       dir="rtl"
     >
       <div className="container flex items-center justify-between h-16">
