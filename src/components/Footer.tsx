@@ -38,7 +38,7 @@ const Footer = () => (
             <span className="font-display font-bold text-lg gradient-text">ReviewHub</span>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            מערכת אימות עצמאית לקורסים ופרילנסרים. נתוני אמון — לא שיווק.
+            תשתית האמון לכלכלה הדיגיטלית. מאמתים כלי SaaS, מומחים דיגיטליים וקורסים — על בסיס נתונים ממשיים.
           </p>
           <div className="flex gap-2 flex-wrap">
             {REVIEWHUB_SOCIALS.map(({ Icon, label, url }) => (

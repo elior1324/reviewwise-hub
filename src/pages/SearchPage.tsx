@@ -10,7 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, FREELANCER_CATEGORIES, SAAS_CATEGORIES,
-  SAAS_SUBCATEGORIES, PRICING_MODEL_LABELS, type Business, type Course, type PricingModel,
+  SAAS_SUBCATEGORIES, PRICING_MODEL_LABELS, COURSE_FORMATS, type Business, type Course, type PricingModel, type CourseFormat,
 } from "@/data/mockData";
 import { Cpu } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -73,6 +73,7 @@ const SearchPage = () => {
   const [selectedSaasCat, setSelectedSaasCat] = useState("הכל");
   const [selectedSaasSubcat, setSelectedSaasSubcat] = useState<string | null>(null);
   const [selectedPricingModel, setSelectedPricingModel] = useState<PricingModel | "הכל">("הכל");
+  const [selectedCourseFormat, setSelectedCourseFormat] = useState<CourseFormat>("הכל");
   const [minRating, setMinRating] = useState(0);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
   const [sortOption, setSortOption] = useState<SortOption>("default");
@@ -251,16 +252,16 @@ const SearchPage = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
       <div className="container py-10">
-        <h1 className="font-display font-bold text-3xl mb-2">בדקו ביקורות מאומתות — בחרו בביטחון</h1>
+        <h1 className="font-display font-bold text-3xl mb-2">ספריית האמון — כלכלה דיגיטלית</h1>
         <p className="text-muted-foreground text-sm mb-6 max-w-xl">
-          ציון האמון מחושב מביקורות מאומתות רכישה בלבד. ביקורות ללא הוכחה מוצגות בנפרד ולא נכללות בחישוב.
+          אמתו כלי SaaS, AI, מומחים דיגיטליים וקורסים מקצועיים לפני שבוטחים. ציון האמון מחושב מביקורות מאומתות רכישה בלבד.
         </p>
 
         {/* Search */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="חיפוש פרילנסרים, קורסים, קטגוריות..." className="pr-10 h-11 glass border-border/50" value={query} onChange={e => setQuery(e.target.value)} />
+            <Input placeholder="חיפוש כלי AI, מומחים דיגיטליים, קורסים..." className="pr-10 h-11 glass border-border/50" value={query} onChange={e => setQuery(e.target.value)} />
           </div>
         </div>
 
@@ -274,7 +275,7 @@ const SearchPage = () => {
           >
             <div className="flex items-center gap-2 mb-1">
               <ShieldCheck size={20} className="text-primary" />
-              <h2 className="font-display font-bold text-lg text-foreground">המדורגים הגבוהים ביותר בציון האמון</h2>
+              <h2 className="font-display font-bold text-lg text-foreground">המדורגים הגבוהים ביותר — ציון אמון דיגיטלי</h2>
               {isAiRanked && (
                 <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">🤖 AI מעודכן</span>
               )}
@@ -346,11 +347,11 @@ const SearchPage = () => {
           <TabsList className="glass">
             <TabsTrigger value="freelancers" className="flex items-center gap-1.5">
               <UserCheck size={14} />
-              ספקי שירות ({freelancers.length})
+              מומחים דיגיטליים ({freelancers.length})
             </TabsTrigger>
             <TabsTrigger value="courses" className="flex items-center gap-1.5">
               <BookOpen size={14} />
-              קורסים והכשרות ({filteredCourses.length})
+              חינוך דיגיטלי ({filteredCourses.length})
             </TabsTrigger>
             <TabsTrigger value="saas" className="flex items-center gap-1.5">
               <Cpu size={14} />
@@ -416,7 +417,7 @@ const SearchPage = () => {
               ))}
             </div>
             {freelancers.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">לא נמצאו בעלי מקצוע התואמים לחיפוש.</p>
+              <p className="text-center text-muted-foreground py-16">לא נמצאו מומחים דיגיטליים התואמים לחיפוש.</p>
             )}
           </TabsContent>
 
@@ -447,9 +448,24 @@ const SearchPage = () => {
               </div>
             </div>
 
+            {/* Course Format Filter */}
+            <div className="flex gap-2 flex-wrap mb-6 items-center">
+              <span className="text-xs text-muted-foreground ml-1">פורמט:</span>
+              {COURSE_FORMATS.map(fmt => (
+                <Button
+                  key={fmt}
+                  variant={selectedCourseFormat === fmt ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCourseFormat(fmt)}
+                >
+                  {fmt}
+                </Button>
+              ))}
+            </div>
+
             {/* Course Providers */}
             <h3 className="font-display font-semibold text-lg text-foreground mb-4 flex items-center gap-2">
-              <BookOpen size={18} className="text-primary" /> ספקי קורסים ({courseProviders.length})
+              <BookOpen size={18} className="text-primary" /> ספקי חינוך דיגיטלי ({courseProviders.length})
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
               {courseProviders.map((biz, i) => (
@@ -460,7 +476,7 @@ const SearchPage = () => {
             </div>
 
             {/* Courses List */}
-            <h3 className="font-display font-semibold text-lg text-foreground mb-4">קורסים וסדנאות ({filteredCourses.length})</h3>
+            <h3 className="font-display font-semibold text-lg text-foreground mb-4">קורסים, סדנאות ומנטורינג ({filteredCourses.length})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCourses.map((course, i) => (
                 <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
@@ -469,7 +485,7 @@ const SearchPage = () => {
               ))}
             </div>
             {filteredCourses.length === 0 && courseProviders.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">לא נמצאו קורסים או ספקים התואמים לחיפוש.</p>
+              <p className="text-center text-muted-foreground py-16">לא נמצאו קורסים, סדנאות או ספקי חינוך דיגיטלי התואמים לחיפוש.</p>
             )}
           </TabsContent>
 
@@ -481,7 +497,7 @@ const SearchPage = () => {
               <div className="mb-8 rounded-xl border border-border/50 bg-card/50 p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <ShieldCheck size={16} className="text-primary" />
-                  <h3 className="font-display font-semibold text-foreground">כלי AI ו-SaaS ישראלים מובילים בציון האמון</h3>
+                  <h3 className="font-display font-semibold text-foreground">כלי SaaS ו-AI — מובילים בציון האמון</h3>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {topTrustedSaas.map((biz, i) => (
@@ -567,9 +583,9 @@ const SearchPage = () => {
             {sortedSaasProducts.length === 0 && (
               <div className="text-center py-16">
                 <Cpu size={32} className="mx-auto mb-3 text-muted-foreground/40" />
-                <p className="text-muted-foreground font-medium mb-1">אין כלי SaaS / AI תואמים</p>
+                <p className="text-muted-foreground font-medium mb-1">לא נמצאו כלים דיגיטליים תואמים</p>
                 <p className="text-sm text-muted-foreground">
-                  ייתכן שהמוצר טרם נרשם למאגר.{" "}
+                  הכלי טרם נרשם למאגר הכלכלה הדיגיטלית.{" "}
                   <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">בקשו הוספה</a>
                 </p>
               </div>

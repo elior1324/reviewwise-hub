@@ -85,44 +85,55 @@ export interface AffiliateClick {
   revenue?: number;
 }
 
-// ─── Freelancer Categories ──────────────────────────────
+// ─── Digital Professional Categories ────────────────────
+// Professionals who operate in the digital economy.
+// Must NOT overlap with SAAS_CATEGORIES (used for type detection).
 export const FREELANCER_CATEGORIES = [
-  "שיווק וסושיאל",
-  "עיצוב אתרים",
-  "עריכת וידאו",
-  "כתיבה שיווקית",
-  "קידום אורגני (SEO)",
-  "פיתוח אתרים",
-  "עיצוב גרפי",
-  "צילום מקצועי",
-  "ניהול קמפיינים",
-  "אסטרטגיה דיגיטלית",
   "מנהל סושיאל",
-  "יועץ עסקי",
-  "יועץ משכנתאות",
-  "רואה חשבון",
-  "עורך דין",
-  "מאמן ספורט",
+  "עורך וידאו",
+  "יוצר תוכן",
+  "מעצב גרפי",
+  "מעצב UI/UX",
+  "מעצב אתרים",
+  "מפתח אתרים",
+  "יועץ שיווק",
+  "מומחה SEO",
+  "כותב שיווקי",
+  "מומחה אוטומציה",
+  "יועץ AI",
+  "אסטרטג דיגיטלי",
+  "מפתח No-Code",
+  "מפתח אפליקציות",
+  "בונה משפכי מכירה",
+  "מומחה פרסום ממומן",
 ];
 
-// ─── Course Categories ──────────────────────────────────
+// ─── Digital Education Categories ───────────────────────
+// Online courses, mentorship, workshops — focused on the digital economy.
 export const COURSE_CATEGORIES = [
-  "פיתוח תוכנה",
   "שיווק דיגיטלי",
+  "פיתוח תוכנה",
+  "AI ומידע",
   "עיצוב UI/UX",
-  "דאטה ו-AI",
-  "עסקים ויזמות",
-  "פיננסים",
-  "צילום ווידאו",
-  "בריאות וספורט",
-  "שפות",
-  "מוזיקה ואומנות",
+  "יזמות עסקית",
+  "פרילנסינג ועצמאות",
+  "פיננסים ו-Fintech",
+  "צילום ווידאו דיגיטלי",
+  "כתיבה ותוכן",
+  "מכירות ו-Growth",
 ];
 
-// ─── SaaS & AI Tool Categories ──────────────────────────
-// Top-level categories for the "SaaS & AI Tools" registry tab.
-// These must NOT overlap with FREELANCER_CATEGORIES so the type-detection
-// logic in SearchPage / Index can correctly identify "saas" entities.
+// ─── Course Format Filter ────────────────────────────────
+export const COURSE_FORMATS = [
+  "הכל",
+  "דיגיטלי / אונליין",
+  "פרונטלי",
+  "היברידי",
+] as const;
+export type CourseFormat = typeof COURSE_FORMATS[number];
+
+// ─── SaaS & Digital Tools Categories ────────────────────
+// Must NOT overlap with FREELANCER_CATEGORIES.
 export const SAAS_CATEGORIES = [
   "כלי AI",
   "כלי שיווק",
@@ -131,6 +142,8 @@ export const SAAS_CATEGORIES = [
   "No-code",
   "פרודקטיביטי",
   "תוכנה עסקית",
+  "כלי יוצרים",
+  "אנליטיקה",
   "כלי סטארטאפ",
 ];
 
@@ -188,6 +201,18 @@ export const SAAS_SUBCATEGORIES: Record<string, string[]> = {
     "Pitch & Investor tools",
     "Legal & Compliance",
   ],
+  "כלי יוצרים": [
+    "עריכת וידאו ותוכן",
+    "ניהול ערוצים ופרסום",
+    "כלי Podcast",
+    "מוניטיזציה לקריאייטורים",
+  ],
+  "אנליטיקה": [
+    "אנליטיקס ו-BI",
+    "Product Analytics",
+    "Marketing Attribution",
+    "Data Visualization",
+  ],
 };
 
 /** Human-readable pricing model labels for display */
@@ -201,39 +226,56 @@ export const PRICING_MODEL_LABELS: Record<PricingModel, string> = {
 
 // ─── Plural forms for "All X" button ────────────────────
 export const CATEGORY_PLURAL: Record<string, string> = {
-  "מנהל סושיאל": "מנהלי סושיאל",
-  "יועץ עסקי": "היועצים העסקיים",
-  "יועץ משכנתאות": "יועצי המשכנתאות",
-  "רואה חשבון": "רואי החשבון",
-  "עורך דין": "עורכי הדין",
-  "שיווק וסושיאל": "השיווק וסושיאל",
-  "עיצוב אתרים": "מעצבי האתרים",
-  "עריכת וידאו": "עורכי הוידאו",
-  "כתיבה שיווקית": "הכותבים השיווקיים",
-  "קידום אורגני (SEO)": "מקדמי ה-SEO",
-  "פיתוח אתרים": "מפתחי האתרים",
-  "עיצוב גרפי": "המעצבים הגרפיים",
-  "צילום מקצועי": "הצלמים המקצועיים",
-  "ניהול קמפיינים": "מנהלי הקמפיינים",
-  "אסטרטגיה דיגיטלית": "האסטרטגים הדיגיטליים",
-  "מאמן ספורט": "מאמני הספורט",
+  "מנהל סושיאל":        "מנהלי הסושיאל",
+  "עורך וידאו":          "עורכי הוידאו",
+  "יוצר תוכן":           "יוצרי התוכן",
+  "מעצב גרפי":           "המעצבים הגרפיים",
+  "מעצב UI/UX":          "מעצבי ה-UI/UX",
+  "מעצב אתרים":          "מעצבי האתרים",
+  "מפתח אתרים":          "מפתחי האתרים",
+  "יועץ שיווק":          "יועצי השיווק",
+  "מומחה SEO":           "מומחי ה-SEO",
+  "כותב שיווקי":         "הכותבים השיווקיים",
+  "מומחה אוטומציה":      "מומחי האוטומציה",
+  "יועץ AI":             "יועצי ה-AI",
+  "אסטרטג דיגיטלי":     "האסטרטגים הדיגיטליים",
+  "מפתח No-Code":        "מפתחי ה-No-Code",
+  "מפתח אפליקציות":      "מפתחי האפליקציות",
+  "בונה משפכי מכירה":    "בוני משפכי המכירה",
+  "מומחה פרסום ממומן":   "מומחי הפרסום הממומן",
 };
 
-// ─── Sub-specialties per category ───────────────────────
+// ─── Sub-specialties per digital professional category ──
 export const FREELANCER_SUBCATEGORIES: Record<string, string[]> = {
   "מנהל סושיאל": [
     "מנהל סושיאל לעסקים קטנים",
-    "מנהל סושיאל למותגי אופנה",
-    "מנהל סושיאל למסעדות ופוד",
+    "מנהל סושיאל למותגים",
     "מנהל סושיאל ל-E-commerce",
     "מנהל סושיאל לסטארטאפים",
   ],
-  "יועץ עסקי": [
-    "יועץ עסקי לסטארטאפים",
-    "יועץ עסקי לעסקים קטנים ובינוניים",
-    "יועץ עסקי למסחר אלקטרוני",
-    "יועץ עסקי לגיוס משקיעים",
-    "יועץ עסקי לאסטרטגיית צמיחה",
+  "מומחה אוטומציה": [
+    "אוטומציה עסקית",
+    "Make / Zapier / n8n",
+    "אוטומציית CRM",
+    "AI Agents & Workflows",
+  ],
+  "יועץ AI": [
+    "הטמעת AI בעסקים",
+    "בניית AI Agents",
+    "אופטימיזציית Prompts",
+    "ייעוץ GPT / LLM",
+  ],
+  "מומחה פרסום ממומן": [
+    "Meta Ads",
+    "Google Ads",
+    "TikTok Ads",
+    "LinkedIn Ads",
+  ],
+  "מפתח No-Code": [
+    "Webflow",
+    "Bubble",
+    "Glide / Softr",
+    "Airtable / AppSheet",
   ],
 };
 

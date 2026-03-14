@@ -41,7 +41,7 @@ const AboutPage = () => {
           </motion.h2>
           <motion.div variants={fadeUp} custom={1} className="space-y-4 text-foreground/80 leading-relaxed">
             <p>
-              ReviewHub מחברת יוצרי קורסים ופרילנסרים למנגנון אימות עצמאי. כל ביקורת שאתם קוראים
+              ReviewHub היא תשתית האמון לכלכלה הדיגיטלית — מאמתים כלי SaaS, מומחים דיגיטליים וקורסים מקצועיים. כל ביקורת שאתם קוראים
               קושרה לרכישה ממשית — <strong className="text-foreground">לא על בסיס הצהרה עצמית, אלא מול נתוני מסחר בפועל.</strong>
             </p>
             <p>

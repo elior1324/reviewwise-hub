@@ -299,7 +299,7 @@ const ComparePage = () => {
               <Scale size={16} /> השוואה חכמה
             </div>
             <h1 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-3">
-              השוו בין קורסים, פרילנסרים והכשרות
+              השוו בין כלי SaaS, מומחים דיגיטליים וקורסים
             </h1>
             <p className="text-muted-foreground text-lg">
               בחרו עד 4 פריטים להשוואה ו-AI ינתח עבורכם את היתרונות, החסרונות וההמלצות

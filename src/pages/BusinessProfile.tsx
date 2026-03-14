@@ -215,21 +215,21 @@ const BusinessProfile = () => {
               <ShieldCheck size={36} className="text-primary" />
             </div>
             <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-3">
-              ישות זו אינה במאגר
+              ישות זו אינה במאגר הכלכלה הדיגיטלית
             </h1>
             <p className="text-muted-foreground mb-4 text-base leading-relaxed">
-              <strong className="text-foreground">{slug}</strong> טרם נרשמה למערכת האימות של ReviewHub — או שהכתובת שגויה.
+              <strong className="text-foreground">{slug}</strong> טרם נרשמה לתשתית האמון של ReviewHub — או שהכתובת שגויה.
             </p>
             <div className="flex items-start gap-3 text-right bg-card/60 border border-border/40 rounded-xl p-4 mb-8 text-sm text-muted-foreground">
               <MessageSquare size={16} className="text-primary shrink-0 mt-0.5" />
               <p>
                 <strong className="text-foreground">היעדר רשומה הוא מידע בפני עצמו.</strong>{" "}
-                אם ישות אינה מופיעה במאגר, פירוש הדבר שציון האמון שלה טרם אומת — ולא ניתן להסתמך על ביקורות שאינן מקושרות לרכישה.
+                כלי, מומחה או ספק חינוך שאינו מאומת ב-ReviewHub — ציון האמון שלו לא אומת מול נתוני רכישה ממשיים.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 w-full sm:w-auto" onClick={() => navigate("/search")}>
-                חפשו ישויות מאומתות
+                חפשו בספריית האמון
               </Button>
               <Button variant="outline" className="border-border/50 gap-2 w-full sm:w-auto" onClick={() => navigate("/")}>
                 עמוד הבית
@@ -307,7 +307,7 @@ const BusinessProfile = () => {
           <div className="flex items-center gap-1.5">
             <ShieldCheck size={12} className="text-primary shrink-0" />
             <span>
-              <strong className="text-foreground">רשומת אמון</strong> — נתונים מאומתים מול מערכות תשלום
+              <strong className="text-foreground">רשומת אמון — כלכלה דיגיטלית</strong> — נתונים מאומתים מהוכחות רכישה ממשיות
             </span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -353,9 +353,9 @@ const BusinessProfile = () => {
 
         {/* Add Review */}
         <div className="mb-8">
-          <h2 className="font-display font-bold text-xl mb-1">הוסיפו רשומה למאגר</h2>
+          <h2 className="font-display font-bold text-xl mb-1">תרמו לאמינות הכלכלה הדיגיטלית</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            ביקורת מאומתת רכישה נספרת בציון האמון ומוצגת ראשונה. משוב קהילה מוצג בנפרד ואינו משפיע על הציון.
+            ביקורת מאומתת רכישה נספרת בציון האמון ומוצגת ראשונה. משוב קהילה מוצג בנפרד ואינו נספר בחישוב.
           </p>
           <AddReviewForm
             businessSlug={business.slug}
@@ -400,7 +400,7 @@ const BusinessProfile = () => {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <ShieldCheck size={15} className="text-primary" aria-hidden="true" />
-                <h3 className="font-display font-semibold text-sm text-foreground">ביקורות מאומתות רכישה</h3>
+                <h3 className="font-display font-semibold text-sm text-foreground">ביקורות מאומתות — הוכחת רכישה</h3>
                 <span className="text-xs text-muted-foreground">({verifiedFiltered.length})</span>
               </div>
               <div className="space-y-4">
@@ -427,7 +427,7 @@ const BusinessProfile = () => {
                 <span className="text-xs text-muted-foreground">({openFiltered.length})</span>
               </div>
               <p className="text-xs text-muted-foreground mb-4">
-                משובים אלו לא עברו אימות רכישה ואינם נספרים בחישוב ציון האמון.
+                משובים אלו לא עברו אימות רכישה ואינם נספרים בציון האמון הדיגיטלי.
               </p>
               <div className="space-y-4">
                 {openFiltered.map((review, i) => (
