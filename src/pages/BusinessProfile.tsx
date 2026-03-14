@@ -106,7 +106,7 @@ const BusinessProfile = () => {
       // reviews has business_id directly
       const { data: reviewDataFinal } = await supabase
         .from("reviews")
-        .select("*, courses(name), business_responses(text, created_at)")
+        .select("*, is_purchase_verified, courses(name), business_responses(text, created_at)")
         .eq("business_id", bizData.id)
         .order("created_at", { ascending: false });
 
@@ -159,7 +159,9 @@ const BusinessProfile = () => {
           businessSlug: bizData.slug,
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified_purchase || false,  // ✅ verified_purchase (NOT .verified)
+          // is_purchase_verified is the canonical flag (set by the purchase-proof trigger).
+          // Fall back to verified_purchase for backwards-compatibility.
+          verified: r.is_purchase_verified || r.verified_purchase || false,
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at && r.updated_at !== r.created_at
             ? new Date(r.updated_at).toLocaleDateString("he-IL")

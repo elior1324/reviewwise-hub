@@ -1,21 +1,34 @@
+/**
+ * BusinessNavbar — the navigation bar shown inside the Business Dashboard.
+ *
+ * Visual differentiation from the public Navbar:
+ *  • Dark background (slate-900 / zinc-900) so users always know they are
+ *    in Business Mode.
+ *  • A "BUSINESS MODE" badge in the logo area.
+ *  • A prominent "מצב אישי" (Switch to User Mode) button that returns the
+ *    user to the public site and resets the mode context.
+ */
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { Menu, X, LogOut, User, LayoutDashboard, ShieldCheck, ArrowLeftRight } from "lucide-react";
 import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAppMode } from "@/contexts/ModeContext";
 import { isGmailAddress } from "@/components/GmailProtectedRoute";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 const BusinessNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { switchToUserMode } = useAppMode();
   const navigate = useNavigate();
   const canSeePricing = isGmailAddress(user?.email);
 
@@ -24,36 +37,51 @@ const BusinessNavbar = () => {
     navigate("/");
   };
 
+  const handleSwitchToUser = () => {
+    switchToUserMode();
+    navigate("/");
+  };
+
   return (
-    <nav className="glass sticky top-0 z-50 border-b border-border/50" dir="rtl">
+    /* ── Dark toolbar — visual cue that the user is in Business Mode ──────── */
+    <nav
+      className="sticky top-0 z-50 border-b bg-zinc-900 border-zinc-700/60 shadow-lg"
+      dir="rtl"
+    >
       <div className="container flex items-center justify-between h-16">
-        {/* Logo */}
+
+        {/* ── Logo + mode badge ─────────────────────────────────────────────── */}
         <div className="flex items-center gap-3">
           <Link to="/business" className="flex items-center gap-2">
-            <img src={logoIcon} alt="ReviewHub Logo" className="w-10 h-10 rounded-xl shadow-lg object-cover" />
-            <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
-            <span className="text-xs text-muted-foreground font-medium border border-border/50 rounded px-1.5 py-0.5">לעסקים</span>
+            <img
+              src={logoIcon}
+              alt="ReviewHub Logo"
+              className="w-9 h-9 rounded-xl shadow-lg object-cover ring-1 ring-white/10"
+            />
+            <span className="font-display font-bold text-lg text-white">ReviewHub</span>
           </Link>
-          <Link to="/" className="text-xs text-muted-foreground hover:text-primary transition-colors font-medium border border-border/50 rounded px-2 py-1 hover:border-primary/50">
-            ← לאישי
-          </Link>
+
+          {/* Business Mode badge — always visible so users know which mode they're in */}
+          <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold tracking-widest uppercase bg-primary/20 text-primary border border-primary/30 rounded px-2 py-0.5 select-none">
+            מצב עסקי
+          </span>
         </div>
 
-        {/* Center nav */}
+        {/* ── Center nav ────────────────────────────────────────────────────── */}
         <div className="hidden lg:flex items-center gap-5">
           <Link
             to="/business/solutions/reviews"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
           >
             <ShieldCheck size={14} aria-hidden="true" />
             אימות ביקורות
           </Link>
           <Link
             to="/partners/prestige-badges"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
           >
             <LayoutDashboard size={14} aria-hidden="true" />
-            ווידג'טים ותגי אמון
+            ווידג׳טים ותגי אמון
           </Link>
           {canSeePricing && (
             <Link
@@ -63,30 +91,48 @@ const BusinessNavbar = () => {
               מחירים
             </Link>
           )}
-          <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            אודות
-          </Link>
         </div>
 
-        {/* Right side */}
+        {/* ── Right side ────────────────────────────────────────────────────── */}
         <div className="flex items-center gap-2">
           <AccessibilityMenu />
+
+          {/* Switch to User Mode */}
+          <button
+            onClick={handleSwitchToUser}
+            className="hidden md:flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-zinc-600 text-zinc-300 hover:text-white hover:border-zinc-400 hover:bg-zinc-800 transition-all"
+            aria-label="עבור למצב אישי"
+          >
+            <ArrowLeftRight size={13} aria-hidden="true" />
+            מצב אישי
+          </button>
+
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full border border-border/50">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full border border-zinc-600 text-zinc-300 hover:text-white hover:bg-zinc-800"
+                >
                   <User size={18} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuContent align="start" className="w-48" style={{ direction: "rtl" }}>
                 <DropdownMenuItem className="text-xs text-muted-foreground cursor-default">
                   {user.email}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/business/dashboard")}>
                   לוח בקרה
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSwitchToUser}>
+                  <ArrowLeftRight size={14} className="ml-2" aria-hidden="true" />
+                  מצב אישי
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-                  <LogOut size={14} className="ml-2" />
+                  <LogOut size={14} className="ml-2" aria-hidden="true" />
                   התנתקו
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -94,48 +140,86 @@ const BusinessNavbar = () => {
           ) : (
             <div className="hidden md:flex items-center gap-2">
               <Link to="/business/login">
-                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 glow-primary font-medium">
+                <Button
+                  size="sm"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+                >
                   התחברו / הרשמו
                 </Button>
               </Link>
             </div>
           )}
 
-          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden text-zinc-300 hover:text-white hover:bg-zinc-800"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? "סגור תפריט" : "פתח תפריט"}
+          >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </Button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* ── Mobile menu ───────────────────────────────────────────────────── */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-border/50 p-4 space-y-3 glass">
+        <div className="lg:hidden border-t border-zinc-700/60 bg-zinc-900 p-4 space-y-3">
           <Link
             to="/business/solutions/reviews"
-            className="flex items-center gap-2 text-sm py-2 text-muted-foreground"
+            className="flex items-center gap-2 text-sm py-2 text-zinc-300"
             onClick={() => setMobileOpen(false)}
           >
             <ShieldCheck size={14} /> אימות ביקורות
           </Link>
           <Link
             to="/partners/prestige-badges"
-            className="flex items-center gap-2 text-sm py-2 text-muted-foreground"
+            className="flex items-center gap-2 text-sm py-2 text-zinc-300"
             onClick={() => setMobileOpen(false)}
           >
-            <LayoutDashboard size={14} /> ווידג'טים ותגי אמון
+            <LayoutDashboard size={14} /> ווידג׳טים ותגי אמון
           </Link>
           {canSeePricing && (
-            <Link to="/business/pricing" className="block text-sm py-2 text-primary font-medium" onClick={() => setMobileOpen(false)}>מחירים</Link>
+            <Link
+              to="/business/pricing"
+              className="block text-sm py-2 text-primary font-medium"
+              onClick={() => setMobileOpen(false)}
+            >
+              מחירים
+            </Link>
           )}
-          <Link to="/about" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>אודות</Link>
-          <div className="border-t border-border/30 my-2" />
+          <div className="border-t border-zinc-700/60 my-2" />
           {!user && (
-            <Link to="/business/login" className="block text-sm py-2 text-primary" onClick={() => setMobileOpen(false)}>התחברו / הרשמו</Link>
+            <Link
+              to="/business/login"
+              className="block text-sm py-2 text-primary"
+              onClick={() => setMobileOpen(false)}
+            >
+              התחברו / הרשמו
+            </Link>
           )}
           {user && (
             <>
-              <Link to="/business/dashboard" className="block text-sm py-2" onClick={() => setMobileOpen(false)}>לוח בקרה</Link>
-              <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="block text-sm py-2 text-destructive">התנתקו</button>
+              <Link
+                to="/business/dashboard"
+                className="block text-sm py-2 text-zinc-300"
+                onClick={() => setMobileOpen(false)}
+              >
+                לוח בקרה
+              </Link>
+              <button
+                onClick={() => { handleSwitchToUser(); setMobileOpen(false); }}
+                className="flex items-center gap-2 text-sm py-2 text-zinc-300 w-full"
+              >
+                <ArrowLeftRight size={14} />
+                מצב אישי
+              </button>
+              <button
+                onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                className="block text-sm py-2 text-destructive w-full text-right"
+              >
+                התנתקו
+              </button>
             </>
           )}
         </div>

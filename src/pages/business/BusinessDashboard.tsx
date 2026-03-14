@@ -159,6 +159,178 @@ const ReportRow = ({
   );
 };
 
+// ── Purchase Verification helper components ────────────────────────────────
+
+const PV_STATUS: Record<string, { label: string; cls: string; bg: string }> = {
+  pending:  { label: "ממתין",   cls: "text-amber-600 dark:text-amber-400",  bg: "bg-amber-500/10" },
+  approved: { label: "מאושר",   cls: "text-green-600 dark:text-green-400",  bg: "bg-green-500/10" },
+  rejected: { label: "נדחה",   cls: "text-destructive",                    bg: "bg-destructive/10" },
+};
+
+/** KPI strip — verified / pending / rejected counts */
+const PurchaseVerificationStats = ({ businessId, isDemo }: { businessId: string | null; isDemo: boolean }) => {
+  const [counts, setCounts] = useState({ approved: 0, pending: 0, rejected: 0 });
+
+  useEffect(() => {
+    if (isDemo || !businessId) {
+      setCounts({ approved: 18, pending: 4, rejected: 2 });
+      return;
+    }
+    supabase
+      .from("purchase_verifications")
+      .select("status")
+      .eq("business_id", businessId)
+      .then(({ data }) => {
+        if (!data) return;
+        const c = { approved: 0, pending: 0, rejected: 0 };
+        data.forEach((r: any) => { if (r.status in c) c[r.status as keyof typeof c]++; });
+        setCounts(c);
+      });
+  }, [businessId, isDemo]);
+
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {([
+        { key: "approved", label: "הוכחות מאושרות", icon: CheckCircle2 },
+        { key: "pending",  label: "ממתינות לבדיקה",  icon: Clock },
+        { key: "rejected", label: "נדחו",            icon: XCircle },
+      ] as const).map(({ key, label, icon: Icon }) => (
+        <Card key={key} className="shadow-card bg-card">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-lg ${PV_STATUS[key].bg} flex items-center justify-center shrink-0`}>
+              <Icon size={18} className={PV_STATUS[key].cls} />
+            </div>
+            <div>
+              <p className="font-display font-bold text-xl">{counts[key]}</p>
+              <p className="text-xs text-muted-foreground">{label}</p>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+/** Queue card — lists purchase_verifications with approve / reject actions */
+const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string | null; isDemo: boolean }) => {
+  const [rows, setRows]       = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actioning, setActioning] = useState<string | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    if (isDemo || !businessId) {
+      setRows([
+        { id: "d1", proof_type: "receipt", status: "pending",  submitted_at: new Date().toISOString(), reviews: { review_text: "קורס מצוין!", reviewer_name: "יוסי כ." } },
+        { id: "d2", proof_type: "receipt", status: "approved", submitted_at: new Date(Date.now() - 86400000).toISOString(), reviews: { review_text: "שירות מעולה.", reviewer_name: "שרה מ." } },
+        { id: "d3", proof_type: "invoice", status: "rejected", submitted_at: new Date(Date.now() - 3 * 86400000).toISOString(), rejection_reason: "המסמך לא תואם", reviews: { review_text: "חוויה טובה.", reviewer_name: "דני א." } },
+      ]);
+      setLoading(false);
+      return;
+    }
+    const { data } = await supabase
+      .from("purchase_verifications")
+      .select("*, reviews(review_text, reviewer_name)")
+      .eq("business_id", businessId)
+      .order("submitted_at", { ascending: false })
+      .limit(30);
+    setRows(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, [businessId, isDemo]);
+
+  const handleAction = async (id: string, newStatus: "approved" | "rejected") => {
+    if (isDemo) return;
+    setActioning(id);
+    await supabase
+      .from("purchase_verifications")
+      .update({ status: newStatus, reviewed_at: new Date().toISOString() })
+      .eq("id", id);
+    setRows(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+    setActioning(null);
+  };
+
+  const proofTypeLabel: Record<string, string> = {
+    receipt: "קבלה",
+    invoice: "חשבונית",
+    crm:     "CRM",
+  };
+
+  return (
+    <Card className="shadow-card bg-card">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <FileText size={16} className="text-primary" /> תור אימות רכישות
+        </CardTitle>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          הגשות של הוכחות רכישה מלקוחות. אשרו ידנית כל פריט שה-AI לא אישר אוטומטית.
+        </p>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <p className="text-sm text-muted-foreground text-center py-6">טוען...</p>
+        ) : rows.length === 0 ? (
+          <div className="text-center py-8">
+            <CheckCircle2 size={32} className="text-green-500 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">אין הגשות ממתינות.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {/* Header */}
+            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 text-[11px] text-muted-foreground font-semibold px-2 pb-1 border-b border-border/30">
+              <span>ביקורת</span>
+              <span>סוג</span>
+              <span>תאריך</span>
+              <span>סטטוס / פעולה</span>
+            </div>
+            {rows.map((row) => {
+              const meta = PV_STATUS[row.status] || PV_STATUS.pending;
+              return (
+                <div key={row.id} className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-center py-2.5 border-b border-border/20 last:border-0 px-2">
+                  <div className="min-w-0">
+                    <p className="text-sm truncate">{row.reviews?.review_text || "—"}</p>
+                    <p className="text-xs text-muted-foreground">{row.reviews?.reviewer_name || "—"}</p>
+                    {row.rejection_reason && (
+                      <p className="text-[10px] text-destructive/70 mt-0.5">{row.rejection_reason}</p>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0">{proofTypeLabel[row.proof_type] || row.proof_type}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">{new Date(row.submitted_at).toLocaleDateString("he-IL")}</span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {row.status === "pending" && !isDemo ? (
+                      <>
+                        <button
+                          onClick={() => handleAction(row.id, "approved")}
+                          disabled={actioning === row.id}
+                          className="text-[10px] px-2 py-1 rounded bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors font-medium disabled:opacity-50"
+                        >
+                          אשר
+                        </button>
+                        <button
+                          onClick={() => handleAction(row.id, "rejected")}
+                          disabled={actioning === row.id}
+                          className="text-[10px] px-2 py-1 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors font-medium disabled:opacity-50"
+                        >
+                          דחה
+                        </button>
+                      </>
+                    ) : (
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${meta.bg} ${meta.cls}`}>
+                        {meta.label}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 const BusinessDashboard = () => {
   const navigate = useNavigate();
   const { user, subscriptionTier } = useAuth();
@@ -917,30 +1089,48 @@ const BusinessDashboard = () => {
           {/* Purchase Verification */}
           <TabsContent value="trust-verification">
             <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <InvoiceTemplateUploader businessId={businessId || "demo"} />
-              <Card className="shadow-card bg-card">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Brain size={18} className="text-primary" /> איך זה עובד?
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3 text-sm text-muted-foreground">
-                    {[
-                      "העלו דוגמאות של חשבוניות/קבלות שלכם (PDF, תמונה או CSV)",
-                      "ה-AI ינתח את המבנה ויזהה פרטים מזהים (לוגו, שם העסק, מספרי מסמך)",
-                      "כשלקוח מעלה קבלה בטופס הביקורת, ה-AI ישווה אותה מול התבניות שלכם",
-                      "רוב הקבלות יאומתו אוטומטית. מקרים חריגים יועברו לבדיקה ידנית",
-                    ].map((step, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">{i + 1}</div>
-                        <p>{step}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="space-y-6">
+
+              {/* ── KPI strip ───────────────────────────────────────────── */}
+              <PurchaseVerificationStats businessId={businessId} isDemo={isDemo} />
+
+              {/* ── Setup + How-it-works ─────────────────────────────── */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <InvoiceTemplateUploader businessId={businessId || "demo"} />
+                <Card className="shadow-card bg-card">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Brain size={18} className="text-primary" /> איך זה עובד?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3 text-sm text-muted-foreground">
+                      {[
+                        "העלו דוגמאות של חשבוניות/קבלות שלכם (PDF, תמונה או CSV)",
+                        "ה-AI ינתח את המבנה ויזהה פרטים מזהים (לוגו, שם העסק, מספרי מסמך)",
+                        "כשלקוח מעלה קבלה בטופס הביקורת, ה-AI ישווה אותה מול התבניות שלכם",
+                        "רוב הקבלות יאומתו אוטומטית. מקרים חריגים יועברו לבדיקה ידנית",
+                      ].map((step, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">{i + 1}</div>
+                          <p>{step}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Credibility rule note */}
+                    <div className="mt-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 flex items-start gap-2">
+                      <Shield size={13} className="mt-0.5 shrink-0" />
+                      <span>
+                        <strong>כלל אמינות:</strong> תג "מאומת" מוצג אך ורק על ביקורות שנסגרו עם הוכחת רכישה מאושרת — גם ביקורות של בעלי עסקים אינן מאומתות אוטומטית.
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* ── Verification Queue ────────────────────────────────── */}
+              <PurchaseVerificationQueue businessId={businessId} isDemo={isDemo} />
+
             </div>
             </LockedOverlay>
           </TabsContent>

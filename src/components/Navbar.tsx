@@ -2,11 +2,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
-  ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen,
+  ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen, Briefcase,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAppMode } from "@/contexts/ModeContext";
 import NotificationBell from "./NotificationBell";
 import AccessibilityMenu from "./AccessibilityMenu";
 import {
@@ -36,6 +37,7 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   const { user, signOut } = useAuth();
+  const { switchToBusinessMode } = useAppMode();
   const navigate = useNavigate();
 
   // Pricing is now open to all authenticated users (C-7 fix)
@@ -44,6 +46,11 @@ const Navbar = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const handleSwitchToBusiness = () => {
+    switchToBusinessMode();
+    navigate("/business/dashboard");
   };
 
   return (
@@ -176,6 +183,18 @@ const Navbar = () => {
           <AccessibilityMenu />
           {user && <NotificationBell />}
 
+          {/* ── Switch Mode button (logged-in only) ──────────────────────── */}
+          {user && (
+            <button
+              onClick={handleSwitchToBusiness}
+              className="hidden md:flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/60 transition-all"
+              aria-label="עבור למצב עסקי"
+            >
+              <Briefcase size={13} aria-hidden="true" />
+              מצב עסקי
+            </button>
+          )}
+
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -301,13 +320,13 @@ const Navbar = () => {
 
           <div className="border-t border-border/30 pt-1">
             {user && (
-              <Link
-                to="/business/dashboard"
-                className="block text-sm py-3 min-h-[44px] flex items-center"
-                onClick={() => setMobileOpen(false)}
+              <button
+                onClick={() => { handleSwitchToBusiness(); setMobileOpen(false); }}
+                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-primary font-medium w-full"
               >
-                לוח בקרה עסקי
-              </Link>
+                <Briefcase size={14} aria-hidden="true" />
+                מצב עסקי
+              </button>
             )}
             {!user && (
               <Link
