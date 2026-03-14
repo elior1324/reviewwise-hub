@@ -113,6 +113,12 @@ const Footer = () => (
             >
               ליוצרים ועסקים
             </Link>
+            <Link
+              to="/trust-policy"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ארכיטקטורת האמון
+            </Link>
           </div>
         </div>
 
