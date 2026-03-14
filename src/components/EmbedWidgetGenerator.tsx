@@ -2,19 +2,22 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Code2, Copy, Check, ExternalLink, Star } from "lucide-react";
+import { Code2, Copy, Check, ExternalLink, Star, ShieldCheck, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import type { BusinessTrustStatus } from "@/components/BusinessTrustStatusBadge";
 
 interface EmbedWidgetGeneratorProps {
   businessSlug: string;
   businessName: string;
   rating: number;
   reviewCount: number;
+  /** Current trust status — used to render the trust-status badge widget variant */
+  trustStatus?: BusinessTrustStatus;
 }
 
-type WidgetType = "script" | "iframe" | "image";
+type WidgetType = "script" | "iframe" | "image" | "trust-badge";
 
-const EmbedWidgetGenerator = ({ businessSlug, businessName, rating, reviewCount }: EmbedWidgetGeneratorProps) => {
+const EmbedWidgetGenerator = ({ businessSlug, businessName, rating, reviewCount, trustStatus = "normal" }: EmbedWidgetGeneratorProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<WidgetType>("script");
@@ -23,6 +26,14 @@ const EmbedWidgetGenerator = ({ businessSlug, businessName, rating, reviewCount 
   const widgetDataUrl = `${supabaseUrl}/functions/v1/widget-data?slug=${businessSlug}`;
   const widgetHtmlUrl = `${widgetDataUrl}&format=html`;
   const profileUrl = `${window.location.origin}/biz/${businessSlug}`;
+
+  // Trust-status indicator text for embed snippets
+  const trustStatusLabel: Record<BusinessTrustStatus, string> = {
+    normal:       "מאומת ✓",
+    under_review: "תחת בדיקה ⚠",
+    warning:      "אזהרה פעילה ⚠",
+    restricted:   "מוגבל ✗",
+  };
 
   const embedCodes: Record<WidgetType, { label: string; description: string; code: string }> = {
     script: {
@@ -49,6 +60,18 @@ const EmbedWidgetGenerator = ({ businessSlug, businessName, rating, reviewCount 
       description: "באדג' סטטי עם קישור לפרופיל — מתאים לאימייל סיגנייצ'ר, חתימה באתר ועוד.",
       code: `<a href="${profileUrl}" target="_blank" rel="noopener" title="דירוג ${businessName} ב-ReviewHub">
   <img src="${supabaseUrl}/functions/v1/widget-badge?slug=${businessSlug}" alt="ReviewHub - ${rating.toFixed(1)} כוכבים מתוך ${reviewCount} ביקורות" style="height:48px;" />
+</a>`,
+    },
+    "trust-badge": {
+      label: "תג אמון",
+      description: "בדג' אמון המציג את סטטוס האימות, הדירוג ומספר הביקורות — כולל סטטוס מודרציה בזמן אמת.",
+      code: `<!-- ReviewHub Trust Badge -->
+<a href="${profileUrl}" target="_blank" rel="noopener noreferrer"
+   style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;text-decoration:none;font-family:sans-serif;">
+  <span style="font-size:13px;font-weight:700;color:#111;">${rating.toFixed(1)} ⭐</span>
+  <span style="font-size:11px;color:#6b7280;">${reviewCount} ביקורות</span>
+  <span style="font-size:10px;font-weight:600;color:#059669;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;padding:1px 6px;">${trustStatusLabel[trustStatus]}</span>
+  <span style="font-size:9px;color:#9ca3af;">ReviewHub</span>
 </a>`,
     },
   };
@@ -100,9 +123,16 @@ const EmbedWidgetGenerator = ({ businessSlug, businessName, rating, reviewCount 
                   </div>
                 </div>
                 <span className="text-[11px] text-muted-foreground">{reviewCount} ביקורות מאומתות</span>
-                <span className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
-                  מופעל ע״י ReviewHub ✓
-                </span>
+                {/* Trust status indicator in widget preview */}
+                {trustStatus === "normal" ? (
+                  <span className="text-[10px] text-emerald-600 flex items-center gap-1">
+                    <ShieldCheck size={10} /> מאומת ReviewHub ✓
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-amber-600 flex items-center gap-1">
+                    <ShieldAlert size={10} /> {trustStatusLabel[trustStatus]}
+                  </span>
+                )}
               </div>
             </a>
           </div>

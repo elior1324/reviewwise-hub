@@ -3,6 +3,7 @@ import StarRating from "./StarRating";
 import VerifiedBadge from "./VerifiedBadge";
 import ReviewResponse from "./ReviewResponse";
 import ReportReviewDialog from "./ReportReviewDialog";
+import ReviewProvenanceBadge, { type ReviewSource } from "./ReviewProvenanceBadge";
 import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2, MessageSquare, AlertTriangle, Eye, HelpCircle } from "lucide-react";
 import { getTimeSincePurchase } from "@/data/mockData";
 import { motion } from "framer-motion";
@@ -77,6 +78,19 @@ interface ReviewCardProps {
   moderationStatus?: "pending" | "verified" | "flagged" | "under_review" | "removed";
   /** AI decision reason shown to business owner in dashboard */
   aiDecisionReason?: string | null;
+  /**
+   * Provenance — how was this review verified?
+   * Drives the ReviewProvenanceBadge shown below the reviewer name.
+   * Falls back to deriving from `verified` and `reviewTier` if not provided.
+   */
+  reviewSource?: ReviewSource;
+  /**
+   * Active moderation case status for this review.
+   * Shown as a small case-tracker chip to make trust handling transparent.
+   */
+  activeCaseStatus?: string | null;
+  /** Whether the spam filter has flagged this review */
+  isSpamFlagged?: boolean;
 }
 
 const ReviewCard = ({
@@ -108,7 +122,17 @@ const ReviewCard = ({
   reviewTier = "verified",
   moderationStatus,
   aiDecisionReason,
+  reviewSource,
+  activeCaseStatus,
+  isSpamFlagged = false,
 }: ReviewCardProps) => {
+
+  // Derive provenance source from existing fields if not explicitly provided
+  const derivedSource: ReviewSource = reviewSource ?? (
+    verified ? "verified_purchase" :
+    reviewTier === "open" ? "community" :
+    "email_verified"
+  );
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [liked, setLiked] = useState(false);
   const [likeLoading, setLikeLoading] = useState(false);
@@ -315,6 +339,44 @@ const ReviewCard = ({
                 {anonymous ? "אנונימי" : reviewerName}
               </p>
               <p className="text-xs text-muted-foreground">{date}</p>
+              {/* ── Review Provenance Badge ───────────────────────────────── */}
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                <ReviewProvenanceBadge source={derivedSource} />
+                {/* Active moderation case indicator */}
+                {activeCaseStatus && activeCaseStatus !== "closed_no_action" && activeCaseStatus !== "decision_issued" && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="inline-flex items-center gap-1 text-[10px] font-medium
+                        text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30
+                        rounded-full px-2 py-0.5 cursor-help">
+                        <Eye size={9} />
+                        תיק ציות פעיל
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[240px] text-xs">
+                      ביקורת זו נמצאת כעת תחת בחינת ציות על ידי צוות ReviewHub.
+                      התוצאה תוצג לאחר סיום הבדיקה.
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                {/* Spam flag indicator */}
+                {isSpamFlagged && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="inline-flex items-center gap-1 text-[10px] font-medium
+                        text-orange-600 dark:text-orange-400 bg-orange-500/10 border border-orange-500/30
+                        rounded-full px-2 py-0.5 cursor-help">
+                        <AlertTriangle size={9} />
+                        נבדקת
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[240px] text-xs">
+                      מסנן האיכות זיהה תבניות חשודות בביקורת זו.
+                      היא מוצגת בזמן שמערכת הציות בוחנת אותה.
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
             </div>
           </div>
           <StarRating rating={rating} size={16} />

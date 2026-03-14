@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
+import { useAuth } from "@/contexts/AuthContext";
+import DeleteAccountModal from "@/components/DeleteAccountModal";
 
 const TelegramIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -23,7 +26,12 @@ const REVIEWHUB_SOCIALS = [
   { Icon: TelegramIcon, label: "Telegram", url: "https://t.me/reviewhub" },
 ];
 
-const Footer = () => (
+const Footer = () => {
+  const { user } = useAuth();
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  return (
+  <>
   <footer className="border-t border-border/50 mt-20">
     <div className="container py-12">
       {/* 4-column grid: brand · product · platform · legal */}
@@ -150,6 +158,16 @@ const Footer = () => (
             >
               הצהרת נגישות
             </Link>
+            {/* Delete Account — only shown to authenticated users */}
+            {user && (
+              <button
+                type="button"
+                onClick={() => setDeleteOpen(true)}
+                className="block text-sm text-destructive/70 hover:text-destructive transition-colors text-right w-full"
+              >
+                מחיקת חשבון
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -167,6 +185,12 @@ const Footer = () => (
       </div>
     </div>
   </footer>
-);
+
+  {user && (
+    <DeleteAccountModal open={deleteOpen} onOpenChange={setDeleteOpen} />
+  )}
+  </>
+  );
+};
 
 export default Footer;

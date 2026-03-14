@@ -80,6 +80,13 @@ export interface Review {
     text: string;
     date: string;
   };
+  // ── Trust platform fields ───────────────────────────────────────────
+  /** How the review was verified (drives provenance badge) */
+  reviewSource?: "verified_purchase" | "crm_verified" | "email_verified" | "community";
+  /** Active moderation case status, if any */
+  activeCaseStatus?: string | null;
+  /** Whether the spam filter has flagged this review */
+  isSpamFlagged?: boolean;
 }
 
 export interface AffiliateClick {

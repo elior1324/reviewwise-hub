@@ -17,6 +17,7 @@ import {
   ExternalLink, Tag, BarChart2, Shield, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Briefcase
 } from "lucide-react";
 import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
+import ModerationCaseTracker from "@/components/ModerationCaseTracker";
 import IntegrationsTab from "@/components/IntegrationsTab";
 import CollaborationPromoCard from "@/components/CollaborationPromoCard";
 import { type CollabConfig } from "@/components/CollaborationSetupModal";
@@ -246,6 +247,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
     // Capture state for rollback before optimistic update
     const snapshot = rows;
     setRows(r => r.map(x => x.id === id ? { ...x, status: newStatus } : x));
+    const row = rows.find(r => r.id === id);
     const { error } = await supabase
       .from("purchase_verifications")
       .update({ status: newStatus, reviewed_at: new Date().toISOString() })
@@ -254,6 +256,21 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
       // Rollback on failure (e.g. RLS rejection)
       setRows(snapshot);
       console.error("[PurchaseVerificationQueue] update failed:", error.message);
+    } else {
+      // ── Trust moderation log ────────────────────────────────────────────
+      // Fire-and-forget; log the manual moderation decision for audit trail.
+      supabase.from("trust_moderation_log").insert({
+        decision_type: newStatus === "approved" ? "verify_purchase_approved" : "verify_purchase_rejected",
+        reason:        newStatus === "approved"
+          ? "הוכחת הרכישה אומתה ידנית על-ידי הבעלים"
+          : "הוכחת הרכישה נדחתה ידנית על-ידי הבעלים",
+        source:        "owner_manual",
+        review_id:     row?.review_id ?? null,
+        business_id:   businessId ?? null,
+        metadata:      { purchase_verification_id: id, proof_type: row?.proof_type ?? null },
+      }).then(({ error: logErr }) => {
+        if (logErr) console.warn("[trust_moderation_log] write failed:", logErr.message);
+      });
     }
     setActioning(null);
   };
@@ -957,45 +974,41 @@ const BusinessDashboard = () => {
           </div>
         )}
 
-        <Tabs defaultValue="analytics-overview" className="space-y-6">
-          {/* ── 4-Section Tab Navigation ────────────────────────────────────────── */}
+        <Tabs defaultValue="analytics" className="space-y-6">
+          {/* ── 4-Module Tab Navigation ──────────────────────────────────────────── */}
           <div className="rounded-xl border border-border/40 bg-card/50 p-3 space-y-3">
 
-            {/* Section 1: Analytics */}
+            {/* Module 1: Analytics (merged overview + clicks) */}
             <div>
               <p className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
                 <BarChart3 size={10} /> אנליטיקס
               </p>
               <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
-                <TabsTrigger value="analytics-overview" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <BarChart3 size={13} className="ml-1" /> סקירה כללית
-                </TabsTrigger>
-                <TabsTrigger value="analytics-clicks" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                  <MousePointerClick size={13} className="ml-1" /> קליקים והמרות
-                  {isFree && <ProBadge />}
+                <TabsTrigger value="analytics" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <BarChart3 size={13} className="ml-1" /> אנליטיקס
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            {/* Section 2: AI Management */}
+            {/* Module 2: AI Insights & Reports */}
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
                 <Brain size={10} className="text-primary" />
-                <span className="text-primary/80">ניהול AI</span>
+                <span className="text-primary/80">תובנות AI ודוחות</span>
               </p>
               <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
-                <TabsTrigger value="ai-system" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                  <Brain size={13} className="ml-1" /> מערכת AI
+                <TabsTrigger value="ai-insights" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <Brain size={13} className="ml-1" /> תובנות AI ודוחות
                   {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            {/* Section 3: Trust & Verification */}
+            {/* Module 3: Trust Center */}
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
                 <Shield size={10} className="text-amber-500" />
-                <span className="text-amber-600/80 dark:text-amber-400/80">אמינות ואימות</span>
+                <span className="text-amber-600/80 dark:text-amber-400/80">מרכז האמון</span>
               </p>
               <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
                 <TabsTrigger value="trust-compliance" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
@@ -1026,7 +1039,7 @@ const BusinessDashboard = () => {
               </TabsList>
             </div>
 
-            {/* Section 4: Integrations */}
+            {/* Module 4: Integrations */}
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
                 <Link2 size={10} className="text-accent" />
@@ -1042,8 +1055,8 @@ const BusinessDashboard = () => {
 
           </div>
 
-          {/* Analytics Overview */}
-          <TabsContent value="analytics-overview">
+          {/* Analytics — merged overview + clicks */}
+          <TabsContent value="analytics">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 <Card className="shadow-card bg-card">
@@ -1104,6 +1117,72 @@ const BusinessDashboard = () => {
               <div>
               </div>
             </div>
+
+            {/* ── Clicks & Conversions ──────────────────────────────────────────── */}
+            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
+            <TooltipProvider delayDuration={200}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 mt-2">
+              {[
+                { icon: MousePointerClick, value: totalClicks, label: "סה״כ קליקים", tip: "מספר הפעמים שמשתמשים לחצו על קישור האפיליאט שלכם." },
+                { icon: TrendingUp, value: conversions, label: `המרות (${totalClicks > 0 ? Math.round(conversions / totalClicks * 100) : 0}%)`, tip: "כמה מהקליקים הפכו לרכישה בפועל." },
+                { icon: DollarSign, value: `₪${totalRevenue.toLocaleString()}`, label: "סה״כ הכנסות", tip: "סך ההכנסות שנוצרו מרכישות דרך ReviewHub." },
+              ].map(({ icon: Icon, value, label, tip }, i) => (
+                <Card key={`click-kpi-${i}`} className="shadow-card bg-card">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon size={20} className="text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-display font-bold text-xl">{value}</p>
+                      <p className="text-xs text-muted-foreground">{label}</p>
+                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                          <HelpCircle size={14} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">{tip}</TooltipContent>
+                    </Tooltip>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            </TooltipProvider>
+            <Card className="shadow-card bg-card">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <MousePointerClick size={16} /> קליקים לפי קורס
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-1">
+                  <div className="grid grid-cols-4 text-xs text-muted-foreground font-medium py-2 border-b border-border/30">
+                    <span>קורס</span>
+                    <span className="text-center">קליקים</span>
+                    <span className="text-center">המרות</span>
+                    <span className="text-left">הכנסות</span>
+                  </div>
+                  {displayClicks.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין קליקים. שתפו קישורי אפיליאט כדי להתחיל.</p>
+                  ) : (
+                    displayClicks.map((row, i) => (
+                      <div key={`click-row-${i}`} className="grid grid-cols-4 text-sm py-3 border-b border-border/20 last:border-0 items-center">
+                        <span className="truncate">{row.course}</span>
+                        <span className="text-center font-display font-bold">{row.clicks}</span>
+                        <span className="text-center">
+                          <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full font-medium">
+                            {row.conversions} ({row.clicks > 0 ? Math.round(row.conversions / row.clicks * 100) : 0}%)
+                          </span>
+                        </span>
+                        <span className="text-left font-display font-bold">₪{row.revenue.toLocaleString()}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            </LockedOverlay>
           </TabsContent>
 
           {/* Purchase Verification */}
@@ -1155,82 +1234,15 @@ const BusinessDashboard = () => {
             </LockedOverlay>
           </TabsContent>
 
-          {/* Clicks & Conversions */}
-          <TabsContent value="analytics-clicks">
-            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
-            <TooltipProvider delayDuration={200}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {[
-                { icon: MousePointerClick, value: totalClicks, label: "סה״כ קליקים", tip: "מספר הפעמים שמשתמשים לחצו על קישור האפיליאט שלכם." },
-                { icon: TrendingUp, value: conversions, label: `המרות (${totalClicks > 0 ? Math.round(conversions / totalClicks * 100) : 0}%)`, tip: "כמה מהקליקים הפכו לרכישה בפועל." },
-                { icon: DollarSign, value: `₪${totalRevenue.toLocaleString()}`, label: "סה״כ הכנסות", tip: "סך ההכנסות שנוצרו מרכישות דרך ReviewHub." },
-              ].map(({ icon: Icon, value, label, tip }, i) => (
-                <Card key={i} className="shadow-card bg-card">
-                  <CardContent className="p-5 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Icon size={20} className="text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-display font-bold text-xl">{value}</p>
-                      <p className="text-xs text-muted-foreground">{label}</p>
-                    </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
-                          <HelpCircle size={14} />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">{tip}</TooltipContent>
-                    </Tooltip>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            </TooltipProvider>
-
-            <Card className="shadow-card bg-card">
-              <CardHeader>
-                <CardTitle className="text-base">קליקים לפי קורס</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-1">
-                  <div className="grid grid-cols-4 text-xs text-muted-foreground font-medium py-2 border-b border-border/30">
-                    <span>קורס</span>
-                    <span className="text-center">קליקים</span>
-                    <span className="text-center">המרות</span>
-                    <span className="text-left">הכנסות</span>
-                  </div>
-                  {displayClicks.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין קליקים. שתפו קישורי אפיליאט כדי להתחיל.</p>
-                  ) : (
-                    displayClicks.map((row, i) => (
-                      <div key={i} className="grid grid-cols-4 text-sm py-3 border-b border-border/20 last:border-0 items-center">
-                        <span className="truncate">{row.course}</span>
-                        <span className="text-center font-display font-bold">{row.clicks}</span>
-                        <span className="text-center">
-                          <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full font-medium">
-                            {row.conversions} ({row.clicks > 0 ? Math.round(row.conversions / row.clicks * 100) : 0}%)
-                          </span>
-                        </span>
-                        <span className="text-left font-display font-bold">₪{row.revenue.toLocaleString()}</span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-            </LockedOverlay>
-          </TabsContent>
-
-          {/* AI System — unified with Daily / Weekly / Monthly period filter */}
-          <TabsContent value="ai-system">
+          {/* AI Insights & Reports — renamed from ai-system */}
+          <TabsContent value="ai-insights">
             <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
             <div className="space-y-4">
               {/* Period filter header */}
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                   <Brain size={18} className="text-primary" />
-                  <h2 className="font-display font-semibold text-base">מערכת AI</h2>
+                  <h2 className="font-display font-semibold text-base">תובנות AI ודוחות</h2>
                 </div>
                 <div className="flex items-center gap-1 rounded-lg border border-border/40 bg-muted/30 p-1">
                   {(["daily", "weekly", "monthly"] as const).map((period) => (
@@ -1808,6 +1820,12 @@ const BusinessDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* ── Moderation Case Tracker — structured workflow per flagged review ── */}
+              <ModerationCaseTracker
+                businessId={isDemo ? "demo" : (businessId ?? "demo")}
+                isDemo={isDemo}
+              />
 
             </div>
           </TabsContent>

@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
   ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen, Briefcase,
+  UserCircle,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppMode } from "@/contexts/ModeContext";
+import type { AppMode } from "@/contexts/ModeContext";
 import NotificationBell from "./NotificationBell";
 import AccessibilityMenu from "./AccessibilityMenu";
 import {
@@ -37,8 +39,9 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   const { user, signOut } = useAuth();
-  const { switchToBusinessMode } = useAppMode();
+  const { mode, switchToBusinessMode, switchToUserMode } = useAppMode();
   const navigate = useNavigate();
+  const isBusinessMode = mode === "business";
 
   // Pricing is now open to all authenticated users (C-7 fix)
   const canSeePricing = !!user;
@@ -53,19 +56,57 @@ const Navbar = () => {
     navigate("/business/dashboard");
   };
 
+  const handleSwitchToConsumer = () => {
+    switchToUserMode();
+    navigate("/");
+  };
+
   return (
-    <nav className={`glass fixed top-0 z-50 border-b border-border/50 w-full transition-shadow duration-300 ${scrolled ? "shadow-lg" : "shadow-none"}`}>
+    <nav className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+      isBusinessMode
+        ? "bg-zinc-900 border-b border-zinc-700/60"
+        : `glass border-b border-border/50 ${scrolled ? "shadow-lg" : "shadow-none"}`
+    }`}>
+      {/* ── Business Mode context band ─────────────────────────────────────────
+          Full-width amber strip that makes it impossible to forget which mode
+          the user is in. Only rendered when isBusinessMode is true.            */}
+      {isBusinessMode && (
+        <div className="w-full bg-amber-500/15 border-b border-amber-500/30 py-1 px-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-amber-400 text-[11px] font-semibold">
+            <Briefcase size={11} aria-hidden="true" />
+            <span>מצב עסקי פעיל — אתם מנהלים פרופיל עסקי</span>
+          </div>
+          {user && (
+            <button
+              onClick={handleSwitchToConsumer}
+              className="flex items-center gap-1 text-[10px] text-amber-400/80 hover:text-amber-300 transition-colors"
+              aria-label="עבור למצב צרכן"
+            >
+              <UserCircle size={10} aria-hidden="true" />
+              מצב צרכן
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="container flex items-center justify-between h-16">
 
         {/* ── Left side: Logo + לעסקים dropdown ─────────────────────────────── */}
         <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center gap-2.5">
+          <Link to={isBusinessMode ? "/business/dashboard" : "/"} className="flex items-center gap-2.5">
             <img
               src={logoIcon}
               alt="ReviewHub Logo"
               className="w-10 h-10 rounded-xl shadow-lg object-cover"
             />
-            <span className="font-display font-bold text-xl gradient-text">ReviewHub</span>
+            <span className={`font-display font-bold text-xl ${isBusinessMode ? "text-white" : "gradient-text"}`}>
+              ReviewHub
+              {isBusinessMode && (
+                <span className="ml-1.5 text-[10px] font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded-full align-middle">
+                  עסקי
+                </span>
+              )}
+            </span>
           </Link>
 
           {/* ── "לעסקים" dropdown — anchored to the left next to the logo ──── */}
@@ -184,7 +225,7 @@ const Navbar = () => {
           {user && <NotificationBell />}
 
           {/* ── Switch Mode button (logged-in only) ──────────────────────── */}
-          {user && (
+          {user && !isBusinessMode && (
             <button
               onClick={handleSwitchToBusiness}
               className="hidden md:flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/60 transition-all"
@@ -194,6 +235,16 @@ const Navbar = () => {
               מצב עסקי
             </button>
           )}
+          {user && isBusinessMode && (
+            <button
+              onClick={handleSwitchToConsumer}
+              className="hidden md:flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-700 hover:border-zinc-500 transition-all"
+              aria-label="עבור למצב צרכן"
+            >
+              <UserCircle size={13} aria-hidden="true" />
+              מצב צרכן
+            </button>
+          )}
 
           {user ? (
             <DropdownMenu>
@@ -201,7 +252,7 @@ const Navbar = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-full border border-border/50"
+                  className={`rounded-full border ${isBusinessMode ? "border-zinc-600 text-zinc-300 hover:bg-zinc-700" : "border-border/50"}`}
                   aria-label="תפריט משתמש"
                 >
                   <User size={18} />
@@ -211,9 +262,18 @@ const Navbar = () => {
                 <DropdownMenuItem className="text-xs text-muted-foreground cursor-default">
                   {user.email}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/business/dashboard")}>
-                  לוח בקרה עסקי
-                </DropdownMenuItem>
+                {!isBusinessMode && (
+                  <DropdownMenuItem onClick={handleSwitchToBusiness}>
+                    <Briefcase size={14} className="ml-2" aria-hidden="true" />
+                    לוח בקרה עסקי
+                  </DropdownMenuItem>
+                )}
+                {isBusinessMode && (
+                  <DropdownMenuItem onClick={handleSwitchToConsumer}>
+                    <UserCircle size={14} className="ml-2" aria-hidden="true" />
+                    עבור למצב צרכן
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut size={14} className="ml-2" aria-hidden="true" />

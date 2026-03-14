@@ -31,7 +31,7 @@ serve(async (req) => {
 
     const { data: biz, error } = await supabaseClient
       .from("businesses")
-      .select("name, slug, rating, review_count, subscription_tier, verified")
+      .select("name, slug, rating, review_count, subscription_tier, verified, trust_status")
       .eq("slug", slug)
       .single();
 
@@ -64,6 +64,18 @@ serve(async (req) => {
         return `<svg width="16" height="16" viewBox="0 0 24 24" fill="${filled ? '#f59e0b' : 'none'}" stroke="${filled ? '#f59e0b' : '#d1d5db'}" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
       }).join("");
 
+      // Trust-status warning strip — only rendered for non-normal statuses
+      const trustStatus = biz.trust_status || "normal";
+      const trustStatusHtml = trustStatus !== "normal" ? (() => {
+        const cfg: Record<string, { label: string; color: string; bg: string; border: string }> = {
+          under_review: { label: "תחת בדיקה",  color: "#92400e", bg: "#fffbeb", border: "#fcd34d" },
+          warning:      { label: "אזהרה פעילה", color: "#991b1b", bg: "#fef2f2", border: "#fca5a5" },
+          restricted:   { label: "מוגבל",       color: "#7f1d1d", bg: "#fee2e2", border: "#ef4444" },
+        };
+        const c = cfg[trustStatus] ?? cfg["under_review"];
+        return `<div style="font-size:9px;font-weight:600;color:${c.color};background:${c.bg};border:1px solid ${c.border};border-radius:4px;padding:1px 6px;margin-top:2px;display:inline-block;">${c.label}</div>`;
+      })() : "";
+
       const html = `<!DOCTYPE html>
 <html dir="rtl" lang="he">
 <head><meta charset="utf-8"><style>
@@ -87,6 +99,7 @@ serve(async (req) => {
     </div>
     <span class="rh-count">${reviewCount} ביקורות מאומתות</span>
     <span class="rh-brand">מופעל ע״י ReviewHub ✓</span>
+    ${trustStatusHtml}
   </div>
 </a>
 </body></html>`;
@@ -154,6 +167,7 @@ serve(async (req) => {
       rating,
       review_count: reviewCount,
       verified: biz.verified,
+      trust_status: biz.trust_status || "normal",
       profile_url: `https://reviewhub.co.il/biz/${biz.slug}`,
       ...(includeReview ? { featured_review: featuredReview } : {}),
     }), {

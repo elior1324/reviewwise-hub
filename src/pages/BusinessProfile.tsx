@@ -8,10 +8,12 @@ import BusinessHero from "@/components/BusinessHero";
 import AddReviewForm from "@/components/AddReviewForm";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import GoogleReviewsSection, { type GoogleReview, type GoogleProfileData } from "@/components/GoogleReviewsSection";
+import BusinessTrustStatusBadge, { type BusinessTrustStatus } from "@/components/BusinessTrustStatusBadge";
+import TransparencyScore from "@/components/TransparencyScore";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info } from "lucide-react";
+import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star } from "lucide-react";
 import { PrestigeBadge, computeEligibleBadges, buildBadgeEmbedCode, BADGE_CONFIG } from "@/components/PrestigeBadge";
 import { useState, useEffect, useMemo } from "react";
 import { generateReviewSummary, FREELANCER_CATEGORIES, SAAS_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
@@ -39,6 +41,17 @@ const BusinessProfile = () => {
   const [googleReviews, setGoogleReviews]   = useState<GoogleReview[]>([]);
   const [isOwner, setIsOwner]               = useState(false);
 
+  // Trust platform state
+  const [trustStatus, setTrustStatus]               = useState<BusinessTrustStatus>("normal");
+  const [trustStatusReason, setTrustStatusReason]   = useState<string | null>(null);
+  const [transparencyScore, setTransparencyScore]   = useState<number | null>(null);
+  const [responseRate, setResponseRate]             = useState<number | null>(null);
+  const [avgResponseHours, setAvgResponseHours]     = useState<number | null>(null);
+  const [verifiedReviewRatio, setVerifiedReviewRatio] = useState<number | null>(null);
+  const [aiSummaryMeta, setAiSummaryMeta]           = useState<{
+    reviewCount: number; periodLabel: string; generatedAt: string;
+  } | null>(null);
+
   useEffect(() => {
     if (!slug) return;
 
@@ -52,7 +65,7 @@ const BusinessProfile = () => {
       //   Rating and reviewCount are computed below from the reviews we fetch.
       const { data: bizData } = await supabase
         .from("businesses")
-        .select("id, slug, name, website, email, phone, category, description, verified, collaboration_active, collaboration_method, collaboration_coupon")
+        .select("id, slug, name, website, email, phone, category, description, verified, collaboration_active, collaboration_method, collaboration_coupon, trust_status, trust_status_reason, transparency_score, response_rate, avg_response_hours, verified_review_ratio")
         .eq("slug", slug)
         .maybeSingle();
 
@@ -62,6 +75,16 @@ const BusinessProfile = () => {
       }
 
       setDbBusinessId(bizData.id);
+
+      // Trust status
+      setTrustStatus((bizData.trust_status as BusinessTrustStatus) || "normal");
+      setTrustStatusReason(bizData.trust_status_reason || null);
+
+      // Transparency score pillars
+      setTransparencyScore(bizData.transparency_score ?? null);
+      setResponseRate(bizData.response_rate ?? null);
+      setAvgResponseHours(bizData.avg_response_hours ?? null);
+      setVerifiedReviewRatio(bizData.verified_review_ratio ?? null);
 
       // Collaboration program state
       setCollabActive(bizData.collaboration_active || false);
@@ -106,9 +129,42 @@ const BusinessProfile = () => {
       // reviews has business_id directly
       const { data: reviewDataFinal } = await supabase
         .from("reviews")
-        .select("*, is_purchase_verified, courses(name), business_responses(text, created_at)")
+        .select("*, is_purchase_verified, review_source, is_flagged_spam, courses(name), business_responses(text, created_at)")
         .eq("business_id", bizData.id)
         .order("created_at", { ascending: false });
+
+      // ── AI Summary metadata ──────────────────────────────────────────────────
+      const { data: summaryMeta } = await supabase
+        .from("ai_summary_meta")
+        .select("review_count, period_start, period_end, generated_at")
+        .eq("business_id", bizData.id)
+        .eq("is_current", true)
+        .order("generated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (summaryMeta) {
+        const periodStart = summaryMeta.period_start
+          ? new Date(summaryMeta.period_start)
+          : null;
+        const periodEnd = summaryMeta.period_end
+          ? new Date(summaryMeta.period_end)
+          : null;
+        let periodLabel = "";
+        if (periodStart && periodEnd) {
+          const diffMonths = Math.round(
+            (periodEnd.getTime() - periodStart.getTime()) / (30 * 86400000)
+          );
+          periodLabel = diffMonths >= 12
+            ? `${Math.round(diffMonths / 12)} שנה אחרונה`
+            : `${diffMonths} חודשים אחרונים`;
+        }
+        setAiSummaryMeta({
+          reviewCount: summaryMeta.review_count ?? 0,
+          periodLabel,
+          generatedAt: summaryMeta.generated_at,
+        });
+      }
 
       if (reviewDataFinal) {
         // ── Expert Badge logic (UNCHANGED) ─────────────────────────────────────
@@ -177,6 +233,14 @@ const BusinessProfile = () => {
             text: r.review_responses[0].response_text || "",
             date: new Date(r.review_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
+          // ── Trust platform fields ─────────────────────────────────────────
+          reviewSource: r.review_source ?? (
+            r.is_purchase_verified || r.verified_purchase
+              ? "verified_purchase"
+              : "community"
+          ),
+          isSpamFlagged: r.is_flagged_spam ?? false,
+          activeCaseStatus: null, // fetched separately if needed
         })));
       } else {
         const mappedBiz: Business = {
@@ -373,6 +437,17 @@ const BusinessProfile = () => {
         </div>
         <BusinessHero business={business} verifiedReviewCount={totalVerified} />
 
+        {/* ── Business Trust Status Banner (Feature 4) ─────────────────────
+            Rendered immediately below the hero — only visible when status is
+            under_review / warning / restricted. Normal returns null.           */}
+        <BusinessTrustStatusBadge
+          status={trustStatus}
+          reason={trustStatusReason ?? undefined}
+          variant="banner"
+          isOwner={isOwner}
+          className="mb-4"
+        />
+
         {/* Audit record strip — institutional framing */}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-border/40 bg-card/40 rounded-xl px-4 py-3 mb-8 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
@@ -391,6 +466,28 @@ const BusinessProfile = () => {
             <span className="text-muted-foreground/60">ציון האמון מחושב מביקורות מאומתות בלבד</span>
           </div>
         </div>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            TRUST HUB (Feature 5) — full trust-center panel
+            Shows: verification stats, contact info, moderation status chip,
+            response rate, and trust tier.  Collapsed by default on mobile.
+        ══════════════════════════════════════════════════════════════════ */}
+        <TrustHub
+          business={business}
+          trustStatus={trustStatus}
+          trustStatusReason={trustStatusReason}
+          totalVerified={totalVerified}
+          totalOpen={totalOpen}
+          isOwner={isOwner}
+        />
+
+        {/* ── Transparency Score (Feature 9) ───────────────────────────────── */}
+        <TransparencyScore
+          transparencyScore={transparencyScore}
+          verifiedReviewRatio={verifiedReviewRatio}
+          responseRate={responseRate}
+          avgResponseHours={avgResponseHours}
+        />
 
         {/* ── Collaboration: Exclusive Offer ──────────────────────────────── */}
         {collabActive && (
@@ -492,8 +589,16 @@ const BusinessProfile = () => {
           </div>
         )}
 
-        {/* AI Summary */}
-        {summary && <ReviewSummary summary={summary} />}
+        {/* AI Summary — with full transparency metadata */}
+        {summary && (
+          <ReviewSummary
+            summary={summary}
+            reviewCount={aiSummaryMeta?.reviewCount ?? reviews.length}
+            periodLabel={aiSummaryMeta?.periodLabel ?? "הביקורות הקיימות"}
+            generatedAt={aiSummaryMeta?.generatedAt}
+            modelVersion="GPT-4o"
+          />
+        )}
 
         {/* Testimonial Videos/Images */}
         {dbBusinessId && <TestimonialCarousel businessId={dbBusinessId} />}
@@ -630,6 +735,212 @@ const BusinessProfile = () => {
 };
 
 export default BusinessProfile;
+
+// ── TrustHub ──────────────────────────────────────────────────────────────────
+// Full trust-center panel rendered on every business profile page.
+// Provides: verification statistics, business contact info, moderation
+// status (when relevant), and a trust-tier legend — the canonical single
+// source of truth for how trustworthy a business is on ReviewHub.
+
+interface TrustHubProps {
+  business: Business;
+  trustStatus: BusinessTrustStatus;
+  trustStatusReason: string | null;
+  totalVerified: number;
+  totalOpen: number;
+  isOwner: boolean;
+}
+
+function TrustHub({
+  business,
+  trustStatus,
+  trustStatusReason,
+  totalVerified,
+  totalOpen,
+  isOwner,
+}: TrustHubProps) {
+  const [expanded, setExpanded] = useState(false);
+
+  const totalReviews = totalVerified + totalOpen;
+  const verifiedPct = totalReviews > 0
+    ? Math.round((totalVerified / totalReviews) * 100)
+    : 0;
+
+  // Derive tier label + colour from rating + verified count
+  const tier: { label: string; color: string; bg: string } = (() => {
+    const { rating, verifiedReviewCount } = business;
+    const vc = verifiedReviewCount ?? totalVerified;
+    if (rating >= 4.5 && vc >= 10) return { label: "Elite",         color: "text-amber-600",  bg: "bg-amber-50 border-amber-200" };
+    if (rating >= 4.0 && vc >= 5)  return { label: "Highly Trusted", color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" };
+    if (rating >= 3.5 && vc >= 3)  return { label: "Trusted",        color: "text-blue-600",   bg: "bg-blue-50 border-blue-200" };
+    if (vc > 0)                    return { label: "Emerging",       color: "text-orange-600", bg: "bg-orange-50 border-orange-200" };
+    return                               { label: "Unrated",         color: "text-muted-foreground", bg: "bg-muted/30 border-border/40" };
+  })();
+
+  const hasContact = !!(business.website || business.email || business.phone);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="mb-8 rounded-xl border border-border/40 bg-card/50 overflow-hidden"
+    >
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <button
+        type="button"
+        onClick={() => setExpanded(e => !e)}
+        className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/20 transition-colors"
+        aria-expanded={expanded}
+      >
+        <div className="flex items-center gap-2.5">
+          <ShieldCheck size={16} className="text-primary shrink-0" />
+          <span className="font-display font-semibold text-sm text-foreground">
+            מרכז האמון
+          </span>
+          {/* Inline trust tier chip */}
+          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${tier.bg} ${tier.color}`}>
+            {tier.label}
+          </span>
+          {/* Moderation status chip — shown always when non-normal */}
+          <BusinessTrustStatusBadge status={trustStatus} variant="badge" />
+        </div>
+        <span className="text-xs text-muted-foreground/70 flex items-center gap-1">
+          {expanded ? "הסתר" : "הצג פרטים"}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="12" height="12" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth="2"
+            className={`transition-transform ${expanded ? "rotate-180" : ""}`}
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </span>
+      </button>
+
+      {/* ── Stats strip — always visible ───────────────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/30 border-t border-border/30">
+        {[
+          { label: "ביקורות מאומתות", value: String(totalVerified), icon: <CheckCircle2 size={13} className="text-primary" /> },
+          { label: "משובי קהילה",     value: String(totalOpen),    icon: <MessageSquare size={13} className="text-muted-foreground" /> },
+          { label: "אחוז אימות",       value: `${verifiedPct}%`,     icon: <BarChart3 size={13} className="text-primary" /> },
+          { label: "דירוג ממוצע",      value: business.rating > 0 ? business.rating.toFixed(1) : "—", icon: <Star size={13} className="text-amber-500" /> },
+        ].map(stat => (
+          <div key={stat.label} className="flex flex-col items-center justify-center gap-1 bg-card/40 py-3 px-2">
+            <div className="flex items-center gap-1">
+              {stat.icon}
+              <span className="font-display font-bold text-base text-foreground">{stat.value}</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground text-center">{stat.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Expanded content ───────────────────────────────────────── */}
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            key="trusthub-expanded"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            <div className="px-5 py-4 space-y-4 border-t border-border/30">
+
+              {/* Business Info */}
+              {hasContact && (
+                <div>
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                    פרטי התקשרות
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    {business.website && (
+                      <a
+                        href={business.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+                      >
+                        <ExternalLink size={11} />
+                        {business.website.replace(/^https?:\/\//, "")}
+                      </a>
+                    )}
+                    {business.email && (
+                      <a
+                        href={`mailto:${business.email}`}
+                        className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+                      >
+                        <MessageSquare size={11} />
+                        {business.email}
+                      </a>
+                    )}
+                    {business.phone && (
+                      <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock size={11} />
+                        {business.phone}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Verification explanation */}
+              <div>
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                  כיצד מחושב ציון האמון?
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  ציון האמון של ReviewHub מחושב אך ורק על סמך <strong className="text-foreground">ביקורות מאומתות רכישה</strong> — ביקורות שנכתבו לאחר הגשת הוכחת רכישה ממשית.
+                  משובי קהילה (ללא הוכחת רכישה) מוצגים בנפרד ואינם נכללים בחישוב.
+                  ככל שאחוז האימות גבוה יותר, כך הציון אמין יותר.
+                </p>
+              </div>
+
+              {/* Moderation status — extended detail when non-normal */}
+              {trustStatus !== "normal" && (
+                <div>
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                    סטטוס מודרציה
+                  </p>
+                  <BusinessTrustStatusBadge
+                    status={trustStatus}
+                    reason={trustStatusReason ?? undefined}
+                    variant="banner"
+                    isOwner={isOwner}
+                  />
+                </div>
+              )}
+
+              {/* Owner response rate */}
+              <div>
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                  מדיניות תגובות בעל העסק
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  בעל העסק רשאי להגיב לכל ביקורת. תגובות מוצגות מתחת לביקורת המקורית
+                  ומסומנות "תגובת בעל העסק" כדי לשמור על שקיפות מלאה.
+                </p>
+              </div>
+
+              {/* Report abuse link */}
+              <div className="pt-1 border-t border-border/20">
+                <p className="text-[10px] text-muted-foreground/60 leading-snug">
+                  מצאתם ביקורת חשודה?{" "}
+                  <a href="mailto:trust@reviewhub.co.il" className="text-primary hover:underline">
+                    דווחו לצוות האמון
+                  </a>{" "}
+                  — כל דוח נבחן ידנית תוך 48 שעות.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
 
 // ── EarnedBadgesSection ────────────────────────────────────────────────────────
 // Shown on the profile page when the business qualifies for ≥1 prestige badge.

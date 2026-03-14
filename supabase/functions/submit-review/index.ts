@@ -192,11 +192,79 @@ serve(async (req: Request) => {
       REVIEWER_MAX,
     );
 
-    // ── Step 5: Insert review via service role ────────────────────────────
+    // ── Step 5: Anti-spam analysis ────────────────────────────────────────
+    // Run spam checks inline (same algorithm as anti-spam-check function).
+    // Results are stored on the review row; spam-flagged reviews are still
+    // inserted but surface in moderation tooling for human review.
+
+    // 5a. SHA-256 duplicate hash
+    async function sha256hex(text: string): Promise<string> {
+      const encoder = new TextEncoder();
+      const hashBuf = await crypto.subtle.digest("SHA-256", encoder.encode(text));
+      return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+    const normalised    = cleanReviewText.toLowerCase().replace(/[\u0591-\u05C7]/g, "").replace(/[^\w\s\u0590-\u05FF]/g, " ").replace(/\s+/g, " ").trim();
+    const duplicateHash = await sha256hex(normalised);
+
+    // 5b. Pattern checks
+    const SPAM_PATTERNS: Array<{ pattern: RegExp; weight: number; flag: string }> = [
+      { pattern: /קוד\s*קופון|קוד\s*הנחה|coupon|promo\s*code/i,            weight: 0.25, flag: "promo_code" },
+      { pattern: /לחצ[וי]\s*כאן|click\s*here|לחץ\s*כאן/i,                  weight: 0.3,  flag: "cta_link" },
+      { pattern: /https?:\/\/|www\./i,                                       weight: 0.35, flag: "url_in_text" },
+      { pattern: /הרוויח[ות]\s*כסף|earn\s*money|make\s*money/i,             weight: 0.3,  flag: "earn_money" },
+      { pattern: /100%\s*חינם|free\s*forever|חינמי\s*לגמרי/i,               weight: 0.2,  flag: "free_claim" },
+      { pattern: /לא\s*(ניסיתי|השתמשתי|קניתי)|לא\s*עשיתי\s*את\s*הקורס/i,  weight: 0.5,  flag: "no_experience" },
+      { pattern: /\[\s*שם\s*המוצר\s*\]|\[\s*name\s*\]|\{\s*product\s*\}/i, weight: 0.9,  flag: "template_placeholder" },
+    ];
+    const spamFlags: string[] = [];
+    let spamScore = 0.0;
+    for (const { pattern, weight, flag } of SPAM_PATTERNS) {
+      if (pattern.test(cleanReviewText)) { spamScore += weight; spamFlags.push(flag); }
+    }
+    if (cleanReviewText.length < 20) { spamScore += 0.5; spamFlags.push("very_short_text"); }
+    else if (cleanReviewText.length < 50) { spamScore += 0.2; spamFlags.push("short_text"); }
+    const excessivePunct = (cleanReviewText.match(/[!?]{2,}/g) || []).length;
+    if (excessivePunct >= 3) { spamScore += 0.2; spamFlags.push("excessive_punctuation"); }
+
+    // 5c. DB checks: duplicate content + user burst
+    const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    const { data: dupRow } = await adminClient
+      .from("reviews").select("id").eq("duplicate_hash", duplicateHash).limit(1).maybeSingle();
+    if (dupRow) { spamScore += 0.6; spamFlags.push("duplicate_content"); }
+
+    const windowStart24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: recentCount } = await adminClient
+      .from("reviews").select("id", { count: "exact", head: true })
+      .eq("user_id", user.id).gte("created_at", windowStart24h);
+    if ((recentCount ?? 0) >= 5) { spamScore += 0.5; spamFlags.push("burst_5plus_24h"); }
+    else if ((recentCount ?? 0) >= 3) { spamScore += 0.25; spamFlags.push("burst_3plus_24h"); }
+
+    // 5d. Business-level burst check (fire-and-forget burst flag)
+    const windowStart1h = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: bizBurst } = await adminClient
+      .from("reviews").select("id", { count: "exact", head: true })
+      .eq("business_id", businessId).gte("created_at", windowStart1h);
+    if ((bizBurst ?? 0) >= 10) {
+      spamFlags.push("business_burst_10plus_1h");
+      adminClient.from("review_burst_flags").insert({
+        business_id:  businessId,
+        window_start: windowStart1h,
+        window_end:   new Date().toISOString(),
+        review_count: bizBurst ?? 10,
+        threshold:    10,
+        severity:     (bizBurst ?? 0) >= 20 ? "critical" : (bizBurst ?? 0) >= 15 ? "high" : "medium",
+        status:       "open",
+      }).then(() => {}).catch(() => {});
+    }
+
+    const isFlaggedSpam = Math.min(1.0, spamScore) >= 0.6;
+
+    // ── Step 6: Insert review via service role ────────────────────────────
     // Using service-role key here ensures the insert cannot be blocked by
     // client-facing RLS misconfiguration and that we bypass nothing ourselves
     // — all business logic is in this function.
-    const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    // NOTE: adminClient was already created in Step 5 for spam checks.
 
     // Guard: verify the businessId actually exists (prevents phantom reviews)
     const { data: bizExists, error: bizErr } = await adminClient
@@ -244,7 +312,7 @@ serve(async (req: Request) => {
     const submissionIp = req.headers.get("CF-Connecting-IP") ?? req.headers.get("X-Forwarded-For") ?? null;
     const submissionUa = req.headers.get("User-Agent") ?? null;
 
-    const { error: insertError } = await adminClient
+    const { data: insertedReview, error: insertError } = await adminClient
       .from("reviews")
       .insert({
         user_id:               user.id,
@@ -267,7 +335,14 @@ serve(async (req: Request) => {
           : new Date().toISOString(),
         // ✅ FIXED: server-computed status — not the client-supplied value
         verification_status:   serverVerificationStatus,
-      });
+        // ── Anti-spam fields (Feature 7) ──────────────────────────────
+        spam_score:            Math.min(1.0, Math.round(spamScore * 1000) / 1000),
+        is_flagged_spam:       isFlaggedSpam,
+        spam_flags:            spamFlags.length > 0 ? spamFlags : null,
+        duplicate_hash:        duplicateHash,
+      })
+      .select("id")
+      .single();
 
     if (insertError) {
       // PostgreSQL unique-constraint violation code
@@ -282,7 +357,31 @@ serve(async (req: Request) => {
       return jsonResp({ error: "Failed to save review" }, 500, cors);
     }
 
-    return jsonResp({ success: true, verifiedPurchase: serverVerifiedPurchase }, 200, cors);
+    // ── Trust moderation log — write audit entry when spam is detected ──────
+    if (isFlaggedSpam && insertedReview?.id) {
+      adminClient.from("trust_moderation_log").insert({
+        decision_type: "spam_flagged",
+        reason:        `ספאם זוהה אוטומטית. ציון: ${Math.min(1.0, Math.round(spamScore * 1000) / 1000).toFixed(3)}. דגלים: ${spamFlags.join(", ")}`,
+        source:        "auto_spam_check",
+        review_id:     insertedReview.id,
+        business_id:   businessId as string,
+        reporter_id:   null,
+        metadata:      {
+          spam_score:  Math.min(1.0, Math.round(spamScore * 1000) / 1000),
+          spam_flags:  spamFlags,
+          duplicate_hash: duplicateHash,
+        },
+      }).then(({ error: logErr }) => {
+        if (logErr) console.warn("[trust_moderation_log] spam write failed:", logErr.message);
+      });
+    }
+
+    return jsonResp({
+      success:         true,
+      verifiedPurchase: serverVerifiedPurchase,
+      spamFlagged:     isFlaggedSpam,
+      spamScore:       Math.min(1.0, Math.round(spamScore * 1000) / 1000),
+    }, 200, cors);
 
   } catch (err) {
     console.error("[submit-review] unexpected error:", err);
