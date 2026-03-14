@@ -274,11 +274,11 @@ const Navbar = () => {
           {user && isBusinessMode && (
             <button
               onClick={handleSwitchToConsumer}
-              className="hidden md:flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-700 hover:border-zinc-500 transition-all"
-              aria-label="עבור למצב צרכן"
+              className="hidden md:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-white/40 transition-all"
+              aria-label="חזרה לחשבון רגיל"
             >
               <UserCircle size={13} aria-hidden="true" />
-              מצב צרכן
+              חזרה לחשבון רגיל
             </button>
           )}
 

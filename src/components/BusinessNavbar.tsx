@@ -8,9 +8,9 @@
  *  • A prominent "מצב אישי" (Switch to User Mode) button that returns the
  *    user to the public site and resets the mode context.
  */
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, LayoutDashboard, ShieldCheck, ArrowLeftRight } from "lucide-react";
+import { Menu, X, LogOut, User, LayoutDashboard, ShieldCheck, ArrowLeftRight, Home, Tag } from "lucide-react";
 import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
@@ -30,7 +30,12 @@ const BusinessNavbar = () => {
   const { user, signOut } = useAuth();
   const { switchToUserMode } = useAppMode();
   const navigate = useNavigate();
+  const location = useLocation();
   const canSeePricing = isGmailAddress(user?.email);
+
+  /** Active link helper — highlights the current route */
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(path + "/");
 
   const handleSignOut = async () => {
     await signOut();
@@ -70,24 +75,58 @@ const BusinessNavbar = () => {
         {/* ── Center nav ────────────────────────────────────────────────────── */}
         <div className="hidden lg:flex items-center gap-5">
           <Link
+            to="/business"
+            className={`text-sm transition-colors flex items-center gap-1.5 ${
+              location.pathname === "/business"
+                ? "text-white font-semibold"
+                : "text-zinc-300 hover:text-white"
+            }`}
+          >
+            <Home size={14} aria-hidden="true" />
+            דף הבית
+          </Link>
+          <Link
+            to="/business/dashboard"
+            className={`text-sm transition-colors flex items-center gap-1.5 ${
+              isActive("/business/dashboard")
+                ? "text-white font-semibold"
+                : "text-zinc-300 hover:text-white"
+            }`}
+          >
+            <LayoutDashboard size={14} aria-hidden="true" />
+            לוח הבקרה
+          </Link>
+          <Link
             to="/business/solutions/reviews"
-            className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
+            className={`text-sm transition-colors flex items-center gap-1.5 ${
+              isActive("/business/solutions/reviews")
+                ? "text-white font-semibold"
+                : "text-zinc-300 hover:text-white"
+            }`}
           >
             <ShieldCheck size={14} aria-hidden="true" />
             אימות ביקורות
           </Link>
           <Link
             to="/partners/prestige-badges"
-            className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
+            className={`text-sm transition-colors flex items-center gap-1.5 ${
+              isActive("/partners/prestige-badges")
+                ? "text-white font-semibold"
+                : "text-zinc-300 hover:text-white"
+            }`}
           >
-            <LayoutDashboard size={14} aria-hidden="true" />
             ווידג׳טים ותגי אמון
           </Link>
           {canSeePricing && (
             <Link
               to="/business/pricing"
-              className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+              className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                isActive("/business/pricing")
+                  ? "text-primary"
+                  : "text-primary/70 hover:text-primary"
+              }`}
             >
+              <Tag size={14} aria-hidden="true" />
               מחירים
             </Link>
           )}
@@ -97,14 +136,14 @@ const BusinessNavbar = () => {
         <div className="flex items-center gap-2">
           <AccessibilityMenu />
 
-          {/* Switch to User Mode */}
+          {/* ── Switch to Consumer Mode — prominent button ────────────────── */}
           <button
             onClick={handleSwitchToUser}
-            className="hidden md:flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-zinc-600 text-zinc-300 hover:text-white hover:border-zinc-400 hover:bg-zinc-800 transition-all"
-            aria-label="עבור למצב אישי"
+            className="hidden md:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-white/40 transition-all"
+            aria-label="עבור לחשבון רגיל"
           >
             <ArrowLeftRight size={13} aria-hidden="true" />
-            מצב אישי
+            חזרה לחשבון רגיל
           </button>
 
           {user ? (
@@ -164,64 +203,73 @@ const BusinessNavbar = () => {
 
       {/* ── Mobile menu ───────────────────────────────────────────────────── */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-zinc-700/60 bg-zinc-900 p-4 space-y-3">
+        <div className="lg:hidden border-t border-zinc-700/60 bg-zinc-900 p-4 space-y-1">
           <Link
-            to="/business/solutions/reviews"
-            className="flex items-center gap-2 text-sm py-2 text-zinc-300"
+            to="/business"
+            className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 font-medium"
             onClick={() => setMobileOpen(false)}
           >
-            <ShieldCheck size={14} /> אימות ביקורות
+            <Home size={14} aria-hidden="true" /> דף הבית
+          </Link>
+          <Link
+            to="/business/dashboard"
+            className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-300"
+            onClick={() => setMobileOpen(false)}
+          >
+            <LayoutDashboard size={14} aria-hidden="true" /> לוח הבקרה
+          </Link>
+          <Link
+            to="/business/solutions/reviews"
+            className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-300"
+            onClick={() => setMobileOpen(false)}
+          >
+            <ShieldCheck size={14} aria-hidden="true" /> אימות ביקורות
           </Link>
           <Link
             to="/partners/prestige-badges"
-            className="flex items-center gap-2 text-sm py-2 text-zinc-300"
+            className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-300"
             onClick={() => setMobileOpen(false)}
           >
-            <LayoutDashboard size={14} /> ווידג׳טים ותגי אמון
+            ווידג׳טים ותגי אמון
           </Link>
           {canSeePricing && (
             <Link
               to="/business/pricing"
-              className="block text-sm py-2 text-primary font-medium"
+              className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-primary font-medium"
               onClick={() => setMobileOpen(false)}
             >
-              מחירים
+              <Tag size={14} aria-hidden="true" /> מחירים
             </Link>
           )}
-          <div className="border-t border-zinc-700/60 my-2" />
-          {!user && (
-            <Link
-              to="/business/login"
-              className="block text-sm py-2 text-primary"
-              onClick={() => setMobileOpen(false)}
-            >
-              התחברו / הרשמו
-            </Link>
-          )}
-          {user && (
-            <>
+          <div className="border-t border-zinc-700/60 pt-1 mt-1">
+            {!user && (
               <Link
-                to="/business/dashboard"
-                className="block text-sm py-2 text-zinc-300"
+                to="/business/login"
+                className="block text-sm py-3 min-h-[44px] flex items-center text-primary"
                 onClick={() => setMobileOpen(false)}
               >
-                לוח בקרה
+                התחברו / הרשמו
               </Link>
-              <button
-                onClick={() => { handleSwitchToUser(); setMobileOpen(false); }}
-                className="flex items-center gap-2 text-sm py-2 text-zinc-300 w-full"
-              >
-                <ArrowLeftRight size={14} />
-                מצב אישי
-              </button>
-              <button
-                onClick={() => { handleSignOut(); setMobileOpen(false); }}
-                className="block text-sm py-2 text-destructive w-full text-right"
-              >
-                התנתקו
-              </button>
-            </>
-          )}
+            )}
+            {user && (
+              <>
+                <button
+                  onClick={() => { handleSwitchToUser(); setMobileOpen(false); }}
+                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-300 w-full"
+                >
+                  <ArrowLeftRight size={14} aria-hidden="true" />
+                  מצב אישי
+                </button>
+                <button
+                  onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-destructive w-full"
+                >
+                  <LogOut size={14} aria-hidden="true" />
+                  התנתקו
+                </button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </nav>
