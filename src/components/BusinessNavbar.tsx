@@ -10,7 +10,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, LayoutDashboard, ShieldCheck,
-  ArrowLeftRight, Home, Tag,
+  ArrowLeftRight, Home, Tag, ChevronDown, BarChart3, Package,
 } from "lucide-react";
 import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
@@ -25,8 +25,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+/** Sub-items for the "מוצר" dropdown — always visible to all visitors */
+const PRODUCT_ITEMS = [
+  { to: "/business/solutions/reviews",  icon: ShieldCheck,  label: "ביקורות מאומתות" },
+  { to: "/partners/prestige-badges",    icon: Tag,          label: "ווידג׳טים"         },
+  { to: "/business/solutions/analytics",icon: BarChart3,    label: "אנליטיקס"          },
+  { to: "/business/pricing",            icon: Package,      label: "מחירים"            },
+] as const;
+
 const BusinessNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [productOpen, setProductOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { switchToUserMode } = useAppMode();
   const navigate = useNavigate();
@@ -78,30 +87,57 @@ const BusinessNavbar = () => {
         {/* ── Center nav ────────────────────────────────────────────────────── */}
         <div className="hidden lg:flex items-center gap-5">
 
-          {/* Always visible */}
+          {/* דף הבית — always visible */}
           <Link to="/business" className={navLink(location.pathname === "/business")}>
             <Home size={14} aria-hidden="true" />
             דף הבית
           </Link>
 
-          {/* Authenticated-only links */}
+          {/* לוח הבקרה — authenticated only */}
           {user && (
-            <>
-              <Link to="/business/dashboard" className={navLink(isActive("/business/dashboard"))}>
-                <LayoutDashboard size={14} aria-hidden="true" />
-                לוח הבקרה
-              </Link>
-              <Link to="/business/solutions/reviews" className={navLink(isActive("/business/solutions/reviews"))}>
-                <ShieldCheck size={14} aria-hidden="true" />
-                אימות ביקורות
-              </Link>
-              <Link to="/partners/prestige-badges" className={navLink(isActive("/partners/prestige-badges"))}>
-                ווידג׳טים ותגי אמון
-              </Link>
-            </>
+            <Link to="/business/dashboard" className={navLink(isActive("/business/dashboard"))}>
+              <LayoutDashboard size={14} aria-hidden="true" />
+              לוח הבקרה
+            </Link>
           )}
 
-          {/* מחירון — always visible */}
+          {/* מוצר dropdown — always visible */}
+          <DropdownMenu open={productOpen} onOpenChange={setProductOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={`text-sm transition-colors flex items-center gap-1 focus-visible:outline-none relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
+                  PRODUCT_ITEMS.some(i => isActive(i.to))
+                    ? "text-white font-semibold after:bg-white"
+                    : "text-zinc-300 hover:text-white after:bg-transparent"
+                }`}
+                aria-haspopup="menu"
+                aria-expanded={productOpen}
+              >
+                מוצר
+                <ChevronDown
+                  size={13}
+                  className={`transition-transform duration-200 ${productOpen ? "rotate-180" : ""}`}
+                  aria-hidden="true"
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-52" style={{ direction: "rtl" }}>
+              {PRODUCT_ITEMS.map(({ to, icon: Icon, label }) => (
+                <DropdownMenuItem key={to} asChild>
+                  <Link
+                    to={to}
+                    className={`flex items-center gap-2 w-full ${isActive(to) ? "font-semibold text-primary" : ""}`}
+                    onClick={() => setProductOpen(false)}
+                  >
+                    <Icon size={15} className={isActive(to) ? "text-primary" : "text-muted-foreground"} aria-hidden="true" />
+                    {label}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* מחירון — always visible, highlighted */}
           <Link
             to="/business/pricing"
             className={`text-sm font-semibold transition-colors flex items-center gap-1.5 relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
@@ -194,7 +230,7 @@ const BusinessNavbar = () => {
       {mobileOpen && (
         <div className="lg:hidden border-t border-zinc-700/60 bg-zinc-900 p-4 space-y-1">
 
-          {/* Always visible */}
+          {/* דף הבית — always visible */}
           <Link
             to="/business"
             className={`flex items-center gap-2 text-sm py-3 min-h-[44px] font-medium border-r-2 pr-2 transition-colors ${location.pathname === "/business" ? "text-white border-white" : "text-zinc-300 border-transparent hover:text-white"}`}
@@ -203,32 +239,31 @@ const BusinessNavbar = () => {
             <Home size={14} aria-hidden="true" /> דף הבית
           </Link>
 
-          {/* Authenticated-only links */}
+          {/* לוח הבקרה — authenticated only */}
           {user && (
-            <>
-              <Link
-                to="/business/dashboard"
-                className={`flex items-center gap-2 text-sm py-3 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive("/business/dashboard") ? "text-white border-white font-medium" : "text-zinc-300 border-transparent hover:text-white"}`}
-                onClick={() => setMobileOpen(false)}
-              >
-                <LayoutDashboard size={14} aria-hidden="true" /> לוח הבקרה
-              </Link>
-              <Link
-                to="/business/solutions/reviews"
-                className={`flex items-center gap-2 text-sm py-3 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive("/business/solutions/reviews") ? "text-white border-white font-medium" : "text-zinc-300 border-transparent hover:text-white"}`}
-                onClick={() => setMobileOpen(false)}
-              >
-                <ShieldCheck size={14} aria-hidden="true" /> אימות ביקורות
-              </Link>
-              <Link
-                to="/partners/prestige-badges"
-                className={`flex items-center gap-2 text-sm py-3 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive("/partners/prestige-badges") ? "text-white border-white font-medium" : "text-zinc-300 border-transparent hover:text-white"}`}
-                onClick={() => setMobileOpen(false)}
-              >
-                ווידג׳טים ותגי אמון
-              </Link>
-            </>
+            <Link
+              to="/business/dashboard"
+              className={`flex items-center gap-2 text-sm py-3 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive("/business/dashboard") ? "text-white border-white font-medium" : "text-zinc-300 border-transparent hover:text-white"}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <LayoutDashboard size={14} aria-hidden="true" /> לוח הבקרה
+            </Link>
           )}
+
+          {/* מוצר section — always visible */}
+          <div className="border-t border-zinc-800/80 pt-2 mt-1">
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-0 mb-1 pr-2">מוצר</p>
+            {PRODUCT_ITEMS.map(({ to, icon: Icon, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`flex items-center gap-2 text-sm py-2.5 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive(to) ? "text-white border-white font-medium" : "text-zinc-400 border-transparent hover:text-white"}`}
+                onClick={() => setMobileOpen(false)}
+              >
+                <Icon size={14} aria-hidden="true" /> {label}
+              </Link>
+            ))}
+          </div>
 
           {/* מחירון — always visible */}
           <Link
