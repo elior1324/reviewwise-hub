@@ -10,7 +10,7 @@ import TestimonialCarousel from "@/components/TestimonialCarousel";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink } from "lucide-react";
+import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info } from "lucide-react";
 import { PrestigeBadge, computeEligibleBadges, buildBadgeEmbedCode, BADGE_CONFIG } from "@/components/PrestigeBadge";
 import { useState, useEffect, useMemo } from "react";
 import { generateReviewSummary, FREELANCER_CATEGORIES, SAAS_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
@@ -25,6 +25,11 @@ const BusinessProfile = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [dbBusinessId, setDbBusinessId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [collabActive, setCollabActive] = useState(false);
+  const [collabMethod, setCollabMethod] = useState<string | null>(null);
+  const [collabCoupon, setCollabCoupon] = useState<string | null>(null);
+  const [couponRevealed, setCouponRevealed] = useState(false);
+  const [collabCopied, setCollabCopied] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -39,7 +44,7 @@ const BusinessProfile = () => {
       //   Rating and reviewCount are computed below from the reviews we fetch.
       const { data: bizData } = await supabase
         .from("businesses")
-        .select("id, slug, name, website, email, phone, category, description, verified")
+        .select("id, slug, name, website, email, phone, category, description, verified, collaboration_active, collaboration_method, collaboration_coupon")
         .eq("slug", slug)
         .maybeSingle();
 
@@ -49,6 +54,11 @@ const BusinessProfile = () => {
       }
 
       setDbBusinessId(bizData.id);
+
+      // Collaboration program state
+      setCollabActive(bizData.collaboration_active || false);
+      setCollabMethod(bizData.collaboration_method || null);
+      setCollabCoupon(bizData.collaboration_coupon || null);
 
       // ── 2. Fetch courses ─────────────────────────────────────────────────────
       // courses columns: id, business_id, course_name, description, price,
@@ -185,6 +195,27 @@ const BusinessProfile = () => {
   const filteredReviews = filterRating ? reviews.filter(r => r.rating === filterRating) : reviews;
   const summary = generateReviewSummary(reviews);
 
+  // Track referral click and redirect
+  const handleCollabAccess = async () => {
+    if (!dbBusinessId || !slug) return;
+    // Record click
+    await supabase.from("referral_clicks").insert({
+      business_id: dbBusinessId,
+      business_slug: slug,
+      referrer: document.referrer || null,
+    });
+    // Navigate to /go/:slug for the redirect page
+    window.open(`/go/${slug}`, "_blank", "noopener,noreferrer");
+  };
+
+  const handleCopyCoupon = () => {
+    if (collabCoupon) {
+      navigator.clipboard.writeText(collabCoupon);
+      setCollabCopied(true);
+      setTimeout(() => setCollabCopied(false), 2500);
+    }
+  };
+
   // ── Hybrid review tiers ────────────────────────────────────────────────────
   // Tier 1: purchase-verified reviews → count toward trust score, shown first
   // Tier 2: open community reviews    → no purchase proof, NOT in trust score
@@ -320,6 +351,82 @@ const BusinessProfile = () => {
             <span className="text-muted-foreground/60">ציון האמון מחושב מביקורות מאומתות בלבד</span>
           </div>
         </div>
+
+        {/* ── Collaboration: Exclusive Offer ──────────────────────────────── */}
+        {collabActive && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="mb-8 rounded-xl border border-primary/30 bg-gradient-to-l from-primary/8 via-background to-background overflow-hidden"
+          >
+            <div className="p-5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                {/* Icon + text */}
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Handshake size={22} className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                    <p className="font-display font-bold text-base text-foreground">
+                      הצעה בלעדית לגולשי ReviewHub
+                    </p>
+                    <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wide">
+                      בלעדי
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    קבלו <strong className="text-foreground">10% הנחה</strong> כשניגשים לעסק זה דרך ReviewHub.
+                    {(collabMethod === "coupon" || collabMethod === "both") && !couponRevealed && (
+                      <button
+                        onClick={() => setCouponRevealed(true)}
+                        className="text-primary hover:underline mr-1 text-sm"
+                      >
+                        הצגת קוד קופון
+                      </button>
+                    )}
+                  </p>
+
+                  {/* Coupon reveal */}
+                  {(collabMethod === "coupon" || collabMethod === "both") && couponRevealed && collabCoupon && (
+                    <div className="mt-2 inline-flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-1.5">
+                      <Tag size={13} className="text-primary" />
+                      <code className="font-mono font-bold text-primary text-base tracking-widest">
+                        {collabCoupon}
+                      </code>
+                      <button
+                        onClick={handleCopyCoupon}
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                        title="העתקת קוד"
+                      >
+                        {collabCopied ? <CheckCheck size={14} className="text-primary" /> : <Copy size={14} />}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* CTA button */}
+                {(collabMethod === "link" || collabMethod === "both") && (
+                  <Button
+                    onClick={handleCollabAccess}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shrink-0"
+                  >
+                    <Link2 size={15} /> גישה עם הנחה
+                  </Button>
+                )}
+              </div>
+
+              {/* Disclosure */}
+              <div className="mt-3 flex items-start gap-1.5 text-[11px] text-muted-foreground/70">
+                <Info size={11} className="mt-0.5 shrink-0" />
+                <span>
+                  ReviewHub עשויה לקבל עמלת הפניה אם תרכשו דרך קישור זה. ההנחה מסופקת
+                  ישירות על ידי העסק ואינה מוענקת על ידי ReviewHub.
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* ── Prestige Badges ─────────────────────────────────────────────── */}
         <EarnedBadgesSection

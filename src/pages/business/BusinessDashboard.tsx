@@ -14,10 +14,13 @@ import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
-  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2, Link2
+  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2, Link2, Handshake,
+  ExternalLink, Tag, BarChart2
 } from "lucide-react";
 import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
 import IntegrationsTab from "@/components/IntegrationsTab";
+import CollaborationPromoCard from "@/components/CollaborationPromoCard";
+import { type CollabConfig } from "@/components/CollaborationSetupModal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { type Review, type Course } from "@/data/mockData";
 import { useState, useEffect } from "react";
@@ -115,6 +118,11 @@ const BusinessDashboard = () => {
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [upgradeModalTier, setUpgradeModalTier] = useState<"pro" | "enterprise">("pro");
   const [upgradeModalFeature, setUpgradeModalFeature] = useState<string | undefined>();
+
+  // Collaboration program state
+  const [collabConfig, setCollabConfig] = useState<CollabConfig>({ active: false, method: null, coupon: null });
+  const [referralClickCount, setReferralClickCount] = useState(0);
+  const [referralClicksData, setReferralClicksData] = useState<{ date: string; clicks: number }[]>([]);
 
   // Determine tier — use DB tier for real users, demo tier for demo mode
   const currentTier: SubscriptionTier = !isDemo ? dbTier : demoTier;
@@ -286,6 +294,39 @@ const BusinessDashboard = () => {
         .order("created_at", { ascending: false })
         .limit(10);
       if (aiReportsData) setRealAiReports(aiReportsData);
+
+      // Fetch collaboration config from business row
+      setCollabConfig({
+        active: biz.collaboration_active || false,
+        method: biz.collaboration_method || null,
+        coupon: biz.collaboration_coupon || null,
+      });
+
+      // Fetch referral clicks count
+      const { count: rclickCount } = await supabase
+        .from("referral_clicks")
+        .select("id", { count: "exact", head: true })
+        .eq("business_id", biz.id);
+      setReferralClickCount(rclickCount || 0);
+
+      // Fetch referral clicks by day (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const { data: rclickRows } = await supabase
+        .from("referral_clicks")
+        .select("created_at")
+        .eq("business_id", biz.id)
+        .gte("created_at", thirtyDaysAgo.toISOString())
+        .order("created_at", { ascending: true });
+
+      if (rclickRows && rclickRows.length > 0) {
+        const byDay: Record<string, number> = {};
+        rclickRows.forEach((row: any) => {
+          const day = new Date(row.created_at).toLocaleDateString("he-IL");
+          byDay[day] = (byDay[day] || 0) + 1;
+        });
+        setReferralClicksData(Object.entries(byDay).map(([date, clicks]) => ({ date, clicks })));
+      }
 
       setLoadingData(false);
     };
@@ -486,6 +527,17 @@ const BusinessDashboard = () => {
           </div>
         )}
 
+        {/* ── Collaboration Program Card (real users only) ──────────── */}
+        {!isDemo && businessId && (
+          <CollaborationPromoCard
+            businessId={businessId}
+            businessSlug={businessSlug}
+            config={collabConfig}
+            onConfigChange={setCollabConfig}
+            referralClickCount={referralClickCount}
+          />
+        )}
+
         {/* Demo Tier Selector */}
         {isDemo && (
           <div className="mb-6 rounded-xl border border-border/50 bg-muted/30 p-4">
@@ -582,6 +634,12 @@ const BusinessDashboard = () => {
                     <Bell size={13} className="ml-1" /> התראות
                     {displayNotifications.length > 0 && (
                       <span className="mr-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full leading-none">{displayNotifications.length}</span>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="collaboration" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                    <Handshake size={13} className="ml-1" /> שיתוף פעולה
+                    {collabConfig.active && !isDemo && (
+                      <span className="mr-1 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                     )}
                   </TabsTrigger>
                 </TabsList>
@@ -1169,6 +1227,185 @@ const BusinessDashboard = () => {
               isDemo={isDemo}
               onUpgrade={() => handleUpgradeWithModal("enterprise", "אינטגרציות")}
             />
+          </TabsContent>
+
+          {/* ── Collaboration Program ───────────────────────────────────── */}
+          <TabsContent value="collaboration">
+            <div className="space-y-6">
+              {/* Status header */}
+              <Card className="shadow-card bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Handshake size={18} className="text-primary" /> תוכנית שיתוף הפעולה
+                    {collabConfig.active && !isDemo && (
+                      <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 rounded-full mr-auto">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" /> פעיל
+                      </span>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isDemo ? (
+                    <div className="text-center py-6 space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                        <Handshake size={24} className="text-primary" />
+                      </div>
+                      <p className="font-display font-semibold text-foreground">תוכנית שיתוף הפעולה</p>
+                      <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                        הפעילו את תוכנית שיתוף הפעולה ואפשרו ל-ReviewHub לשלוח לקוחות חדשים לעסק שלכם.
+                        הלקוח מקבל 10% הנחה — Review Hub מרוויחה עמלת שיווק — אתם מקבלים לקוח.
+                      </p>
+                      <Button onClick={() => navigate("/business/signup")} className="gap-2">
+                        הירשמו להפעלת התוכנית
+                      </Button>
+                    </div>
+                  ) : !collabConfig.active ? (
+                    <div className="text-center py-6 space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        תוכנית שיתוף הפעולה אינה פעילה. הפעילו אותה מכרטיס "שיתוף פעולה" בראש הדף.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Config summary */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="rounded-lg border border-border/40 bg-muted/20 p-4 text-center">
+                          <p className="text-xs text-muted-foreground mb-1">שיטה</p>
+                          <p className="font-semibold text-foreground text-sm capitalize">
+                            {collabConfig.method === "link" && "קישור הפניה"}
+                            {collabConfig.method === "coupon" && "קופון הנחה"}
+                            {collabConfig.method === "both" && "קישור + קופון"}
+                          </p>
+                        </div>
+                        {(collabConfig.method === "coupon" || collabConfig.method === "both") && (
+                          <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-center">
+                            <p className="text-xs text-muted-foreground mb-1">קוד קופון</p>
+                            <p className="font-mono font-bold text-primary text-base tracking-widest">
+                              {collabConfig.coupon || "REVIEWHUB10"}
+                            </p>
+                          </div>
+                        )}
+                        <div className="rounded-lg border border-border/40 bg-muted/20 p-4 text-center">
+                          <p className="text-xs text-muted-foreground mb-1">קליקי הפניה (סה"כ)</p>
+                          <p className="font-bold text-2xl text-foreground">{referralClickCount}</p>
+                        </div>
+                      </div>
+
+                      {/* Referral link */}
+                      {(collabConfig.method === "link" || collabConfig.method === "both") && (
+                        <div className="rounded-lg border border-border/40 bg-muted/10 p-4">
+                          <p className="text-xs font-semibold text-muted-foreground mb-2">קישור הפניה שלכם</p>
+                          <div className="flex gap-2">
+                            <code className="flex-1 text-xs font-mono bg-muted/40 border border-border/40 px-3 py-2 rounded-lg truncate">
+                              https://reviewhub.co.il/go/{businessSlug}
+                            </code>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => { navigator.clipboard.writeText(`https://reviewhub.co.il/go/${businessSlug}`); }}
+                            >
+                              העתקה
+                            </Button>
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={`/biz/${businessSlug}`} target="_blank" rel="noopener noreferrer" className="gap-1">
+                                <ExternalLink size={13} />
+                              </a>
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Analytics */}
+              {!isDemo && collabConfig.active && (
+                <Card className="shadow-card bg-card">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <BarChart2 size={18} className="text-primary" /> אנליטיקת שיתוף פעולה
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      {[
+                        { label: "קליקי הפניה", value: String(referralClickCount), icon: MousePointerClick },
+                        { label: "30 ימים אחרונים", value: String(referralClicksData.reduce((s, d) => s + d.clicks, 0)), icon: TrendingUp },
+                        { label: "הנחה לגולש", value: "10%", icon: Tag },
+                        { label: "מקור תנועה", value: "ReviewHub", icon: Users },
+                      ].map(({ label, value, icon: Icon }) => (
+                        <div key={label} className="rounded-lg border border-border/40 bg-muted/20 p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Icon size={15} className="text-primary" />
+                            <p className="text-xs text-muted-foreground">{label}</p>
+                          </div>
+                          <p className="font-bold text-xl text-foreground">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Clicks timeline */}
+                    {referralClicksData.length > 0 ? (
+                      <div>
+                        <p className="text-xs font-semibold text-muted-foreground mb-3">קליקים לפי תאריך (30 ימים אחרונים)</p>
+                        <div className="space-y-1.5">
+                          {referralClicksData.slice(-10).map(({ date, clicks }) => (
+                            <div key={date} className="flex items-center gap-3">
+                              <span className="text-xs text-muted-foreground w-20 shrink-0">{date}</span>
+                              <div className="flex-1 bg-muted/30 rounded-full h-2 overflow-hidden">
+                                <div
+                                  className="bg-primary h-2 rounded-full transition-all duration-500"
+                                  style={{
+                                    width: `${Math.min(100, (clicks / Math.max(...referralClicksData.map(d => d.clicks), 1)) * 100)}%`,
+                                  }}
+                                />
+                              </div>
+                              <span className="text-xs font-semibold text-foreground w-6 text-left">{clicks}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        עדיין אין נתוני קליקים. הקישור שלכם פעיל — קליקים ירשמו כאן אוטומטית.
+                      </p>
+                    )}
+
+                    <div className="mt-4 pt-4 border-t border-border/30 text-xs text-muted-foreground">
+                      גילוי נאות: ReviewHub מציגה לגולשים גילוי נאות ברור לפני כל הפניה.
+                      הנתונים מעודכנים בזמן אמת.
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* How it works */}
+              <Card className="shadow-card bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base">איך התוכנית עובדת</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    {[
+                      { step: "1", title: "ReviewHub מפנה לקוחות", desc: "גולשים שמוצא אתר ReviewHub את הפרופיל שלכם רואים כפתור 'גישה עם הנחה'." },
+                      { step: "2", title: "הלקוח מקבל 10% הנחה", desc: "הלקוח מגיע לאתרכם דרך הקישור או עם קוד הקופון ומקבל הנחה." },
+                      { step: "3", title: "ReviewHub מרוויחה עמלה", desc: "ה-10% פועלים כעמלת שיווק עבור ReviewHub. אתם לא משלמים דבר מראש." },
+                    ].map(({ step, title, desc }) => (
+                      <div key={step} className="flex gap-3">
+                        <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          {step}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{title}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
