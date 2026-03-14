@@ -15,7 +15,7 @@ import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
   Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2, Link2, Handshake,
-  ExternalLink, Tag, BarChart2, Shield, CheckCircle2, XCircle, Clock
+  ExternalLink, Tag, BarChart2, Shield, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp
 } from "lucide-react";
 import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
 import IntegrationsTab from "@/components/IntegrationsTab";
@@ -199,6 +199,12 @@ const BusinessDashboard = () => {
   // Compliance panel state
   const [complianceReviews, setComplianceReviews] = useState<any[]>([]);
   const [openReports, setOpenReports] = useState<any[]>([]);
+
+  // AI report period filter
+  const [aiReportPeriod, setAiReportPeriod] = useState<"daily" | "weekly" | "monthly">("weekly");
+
+  // Notification strip state
+  const [notifStripExpanded, setNotifStripExpanded] = useState(false);
 
   // Determine tier — use DB tier for real users, demo tier for demo mode
   const currentTier: SubscriptionTier = !isDemo ? dbTier : demoTier;
@@ -714,108 +720,140 @@ const BusinessDashboard = () => {
         </div>
         </TooltipProvider>
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          {/* Grouped Tab Navigation */}
-          <div className="rounded-xl border border-border/40 bg-card/50 p-3 space-y-3">
-            {/* Free tier tabs */}
-            <div>
-              <p className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider px-1 mb-1.5">כלים בסיסיים</p>
-              <div className="flex flex-wrap gap-1">
-                <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
-                  <TabsTrigger value="overview" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                    <BarChart3 size={13} className="ml-1" /> סקירה כללית
-                  </TabsTrigger>
-                  <TabsTrigger value="notifications" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                    <Bell size={13} className="ml-1" /> התראות
-                    {displayNotifications.length > 0 && (
-                      <span className="mr-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full leading-none">{displayNotifications.length}</span>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="collaboration" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                    <Handshake size={13} className="ml-1" /> שיתוף פעולה
-                    {collabConfig.active && !isDemo && (
-                      <span className="mr-1 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="compliance" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                    <Shield size={13} className="ml-1" /> ציות ואימות
-                    {!isDemo && complianceReviews.filter(r => r.status === "flagged" || r.status === "under_review").length > 0 && (
-                      <span className="mr-1.5 bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">
-                        {complianceReviews.filter(r => r.status === "flagged" || r.status === "under_review").length}
-                      </span>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="google-reviews" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                    <svg width={13} height={13} viewBox="0 0 24 24" className="ml-1">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                    ביקורות Google
-                  </TabsTrigger>
-                </TabsList>
+        {/* ── Persistent Notifications Strip ─────────────────────────────────── */}
+        {displayNotifications.length > 0 && (
+          <div className="mb-4 rounded-xl border border-border/40 bg-card/60 overflow-hidden">
+            <button
+              onClick={() => setNotifStripExpanded(e => !e)}
+              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors"
+            >
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Bell size={14} className="text-primary shrink-0" />
+                <span className="text-xs font-semibold text-foreground">התראות</span>
+                <span className="bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold leading-none">
+                  {displayNotifications.length}
+                </span>
+                {!notifStripExpanded && (
+                  <span className="text-xs text-muted-foreground truncate mr-2">
+                    {displayNotifications[0].text}
+                  </span>
+                )}
               </div>
-            </div>
+              {notifStripExpanded ? <ChevronUp size={14} className="text-muted-foreground shrink-0" /> : <ChevronDown size={14} className="text-muted-foreground shrink-0" />}
+            </button>
+            {notifStripExpanded && (
+              <div className="border-t border-border/30 divide-y divide-border/20">
+                {displayNotifications.map((n) => (
+                  <div key={n.id} className="flex items-start gap-3 px-4 py-2.5">
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
+                      n.type === "review" ? "bg-primary/10" :
+                      n.type === "conversion" ? "bg-accent/10" :
+                      n.type === "alert" ? "bg-destructive/10" :
+                      "bg-secondary"
+                    }`}>
+                      {n.type === "review" && <MessageSquare size={12} className="text-primary" />}
+                      {n.type === "conversion" && <DollarSign size={12} className="text-accent" />}
+                      {n.type === "alert" && <AlertTriangle size={12} className="text-destructive" />}
+                      {n.type === "report" && <Brain size={12} className="text-muted-foreground" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-foreground/80">{n.text}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{n.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-            {/* Pro tier tabs */}
+        <Tabs defaultValue="analytics-overview" className="space-y-6">
+          {/* ── 4-Section Tab Navigation ────────────────────────────────────────── */}
+          <div className="rounded-xl border border-border/40 bg-card/50 p-3 space-y-3">
+
+            {/* Section 1: Analytics */}
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
-                <Sparkles size={10} className="text-accent" />
-                <span className="text-accent/80">מקצועי ומעלה</span>
+              <p className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
+                <BarChart3 size={10} /> אנליטיקס
               </p>
               <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
-                <TabsTrigger value="invoices" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
-                  <FileText size={13} className="ml-1" /> קבלות ואימות
-                  {isFree && <ProBadge />}
+                <TabsTrigger value="analytics-overview" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <BarChart3 size={13} className="ml-1" /> סקירה כללית
                 </TabsTrigger>
-                <TabsTrigger value="clicks" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
+                <TabsTrigger value="analytics-clicks" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <MousePointerClick size={13} className="ml-1" /> קליקים והמרות
                   {isFree && <ProBadge />}
                 </TabsTrigger>
-                <TabsTrigger value="testimonials" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
-                  <Video size={13} className="ml-1" /> סרטוני לקוחות
-                  {isFree && <ProBadge />}
-                </TabsTrigger>
-                <TabsTrigger value="widget" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
-                  <Code2 size={13} className="ml-1" /> ווידג׳ט להטמעה
-                </TabsTrigger>
               </TabsList>
             </div>
 
-            {/* Enterprise tier tabs */}
+            {/* Section 2: AI Management */}
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
-                <Crown size={10} className="text-primary" />
-                <span className="text-primary/80">אנטרפרייז בלבד</span>
+                <Brain size={10} className="text-primary" />
+                <span className="text-primary/80">ניהול AI</span>
               </p>
               <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
-                <TabsTrigger value="ai-report" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                  <Brain size={13} className="ml-1" /> דוח AI שבועי
-                  {!isEnterprise && <EnterpriseBadge />}
-                </TabsTrigger>
-                <TabsTrigger value="daily-ai" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                  <CalendarClock size={13} className="ml-1" /> דוחות AI יומיים
-                  {!isEnterprise && <EnterpriseBadge />}
-                </TabsTrigger>
-                <TabsTrigger value="crm" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                  <Contact size={13} className="ml-1" /> CRM ולידים
-                  {!isEnterprise && <EnterpriseBadge />}
-                </TabsTrigger>
-                <TabsTrigger value="webhooks" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                  <Webhook size={13} className="ml-1" /> Webhooks & API
-                  {!isEnterprise && <EnterpriseBadge />}
-                </TabsTrigger>
-                <TabsTrigger value="integrations" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                  <Link2 size={13} className="ml-1" /> אינטגרציות
+                <TabsTrigger value="ai-system" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <Brain size={13} className="ml-1" /> מערכת AI
                   {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
               </TabsList>
             </div>
+
+            {/* Section 3: Trust & Verification */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
+                <Shield size={10} className="text-amber-500" />
+                <span className="text-amber-600/80 dark:text-amber-400/80">אמינות ואימות</span>
+              </p>
+              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+                <TabsTrigger value="trust-compliance" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <Shield size={13} className="ml-1" /> ציות ומודרציה
+                  {!isDemo && complianceReviews.filter(r => r.status === "flagged" || r.status === "under_review").length > 0 && (
+                    <span className="mr-1.5 bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">
+                      {complianceReviews.filter(r => r.status === "flagged" || r.status === "under_review").length}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="trust-verification" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <FileText size={13} className="ml-1" /> אימות רכישה
+                  {isFree && <ProBadge />}
+                </TabsTrigger>
+                <TabsTrigger value="trust-google" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <svg width={13} height={13} viewBox="0 0 24 24" className="ml-1">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  ביקורות Google
+                </TabsTrigger>
+                <TabsTrigger value="trust-social" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <Video size={13} className="ml-1" /> הוכחה חברתית
+                  {isFree && <ProBadge />}
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* Section 4: Integrations */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
+                <Link2 size={10} className="text-accent" />
+                <span className="text-accent/80">אינטגרציות</span>
+              </p>
+              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+                <TabsTrigger value="integrations-hub" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
+                  <Link2 size={13} className="ml-1" /> מרכז אינטגרציות
+                  {!isEnterprise && <EnterpriseBadge />}
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
           </div>
 
-          {/* Overview */}
-          <TabsContent value="overview">
+          {/* Analytics Overview */}
+          <TabsContent value="analytics-overview">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 <Card className="shadow-card bg-card">
@@ -878,8 +916,8 @@ const BusinessDashboard = () => {
             </div>
           </TabsContent>
 
-          {/* Invoices & Verification */}
-          <TabsContent value="invoices">
+          {/* Purchase Verification */}
+          <TabsContent value="trust-verification">
             <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <InvoiceTemplateUploader businessId={businessId || "demo"} />
@@ -910,7 +948,7 @@ const BusinessDashboard = () => {
           </TabsContent>
 
           {/* Clicks & Conversions */}
-          <TabsContent value="clicks">
+          <TabsContent value="analytics-clicks">
             <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <TooltipProvider delayDuration={200}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -976,126 +1014,164 @@ const BusinessDashboard = () => {
             </LockedOverlay>
           </TabsContent>
 
-          {/* Notifications */}
-          <TabsContent value="notifications">
-            <Card className="shadow-card bg-card">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Bell size={18} /> התראות אחרונות
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                {displayNotifications.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4 text-center">אין התראות חדשות.</p>
-                ) : (
-                  displayNotifications.map((n) => (
-                    <div key={n.id} className="flex items-start gap-3 py-3 border-b border-border/20 last:border-0">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                        n.type === "review" ? "bg-primary/10" :
-                        n.type === "conversion" ? "bg-accent/10" :
-                        n.type === "alert" ? "bg-destructive/10" :
-                        "bg-secondary"
-                      }`}>
-                        {n.type === "review" && <MessageSquare size={14} className="text-primary" />}
-                        {n.type === "conversion" && <DollarSign size={14} className="text-accent" />}
-                        {n.type === "alert" && <AlertTriangle size={14} className="text-destructive" />}
-                        {n.type === "report" && <Brain size={14} className="text-muted-foreground" />}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm">{n.text}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{n.time}</p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="ai-report">
+          {/* AI System — unified with Daily / Weekly / Monthly period filter */}
+          <TabsContent value="ai-system">
             <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
-            <Card className="shadow-card bg-card mb-6">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Brain size={18} className="text-primary" /> דוח AI שבועי
-                  {!isDemo && businessId && (
-                    <Button size="sm" variant="outline" className="mr-auto text-xs" onClick={() => handleGenerateReport("weekly")} disabled={generatingReport}>
-                      {generatingReport ? "מייצר..." : "צור דוח חדש"}
-                    </Button>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {!isDemo && realAiReports.filter(r => r.report_type === "weekly").length > 0 ? (
-                  <div className="space-y-4">
-                    {realAiReports.filter(r => r.report_type === "weekly").map((report: any) => (
-                      <div key={report.id} className="border border-border/30 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-xs text-muted-foreground">{new Date(report.created_at).toLocaleDateString("he-IL")} | {report.period_start} — {report.period_end}</span>
-                        </div>
-                        <div className="prose prose-sm prose-invert max-w-none text-foreground/80" dir="rtl">
-                          <ReactMarkdown>{report.content}</ReactMarkdown>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : isDemo ? (
-                  <>
-                    <div>
-                      <h3 className="text-sm font-display font-semibold text-primary flex items-center gap-2 mb-3">
-                        <ArrowUpRight size={16} /> חוזקות
-                      </h3>
-                      <ul className="space-y-2">
-                        {aiReport.strengths.map((s, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                            {s}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-display font-semibold text-destructive flex items-center gap-2 mb-3">
-                        <ArrowDownRight size={16} /> נקודות לשיפור
-                      </h3>
-                      <ul className="space-y-2">
-                        {aiReport.weaknesses.map((w, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                            <div className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
-                            {w}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-display font-semibold text-accent flex items-center gap-2 mb-3">
-                        <Brain size={16} /> המלצות AI
-                      </h3>
-                      <ul className="space-y-2">
-                        {aiReport.recommendations.map((r, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                            <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
-                            {r}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין דוחות. לחצו "צור דוח חדש" כדי לייצר את הדוח הראשון.</p>
-                )}
-                <div className="pt-4 border-t border-border/30">
-                  <p className="text-xs text-muted-foreground">
-                    דוח זה נוצר על ידי AI על בסיס נתוני הביקורות, אנליטיקת הקליקים ומגמות ההמרה שלכם.
-                  </p>
+            <div className="space-y-4">
+              {/* Period filter header */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <Brain size={18} className="text-primary" />
+                  <h2 className="font-display font-semibold text-base">מערכת AI</h2>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-center gap-1 rounded-lg border border-border/40 bg-muted/30 p-1">
+                  {(["daily", "weekly", "monthly"] as const).map((period) => (
+                    <button
+                      key={period}
+                      onClick={() => setAiReportPeriod(period)}
+                      className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
+                        aiReportPeriod === period
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {period === "daily" ? "יומי" : period === "weekly" ? "שבועי" : "חודשי"}
+                    </button>
+                  ))}
+                </div>
+                {!isDemo && businessId && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={() => handleGenerateReport(aiReportPeriod === "daily" ? "daily" : "weekly")}
+                    disabled={generatingReport}
+                  >
+                    {generatingReport ? "מייצר..." : "צור דוח"}
+                  </Button>
+                )}
+              </div>
+
+              <Card className="shadow-card bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    {aiReportPeriod === "daily"
+                      ? <><CalendarClock size={16} className="text-primary" /> דוחות יומיים</>
+                      : aiReportPeriod === "weekly"
+                      ? <><Brain size={16} className="text-primary" /> דוח שבועי</>
+                      : <><BarChart2 size={16} className="text-primary" /> סיכום חודשי</>
+                    }
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {aiReportPeriod === "daily" && (
+                    <>
+                      <p className="text-sm text-muted-foreground">
+                        קבלו כל בוקר דוח AI מפורט עם ניתוח הביצועים של אתמול, שינויים במגמות, וצעדים מומלצים.
+                      </p>
+                      <div className="space-y-3">
+                        {(() => {
+                          const dailyReports = isDemo ? [
+                            { id: "d1", created_at: "2026-03-08", content: "3 ביקורות חדשות, 2 המרות, עלייה של 5% בדירוג" },
+                            { id: "d2", created_at: "2026-03-07", content: "ביקורת שלילית זוהתה, 4 קליקים חדשים" },
+                            { id: "d3", created_at: "2026-03-06", content: "יום שיא — 8 המרות, הכנסות של ₪19,920" },
+                          ] : realAiReports.filter(r => r.report_type === "daily");
+                          if (dailyReports.length === 0) return <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין דוחות יומיים. לחצו "צור דוח" כדי להתחיל.</p>;
+                          return dailyReports.map((report: any) => (
+                            <div key={report.id} className="border border-border/20 rounded-lg p-4">
+                              <p className="text-xs text-muted-foreground mb-2">{new Date(report.created_at).toLocaleDateString("he-IL")}</p>
+                              {isDemo ? (
+                                <p className="text-sm text-foreground/80">{report.content}</p>
+                              ) : (
+                                <div className="prose prose-sm prose-invert max-w-none text-foreground/80">
+                                  <ReactMarkdown>{report.content}</ReactMarkdown>
+                                </div>
+                              )}
+                            </div>
+                          ));
+                        })()}
+                      </div>
+                      <p className="text-xs text-muted-foreground pt-2 border-t border-border/30">
+                        הדוחות נשלחים גם במייל כל בוקר בשעה 08:00.
+                      </p>
+                    </>
+                  )}
+
+                  {(aiReportPeriod === "weekly" || aiReportPeriod === "monthly") && (
+                    <>
+                      {!isDemo && realAiReports.filter(r => r.report_type === "weekly").length > 0 ? (
+                        <div className="space-y-4">
+                          {realAiReports.filter(r => r.report_type === "weekly").map((report: any) => (
+                            <div key={report.id} className="border border-border/30 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <span className="text-xs text-muted-foreground">{new Date(report.created_at).toLocaleDateString("he-IL")} | {report.period_start} — {report.period_end}</span>
+                              </div>
+                              <div className="prose prose-sm prose-invert max-w-none text-foreground/80" dir="rtl">
+                                <ReactMarkdown>{report.content}</ReactMarkdown>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : isDemo ? (
+                        <div className="space-y-6">
+                          <div>
+                            <h3 className="text-sm font-display font-semibold text-primary flex items-center gap-2 mb-3">
+                              <ArrowUpRight size={16} /> חוזקות
+                            </h3>
+                            <ul className="space-y-2">
+                              {aiReport.strengths.map((s, i) => (
+                                <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                                  {s}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-display font-semibold text-destructive flex items-center gap-2 mb-3">
+                              <ArrowDownRight size={16} /> נקודות לשיפור
+                            </h3>
+                            <ul className="space-y-2">
+                              {aiReport.weaknesses.map((w, i) => (
+                                <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
+                                  {w}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-display font-semibold text-accent flex items-center gap-2 mb-3">
+                              <Brain size={16} /> המלצות AI
+                            </h3>
+                            <ul className="space-y-2">
+                              {aiReport.recommendations.map((r, i) => (
+                                <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
+                                  {r}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין דוחות. לחצו "צור דוח" כדי לייצר את הדוח הראשון.</p>
+                      )}
+                      <div className="pt-4 border-t border-border/30">
+                        <p className="text-xs text-muted-foreground">
+                          דוח זה נוצר על ידי AI על בסיס נתוני הביקורות, אנליטיקת הקליקים ומגמות ההמרה שלכם.
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
             </LockedOverlay>
           </TabsContent>
 
-          {/* Testimonials Tab */}
-          <TabsContent value="testimonials">
+          {/* Social Proof */}
+          <TabsContent value="trust-social">
             <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
             <div className="max-w-2xl">
               <p className="text-muted-foreground text-sm mb-4">
@@ -1108,420 +1184,282 @@ const BusinessDashboard = () => {
             </LockedOverlay>
           </TabsContent>
 
-          {/* ===== PREMIUM-ONLY TABS ===== */}
-
-          {/* CRM & Leads */}
-          <TabsContent value="crm">
+          {/* ── Integrations Hub — CRM + Webhooks + Widget + Integrations + Collaboration ── */}
+          <TabsContent value="integrations-hub">
             <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="shadow-card bg-card">
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Contact size={18} className="text-primary" /> ניהול לידים
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {(() => {
-                      const leadsToShow = isDemo ? [
-                        { id: "d1", customer_name: "יוסי כהן", customer_email: "yossi@gmail.com", source: "positive_review", status: "new", created_at: new Date().toISOString() },
-                        { id: "d2", customer_name: "מיכל לוי", customer_email: "michal@company.co.il", source: "positive_review", status: "new", created_at: new Date(Date.now() - 86400000).toISOString() },
-                        { id: "d3", customer_name: "דני אברהם", customer_email: "dani@startup.io", source: "positive_review", status: "contacted", created_at: new Date(Date.now() - 3 * 86400000).toISOString() },
-                      ] : realLeads;
+            <div className="space-y-6">
 
-                      if (leadsToShow.length === 0) return <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין לידים. לידים נוצרים אוטומטית מביקורות חיוביות (4-5 כוכבים).</p>;
-
-                      const statusMap: Record<string, { label: string; cls: string }> = {
-                        new: { label: "חדש", cls: "bg-accent/10 text-accent" },
-                        contacted: { label: "בטיפול", cls: "bg-secondary text-muted-foreground" },
-                        converted: { label: "הומר", cls: "bg-primary/10 text-primary" },
-                      };
-
-                      return leadsToShow.map((lead: any) => (
-                        <div key={lead.id} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
-                          <div>
-                            <p className="text-sm font-medium">{lead.customer_name || "אנונימי"}</p>
-                            <p className="text-xs text-muted-foreground">{lead.customer_email || lead.source}</p>
+              {/* ─── CRM & Leads ─────────────────────────────────────── */}
+              <div>
+                <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2 mb-3">
+                  <Contact size={15} className="text-primary" /> CRM ולידים
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <Card className="shadow-card bg-card">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Contact size={15} className="text-primary" /> ניהול לידים
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {(() => {
+                        const leadsToShow = isDemo ? [
+                          { id: "d1", customer_name: "יוסי כהן", customer_email: "yossi@gmail.com", source: "positive_review", status: "new", created_at: new Date().toISOString() },
+                          { id: "d2", customer_name: "מיכל לוי", customer_email: "michal@company.co.il", source: "positive_review", status: "new", created_at: new Date(Date.now() - 86400000).toISOString() },
+                          { id: "d3", customer_name: "דני אברהם", customer_email: "dani@startup.io", source: "positive_review", status: "contacted", created_at: new Date(Date.now() - 3 * 86400000).toISOString() },
+                        ] : realLeads;
+                        if (leadsToShow.length === 0) return <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין לידים.</p>;
+                        const statusMap: Record<string, { label: string; cls: string }> = {
+                          new: { label: "חדש", cls: "bg-accent/10 text-accent" },
+                          contacted: { label: "בטיפול", cls: "bg-secondary text-muted-foreground" },
+                          converted: { label: "הומר", cls: "bg-primary/10 text-primary" },
+                        };
+                        return leadsToShow.map((lead: any) => (
+                          <div key={lead.id} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
+                            <div>
+                              <p className="text-sm font-medium">{lead.customer_name || "אנונימי"}</p>
+                              <p className="text-xs text-muted-foreground">{lead.customer_email || lead.source}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusMap[lead.status]?.cls || "bg-secondary text-muted-foreground"}`}>
+                                {statusMap[lead.status]?.label || lead.status}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground">{new Date(lead.created_at).toLocaleDateString("he-IL")}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusMap[lead.status]?.cls || "bg-secondary text-muted-foreground"}`}>
-                              {statusMap[lead.status]?.label || lead.status}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground">{new Date(lead.created_at).toLocaleDateString("he-IL")}</span>
-                          </div>
+                        ));
+                      })()}
+                    </CardContent>
+                  </Card>
+                  <Card className="shadow-card bg-card">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Users size={15} className="text-primary" /> סטטיסטיקת לידים
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center p-3 rounded-lg bg-primary/5">
+                          <p className="font-display font-bold text-2xl text-primary">{isDemo ? "47" : realLeads.filter(l => l.status === "new").length}</p>
+                          <p className="text-xs text-muted-foreground">לידים חדשים</p>
                         </div>
-                      ));
-                    })()}
-                  </CardContent>
-                </Card>
-
-                <Card className="shadow-card bg-card">
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Users size={18} className="text-primary" /> סטטיסטיקת לידים
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-4 rounded-lg bg-primary/5">
-                        <p className="font-display font-bold text-2xl text-primary">{isDemo ? "47" : realLeads.filter(l => l.status === "new").length}</p>
-                        <p className="text-xs text-muted-foreground">לידים חדשים</p>
+                        <div className="text-center p-3 rounded-lg bg-accent/5">
+                          <p className="font-display font-bold text-2xl text-accent">{isDemo ? "23%" : (realLeads.length > 0 ? Math.round(realLeads.filter(l => l.status === "converted").length / realLeads.length * 100) : 0) + "%"}</p>
+                          <p className="text-xs text-muted-foreground">אחוז המרה</p>
+                        </div>
                       </div>
-                      <div className="text-center p-4 rounded-lg bg-accent/5">
-                        <p className="font-display font-bold text-2xl text-accent">{isDemo ? "23%" : (realLeads.length > 0 ? Math.round(realLeads.filter(l => l.status === "converted").length / realLeads.length * 100) : 0) + "%"}</p>
-                        <p className="text-xs text-muted-foreground">אחוז המרה</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      מעקב אחר כל הלידים שמגיעים דרך הביקורות, דפי קורסים וקישורי אפיליאט.
-                    </p>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            </LockedOverlay>
-          </TabsContent>
 
-          {/* Webhooks & API */}
-          <TabsContent value="webhooks">
-            <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
-              <Card className="shadow-card bg-card">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Webhook size={18} className="text-primary" /> Webhooks & API
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-display font-semibold">מפתחות API</h3>
-                      {!isDemo && businessId && (
-                        <Button size="sm" variant="outline" className="text-xs" onClick={handleGenerateApiKey} disabled={generatingApiKey}>
-                          {generatingApiKey ? "מייצר..." : "צור מפתח חדש"}
-                        </Button>
+              <div className="border-t border-border/30" />
+
+              {/* ─── Webhooks & API ───────────────────────────────────── */}
+              <div>
+                <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2 mb-3">
+                  <Webhook size={15} className="text-primary" /> Webhooks & API
+                </h3>
+                <Card className="shadow-card bg-card">
+                  <CardContent className="p-5 space-y-5">
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm font-semibold">מפתחות API</p>
+                        {!isDemo && businessId && (
+                          <Button size="sm" variant="outline" className="text-xs" onClick={handleGenerateApiKey} disabled={generatingApiKey}>
+                            {generatingApiKey ? "מייצר..." : "צור מפתח חדש"}
+                          </Button>
+                        )}
+                      </div>
+                      {!isDemo && realApiKeys.length > 0 ? (
+                        <div className="space-y-2">
+                          {realApiKeys.map((k: any) => (
+                            <div key={k.id} className="bg-secondary rounded-lg p-3 flex items-center justify-between" dir="ltr">
+                              <code className="text-xs text-foreground/70">{k.key_prefix}••••••••••••</code>
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${k.active ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
+                                {k.active ? "פעיל" : "מושבת"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="bg-secondary rounded-lg p-4" dir="ltr">
+                          <code className="text-xs text-foreground/70">{isDemo ? "rh_live_sk_••••••••••••••••••••3f8a" : "אין מפתחות עדיין"}</code>
+                        </div>
                       )}
                     </div>
-                    {!isDemo && realApiKeys.length > 0 ? (
-                      <div className="space-y-2">
-                        {realApiKeys.map((k: any) => (
-                          <div key={k.id} className="bg-secondary rounded-lg p-3 flex items-center justify-between" dir="ltr">
-                            <code className="text-xs text-foreground/70">{k.key_prefix}••••••••••••</code>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${k.active ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
-                              {k.active ? "פעיל" : "מושבת"}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="bg-secondary rounded-lg p-4" dir="ltr">
-                        <code className="text-xs text-foreground/70">{isDemo ? "rh_live_sk_••••••••••••••••••••3f8a" : "אין מפתחות עדיין"}</code>
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-display font-semibold mb-3">Webhooks פעילים</h3>
-                    <div className="space-y-2">
+                    <div>
+                      <p className="text-sm font-semibold mb-3">Webhooks פעילים</p>
                       {(() => {
                         const whList = isDemo ? [
                           { id: "d1", url: "https://your-crm.com/webhooks/review", events: ["new_review"], active: true },
                           { id: "d2", url: "https://zapier.com/hooks/catch/123", events: ["affiliate_conversion"], active: true },
                         ] : realWebhooks;
                         if (whList.length === 0) return <p className="text-sm text-muted-foreground py-2 text-center">אין webhooks מוגדרים.</p>;
-                        return whList.map((wh: any) => (
-                          <div key={wh.id} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
-                            <div>
-                              <p className="text-xs font-mono text-foreground/70" dir="ltr">{wh.url}</p>
-                              <p className="text-[10px] text-muted-foreground mt-0.5">{(wh.events || []).join(", ")}</p>
-                            </div>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${wh.active ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
-                              {wh.active ? "פעיל" : "מושבת"}
-                            </span>
+                        return (
+                          <div className="space-y-2">
+                            {whList.map((wh: any) => (
+                              <div key={wh.id} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
+                                <div>
+                                  <p className="text-xs font-mono text-foreground/70" dir="ltr">{wh.url}</p>
+                                  <p className="text-[10px] text-muted-foreground mt-0.5">{(wh.events || []).join(", ")}</p>
+                                </div>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${wh.active ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
+                                  {wh.active ? "פעיל" : "מושבת"}
+                                </span>
+                              </div>
+                            ))}
                           </div>
-                        ));
+                        );
                       })()}
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-display font-semibold mb-2">אינטגרציות זמינות</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {["Zapier", "Make", "HubSpot", "Salesforce", "Slack", "Google Sheets"].map(name => (
-                        <span key={name} className="text-xs bg-secondary px-3 py-1.5 rounded-full text-muted-foreground">{name}</span>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </LockedOverlay>
-          </TabsContent>
-
-          {/* Daily AI Reports */}
-          <TabsContent value="daily-ai">
-            <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
-              <Card className="shadow-card bg-card">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <CalendarClock size={18} className="text-primary" /> דוחות AI יומיים
-                    {!isDemo && businessId && (
-                      <Button size="sm" variant="outline" className="mr-auto text-xs" onClick={() => handleGenerateReport("daily")} disabled={generatingReport}>
-                        {generatingReport ? "מייצר..." : "צור דוח יומי"}
-                      </Button>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    קבלו כל בוקר דוח AI מפורט עם ניתוח הביצועים של אתמול, שינויים במגמות, וצעדים מומלצים.
-                  </p>
-                  <div className="space-y-3">
-                    {(() => {
-                      const dailyReports = isDemo ? [
-                        { id: "d1", created_at: "2026-03-08", content: "3 ביקורות חדשות, 2 המרות, עלייה של 5% בדירוג" },
-                        { id: "d2", created_at: "2026-03-07", content: "ביקורת שלילית זוהתה, 4 קליקים חדשים" },
-                        { id: "d3", created_at: "2026-03-06", content: "יום שיא — 8 המרות, הכנסות של ₪19,920" },
-                      ] : realAiReports.filter(r => r.report_type === "daily");
-                      if (dailyReports.length === 0) return <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין דוחות יומיים. לחצו "צור דוח יומי" כדי להתחיל.</p>;
-                      return dailyReports.map((report: any) => (
-                        <div key={report.id} className="border border-border/20 rounded-lg p-4">
-                          <p className="text-xs text-muted-foreground mb-2">{new Date(report.created_at).toLocaleDateString("he-IL")}</p>
-                          {isDemo ? (
-                            <p className="text-sm text-foreground/80">{report.content}</p>
-                          ) : (
-                            <div className="prose prose-sm prose-invert max-w-none text-foreground/80">
-                              <ReactMarkdown>{report.content}</ReactMarkdown>
-                            </div>
-                          )}
-                        </div>
-                      ));
-                    })()}
-                  </div>
-                  <div className="pt-4 border-t border-border/30">
-                    <p className="text-xs text-muted-foreground">
-                      הדוחות נשלחים גם במייל כל בוקר בשעה 08:00. ניתן לשנות את שעת השליחה בהגדרות.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </LockedOverlay>
-          </TabsContent>
-
-          {/* Trust Badge / Embed Widget — available on all plans */}
-          <TabsContent value="widget">
-            <TrustBadgeDashboard
-              businessSlug={isDemo ? "demo-business" : (businessId ? businessSlug : "demo-business")}
-              businessName={isDemo ? "העסק שלכם" : displayBusiness.name}
-              rating={isDemo ? 4.8 : (Number(displayStats[0]?.value) || 0)}
-              reviewCount={isDemo ? 124 : (Number(displayStats[1]?.value) || 0)}
-              reviews={isDemo ? DEMO_REVIEWS.map(r => ({
-                id: r.id,
-                rating: r.rating,
-                text: r.text,
-                reviewerName: r.reviewerName,
-                anonymous: r.anonymous,
-                verified: r.verified,
-                courseName: r.courseName,
-                date: r.date,
-              })) : realReviews.map(r => ({
-                id: r.id,
-                rating: r.rating,
-                text: r.text,
-                reviewerName: r.reviewerName,
-                anonymous: r.anonymous,
-                verified: r.verified,
-                courseName: r.courseName,
-                date: r.date,
-              }))}
-            />
-          </TabsContent>
-
-          {/* Integrations */}
-          <TabsContent value="integrations">
-            <IntegrationsTab
-              businessId={businessId || "demo"}
-              isEnterprise={isEnterprise}
-              isDemo={isDemo}
-              onUpgrade={() => handleUpgradeWithModal("enterprise", "אינטגרציות")}
-            />
-          </TabsContent>
-
-          {/* ── Collaboration Program ───────────────────────────────────── */}
-          <TabsContent value="collaboration">
-            <div className="space-y-6">
-              {/* Status header */}
-              <Card className="shadow-card bg-card">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Handshake size={18} className="text-primary" /> תוכנית שיתוף הפעולה
-                    {collabConfig.active && !isDemo && (
-                      <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 rounded-full mr-auto">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" /> פעיל
-                      </span>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isDemo ? (
-                    <div className="text-center py-6 space-y-3">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                        <Handshake size={24} className="text-primary" />
+                    <div>
+                      <p className="text-sm font-semibold mb-2">פלטפורמות נתמכות</p>
+                      <div className="flex flex-wrap gap-2">
+                        {["Zapier", "Make", "HubSpot", "Salesforce", "Slack", "Google Sheets"].map(name => (
+                          <span key={name} className="text-xs bg-secondary px-3 py-1.5 rounded-full text-muted-foreground">{name}</span>
+                        ))}
                       </div>
-                      <p className="font-display font-semibold text-foreground">תוכנית שיתוף הפעולה</p>
-                      <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                        הפעילו את תוכנית שיתוף הפעולה ואפשרו ל-ReviewHub לשלוח לקוחות חדשים לעסק שלכם.
-                        הלקוח מקבל 10% הנחה — Review Hub מרוויחה עמלת שיווק — אתם מקבלים לקוח.
-                      </p>
-                      <Button onClick={() => navigate("/business/signup")} className="gap-2">
-                        הירשמו להפעלת התוכנית
-                      </Button>
-                    </div>
-                  ) : !collabConfig.active ? (
-                    <div className="text-center py-6 space-y-3">
-                      <p className="text-sm text-muted-foreground">
-                        תוכנית שיתוף הפעולה אינה פעילה. הפעילו אותה מכרטיס "שיתוף פעולה" בראש הדף.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Config summary */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="rounded-lg border border-border/40 bg-muted/20 p-4 text-center">
-                          <p className="text-xs text-muted-foreground mb-1">שיטה</p>
-                          <p className="font-semibold text-foreground text-sm capitalize">
-                            {collabConfig.method === "link" && "קישור הפניה"}
-                            {collabConfig.method === "coupon" && "קופון הנחה"}
-                            {collabConfig.method === "both" && "קישור + קופון"}
-                          </p>
-                        </div>
-                        {(collabConfig.method === "coupon" || collabConfig.method === "both") && (
-                          <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-center">
-                            <p className="text-xs text-muted-foreground mb-1">קוד קופון</p>
-                            <p className="font-mono font-bold text-primary text-base tracking-widest">
-                              {collabConfig.coupon || "REVIEWHUB10"}
-                            </p>
-                          </div>
-                        )}
-                        <div className="rounded-lg border border-border/40 bg-muted/20 p-4 text-center">
-                          <p className="text-xs text-muted-foreground mb-1">קליקי הפניה (סה"כ)</p>
-                          <p className="font-bold text-2xl text-foreground">{referralClickCount}</p>
-                        </div>
-                      </div>
-
-                      {/* Referral link */}
-                      {(collabConfig.method === "link" || collabConfig.method === "both") && (
-                        <div className="rounded-lg border border-border/40 bg-muted/10 p-4">
-                          <p className="text-xs font-semibold text-muted-foreground mb-2">קישור הפניה שלכם</p>
-                          <div className="flex gap-2">
-                            <code className="flex-1 text-xs font-mono bg-muted/40 border border-border/40 px-3 py-2 rounded-lg truncate">
-                              https://reviewhub.co.il/go/{businessSlug}
-                            </code>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => { navigator.clipboard.writeText(`https://reviewhub.co.il/go/${businessSlug}`); }}
-                            >
-                              העתקה
-                            </Button>
-                            <Button variant="outline" size="sm" asChild>
-                              <a href={`/biz/${businessSlug}`} target="_blank" rel="noopener noreferrer" className="gap-1">
-                                <ExternalLink size={13} />
-                              </a>
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Analytics */}
-              {!isDemo && collabConfig.active && (
-                <Card className="shadow-card bg-card">
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <BarChart2 size={18} className="text-primary" /> אנליטיקת שיתוף פעולה
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      {[
-                        { label: "קליקי הפניה", value: String(referralClickCount), icon: MousePointerClick },
-                        { label: "30 ימים אחרונים", value: String(referralClicksData.reduce((s, d) => s + d.clicks, 0)), icon: TrendingUp },
-                        { label: "הנחה לגולש", value: "10%", icon: Tag },
-                        { label: "מקור תנועה", value: "ReviewHub", icon: Users },
-                      ].map(({ label, value, icon: Icon }) => (
-                        <div key={label} className="rounded-lg border border-border/40 bg-muted/20 p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Icon size={15} className="text-primary" />
-                            <p className="text-xs text-muted-foreground">{label}</p>
-                          </div>
-                          <p className="font-bold text-xl text-foreground">{value}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Clicks timeline */}
-                    {referralClicksData.length > 0 ? (
-                      <div>
-                        <p className="text-xs font-semibold text-muted-foreground mb-3">קליקים לפי תאריך (30 ימים אחרונים)</p>
-                        <div className="space-y-1.5">
-                          {referralClicksData.slice(-10).map(({ date, clicks }) => (
-                            <div key={date} className="flex items-center gap-3">
-                              <span className="text-xs text-muted-foreground w-20 shrink-0">{date}</span>
-                              <div className="flex-1 bg-muted/30 rounded-full h-2 overflow-hidden">
-                                <div
-                                  className="bg-primary h-2 rounded-full transition-all duration-500"
-                                  style={{
-                                    width: `${Math.min(100, (clicks / Math.max(...referralClicksData.map(d => d.clicks), 1)) * 100)}%`,
-                                  }}
-                                />
-                              </div>
-                              <span className="text-xs font-semibold text-foreground w-6 text-left">{clicks}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground text-center py-4">
-                        עדיין אין נתוני קליקים. הקישור שלכם פעיל — קליקים ירשמו כאן אוטומטית.
-                      </p>
-                    )}
-
-                    <div className="mt-4 pt-4 border-t border-border/30 text-xs text-muted-foreground">
-                      גילוי נאות: ReviewHub מציגה לגולשים גילוי נאות ברור לפני כל הפניה.
-                      הנתונים מעודכנים בזמן אמת.
                     </div>
                   </CardContent>
                 </Card>
-              )}
+              </div>
 
-              {/* How it works */}
-              <Card className="shadow-card bg-card">
-                <CardHeader>
-                  <CardTitle className="text-base">איך התוכנית עובדת</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    {[
-                      { step: "1", title: "ReviewHub מפנה לקוחות", desc: "גולשים שמוצא אתר ReviewHub את הפרופיל שלכם רואים כפתור 'גישה עם הנחה'." },
-                      { step: "2", title: "הלקוח מקבל 10% הנחה", desc: "הלקוח מגיע לאתרכם דרך הקישור או עם קוד הקופון ומקבל הנחה." },
-                      { step: "3", title: "ReviewHub מרוויחה עמלה", desc: "ה-10% פועלים כעמלת שיווק עבור ReviewHub. אתם לא משלמים דבר מראש." },
-                    ].map(({ step, title, desc }) => (
-                      <div key={step} className="flex gap-3">
-                        <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                          {step}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-foreground">{title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
-                        </div>
+              <div className="border-t border-border/30" />
+
+              {/* ─── Widget Embed ─────────────────────────────────────── */}
+              <div>
+                <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2 mb-3">
+                  <Code2 size={15} className="text-accent" /> ווידג׳ט להטמעה
+                </h3>
+                <TrustBadgeDashboard
+                  businessSlug={isDemo ? "demo-business" : (businessId ? businessSlug : "demo-business")}
+                  businessName={isDemo ? "העסק שלכם" : displayBusiness.name}
+                  rating={isDemo ? 4.8 : (Number(displayStats[0]?.value) || 0)}
+                  reviewCount={isDemo ? 124 : (Number(displayStats[1]?.value) || 0)}
+                  reviews={isDemo ? DEMO_REVIEWS.map(r => ({
+                    id: r.id, rating: r.rating, text: r.text, reviewerName: r.reviewerName,
+                    anonymous: r.anonymous, verified: r.verified, courseName: r.courseName, date: r.date,
+                  })) : realReviews.map(r => ({
+                    id: r.id, rating: r.rating, text: r.text, reviewerName: r.reviewerName,
+                    anonymous: r.anonymous, verified: r.verified, courseName: r.courseName, date: r.date,
+                  }))}
+                />
+              </div>
+
+              <div className="border-t border-border/30" />
+
+              {/* ─── Third-party Integrations ─────────────────────────── */}
+              <div>
+                <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2 mb-3">
+                  <Link2 size={15} className="text-accent" /> אינטגרציות חיצוניות
+                </h3>
+                <IntegrationsTab
+                  businessId={businessId || "demo"}
+                  isEnterprise={isEnterprise}
+                  isDemo={isDemo}
+                  onUpgrade={() => handleUpgradeWithModal("enterprise", "אינטגרציות")}
+                />
+              </div>
+
+              <div className="border-t border-border/30" />
+
+              {/* ─── Collaboration Program ────────────────────────────── */}
+              <div>
+                <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2 mb-3">
+                  <Handshake size={15} className="text-primary" /> תוכנית שיתוף הפעולה
+                  {collabConfig.active && !isDemo && (
+                    <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full mr-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" /> פעיל
+                    </span>
+                  )}
+                </h3>
+                <Card className="shadow-card bg-card">
+                  <CardContent className="p-5">
+                    {isDemo ? (
+                      <div className="text-center py-4 space-y-3">
+                        <p className="font-display font-semibold text-foreground">תוכנית שיתוף הפעולה</p>
+                        <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                          הפעילו את תוכנית שיתוף הפעולה ואפשרו ל-ReviewHub לשלוח לקוחות חדשים לעסק שלכם.
+                          הלקוח מקבל 10% הנחה — ReviewHub מרוויחה עמלת שיווק — אתם מקבלים לקוח.
+                        </p>
+                        <Button onClick={() => navigate("/business/signup")} className="gap-2">
+                          הירשמו להפעלת התוכנית
+                        </Button>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    ) : !collabConfig.active ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        תוכנית שיתוף הפעולה אינה פעילה. הפעילו אותה מכרטיס "שיתוף פעולה" בראש הדף.
+                      </p>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="rounded-lg border border-border/40 bg-muted/20 p-4 text-center">
+                            <p className="text-xs text-muted-foreground mb-1">שיטה</p>
+                            <p className="font-semibold text-foreground text-sm">
+                              {collabConfig.method === "link" && "קישור הפניה"}
+                              {collabConfig.method === "coupon" && "קופון הנחה"}
+                              {collabConfig.method === "both" && "קישור + קופון"}
+                            </p>
+                          </div>
+                          {(collabConfig.method === "coupon" || collabConfig.method === "both") && (
+                            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-center">
+                              <p className="text-xs text-muted-foreground mb-1">קוד קופון</p>
+                              <p className="font-mono font-bold text-primary text-base tracking-widest">
+                                {collabConfig.coupon || "REVIEWHUB10"}
+                              </p>
+                            </div>
+                          )}
+                          <div className="rounded-lg border border-border/40 bg-muted/20 p-4 text-center">
+                            <p className="text-xs text-muted-foreground mb-1">קליקי הפניה</p>
+                            <p className="font-bold text-2xl text-foreground">{referralClickCount}</p>
+                          </div>
+                        </div>
+                        {(collabConfig.method === "link" || collabConfig.method === "both") && (
+                          <div className="rounded-lg border border-border/40 bg-muted/10 p-4">
+                            <p className="text-xs font-semibold text-muted-foreground mb-2">קישור הפניה שלכם</p>
+                            <div className="flex gap-2">
+                              <code className="flex-1 text-xs font-mono bg-muted/40 border border-border/40 px-3 py-2 rounded-lg truncate">
+                                https://reviewhub.co.il/go/{businessSlug}
+                              </code>
+                              <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(`https://reviewhub.co.il/go/${businessSlug}`); }}>
+                                העתקה
+                              </Button>
+                              <Button variant="outline" size="sm" asChild>
+                                <a href={`/biz/${businessSlug}`} target="_blank" rel="noopener noreferrer"><ExternalLink size={13} /></a>
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        {referralClicksData.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-3">קליקים לפי תאריך (30 ימים)</p>
+                            <div className="space-y-1.5">
+                              {referralClicksData.slice(-8).map(({ date, clicks }) => (
+                                <div key={date} className="flex items-center gap-3">
+                                  <span className="text-xs text-muted-foreground w-20 shrink-0">{date}</span>
+                                  <div className="flex-1 bg-muted/30 rounded-full h-2 overflow-hidden">
+                                    <div className="bg-primary h-2 rounded-full transition-all duration-500"
+                                      style={{ width: `${Math.min(100, (clicks / Math.max(...referralClicksData.map(d => d.clicks), 1)) * 100)}%` }} />
+                                  </div>
+                                  <span className="text-xs font-semibold text-foreground w-6 text-left">{clicks}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
             </div>
+            </LockedOverlay>
           </TabsContent>
 
           {/* ── Compliance & Moderation Panel ─────────────────────────── */}
-          <TabsContent value="compliance">
+          <TabsContent value="trust-compliance">
             <div className="space-y-6">
 
               {/* KPI strip */}
@@ -1667,7 +1605,7 @@ const BusinessDashboard = () => {
           </TabsContent>
 
           {/* ── Google Reviews Linking Tab ────────────────────────────────── */}
-          <TabsContent value="google-reviews">
+          <TabsContent value="trust-google">
             <div className="space-y-6 max-w-xl">
               <Card className="shadow-card bg-card border-primary/10">
                 <CardContent className="p-4 flex items-start gap-3">
