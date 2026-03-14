@@ -16,8 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import DeleteAccountButton from "./DeleteAccountButton";
-
 // ── "לעסקים" dropdown items ───────────────────────────────────────────────────
 // Gateway for business owners who land on the public site.
 // Pricing is appended conditionally based on auth status.
@@ -202,11 +200,6 @@ const Navbar = () => {
                   <LogOut size={14} className="ml-2" aria-hidden="true" />
                   התנתקו
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="p-0">
-                  <div>
-                    <DeleteAccountButton />
-                  </div>
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
@@ -326,15 +319,12 @@ const Navbar = () => {
               </Link>
             )}
             {user && (
-              <>
-                <button
-                  onClick={() => { handleSignOut(); setMobileOpen(false); }}
-                  className="block text-sm py-3 min-h-[44px] flex items-center text-destructive w-full"
-                >
-                  התנתקו
-                </button>
-                <DeleteAccountButton />
-              </>
+              <button
+                onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                className="block text-sm py-3 min-h-[44px] flex items-center text-destructive w-full"
+              >
+                התנתקו
+              </button>
             )}
           </div>
         </div>

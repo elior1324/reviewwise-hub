@@ -4,7 +4,6 @@ import BusinessFooter from "@/components/BusinessFooter";
 import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
 import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
 import LockedOverlay from "@/components/LockedOverlay";
-import DeleteAccountButton from "@/components/DeleteAccountButton";
 import DevControlPanel from "@/components/DevControlPanel";
 import UpgradeModal from "@/components/UpgradeModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -575,7 +574,6 @@ const BusinessDashboard = () => {
               <p className="text-xs text-muted-foreground">{displayBusiness.email}</p>
             </div>
             <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">מנהל</span>
-            <DeleteAccountButton />
           </div>
         )}
 

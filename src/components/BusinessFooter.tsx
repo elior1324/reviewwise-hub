@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
+import { DeleteAccountTrigger } from "./DeleteAccountButton";
 
 const TelegramIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -76,6 +77,7 @@ const BusinessFooter = () => (
             <a href="mailto:support@reviewshub.info" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">צרו קשר</a>
             <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">מדיניות פרטיות</Link>
             <Link to="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">תנאי שימוש</Link>
+            <DeleteAccountTrigger className="block" />
           </div>
         </div>
       </div>
