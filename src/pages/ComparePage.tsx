@@ -293,7 +293,7 @@ const ComparePage = () => {
 
       <section className="relative overflow-hidden border-b border-border/50">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
-        <div className="container py-12 md:py-16 relative">
+        <div className="container pt-24 pb-12 md:pb-16 relative">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-4 text-primary">
               <Scale size={16} /> השוואה חכמה

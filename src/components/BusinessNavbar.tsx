@@ -37,8 +37,10 @@ const BusinessNavbar = () => {
     location.pathname === path || location.pathname.startsWith(path + "/");
 
   const navLink = (active: boolean) =>
-    `text-sm transition-colors flex items-center gap-1.5 ${
-      active ? "text-white font-semibold" : "text-zinc-300 hover:text-white"
+    `text-sm transition-colors flex items-center gap-1.5 relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
+      active
+        ? "text-white font-semibold after:bg-white"
+        : "text-zinc-300 hover:text-white after:bg-transparent"
     }`;
 
   const handleSignOut = async () => {
@@ -102,10 +104,10 @@ const BusinessNavbar = () => {
           {/* מחירון — always visible */}
           <Link
             to="/business/pricing"
-            className={`text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+            className={`text-sm font-semibold transition-colors flex items-center gap-1.5 relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
               isActive("/business/pricing")
-                ? "text-primary"
-                : "text-primary/80 hover:text-primary"
+                ? "text-primary after:bg-primary"
+                : "text-primary/80 hover:text-primary after:bg-transparent"
             }`}
           >
             <Tag size={14} aria-hidden="true" />
@@ -195,7 +197,7 @@ const BusinessNavbar = () => {
           {/* Always visible */}
           <Link
             to="/business"
-            className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 font-medium"
+            className={`flex items-center gap-2 text-sm py-3 min-h-[44px] font-medium border-r-2 pr-2 transition-colors ${location.pathname === "/business" ? "text-white border-white" : "text-zinc-300 border-transparent hover:text-white"}`}
             onClick={() => setMobileOpen(false)}
           >
             <Home size={14} aria-hidden="true" /> דף הבית
@@ -206,21 +208,21 @@ const BusinessNavbar = () => {
             <>
               <Link
                 to="/business/dashboard"
-                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-300"
+                className={`flex items-center gap-2 text-sm py-3 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive("/business/dashboard") ? "text-white border-white font-medium" : "text-zinc-300 border-transparent hover:text-white"}`}
                 onClick={() => setMobileOpen(false)}
               >
                 <LayoutDashboard size={14} aria-hidden="true" /> לוח הבקרה
               </Link>
               <Link
                 to="/business/solutions/reviews"
-                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-300"
+                className={`flex items-center gap-2 text-sm py-3 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive("/business/solutions/reviews") ? "text-white border-white font-medium" : "text-zinc-300 border-transparent hover:text-white"}`}
                 onClick={() => setMobileOpen(false)}
               >
                 <ShieldCheck size={14} aria-hidden="true" /> אימות ביקורות
               </Link>
               <Link
                 to="/partners/prestige-badges"
-                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-300"
+                className={`flex items-center gap-2 text-sm py-3 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive("/partners/prestige-badges") ? "text-white border-white font-medium" : "text-zinc-300 border-transparent hover:text-white"}`}
                 onClick={() => setMobileOpen(false)}
               >
                 ווידג׳טים ותגי אמון
@@ -231,7 +233,7 @@ const BusinessNavbar = () => {
           {/* מחירון — always visible */}
           <Link
             to="/business/pricing"
-            className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-primary font-semibold"
+            className={`flex items-center gap-2 text-sm py-3 min-h-[44px] font-semibold border-r-2 pr-2 transition-colors ${isActive("/business/pricing") ? "text-primary border-primary" : "text-primary/80 border-transparent hover:text-primary"}`}
             onClick={() => setMobileOpen(false)}
           >
             <Tag size={14} aria-hidden="true" /> מחירון

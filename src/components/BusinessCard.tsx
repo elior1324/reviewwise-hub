@@ -116,10 +116,22 @@ const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewC
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             <StarRating rating={rating} size={14} />
             <span className="text-sm text-muted-foreground">({reviewCount})</span>
-            {/* Trust grade chip */}
-            <span className={`text-xs font-bold ${trust.color} bg-transparent border border-border/40 rounded px-1 py-0.5 leading-none`}>
-              {trust.grade}
-            </span>
+            {/* Trust grade chip — prominent coloured badge */}
+            {trust.grade !== "—" && (
+              <span
+                className={`text-xs font-bold rounded-md px-1.5 py-0.5 leading-none border ${
+                  trust.grade === "A+" ? "text-emerald-700 bg-emerald-500/10 border-emerald-500/30 dark:text-emerald-400" :
+                  trust.grade === "A"  ? "text-emerald-600 bg-emerald-500/8 border-emerald-500/25 dark:text-emerald-400" :
+                  trust.grade === "B"  ? "text-blue-600 bg-blue-500/10 border-blue-500/25 dark:text-blue-400" :
+                  trust.grade === "C"  ? "text-amber-600 bg-amber-500/10 border-amber-500/25 dark:text-amber-400" :
+                  trust.grade === "D"  ? "text-orange-600 bg-orange-500/10 border-orange-500/25 dark:text-orange-400" :
+                  "text-red-600 bg-red-500/10 border-red-500/25 dark:text-red-400"
+                }`}
+                title={`ציון אמון: ${trust.grade}`}
+              >
+                {trust.grade}
+              </span>
+            )}
           </div>
           {/* Verified count badge */}
           {verifiedReviewCount > 0 && (
@@ -177,8 +189,9 @@ const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewC
             </div>
           )}
 
-          <div className="mt-4 flex items-center text-primary text-sm font-medium group-hover:gap-2 gap-1 transition-all">
-            {isSaas ? "ראו רשומת האמון" : "בדקו את ציון האמון"} <ArrowLeft size={14} />
+          <div className="mt-4 flex items-center text-primary text-sm font-medium gap-1 group-hover:gap-2.5 transition-all duration-200 border-t border-border/30 pt-3">
+            {isSaas ? "ראו רשומת האמון" : "בדקו את ציון האמון"}
+            <ArrowLeft size={14} className="transition-transform duration-200 group-hover:-translate-x-1" />
           </div>
         </CardContent>
       </Card>

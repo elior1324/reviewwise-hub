@@ -17,8 +17,8 @@ export default function LeaderboardPage() {
     <div className="min-h-screen flex flex-col bg-background" dir="rtl">
       <Navbar />
 
-      {/* Hero */}
-      <div className="bg-gradient-to-br from-primary/10 via-accent/5 to-background border-b border-border/50 py-10 px-4 text-center">
+      {/* Hero — pt-24 clears the fixed navbar */}
+      <div className="bg-gradient-to-br from-primary/10 via-accent/5 to-background border-b border-border/50 pt-24 pb-10 px-4 text-center">
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="flex items-center justify-center gap-2 mb-3">
             <Trophy className="text-yellow-400 w-6 h-6" aria-hidden="true" />

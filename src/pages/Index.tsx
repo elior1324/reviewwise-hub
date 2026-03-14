@@ -227,7 +227,7 @@ const Index = () => {
         aria-labelledby links this landmark to the visible h1 heading so that
         screen readers announce "Hero region: מצאו את בעל המקצוע…" (WCAG 1.3.1).
       */}
-      <section ref={heroRef} className="relative overflow-hidden" aria-labelledby="hero-heading">
+      <section ref={heroRef} className="relative overflow-hidden pt-16" aria-labelledby="hero-heading">
         {/* Decorative gradient overlay — hidden from assistive technology */}
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} aria-hidden="true" />
         {/* Animated teal SVG path decorations (FloatingPaths) */}
@@ -433,8 +433,8 @@ const Index = () => {
             {[
               { icon: Star, label: "ביקורות מאומתות רכישה", value: stats.reviews > 0 ? stats.reviews.toLocaleString() : "0" },
               { icon: Users, label: "ישויות דיגיטליות מאומתות", value: stats.businesses > 0 ? stats.businesses.toLocaleString() : "0" },
-              { icon: ShieldCheck, label: "נתמך בהוכחת רכישה", value: "100%" },
-              { icon: TrendingUp, label: "מתודולוגיה פתוחה לציבור", value: "✓" },
+              { icon: ShieldCheck, label: "ביקורות נתמכות בהוכחת רכישה", value: "100%" },
+              { icon: TrendingUp, label: "מתודולוגיה פתוחה לציבור", value: "פתוח" },
             ].map(({ icon: Icon, label, value }) => (
               <motion.div key={label} variants={scaleIn}>
                 <motion.div

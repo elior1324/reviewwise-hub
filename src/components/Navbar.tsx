@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
@@ -41,7 +41,28 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const { mode, switchToBusinessMode, switchToUserMode } = useAppMode();
   const navigate = useNavigate();
+  const location = useLocation();
   const isBusinessMode = mode === "business";
+
+  /** Returns true when the current pathname matches or starts with the given path */
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(path + "/");
+
+  const navLinkCls = (path: string, dark = false) => {
+    const active = isActive(path);
+    if (dark) {
+      return `text-sm transition-colors flex items-center gap-1.5 relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
+        active
+          ? "text-white font-semibold after:bg-white"
+          : "text-zinc-300 hover:text-white after:bg-transparent"
+      }`;
+    }
+    return `text-sm transition-colors flex items-center gap-1.5 relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
+      active
+        ? "text-foreground font-semibold after:bg-primary"
+        : "text-muted-foreground hover:text-foreground after:bg-transparent"
+    }`;
+  };
 
   // Pricing is now open to all authenticated users (C-7 fix)
   const canSeePricing = !!user;
@@ -183,30 +204,18 @@ const Navbar = () => {
           {isBusinessMode ? (
             /* ── Business mode nav ── */
             <>
-              <Link
-                to="/business"
-                className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
-              >
+              <Link to="/business" className={navLinkCls("/business", true)}>
                 דף הבית
               </Link>
-              <Link
-                to="/business/dashboard"
-                className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
-              >
+              <Link to="/business/dashboard" className={navLinkCls("/business/dashboard", true)}>
                 <LayoutDashboard size={14} aria-hidden="true" />
                 לוח הבקרה
               </Link>
-              <Link
-                to="/business/pricing"
-                className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
-              >
+              <Link to="/business/pricing" className={navLinkCls("/business/pricing", true)}>
                 <Tag size={14} aria-hidden="true" />
                 תמחור
               </Link>
-              <Link
-                to="/business/solutions/reviews"
-                className="text-sm text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
-              >
+              <Link to="/business/solutions/reviews" className={navLinkCls("/business/solutions/reviews", true)}>
                 <ShieldCheck size={14} aria-hidden="true" />
                 אימות ביקורות
               </Link>
@@ -214,40 +223,21 @@ const Navbar = () => {
           ) : (
             /* ── Consumer mode nav ── */
             <>
-              <Link
-                to="/"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <Link to="/" className={navLinkCls("/")}>
                 עמוד הבית
               </Link>
-
-              <Link
-                to="/search"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <Link to="/search" className={navLinkCls("/search")}>
                 ספריית האמון
               </Link>
-
-              <Link
-                to="/leaderboard"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-              >
+              <Link to="/leaderboard" className={navLinkCls("/leaderboard")}>
                 <Trophy size={14} aria-hidden="true" />
                 קהילה
               </Link>
-
-              <Link
-                to="/compare"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-              >
+              <Link to="/compare" className={navLinkCls("/compare")}>
                 <Scale size={14} aria-hidden="true" />
                 השוואה
               </Link>
-
-              <Link
-                to="/about"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-              >
+              <Link to="/about" className={navLinkCls("/about")}>
                 <BookOpen size={14} aria-hidden="true" />
                 אודות
               </Link>

@@ -65,10 +65,16 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Product — mirrors the navbar "לעסקים" dropdown (no Pricing: auth-gated) */}
+        {/* Product */}
         <div>
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">לעסקים</h4>
           <div className="space-y-2">
+            <Link
+              to="/business"
+              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              פורטל עסקי
+            </Link>
             <Link
               to="/business/solutions/reviews"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -85,11 +91,14 @@ const Footer = () => {
               to="/business/solutions/widgets"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              ווידג'טים
+              ווידג'טים ותגי אמון
             </Link>
-            {/* Pricing intentionally omitted from the static footer:
-                it requires authentication and the footer has no auth context.
-                The link is surfaced in the navbar dropdown for eligible users. */}
+            <Link
+              to="/business/pricing"
+              className="block text-sm text-primary/80 hover:text-primary font-medium transition-colors"
+            >
+              מחירון
+            </Link>
           </div>
         </div>
 
@@ -171,16 +180,15 @@ const Footer = () => {
           </div>
         </div>
       </div>
-      <div className="border-t border-border/50 mt-8 pt-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-xs text-muted-foreground text-center md:text-right">
-            <p className="font-semibold text-foreground mb-1">ReviewHub בע"מ</p>
-            <p>ישראל</p>
-            <p>אימייל: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></p>
+      <div className="border-t border-border/50 mt-8 pt-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 justify-center sm:justify-start">
+            <span className="font-semibold text-foreground/70">ReviewHub בע"מ · ישראל</span>
+            <a href="mailto:support@reviewshub.info" className="hover:text-primary transition-colors">
+              support@reviewshub.info
+            </a>
           </div>
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} ReviewHub בע"מ. כל הזכויות שמורות.
-          </p>
+          <p>© {new Date().getFullYear()} ReviewHub בע"מ. כל הזכויות שמורות.</p>
         </div>
       </div>
     </div>

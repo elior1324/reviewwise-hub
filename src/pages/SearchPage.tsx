@@ -4,7 +4,7 @@ import BusinessCard from "@/components/BusinessCard";
 import CourseCard from "@/components/CourseCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown, Trophy, Star, ShieldCheck } from "lucide-react";
+import { Search, UserCheck, BookOpen, ChevronDown, ArrowUpDown, Trophy, Star, ShieldCheck, X } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -268,7 +268,7 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
-      <div className="container py-10">
+      <div className="container pt-24 pb-16">
         <h1 className="font-display font-bold text-3xl mb-2">ספריית האמון — כלכלה דיגיטלית</h1>
         <p className="text-muted-foreground text-sm mb-6 max-w-xl">
           אמתו כלי SaaS, AI, מומחים דיגיטליים וקורסים מקצועיים לפני שבוטחים. ציון האמון מחושב מביקורות מאומתות רכישה בלבד.
@@ -276,10 +276,30 @@ const SearchPage = () => {
 
         {/* Search */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="חיפוש כלי AI, מומחים דיגיטליים, קורסים..." className="pr-10 h-11 glass border-border/50" value={query} onChange={e => setQuery(e.target.value)} />
+          <div className="relative flex-1 max-w-xl">
+            <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" aria-hidden="true" />
+            <Input
+              placeholder="חיפוש כלי AI, מומחים דיגיטליים, קורסים..."
+              className="pr-10 h-11 glass border-border/50"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              aria-label="חיפוש"
+            />
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="נקה חיפוש"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
+          {query && (
+            <div className="flex items-center text-sm text-muted-foreground self-center">
+              תוצאות עבור: <span className="font-semibold text-foreground mr-1">"{query}"</span>
+            </div>
+          )}
         </div>
 
         {/* Top 5 Most Reviewed */}
@@ -434,7 +454,11 @@ const SearchPage = () => {
               ))}
             </div>
             {freelancers.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">לא נמצאו מומחים דיגיטליים התואמים לחיפוש.</p>
+              <div className="text-center py-16">
+                <Search size={32} className="mx-auto mb-3 text-muted-foreground/40" />
+                <p className="text-muted-foreground font-medium">לא נמצאו מומחים דיגיטליים</p>
+                <p className="text-sm text-muted-foreground/60 mt-1">נסו לשנות את הקטגוריה או מחקו את הסינון</p>
+              </div>
             )}
           </TabsContent>
 
@@ -502,7 +526,11 @@ const SearchPage = () => {
               ))}
             </div>
             {filteredCourses.length === 0 && courseProviders.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">לא נמצאו קורסים, סדנאות או ספקי חינוך דיגיטלי התואמים לחיפוש.</p>
+              <div className="text-center py-16">
+                <BookOpen size={32} className="mx-auto mb-3 text-muted-foreground/40" />
+                <p className="text-muted-foreground font-medium">לא נמצאו קורסים או ספקי חינוך</p>
+                <p className="text-sm text-muted-foreground/60 mt-1">נסו לשנות את הסינון או לנקות את החיפוש</p>
+              </div>
             )}
           </TabsContent>
 

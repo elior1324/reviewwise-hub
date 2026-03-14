@@ -331,8 +331,8 @@ const ReviewCard = ({
           )}
 
           <div className="flex items-start gap-3 mb-3 mt-6">
-            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0">
-              <User size={18} className="text-muted-foreground" />
+            <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 font-display font-semibold text-sm text-primary select-none">
+              {anonymous ? <User size={16} className="text-primary/60" /> : reviewerName.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-display font-semibold text-sm text-foreground">
@@ -539,15 +539,14 @@ const ReviewCard = ({
           )}
 
           {/* Safe Harbor disclaimer */}
-          <p className="mt-2 text-[10px] text-muted-foreground/60 leading-snug">
-            ביקורת זו משקפת את דעתו האישית של המשתמש שפרסם אותה. ReviewHub אינה מאמתת את דיוק העובדות.
+          <p className="mt-2 text-[9px] text-muted-foreground/45 leading-snug">
+            דעת הכותב בלבד · ReviewHub אינה מאמתת עובדות
           </p>
 
           <div className="mt-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button
-aria-label={liked ? "ביטול מועיל" : "מועיל"}
-
+                aria-label={liked ? "ביטול מועיל" : "מועיל"}
                 variant="ghost"
                 size="sm"
                 onClick={handleLike}
