@@ -21,6 +21,7 @@ import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
 import IntegrationsTab from "@/components/IntegrationsTab";
 import CollaborationPromoCard from "@/components/CollaborationPromoCard";
 import { type CollabConfig } from "@/components/CollaborationSetupModal";
+import GoogleLinkingPanel from "@/components/GoogleLinkingPanel";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { type Review, type Course } from "@/data/mockData";
 import { useState, useEffect } from "react";
@@ -743,6 +744,15 @@ const BusinessDashboard = () => {
                         {complianceReviews.filter(r => r.status === "flagged" || r.status === "under_review").length}
                       </span>
                     )}
+                  </TabsTrigger>
+                  <TabsTrigger value="google-reviews" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                    <svg width={13} height={13} viewBox="0 0 24 24" className="ml-1">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    ביקורות Google
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -1653,6 +1663,43 @@ const BusinessDashboard = () => {
                 </CardContent>
               </Card>
 
+            </div>
+          </TabsContent>
+
+          {/* ── Google Reviews Linking Tab ────────────────────────────────── */}
+          <TabsContent value="google-reviews">
+            <div className="space-y-6 max-w-xl">
+              <Card className="shadow-card bg-card border-primary/10">
+                <CardContent className="p-4 flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg width={18} height={18} viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground mb-0.5">ביקורות Google — הוסף הקשר חיצוני</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      קשרו את הפרופיל ב-Google לעמוד הפרופיל שלכם ב-ReviewHub.
+                      ביקורות Google יוצגו <strong className="text-foreground">בסעיף נפרד</strong> מתחת לביקורות ReviewHub —
+                      מסומנות בבירור כמקורן ב-Google ואינן משפיעות על ציון האמון הרשמי.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {isDemo ? (
+                <Card className="shadow-card bg-card opacity-60">
+                  <CardContent className="py-8 text-center">
+                    <p className="text-sm text-muted-foreground">חיבור פרופיל Google זמין לעסקים רשומים בלבד.</p>
+                    <p className="text-xs text-muted-foreground mt-1">צרו חשבון עסקי כדי לחבר את הפרופיל שלכם ב-Google.</p>
+                  </CardContent>
+                </Card>
+              ) : businessId ? (
+                <GoogleLinkingPanel businessId={businessId} />
+              ) : null}
             </div>
           </TabsContent>
         </Tabs>

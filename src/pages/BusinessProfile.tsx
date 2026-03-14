@@ -7,6 +7,7 @@ import CourseCard from "@/components/CourseCard";
 import BusinessHero from "@/components/BusinessHero";
 import AddReviewForm from "@/components/AddReviewForm";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
+import GoogleReviewsSection, { type GoogleReview, type GoogleProfileData } from "@/components/GoogleReviewsSection";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,10 +16,12 @@ import { PrestigeBadge, computeEligibleBadges, buildBadgeEmbedCode, BADGE_CONFIG
 import { useState, useEffect, useMemo } from "react";
 import { generateReviewSummary, FREELANCER_CATEGORIES, SAAS_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const BusinessProfile = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [business, setBusiness] = useState<Business | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -30,6 +33,11 @@ const BusinessProfile = () => {
   const [collabCoupon, setCollabCoupon] = useState<string | null>(null);
   const [couponRevealed, setCouponRevealed] = useState(false);
   const [collabCopied, setCollabCopied] = useState(false);
+
+  // Google Reviews state
+  const [googleProfile, setGoogleProfile]   = useState<GoogleProfileData | null>(null);
+  const [googleReviews, setGoogleReviews]   = useState<GoogleReview[]>([]);
+  const [isOwner, setIsOwner]               = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -186,11 +194,41 @@ const BusinessProfile = () => {
         setBusiness(mappedBiz);
       }
 
+      // ── 4. Fetch Google external profile + reviews ───────────────────────────
+      const { data: extProfile } = await supabase
+        .from("business_external_profiles")
+        .select("external_id,external_url,external_name,external_rating,external_review_count,last_synced_at,sync_status")
+        .eq("business_id", bizData.id)
+        .eq("status", "confirmed")
+        .maybeSingle();
+
+      if (extProfile) {
+        setGoogleProfile(extProfile as GoogleProfileData);
+
+        const { data: gReviews } = await supabase
+          .from("imported_google_reviews")
+          .select("id,author_name,author_photo_url,rating,text,published_at,source_url")
+          .eq("business_id", bizData.id)
+          .eq("display_allowed", true)
+          .eq("is_deleted_at_source", false)
+          .order("published_at", { ascending: false })
+          .limit(10);
+
+        if (gReviews) setGoogleReviews(gReviews as GoogleReview[]);
+      }
+
       setLoading(false);
     };
 
     fetchAll();
   }, [slug]);
+
+  // Detect ownership for the manual sync button
+  useEffect(() => {
+    if (!user || !dbBusinessId) { setIsOwner(false); return; }
+    supabase.from("businesses").select("id").eq("id", dbBusinessId).eq("owner_id", user.id).maybeSingle()
+      .then(({ data }) => setIsOwner(!!data));
+  }, [user, dbBusinessId]);
 
   const filteredReviews = filterRating ? reviews.filter(r => r.rating === filterRating) : reviews;
   const summary = generateReviewSummary(reviews);
@@ -558,6 +596,23 @@ const BusinessProfile = () => {
             </p>
           )}
         </div>
+
+        {/* ── Tier 3: External Google Reviews ────────────────────────────────────
+            Trust hierarchy: this section is always rendered AFTER ReviewHub reviews.
+            It is visually separated and clearly labeled as external / not verified.
+        ─────────────────────────────────────────────────────────────────────── */}
+        {googleProfile && (
+          <div className="mt-8 border-t border-border/30 pt-8">
+            <GoogleReviewsSection
+              businessId={dbBusinessId!}
+              businessSlug={slug!}
+              profile={googleProfile}
+              reviews={googleReviews}
+              isOwner={isOwner}
+            />
+          </div>
+        )}
+
       </div>
       <Footer />
     </div>
