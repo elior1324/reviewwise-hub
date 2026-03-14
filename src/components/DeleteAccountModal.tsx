@@ -1,17 +1,18 @@
 /**
  * DeleteAccountModal
  *
- * Destructive account deletion flow with three gates:
- *   1. Current password verification (server-side via supabase.auth.signInWithPassword)
- *   2. Optional "Reason for leaving" textarea
- *   3. Final "Delete Permanently" confirmation button
+ * Handles two account-lifecycle actions:
+ *   • "מחיקת חשבון"  — soft-delete with a 7-day recovery window
+ *   • "השהיית חשבון" — temporarily suspend (deactivate) the account
  *
- * On confirmation:
- *   - Calls the request-account-deletion edge function (marks account for deletion)
- *   - Signs the user out
+ * Flow for deletion:
+ *   confirm (choose action) → password → reason → final
  *
- * The component is rendered inside Footer.tsx so that the Delete Account
- * link lives in the footer — well away from main navigation.
+ * Flow for suspension:
+ *   confirm (choose action) → password → final-suspend
+ *
+ * After 7 days the deletion becomes permanent and cannot be undone.
+ * During the 7-day window the user can restore via the login page.
  */
 
 import { useState } from "react";
@@ -26,21 +27,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, Lock, Trash2, ChevronLeft } from "lucide-react";
+import {
+  AlertTriangle, Lock, Trash2, ChevronLeft, PauseCircle, RotateCcw, Clock,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-type Step = "confirm" | "password" | "reason" | "final";
+type Action = "delete" | "suspend";
+type Step   = "confirm" | "password" | "reason" | "final" | "final-suspend";
 
 interface DeleteAccountModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-// ── LEAVE_REASONS — surfaced to the user as quick-select chips ─────────────
+// ── LEAVE_REASONS ──────────────────────────────────────────────────────────
 
 const LEAVE_REASONS = [
   "סיימתי להשתמש בפלטפורמה",
@@ -53,11 +57,12 @@ const LEAVE_REASONS = [
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalProps) {
-  const [step, setStep]         = useState<Step>("confirm");
+  const [step,     setStep]     = useState<Step>("confirm");
+  const [action,   setAction]   = useState<Action>("delete");
   const [password, setPassword] = useState("");
-  const [reason, setReason]     = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState<string | null>(null);
+  const [reason,   setReason]   = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState<string | null>(null);
 
   const { user, signOut } = useAuth();
   const { toast }         = useToast();
@@ -67,6 +72,7 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
   const handleOpenChange = (val: boolean) => {
     if (!val) {
       setStep("confirm");
+      setAction("delete");
       setPassword("");
       setReason("");
       setError(null);
@@ -75,13 +81,14 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
     onOpenChange(val);
   };
 
-  // ── Step 1 → Step 2: ask for password ─────────────────────────────────
-  const handleConfirm = () => {
+  // ── Step: choose action ────────────────────────────────────────────────
+  const handleChooseAction = (chosen: Action) => {
+    setAction(chosen);
     setStep("password");
     setError(null);
   };
 
-  // ── Step 2 → Step 3: verify password ──────────────────────────────────
+  // ── Step: verify password → branch by action ───────────────────────────
   const handleVerifyPassword = async () => {
     if (!user?.email) return;
     setLoading(true);
@@ -96,7 +103,8 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
         setLoading(false);
         return;
       }
-      setStep("reason");
+      // Branch: suspension skips the "reason" step
+      setStep(action === "suspend" ? "final-suspend" : "reason");
     } catch {
       setError("אירעה שגיאה. אנא נסו שוב.");
     } finally {
@@ -104,20 +112,18 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
     }
   };
 
-  // ── Step 3 → Step 4: save reason, show final confirmation ─────────────
+  // ── Step: reason → final delete confirmation ───────────────────────────
   const handleReasonContinue = () => {
     setStep("final");
     setError(null);
   };
 
-  // ── Step 4: execute deletion ───────────────────────────────────────────
+  // ── Execute: permanent delete (7-day grace) ────────────────────────────
   const handleDeletePermanently = async () => {
     if (!user) return;
     setLoading(true);
     setError(null);
-
     try {
-      // Call the request-account-deletion edge function
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData?.session?.access_token;
 
@@ -143,10 +149,9 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
         return;
       }
 
-      // Success — sign out and navigate home
       toast({
         title: "החשבון מסומן למחיקה",
-        description: "החשבון שלכם יימחק תוך 30 ימים. התנתקתם בהצלחה.",
+        description: "יש לכם 7 ימים לשחזר את החשבון. לאחר מכן — המחיקה סופית.",
       });
       handleOpenChange(false);
       await signOut();
@@ -158,56 +163,101 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
     }
   };
 
+  // ── Execute: suspend account ───────────────────────────────────────────
+  const handleSuspend = async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/suspend-account`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          },
+          body: JSON.stringify({ password }),
+        },
+      );
+
+      if (!resp.ok) {
+        const body = await resp.json().catch(() => ({}));
+        setError(body?.message || "לא ניתן להשהות את החשבון כרגע. אנא פנו לתמיכה.");
+        setLoading(false);
+        return;
+      }
+
+      toast({
+        title: "החשבון הושהה",
+        description: "החשבון שלכם הושהה. ניתן להפעילו מחדש בכל עת על ידי התחברות.",
+      });
+      handleOpenChange(false);
+      await signOut();
+      navigate("/");
+    } catch {
+      setError("אירעה שגיאה בעת השהיית החשבון. אנא פנו לצוות התמיכה.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md" dir="rtl">
 
-        {/* ── Step: initial confirmation ────────────────────────────── */}
+        {/* ── Step: choose action ────────────────────────────────────── */}
         {step === "confirm" && (
           <>
             <DialogHeader>
-              <div className="flex items-center gap-3 mb-1">
-                <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
-                  <Trash2 size={18} className="text-destructive" />
-                </div>
-                <DialogTitle className="text-destructive">מחיקת חשבון</DialogTitle>
-              </div>
-              <DialogDescription asChild>
-                <div className="space-y-3 text-sm text-muted-foreground mt-2">
-                  <p>
-                    פעולה זו <strong className="text-foreground">בלתי הפיכה</strong>.
-                    מחיקת החשבון תגרום לאיבוד קבוע של:
-                  </p>
-                  <ul className="list-disc list-inside space-y-1 text-xs pr-2">
-                    <li>כל הביקורות שכתבתם</li>
-                    <li>נתוני הפרופיל והפעילות שלכם</li>
-                    <li>גישה לכל תוכן שנרכש דרך ReviewHub</li>
-                    <li>נתוני עסק, אנליטיקס ואינטגרציות (אם קיימים)</li>
-                  </ul>
-                  <div className="flex items-start gap-2 bg-destructive/5 border border-destructive/20 rounded-lg p-3">
-                    <AlertTriangle size={14} className="text-destructive shrink-0 mt-0.5" />
-                    <p className="text-xs text-destructive/90">
-                      לאחר אישור, החשבון יסומן למחיקה. תהליך המחיקה יושלם תוך 30 ימים.
-                    </p>
-                  </div>
-                </div>
+              <DialogTitle className="text-foreground">ניהול חשבון</DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground mt-1">
+                בחרו את הפעולה הרצויה. ניתן להשהות את החשבון זמנית, או למחוק אותו לצמיתות.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex flex-col gap-2 mt-2">
-              <Button
-                variant="destructive"
-                onClick={handleConfirm}
-                className="w-full"
+            <div className="flex flex-col gap-3 mt-3">
+              {/* Suspend option */}
+              <button
+                onClick={() => handleChooseAction("suspend")}
+                className="group flex items-start gap-4 rounded-xl border border-border bg-muted/30 p-4 text-right hover:border-primary/40 hover:bg-primary/5 transition-all"
               >
-                המשיכו לתהליך המחיקה
-              </Button>
+                <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-amber-500/20 transition-colors">
+                  <PauseCircle size={18} className="text-amber-500" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-semibold text-foreground">השהיית חשבון</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    החשבון יושהה ולא יהיה גלוי. ניתן להפעילו מחדש בכל עת על ידי התחברות רגילה.
+                  </p>
+                </div>
+              </button>
+
+              {/* Delete option */}
+              <button
+                onClick={() => handleChooseAction("delete")}
+                className="group flex items-start gap-4 rounded-xl border border-border bg-muted/30 p-4 text-right hover:border-destructive/40 hover:bg-destructive/5 transition-all"
+              >
+                <div className="w-9 h-9 rounded-full bg-destructive/10 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-destructive/20 transition-colors">
+                  <Trash2 size={18} className="text-destructive" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-semibold text-destructive">מחיקת חשבון</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    החשבון יסומן למחיקה. יש לכם חלון של <strong className="text-foreground">7 ימים</strong> לשחזר אותו לפני שהמחיקה הופכת סופית.
+                  </p>
+                </div>
+              </button>
+
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => handleOpenChange(false)}
-                className="w-full"
+                className="text-muted-foreground"
               >
-                ביטול — שמרו על החשבון שלי
+                ביטול
               </Button>
             </div>
           </>
@@ -224,7 +274,7 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
                 <DialogTitle>אמתו את זהותכם</DialogTitle>
               </div>
               <DialogDescription className="text-sm text-muted-foreground">
-                הזינו את הסיסמה הנוכחית שלכם כדי להמשיך. שלב זה מגן עליכם מפני מחיקה לא מכוונת.
+                הזינו את הסיסמה הנוכחית שלכם כדי להמשיך.
               </DialogDescription>
             </DialogHeader>
 
@@ -260,14 +310,14 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
                   disabled={loading || password.length < 6}
                   className="flex-1"
                 >
-                  {loading ? "מאמת..." : "אמתו סיסמה →"}
+                  {loading ? "מאמת..." : "המשיכו →"}
                 </Button>
               </div>
             </div>
           </>
         )}
 
-        {/* ── Step: reason for leaving ──────────────────────────────── */}
+        {/* ── Step: reason for leaving (delete path only) ────────────── */}
         {step === "reason" && (
           <>
             <DialogHeader>
@@ -278,7 +328,6 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
             </DialogHeader>
 
             <div className="space-y-3 mt-2">
-              {/* Quick-select chips */}
               <div className="flex flex-wrap gap-2">
                 {LEAVE_REASONS.map(r => (
                   <button
@@ -296,7 +345,6 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
                 ))}
               </div>
 
-              {/* Free-text */}
               <Textarea
                 placeholder="פירוט נוסף (אופציונלי)..."
                 value={reason}
@@ -304,9 +352,7 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
                 className="text-sm min-h-[80px] resize-none text-right"
                 maxLength={500}
               />
-              <p className="text-[10px] text-muted-foreground text-left">
-                {reason.length}/500
-              </p>
+              <p className="text-[10px] text-muted-foreground text-left">{reason.length}/500</p>
 
               <div className="flex gap-2">
                 <Button
@@ -318,10 +364,7 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
                   <ChevronLeft size={14} />
                   חזרה
                 </Button>
-                <Button
-                  onClick={handleReasonContinue}
-                  className="flex-1"
-                >
+                <Button onClick={handleReasonContinue} className="flex-1">
                   המשיכו →
                 </Button>
               </div>
@@ -329,7 +372,7 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
           </>
         )}
 
-        {/* ── Step: final confirmation ──────────────────────────────── */}
+        {/* ── Step: final delete confirmation ───────────────────────── */}
         {step === "final" && (
           <>
             <DialogHeader>
@@ -342,14 +385,26 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
               <DialogDescription asChild>
                 <div className="space-y-2 text-sm text-muted-foreground mt-1">
                   <p>
-                    אתם עומדים <strong className="text-foreground">למחוק לצמיתות</strong> את החשבון של <strong className="text-foreground">{user?.email}</strong>.
-                  </p>
-                  <p className="text-xs">
-                    לאחר לחיצה על "מחקו לצמיתות" — לא תוכלו לבטל פעולה זו.
+                    אתם עומדים למחוק את החשבון של{" "}
+                    <strong className="text-foreground">{user?.email}</strong>.
                   </p>
                 </div>
               </DialogDescription>
             </DialogHeader>
+
+            {/* 7-day grace window banner */}
+            <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 mt-1">
+              <Clock size={16} className="text-amber-500 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                  חלון שחזור — 7 ימים
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  לאחר האישור, החשבון יושבת ויסומן למחיקה. תוך <strong className="text-foreground">7 ימים</strong> ניתן לשחזר אותו
+                  על ידי התחברות או פנייה לתמיכה. לאחר 7 ימים — המחיקה סופית ובלתי הפיכה.
+                </p>
+              </div>
+            </div>
 
             {error && (
               <p className="text-xs text-destructive flex items-center gap-1 mt-1">
@@ -366,7 +421,7 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
                 className="w-full font-semibold"
               >
                 <Trash2 size={15} className="ml-2" />
-                {loading ? "מוחק..." : "מחקו לצמיתות"}
+                {loading ? "מוחק..." : "מחקו את החשבון"}
               </Button>
               <Button
                 variant="outline"
@@ -379,6 +434,66 @@ export default function DeleteAccountModal({ open, onOpenChange }: DeleteAccount
             </div>
           </>
         )}
+
+        {/* ── Step: final suspend confirmation ──────────────────────── */}
+        {step === "final-suspend" && (
+          <>
+            <DialogHeader>
+              <div className="flex items-center gap-3 mb-1">
+                <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <PauseCircle size={18} className="text-amber-500" />
+                </div>
+                <DialogTitle>אישור השהיית חשבון</DialogTitle>
+              </div>
+              <DialogDescription asChild>
+                <div className="space-y-2 text-sm text-muted-foreground mt-1">
+                  <p>
+                    החשבון של <strong className="text-foreground">{user?.email}</strong> יושהה.
+                  </p>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* Suspension info */}
+            <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 mt-1">
+              <RotateCcw size={16} className="text-primary shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-primary">ניתן לחזור בכל עת</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  פרופילכם לא יהיה גלוי לאחרים, והנתונים שלכם יישמרו. כדי להפעיל את החשבון מחדש —
+                  פשוט התחברו שוב.
+                </p>
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-xs text-destructive flex items-center gap-1 mt-1">
+                <AlertTriangle size={11} />
+                {error}
+              </p>
+            )}
+
+            <div className="flex flex-col gap-2 mt-2">
+              <Button
+                onClick={handleSuspend}
+                disabled={loading}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold"
+              >
+                <PauseCircle size={15} className="ml-2" />
+                {loading ? "מושהה..." : "השהו את החשבון"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+                disabled={loading}
+                className="w-full"
+              >
+                ביטול — שמרו על החשבון שלי
+              </Button>
+            </div>
+          </>
+        )}
+
       </DialogContent>
     </Dialog>
   );

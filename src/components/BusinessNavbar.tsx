@@ -17,13 +17,6 @@ import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppMode } from "@/contexts/ModeContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 /** Sub-items for the "מוצר" dropdown — always visible to all visitors */
 const PRODUCT_ITEMS = [
@@ -36,6 +29,7 @@ const PRODUCT_ITEMS = [
 const BusinessNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productOpen, setProductOpen] = useState(false);
+  const [userOpen, setUserOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { switchToUserMode } = useAppMode();
   const navigate = useNavigate();
@@ -101,9 +95,9 @@ const BusinessNavbar = () => {
             </Link>
           )}
 
-          {/* מוצר dropdown — hover-based (no long-click needed) */}
+          {/* מוצר dropdown — hover-based; pb-2 bridges the gap so panel never vanishes mid-travel */}
           <div
-            className="relative"
+            className="relative pb-2"
             onMouseEnter={() => setProductOpen(true)}
             onMouseLeave={() => setProductOpen(false)}
           >
@@ -125,10 +119,10 @@ const BusinessNavbar = () => {
               />
             </button>
 
-            {/* Floating panel */}
+            {/* Floating panel — top-full aligns with the bottom of the pb-2 zone so no gap */}
             {productOpen && (
               <div
-                className="absolute top-[calc(100%+6px)] right-1/2 translate-x-1/2 w-52 rounded-xl border border-zinc-700/80 bg-zinc-800/95 backdrop-blur-sm shadow-2xl py-1.5 z-50"
+                className="absolute top-full right-1/2 translate-x-1/2 w-52 rounded-xl border border-zinc-700/80 bg-zinc-800/95 backdrop-blur-sm shadow-2xl py-1.5 z-50"
                 style={{ direction: "rtl" }}
                 role="menu"
               >
@@ -186,39 +180,40 @@ const BusinessNavbar = () => {
           )}
 
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full border border-zinc-600 text-zinc-300 hover:text-white hover:bg-zinc-800"
+            /* Avatar hover menu — pb-2 bridges the gap, single hover opens it */
+            <div
+              className="relative pb-2"
+              onMouseEnter={() => setUserOpen(true)}
+              onMouseLeave={() => setUserOpen(false)}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full border border-zinc-600 text-zinc-300 hover:text-white hover:bg-zinc-800"
+                aria-label="תפריט משתמש"
+                aria-haspopup="menu"
+                aria-expanded={userOpen}
+              >
+                <User size={18} />
+              </Button>
+
+              {userOpen && (
+                <div
+                  className="absolute top-full left-0 w-36 rounded-xl border border-zinc-700/80 bg-zinc-800/95 backdrop-blur-sm shadow-2xl py-1 z-50"
+                  style={{ direction: "rtl" }}
+                  role="menu"
                 >
-                  <User size={18} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48" style={{ direction: "rtl" }}>
-                <DropdownMenuItem className="text-xs text-muted-foreground cursor-default">
-                  {user.email}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/business/dashboard")}>
-                  לוח בקרה
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/business/pricing")}>
-                  <Tag size={14} className="ml-2" aria-hidden="true" />
-                  מחירון
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSwitchToUser}>
-                  <ArrowLeftRight size={14} className="ml-2" aria-hidden="true" />
-                  חזרה לחשבון רגיל
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-                  <LogOut size={14} className="ml-2" aria-hidden="true" />
-                  התנתקו
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <button
+                    onClick={handleSignOut}
+                    role="menuitem"
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm w-full text-red-400 hover:text-red-300 hover:bg-zinc-700/50 transition-colors"
+                  >
+                    <LogOut size={14} aria-hidden="true" />
+                    התנתקו
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="hidden md:flex items-center gap-2">
               <Link to="/business/login">
