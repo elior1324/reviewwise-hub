@@ -165,18 +165,16 @@ const BusinessNavbar = () => {
         <div className="flex items-center gap-2">
           <AccessibilityMenu />
 
-          {/* Mode switch — always visible when logged-in */}
-          {user && (
-            <button
-              onClick={handleSwitchToUser}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-zinc-700/60 border border-zinc-600 text-zinc-200 hover:bg-zinc-600 hover:text-white hover:border-zinc-500 transition-all"
-              aria-label="עבור לגלישה רגילה"
-              title="עבור לגלישה רגילה"
-            >
-              <ArrowLeftRight size={12} aria-hidden="true" />
-              גלישה רגילה
-            </button>
-          )}
+          {/* Mode switch — visible to everyone, logged-in or not */}
+          <button
+            onClick={handleSwitchToUser}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-zinc-700/60 border border-zinc-600 text-zinc-200 hover:bg-zinc-600 hover:text-white hover:border-zinc-500 transition-all"
+            aria-label="עבור לגלישה רגילה"
+            title="עבור לגלישה רגילה"
+          >
+            <ArrowLeftRight size={12} aria-hidden="true" />
+            גלישה רגילה
+          </button>
 
           {user ? (
             /* Avatar hover menu — pb-2 bridges the gap, single hover opens it */
@@ -287,6 +285,14 @@ const BusinessNavbar = () => {
           </Link>
 
           <div className="border-t border-zinc-700/60 pt-1 mt-1">
+            {/* גלישה רגילה — visible to everyone */}
+            <button
+              onClick={() => { handleSwitchToUser(); setMobileOpen(false); }}
+              className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-300 w-full"
+            >
+              <ArrowLeftRight size={14} aria-hidden="true" />
+              גלישה רגילה
+            </button>
             {!user ? (
               <Link
                 to="/business/login"
@@ -296,22 +302,13 @@ const BusinessNavbar = () => {
                 התחברו / הרשמו
               </Link>
             ) : (
-              <>
-                <button
-                  onClick={() => { handleSwitchToUser(); setMobileOpen(false); }}
-                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-300 w-full"
-                >
-                  <ArrowLeftRight size={14} aria-hidden="true" />
-                  חזרה לחשבון רגיל
-                </button>
-                <button
-                  onClick={() => { handleSignOut(); setMobileOpen(false); }}
-                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-destructive w-full"
-                >
-                  <LogOut size={14} aria-hidden="true" />
-                  התנתקו
-                </button>
-              </>
+              <button
+                onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-destructive w-full"
+              >
+                <LogOut size={14} aria-hidden="true" />
+                התנתקו
+              </button>
             )}
           </div>
         </div>

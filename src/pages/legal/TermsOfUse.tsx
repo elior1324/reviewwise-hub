@@ -149,6 +149,21 @@ const TermsOfUse = () => (
             </li>
           </ol>
 
+          {/* Feature table — what ReviewHub does and doesn't do */}
+          <div className="mt-5 rounded-xl overflow-hidden border border-border/60 text-sm">
+            {([
+              ["מה ReviewHub עושה", "מספקת תשתית אחסון; מפעילה מידור טרום-פרסום; מנהלת תהליך יישוב סכסוכים; מציגה ציוני אמון מנתוני רכישה מאומתים בלבד."],
+              ["מה ReviewHub אינה עושה", "כתיבה, עריכה או אישור ביקורות בודדות; ערובה לדיוק עובדתי של תוכן שהוגש; דיכוי ביקורות מסיבות מסחריות; מכירה או מניפולציה של ציוני אמון."],
+              ["אחריות הסוקר", "כל סוקר מקבל, בעת הגשה, שהוא האחראי הבלעדי לנכונות ולחוקיות התוכן שהוא מפרסם."],
+              ["אחריות הגוף", "גופים שתובעים ומנהלים פרופיל ב-ReviewHub מקבלים את מנגנון הביקורות כתנאי לכך ומאשרים שהפלטפורמה אינה שולטת בתוכנן."],
+            ] as [string, string][]).map(([k, v], i) => (
+              <div key={i} className={`grid grid-cols-[160px_1fr] gap-3 px-4 py-3 ${i % 2 === 0 ? "bg-muted/30" : ""}`}>
+                <span className="font-semibold text-foreground/80 text-xs leading-snug self-start pt-0.5">{k}</span>
+                <span className="text-muted-foreground text-xs leading-relaxed">{v}</span>
+              </div>
+            ))}
+          </div>
+
           <p className="mt-4 text-xs text-muted-foreground">
             ← למידע על הגשת תלונה ראו:{" "}
             <a href="/terms#notice-takedown" className="text-primary hover:underline">
@@ -385,13 +400,33 @@ const TermsOfUse = () => (
           <p className="mb-3">
             ReviewHub מפעילה הליך מובנה לטיפול בתלונות על תוכן שפורסם בפלטפורמה:
           </p>
-          <ol className="list-decimal pr-6 space-y-2 text-muted-foreground mb-4">
-            <li><strong>הגשת דיווח:</strong> באמצעות כפתור ה&quot;דווח&quot; או פנייה ל-<a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a>.</li>
-            <li><strong>בדיקה ראשונית:</strong> תוך 72 שעות.</li>
-            <li><strong>הודעה לכותב:</strong> הכותב מקבל 7 ימים להגיב.</li>
-            <li><strong>החלטה:</strong> הותרה, עריכה או הסרה.</li>
-            <li><strong>היעדר תגובה:</strong> ReviewHub רשאית להסיר לפי שיקול דעתה.</li>
-          </ol>
+          <div className="rounded-xl overflow-hidden border border-border/60 my-3">
+            <div className="grid grid-cols-[160px_1fr] bg-primary/10 px-4 py-2.5">
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">שלב</span>
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">פעולה</span>
+            </div>
+            {([
+              ["1 — הגשת דיווח",    "הגוף מגיש סכסוך דרך לוח הבקרה, דרך כפתור ה\"דווח\" בביקורת, או פנייה ל-support@reviewshub.info — תוך פירוט עילות וראיות תומכות."],
+              ["2 — הודעת סוקר",    "הסוקר מקבל הודעה אוטומטית תוך 24 שעות, המבקשת הוכחת רכישה."],
+              ["3 — תגובת סוקר",    "לסוקר 72 שעות להגיש הוכחת רכישה או להגיב לסכסוך."],
+              ["4א — הוכחה הוגשה",  "אם הוגשה הוכחה מספקת — הביקורת נשמרת. הסכסוך מסומן כנפתר לטובת הסוקר."],
+              ["4ב — אין תגובה",    "אם הסוקר אינו מגיב תוך 72 שעות — הביקורת מוסרת זמנית ומסומנת כ'ממתין לאימות'."],
+              ["5 — בדיקת ReviewHub", "במקרים מורכבים, צוות Trust & Safety מנהל בדיקה ידנית ומוציא החלטה סופית תוך 7 ימי עסקים."],
+            ] as [string, string][]).map(([step, action], i) => (
+              <div key={i} className={`grid grid-cols-[160px_1fr] gap-3 px-4 py-3 ${i % 2 === 0 ? "bg-muted/20" : ""}`}>
+                <span className="text-sm font-semibold text-foreground self-start pt-0.5">{step}</span>
+                <span className="text-sm text-muted-foreground leading-relaxed">{action}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-r-4 border-primary bg-primary/5 rounded-l-lg pr-4 pl-3 py-3 my-3">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1.5">תיוג ביניים סטנדרטי</p>
+            <p className="text-sm text-foreground/80 leading-relaxed">
+              "ביקורת זו נמצאת כרגע בתהליך אימות מהימנות. היא תשוחזר או תוסר עם סיום הליך הבדיקה."
+            </p>
+          </div>
+
           <p className="text-muted-foreground text-sm">
             ביצוע הליך זה אינו הופך את ReviewHub לצד בסכסוך.
           </p>
@@ -408,6 +443,87 @@ const TermsOfUse = () => (
           </p>
         </Section>
         </div>
+
+        {/* Reputation Portal — from Trust Architecture */}
+        <Section icon={Shield} title="פורטל ניהול מוניטין לעסקים">
+          <p className="mb-3">
+            ReviewHub מעניקה לגופים מופיעים מערכת כלים מובנית לניהול המוניטין שלהם בשקיפות —
+            מבלי להעניק יכולת לדכא או לתמרן תוכן ביקורות.
+          </p>
+          <p className="font-semibold text-foreground mb-2">זכות תגובה רשמית:</p>
+          <ul className="list-disc pr-6 space-y-1 text-muted-foreground mb-3">
+            <li><strong>תצוגה:</strong> תגובות מוצגות ישירות מתחת לביקורת, מזוהות בבירור כתגובה רשמית של הגוף.</li>
+            <li><strong>מידור:</strong> תגובות כפופות לאותה שכבת מידור כמו ביקורות (בדיקה אוטומטית + ידנית).</li>
+            <li><strong>נעילה:</strong> תגובה שהוגשה ניתנת לעריכה תוך 24 שעות. לאחר מכן — נעולה.</li>
+          </ul>
+          <p className="font-semibold text-foreground mb-2">לוח בקרה אנליטי:</p>
+          <div className="rounded-xl overflow-hidden border border-border/60 text-sm">
+            {([
+              ["מגמת ציון אמון",        "גרף של ציון האמון לאורך תקופות שנבחרו."],
+              ["מהירות ביקורות",         "נפח ביקורות חדשות לחודש ויחס מאומת/לא מאומת."],
+              ["ניתוח סנטימנט",           "סיווג תוכן הביקורות לפי סנטימנט ואשכולות נושא — באמצעות AI."],
+              ["יומן יישוב סכסוכים",      "סטטוס ותוצאות כל הסכסוכים ובקשות ההסרה."],
+              ["השוואת מתחרים",           "השוואה אנונימית לציון אמון ממוצע בקטגוריה (Enterprise בלבד)."],
+            ] as [string, string][]).map(([k, v], i) => (
+              <div key={i} className={`grid grid-cols-[180px_1fr] gap-3 px-4 py-3 ${i % 2 === 0 ? "bg-muted/30" : ""}`}>
+                <span className="font-semibold text-foreground/80 text-xs leading-snug self-start pt-0.5">{k}</span>
+                <span className="text-muted-foreground text-xs leading-relaxed">{v}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* Stakeholder Alignment — from Trust Architecture */}
+        <Section icon={Handshake} title="יישור בעלי עניין ויושרת המערכת">
+          <p className="mb-3">
+            הארכיטקטורה שלנו אינה נועדה להיות עוינת כלפי אף צד — היא מתוכננת למקסם את הדיוק
+            ואת אפשרות האימות של המידע הזמין לצרכנים.
+          </p>
+          <div className="rounded-xl overflow-hidden border border-border/60 text-sm mb-4">
+            <div className="grid grid-cols-[130px_1fr] bg-foreground/90 px-4 py-2.5">
+              <span className="text-xs font-bold text-background uppercase tracking-wider">בעל עניין</span>
+              <span className="text-xs font-bold text-background uppercase tracking-wider">מטרת הפלטפורמה</span>
+            </div>
+            {([
+              ["צרכנים",     "סביבת מידע מהימנה ומאומתת להערכת מוצרים דיגיטליים. ניתן להבחין בין ביקורות אימות רכישה למשוב לא מאומת."],
+              ["גופים",       "מערכת מוניטין שקופה עם מנגנונים ברורים לתגובה, ערעור ובקשת הסרה. הגנה מבידיון אנונימי."],
+              ["ReviewHub",  "הגנה משפטית כמתווכת ניטרלית; תשתית אמון בת-קיימא; פלטפורמה שנשארת ניתנת להגנה במסגרות אחריות מתווכים."],
+            ] as [string, string][]).map(([who, goal], i) => (
+              <div key={i} className={`grid grid-cols-[130px_1fr] gap-3 px-4 py-3 ${i % 2 === 0 ? "bg-muted/20" : ""}`}>
+                <span className="text-sm font-semibold text-foreground self-start pt-0.5">{who}</span>
+                <span className="text-sm text-muted-foreground leading-relaxed">{goal}</span>
+              </div>
+            ))}
+          </div>
+          <div className="border-r-4 border-primary bg-primary/5 rounded-l-lg pr-4 pl-3 py-3">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1.5">הצהרת יושרת המערכת</p>
+            <p className="text-sm text-foreground/80 leading-relaxed">
+              ציון האמון שמפיקה ReviewHub אינו מוצר. לא ניתן לרכוש אותו, לשדרגו, או להשפיע עליו
+              דרך מערכת יחסים מסחרית עם הפלטפורמה. הוא פונקציה של ראיות לקוחות הניתנות לאימות
+              עצמאי. מגבלה זו היא המקור לערכה של הפלטפורמה.
+            </p>
+          </div>
+        </Section>
+
+        {/* Glossary — from Trust Architecture */}
+        <Section icon={FileText} title="מילון מונחים">
+          <div className="divide-y divide-border/40">
+            {([
+              ["משוב קהילתי",           "ביקורת שהוגשה ללא הוכחת רכישה. מוצגת בפרופיל אך אינה נכללת בחישוב ציון האמון (שכבה ב')."],
+              ["סכסוך מהימנות",          "ערעור פורמלי שהוגש על ידי גוף מופיע על אמיתות ביקורת שפורסמה."],
+              ["גוף מופיע",              "כל עסק, יוצר, מוצר SaaS, ספק קורסים, או מקצוען עצמאי עם פרופיל ב-ReviewHub."],
+              ["אימות OAuth",             "אימות דרך ספק זהות צד שלישי (Google, LinkedIn). נדרש לכל הגשת ביקורת."],
+              ["הוכחת רכישה",            "ראיה מסמכנת שעסקה מסחרית התרחשה בין הסוקר לבין הגוף המופיע."],
+              ["ציון אמון",               "ציון מורכב מנתוני אימות רכישה שכבה א'. אינו מושפע מגורמים מסחריים."],
+              ["ביקורת אימות רכישה",     "ביקורת המלווה בהוכחת רכישה מאומתת. תורמת לציון האמון של הגוף ומוצגת עם תג אימות."],
+            ] as [string, string][]).map(([term, def]) => (
+              <div key={term} className="flex flex-col sm:flex-row gap-1 sm:gap-4 py-3">
+                <span className="text-sm font-semibold text-foreground shrink-0 sm:w-48">{term}</span>
+                <span className="text-sm text-muted-foreground leading-relaxed">{def}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
 
         {/* 13 — Third party (original) */}
         <Section icon={Globe} title="תוכן צדדים שלישיים וקישורים חיצוניים">

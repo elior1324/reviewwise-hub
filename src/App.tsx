@@ -26,7 +26,6 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
-import TrustArchitecturePage from "./pages/TrustArchitecturePage";
 import CompanyGuidelines from "./pages/CompanyGuidelines";
 import TrademarkGuidelines from "./pages/TrademarkGuidelines";
 import ModernSlaveryStatement from "./pages/ModernSlaveryStatement";
@@ -95,7 +94,6 @@ const App = () => (
 
             {/* Legal */}
             <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/trust-policy" element={<TrustArchitecturePage />} />
             <Route path="/terms" element={<TermsAndConditions />} />
             <Route path="/guidelines" element={<CompanyGuidelines />} />
             <Route path="/trademark" element={<TrademarkGuidelines />} />

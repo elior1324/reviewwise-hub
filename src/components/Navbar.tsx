@@ -74,7 +74,8 @@ const Navbar = () => {
 
   const handleSwitchToBusiness = () => {
     switchToBusinessMode();
-    navigate("/business/dashboard");
+    // Logged-in users go straight to their dashboard; guests see the landing page
+    navigate(user ? "/business/dashboard" : "/business");
   };
 
   const handleSwitchToConsumer = () => {
@@ -250,8 +251,8 @@ const Navbar = () => {
           <AccessibilityMenu />
           {user && <NotificationBell />}
 
-          {/* ── Mode switch pill — consumer → business ───────────────────── */}
-          {user && !isBusinessMode && (
+          {/* ── Mode switch pill — consumer → business (always visible) ─── */}
+          {!isBusinessMode && (
             <button
               onClick={handleSwitchToBusiness}
               className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/70 transition-all"
@@ -262,8 +263,8 @@ const Navbar = () => {
               פרופיל עסקי
             </button>
           )}
-          {/* ── Mode switch pill — business → consumer ───────────────────── */}
-          {user && isBusinessMode && (
+          {/* ── Mode switch pill — business → consumer (always visible) ─── */}
+          {isBusinessMode && (
             <button
               onClick={handleSwitchToConsumer}
               className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-zinc-700/60 border border-zinc-600 text-zinc-200 hover:bg-zinc-600 hover:text-white hover:border-zinc-500 transition-all"
@@ -455,19 +456,18 @@ const Navbar = () => {
               </div>
 
               <div className="border-t border-border/30 pt-1">
-                {user && (
-                  <button
-                    onClick={() => { handleSwitchToBusiness(); setMobileOpen(false); }}
-                    className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-primary font-medium w-full"
-                  >
-                    <Briefcase size={14} aria-hidden="true" />
-                    מצב עסקי
-                  </button>
-                )}
+                {/* פרופיל עסקי — visible to everyone */}
+                <button
+                  onClick={() => { handleSwitchToBusiness(); setMobileOpen(false); }}
+                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-primary font-medium w-full"
+                >
+                  <ArrowLeftRight size={14} aria-hidden="true" />
+                  פרופיל עסקי
+                </button>
                 {!user && (
                   <Link
                     to="/auth"
-                    className="block text-sm py-3 min-h-[44px] flex items-center text-primary"
+                    className="block text-sm py-3 min-h-[44px] flex items-center text-muted-foreground"
                     onClick={() => setMobileOpen(false)}
                   >
                     התחברו / צרו חשבון
