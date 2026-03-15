@@ -37,6 +37,12 @@ const CoursePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (course?.name) {
+      document.title = `${course.name} — ביקורות מאומתות | ReviewHub`;
+    }
+  }, [course?.name]);
+
+  useEffect(() => {
     if (!courseId) return;
 
     const fetchCourse = async () => {
@@ -202,17 +208,20 @@ const CoursePage = () => {
               )}
               {course.affiliateUrl && sanitizeUrl(course.affiliateUrl) && (
                 <div className="space-y-2">
+                  {/* Community Discount Label — v2.0 */}
+                  <div className="flex flex-col items-end gap-1 mb-2">
+                    <p className="text-[12px] text-primary font-semibold leading-relaxed text-right max-w-[280px]">
+                      10% הנחה לקהילת ReviewHub — כולל אימות רכישה אוטומטי
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/70 leading-relaxed text-right max-w-[280px]">
+                      רכישה דרך קישור זה מעניקה סטטוס &quot;קונה מאומת&quot; אוטומטית ומאפשרת כתיבת ביקורת מאומתת. עמלת תפעול עשויה להיווצר — אינה משפיעה על ציון האמון.
+                    </p>
+                  </div>
                   <a href={sanitizeUrl(course.affiliateUrl)} target="_blank" rel="noopener noreferrer">
                     <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 w-full">
                       המשיכו לרכישה מאומתת <ExternalLink size={16} />
                     </Button>
                   </a>
-                  <p className="text-[11px] text-primary/80 font-medium leading-relaxed text-right max-w-[260px]">
-                    10% הנחה לקהילת ReviewHub (כולל אימות רכישה אוטומטי)
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/60 leading-relaxed text-right max-w-[260px]">
-                    רכישה דרך קישור זה מאפשרת קבלת סטטוס ״קונה מאומת״ ומסייעת לאמת ביקורות עתידיות. לשקיפות: עמלת תפעול עשויה להיווצר — אינה משפיעה על ציון האמון.
-                  </p>
                 </div>
               )}
             </div>

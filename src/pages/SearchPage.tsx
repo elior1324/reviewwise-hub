@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type SortOption = "default" | "top5" | "alpha-asc" | "rating-desc" | "rating-asc" | "most-reviews" | "least-reviews" | "most-verified" | "most-trusted";
+type SortOption = "default" | "top5" | "alpha-asc" | "rating-desc" | "rating-asc" | "most-reviews" | "least-reviews" | "most-verified" | "most-trusted" | "trending" | "rising";
 
 const SORT_LABELS: Record<SortOption, string> = {
   "default": "ברירת מחדל",
@@ -36,6 +36,8 @@ const SORT_LABELS: Record<SortOption, string> = {
   "rating-asc": "דירוג נמוך תחילה",
   "most-reviews": "הכי הרבה ביקורות",
   "least-reviews": "הכי פחות ביקורות",
+  "trending": "Trending — הכי נסקרים השבוע",
+  "rising": "Rising — עולים בדירוג",
 };
 
 // Trust tier ordering for ranking
@@ -81,7 +83,7 @@ function sortBusinesses(list: Business[], sort: SortOption): Business[] {
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
-  const defaultTab = searchParams.get("tab") || "freelancers";
+  const defaultTab = searchParams.get("tab") || "courses";
   const [selectedFreelancerCat, setSelectedFreelancerCat] = useState("הכל");
   const [selectedSubcat, setSelectedSubcat] = useState<string | null>(null);
   const [selectedCourseCat, setSelectedCourseCat] = useState("הכל");
@@ -269,9 +271,9 @@ const SearchPage = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
       <div className="container pt-24 pb-16">
-        <h1 className="font-display font-bold text-3xl mb-2">ספריית האמון — כלכלה דיגיטלית</h1>
+        <h1 className="font-display font-bold text-3xl mb-2">מאגר האמון — קורסים דיגיטליים מאומתים</h1>
         <p className="text-muted-foreground text-sm mb-6 max-w-xl">
-          אמתו כלי SaaS, AI, מומחים דיגיטליים וקורסים מקצועיים לפני שבוטחים. ציון האמון מחושב מביקורות מאומתות רכישה בלבד.
+          אמתו קורסים דיגיטליים לפני שבוטחים. ציון האמון מחושב מביקורות מאומתות רכישה בלבד.
         </p>
 
         {/* Search */}

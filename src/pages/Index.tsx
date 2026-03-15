@@ -239,28 +239,27 @@ const Index = () => {
         <motion.div className="container py-16 md:py-24 relative" style={{ opacity: heroOpacity, y: heroY }}>
           <motion.div className="max-w-4xl mx-auto text-center" initial="hidden" animate="visible">
             <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
-              <ShieldCheck size={16} aria-hidden="true" /> תשתית אמון לכלכלה הדיגיטלית · אימות עצמאי · נתונים ממשיים
+              <ShieldCheck size={16} aria-hidden="true" /> תשתית אימות עצמאית לחינוך דיגיטלי · ביקורות מאומתות רכישה בלבד
             </motion.div>
             <motion.h1 id="hero-heading" variants={fadeUp} custom={1} className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-4">
-              <span className="gradient-text glow-text">אמון</span>
-              {" "}בכלכלה{" "}
-              <span className="gradient-text glow-text">הדיגיטלית</span>
+              מצאו קורסים שאפשר{" "}
+              <span className="gradient-text glow-text">באמת לסמוך עליהם</span>
             </motion.h1>
             <motion.p variants={fadeUp} custom={2} className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-              ReviewHub מאמתת SaaS, כלי AI, מומחים דיגיטליים וקורסים מקצועיים — לפני שאתם בוטחים. לא דעות — רשומות מסחריות מאומתות מנתוני רכישה ממשיים.
+              ReviewHub מדרגת קורסים דיגיטליים לפי ביקורות מאומתות רכישה בלבד — לא פרסום, לא דעות, לא תשלום לשיפור דירוג. ציון אמון עצמאי לכל קורס.
             </motion.p>
             {/*
               role="search" identifies this as the site's primary search form for
               screen reader landmark navigation (WCAG 1.3.1 / ARIA landmark roles).
               aria-label distinguishes it from any other search forms on the page.
             */}
-            <motion.form role="search" aria-label="חיפוש מומחים דיגיטליים, כלי SaaS וקורסים" variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto mb-12 w-full px-4 sm:px-0">
+            <motion.form role="search" aria-label="חיפוש קורסים דיגיטליים" variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto mb-12 w-full px-4 sm:px-0">
               <div className="relative flex-1">
                 {/* Search icon is decorative — the input's aria-label conveys the purpose */}
                 <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
-                  placeholder="חפשו כלי AI, מומחה דיגיטלי, קורס — בדקו אמינות לפני שבוטחים"
-                  aria-label="חיפוש כלים דיגיטליים, מומחים וקורסים לאימות"
+                  placeholder="חפשו קורסים — שיווק, AI, פיתוח, עיצוב, יזמות ועוד"
+                  aria-label="חיפוש קורסים דיגיטליים"
                   className="pr-10 h-12 glass border-border/50 w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -281,9 +280,9 @@ const Index = () => {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <BookOpen size={22} className="text-primary" />
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">ציוני אמון — חינוך דיגיטלי</h2>
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">קורסים מובילים — ביקורות מאומתות</h2>
             </div>
-            <p className="text-muted-foreground mt-1">קורסים, מנטורינג וסדנאות בתחומי הכלכלה הדיגיטלית — מדורגים לפי ביקורות מאומתות רכישה</p>
+            <p className="text-muted-foreground mt-1">קורסים מדורגים לפי ציון האמון — מבוסס על ביקורות מאומתות רכישה בלבד. לא ניתן לרכוש מיקום.</p>
           </div>
           <Link to="/search?tab=courses">
             <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
@@ -302,8 +301,110 @@ const Index = () => {
         )}
       </section>
 
-      {/* Top SaaS & AI Tools — 2nd */}
+      {/* ── Trending Now Discovery Feed ─────────────────────────────── */}
       <section className="container py-10">
+        <div className="flex items-start md:items-end justify-between mb-8 flex-wrap gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp size={22} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">Trending Now</h2>
+              <span className="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">↑ הכי נסקרים השבוע</span>
+            </div>
+            <p className="text-muted-foreground mt-1">קורסים עם הכי הרבה ביקורות חדשות ב-7 הימים האחרונים — מתעדכן כל 6 שעות</p>
+          </div>
+          <Link to="/search?sort=trending">
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+          </Link>
+        </div>
+        {topCourseProviders.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topCourseProviders.slice(0, 4).map((biz, i) => (
+              <motion.div key={`trending-${biz.slug}`} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <div className="relative">
+                  <span className="absolute -top-2 -right-2 z-10 text-xs font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">Trending</span>
+                  <BusinessCard {...biz} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-8">עדיין אין נתוני Trending. תחזרו בקרוב!</p>
+        )}
+      </section>
+
+      {/* ── Rising Courses Discovery Feed ───────────────────────────── */}
+      <section className="container py-10">
+        <div className="flex items-start md:items-end justify-between mb-8 flex-wrap gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Star size={22} className="text-warn" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">Rising Courses</h2>
+              <span className="text-xs font-semibold bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-2 py-0.5 rounded-full">↑ בניית מומנטום</span>
+            </div>
+            <p className="text-muted-foreground mt-1">קורסים שציון האמון שלהם עלה הכי הרבה ב-30 הימים האחרונים — גם יוצרים קטנים יכולים להגיע לדף הבית</p>
+          </div>
+          <Link to="/search?sort=rising">
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+          </Link>
+        </div>
+        {topCourseProviders.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...topCourseProviders].reverse().slice(0, 4).map((biz, i) => (
+              <motion.div key={`rising-${biz.slug}`} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <div className="relative">
+                  <span className="absolute -top-2 -right-2 z-10 text-xs font-bold bg-yellow-500 text-white px-2 py-0.5 rounded-full">Rising ↑</span>
+                  <BusinessCard {...biz} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-8">עדיין אין נתוני Rising. תחזרו בקרוב!</p>
+        )}
+      </section>
+
+      {/* ── Editor Picks ────────────────────────────────────────────── */}
+      <section className="border-y border-primary/20 bg-primary/5 py-10">
+        <div className="container">
+          <div className="flex items-start md:items-end justify-between mb-8 flex-wrap gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <ShieldCheck size={22} className="text-primary" />
+                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">Editor Picks</h2>
+                <span className="text-xs font-semibold bg-primary/15 text-primary px-2 py-0.5 rounded-full">נבחר ידנית</span>
+              </div>
+              <p className="text-muted-foreground mt-1">בחירה שבועית של צוות ReviewHub — קורסים שהצטיינו באיכות, עדכניות, או בתחום שזקוק לחשיפה</p>
+            </div>
+            <Link to="/search?sort=editor_picks">
+              <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+            </Link>
+          </div>
+          {topCourseProviders.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {topCourseProviders.slice(0, 3).map((biz, i) => (
+                <motion.div key={`editor-${biz.slug}`} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                  <div className="relative">
+                    <span className="absolute -top-2 -right-2 z-10 text-xs font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <ShieldCheck size={10} /> Editor Pick
+                    </span>
+                    <BusinessCard {...biz} />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">Editor Picks יעודכנו בקרוב.</p>
+          )}
+        </div>
+      </section>
+
+      {/* Top SaaS & AI Tools — Phase 2 */}
+      <section className="container py-10 opacity-70">
+        <div className="mb-4">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-muted text-muted-foreground px-3 py-1 rounded-full">
+            שלב 2 — בפיתוח · כלי SaaS ו-AI יתווספו בהמשך
+          </span>
+        </div>
         <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -329,8 +430,13 @@ const Index = () => {
         )}
       </section>
 
-      {/* Top Service Providers — 3rd */}
-      <section className="container py-10">
+      {/* Top Service Providers — Phase 2 */}
+      <section className="container py-10 opacity-70">
+        <div className="mb-4">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-muted text-muted-foreground px-3 py-1 rounded-full">
+            שלב 2 — בפיתוח · מומחים דיגיטליים יתווספו בהמשך
+          </span>
+        </div>
         <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -602,7 +708,7 @@ const Index = () => {
                 {
                   step: "02",
                   title: "ציון אמון לכלכלה הדיגיטלית",
-                  desc: "ציון האמון מורכב משלושה מרכיבים: נפח ביקורות מאומתות (עד 40 נקודות), בריאות החזרים ותלונות (עד 35 נקודות), ותקופת פעילות מוכחת (עד 25 נקודות).",
+                  desc: "ציון האמון v2.0 מורכב מארבעה מרכיבים: איכות ביקורות (עד 20 נקודות), נפח לוגריתמי (עד 25 נקודות), עדכניות (עד 25 נקודות), ועקביות (עד 30 נקודות) — כפול מכפיל יחס ביקורות מאומתות. יוצר קטן עם 5 ביקורות מאומתות מצוינות יכול להגיע לרמת Elite.",
                 },
                 {
                   step: "03",
@@ -662,8 +768,8 @@ const Index = () => {
           </motion.div>
           <div className="max-w-3xl mx-auto space-y-3">
             {[
-              { q: "מה זה ReviewHub?", a: "ReviewHub היא תשתית האמון לכלכלה הדיגיטלית. הפלטפורמה מאמתת כלי SaaS, AI, מומחים דיגיטליים וקורסים מקצועיים — ומפיקה ציוני אמון המבוססים על נתוני רכישה ממשיים. לא פרסום, לא דעות — אימות עצמאי בלבד." },
-              { q: "אילו ישויות מאומתות ב-ReviewHub?", a: "ReviewHub מאמתת שלוש קטגוריות של הכלכלה הדיגיטלית: כלי SaaS ו-AI, מומחים דיגיטליים (מנהלי סושיאל, מפתחים, יועצי AI וכו'), וחינוך דיגיטלי (קורסים, מנטורינג, סדנאות). כל הביקורות מבוססות על הוכחת רכישה." },
+              { q: "מה זה ReviewHub?", a: "ReviewHub היא תשתית אימות עצמאית לחינוך דיגיטלי. הפלטפורמה מדרגת קורסים אונליין לפי ביקורות מאומתות רכישה — לא פרסום, לא דעות, ולא תשלום לשיפור דירוג. ציון האמון מחושב אוטומטית ולא ניתן לרכישה." },
+              { q: "אילו קורסים מדורגים ב-ReviewHub?", a: "ReviewHub v1.0 מתמקדת בחינוך דיגיטלי: קורסי שיווק דיגיטלי, פיתוח תוכנה, AI, עיצוב UI/UX, יזמות, פרילנסינג, פיננסים, וידאו, כתיבה ומכירות. קטגוריות נוספות (מומחים דיגיטליים, כלי SaaS) יתווספו בשלב 2." },
               { q: "איך אני יודע שהביקורות אמיתיות?", a: "אנחנו מאמתים מול נתוני רכישה ממשיים — לא על בסיס הצהרה עצמית. רק מי שרכש בפועל יכול לכתוב ביקורת. ביקורות מאומתות מסומנות במפורש. ספקים לא יכולים למחוק ביקורות שליליות." },
               { q: "איך מחושב ציון האמון?", a: "ציון האמון (0–100) מורכב משלושה מרכיבים: נפח ביקורות מאומתות (עד 40 נקודות), יחס החזרים ותלונות (עד 35 נקודות), ותקופת פעילות מוכחת (עד 25 נקודות). המתודולוגיה המלאה פתוחה לציבור." },
               { q: "האם השימוש באתר עולה כסף?", a: "לא. עיון בביקורות, חיפוש, השוואות וכתיבת ביקורות — הכל חינמי. ReviewHub מתוחזקת כשכבה עצמאית של אמין — ללא ניגודי אינטרסים." },

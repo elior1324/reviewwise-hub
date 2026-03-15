@@ -83,11 +83,53 @@ export interface Review {
   // ── Trust platform fields ───────────────────────────────────────────
   /** How the review was verified (drives provenance badge) */
   reviewSource?: "verified_purchase" | "crm_verified" | "email_verified" | "community";
+  /** Review type — determines TrustScore weight */
+  reviewType?: ReviewType;
   /** Active moderation case status, if any */
   activeCaseStatus?: string | null;
   /** Whether the spam filter has flagged this review */
   isSpamFlagged?: boolean;
 }
+
+/** Review type — determines TrustScore weight */
+export type ReviewType = "verified_purchase" | "community";
+
+/** Discovery feed identifiers */
+export type DiscoveryFeedType =
+  | "trending"
+  | "rising"
+  | "editor_picks"
+  | "recently_verified"
+  | "fast_growing_creators";
+
+/** v2.0 TrustScore component breakdown */
+export interface TrustScoreV2 {
+  courseId: string;
+  score: number;                      // 0–100
+  tier: "elite" | "highly_trusted" | "trusted" | "emerging" | "unrated";
+  qualityScore: number;               // max 20
+  volumeScore: number;                // max 25 (log-weighted)
+  recencyScore: number;               // max 25 (decay-weighted last 90d)
+  consistencyScore: number;           // max 30
+  verifiedRatioMultiplier: number;    // 0.5–1.0
+  fraudPenaltyMultiplier: number;     // 0.0–1.0
+  lastCalculatedAt: string;
+}
+
+/** Labels for trust tiers */
+export const TRUST_TIER_LABELS: Record<string, string> = {
+  elite:          "Elite",
+  highly_trusted: "Highly Trusted",
+  trusted:        "Trusted",
+  emerging:       "Emerging",
+  unrated:        "Unrated",
+};
+
+/** Weight per review type for display purposes */
+export const REVIEW_TYPE_WEIGHTS: Record<ReviewType, number> = {
+  verified_purchase: 1.0,
+  community:         0.4,
+};
 
 export interface AffiliateClick {
   courseId: string;
