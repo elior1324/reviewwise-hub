@@ -57,6 +57,7 @@ import AnalyticsSolution from "./pages/business/solutions/AnalyticsSolution";
 // Business resources
 import DocsPage from "./pages/business/resources/DocsPage";
 import BlogPage from "./pages/business/resources/BlogPage";
+import ResourcesPage from "./pages/business/resources/ResourcesPage";
 
 // Evidence submission — token-based, no login required
 import EvidenceUploadPanel from "./components/EvidenceUploadPanel";
@@ -141,9 +142,11 @@ const App = () => (
             {/* Widgets solution merged into prestige-badges page */}
             <Route path="/business/solutions/widgets" element={<Navigate to="/partners/prestige-badges?tab=widgets" replace />} />
 
-            {/* Business resource pages */}
-            <Route path="/business/resources/docs" element={<DocsPage />} />
-            <Route path="/business/resources/blog" element={<BlogPage />} />
+            {/* Business resource pages — merged */}
+            <Route path="/business/resources" element={<ResourcesPage />} />
+            {/* Legacy routes redirect to merged page */}
+            <Route path="/business/resources/docs" element={<Navigate to="/business/resources" replace />} />
+            <Route path="/business/resources/blog" element={<Navigate to="/business/resources" replace />} />
 
             {/* /pricing → canonical URL */}
             <Route path="/pricing" element={<Navigate to="/business/pricing" replace />} />

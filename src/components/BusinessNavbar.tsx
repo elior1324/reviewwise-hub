@@ -10,7 +10,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, LayoutDashboard, ShieldCheck,
-  ArrowLeftRight, Home, Tag, ChevronDown, BarChart3, Package,
+  ArrowLeftRight, Home, Tag, ChevronDown, BarChart3, Package, BookOpen,
 } from "lucide-react";
 import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
@@ -159,6 +159,15 @@ const BusinessNavbar = () => {
             <Tag size={14} aria-hidden="true" />
             מחירון
           </Link>
+
+          {/* משאבים — always visible */}
+          <Link
+            to="/business/resources"
+            className={navLink(isActive("/business/resources"))}
+          >
+            <BookOpen size={14} aria-hidden="true" />
+            משאבים
+          </Link>
         </div>
 
         {/* ── Right side ────────────────────────────────────────────────────── */}
@@ -282,6 +291,15 @@ const BusinessNavbar = () => {
             onClick={() => setMobileOpen(false)}
           >
             <Tag size={14} aria-hidden="true" /> מחירון
+          </Link>
+
+          {/* משאבים — always visible */}
+          <Link
+            to="/business/resources"
+            className={`flex items-center gap-2 text-sm py-3 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive("/business/resources") ? "text-white border-white font-medium" : "text-zinc-300 border-transparent hover:text-white"}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            <BookOpen size={14} aria-hidden="true" /> משאבים
           </Link>
 
           <div className="border-t border-zinc-700/60 pt-1 mt-1">
