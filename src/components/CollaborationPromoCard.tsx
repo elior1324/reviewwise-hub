@@ -58,20 +58,19 @@ const CollaborationPromoCard = ({
                 </div>
 
                 <h2 className="font-display font-bold text-xl md:text-2xl text-foreground mb-2">
-                  הגדילו את המכירות עם ReviewHub
+                  הצטרפו לתשתית האימות של ReviewHub
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-xl leading-relaxed mb-4">
-                  הפעילו את תוכנית שיתוף הפעולה ואפשרו ללקוחות לקבל{" "}
-                  <strong className="text-foreground">10% הנחה</strong> כשהם מגיעים
-                  אליכם דרך ReviewHub. ReviewHub שולחת אליכם לקוחות — ומרוויחה עמלת שיווק
-                  מהקופון. אתם לא משלמים דבר מראש.
+                  הפעילו את תוכנית האימות ואפשרו לגולשי ReviewHub לרכוש בתנאי קהילה מסונכרנים —{" "}
+                  <strong className="text-foreground">10% הנחה לקהילת ReviewHub</strong> הנגזרת
+                  מכוח הקנייה הקולקטיבי. רכישות דרך ReviewHub עוברות אימות אוטומטי ומקנות סטטוס ״קונה מאומת״ לגולש. עמלת תפעול עשויה להיווצר — אינה משפיעה על ציון האמון שלכם.
                 </p>
 
                 {/* Benefits row */}
                 <div className="flex flex-wrap gap-4 mb-5">
                   {[
-                    { icon: Users,            text: "לקוחות חדשים ממלאי ReviewHub" },
-                    { icon: Tag,              text: "10% הנחה לגולש — עמלת שיווק" },
+                    { icon: Users,            text: "גולשים ממאגר ReviewHub" },
+                    { icon: Tag,              text: "10% הנחה לקהילה — עמלת תפעול" },
                     { icon: TrendingUp,       text: "ניתוח קליקים בלוח הבקרה" },
                     { icon: ArrowUpRight,     text: "השתתפות אופציונלית תמיד" },
                   ].map(({ icon: Icon, text }) => (

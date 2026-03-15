@@ -207,8 +207,11 @@ const CoursePage = () => {
                       המשיכו לרכישה מאומתת <ExternalLink size={16} />
                     </Button>
                   </a>
-                  <p className="text-[10px] text-muted-foreground/70 leading-relaxed text-right max-w-[240px]">
-                    רכישה דרך קישור זה מאפשרת קבלת סטטוס ״קונה מאומת״ ומסייעת לאמת ביקורות עתידיות. לשקיפות: ReviewHub עשויה לקבל אות תפעולי — אינו משפיע על ציון האמון.
+                  <p className="text-[11px] text-primary/80 font-medium leading-relaxed text-right max-w-[260px]">
+                    10% הנחה לקהילת ReviewHub (כולל אימות רכישה אוטומטי)
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 leading-relaxed text-right max-w-[260px]">
+                    רכישה דרך קישור זה מאפשרת קבלת סטטוס ״קונה מאומת״ ומסייעת לאמת ביקורות עתידיות. לשקיפות: עמלת תפעול עשויה להיווצר — אינה משפיעה על ציון האמון.
                   </p>
                 </div>
               )}

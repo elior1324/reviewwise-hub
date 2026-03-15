@@ -246,8 +246,7 @@ const CollaborationSetupModal = ({
             <div className="rounded-lg bg-amber-500/5 border border-amber-500/20 p-3 flex gap-2 text-xs text-muted-foreground">
               <Info size={13} className="text-amber-500 shrink-0 mt-0.5" />
               <span>
-                גילוי נאות יוצג לגולשים בסמוך לכפתור ההפניה: "ReviewHub עשויה לקבל עמלה
-                אם תרכשו דרך קישור זה."
+                גילוי נאות יוצג לגולשים בסמוך לכפתור הרכישה: "רכישות דרך קישור זה עוברות דרך תשתית האימות של ReviewHub. עמלת תפעול עשויה להיווצר — אינה משפיעה על ציון האמון."
               </span>
             </div>
 
