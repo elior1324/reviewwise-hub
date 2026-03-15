@@ -6,7 +6,7 @@ import ReviewSummary from "@/components/ReviewSummary";
 import AddReviewForm from "@/components/AddReviewForm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, ExternalLink, Users, Tag, Info, Lock } from "lucide-react";
+import { ShieldCheck, ExternalLink, Users, Tag, Info, Lock, Gift } from "lucide-react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -340,6 +340,27 @@ const CoursePage = () => {
             courseId={course.id}
             isVerifiedPurchaser={false}
           />
+        </div>
+
+        {/* Giveaway banner */}
+        <div className="mb-6 rounded-xl border border-primary/25 bg-primary/5 px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+              <Gift size={18} className="text-primary" />
+            </div>
+            <div>
+              <p className="font-semibold text-foreground text-sm">הגרלה חודשית ₪5,000</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                קנו דרך קישור Verified Deal, כתבו ביקורת מאומתת — ונכנסו אוטומטית להגרלה.
+              </p>
+            </div>
+          </div>
+          <Link to="/giveaway">
+            <Button variant="outline" size="sm" className="border-primary/30 text-primary hover:bg-primary/10 gap-1.5 shrink-0">
+              <Gift size={13} />
+              פרטים נוספים
+            </Button>
+          </Link>
         </div>
 
         {/* Review filters */}

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ShieldCheck, Tag, Clock } from "lucide-react";
+import { ShieldCheck, Tag, Clock, Gift } from "lucide-react";
 import {
   setAffiliateCookie,
   buildVerifiedPurchaseUrl,
@@ -45,6 +45,17 @@ const AffiliateRedirect = () => {
             user_agent:    navigator.userAgent || null,
           });
 
+          // Record purchase session (once per browser session)
+          const sessionKeyBiz = `rh_ps_biz_${biz.id}`;
+          if (!sessionStorage.getItem(sessionKeyBiz)) {
+            sessionStorage.setItem(sessionKeyBiz, "1");
+            await supabase.from("purchase_sessions").insert({
+              business_id: biz.id,
+              referrer:    document.referrer || null,
+              user_agent:  navigator.userAgent || null,
+            });
+          }
+
           const tgt: RedirectTarget = {
             kind:   "business",
             name:   biz.name,
@@ -75,6 +86,17 @@ const AffiliateRedirect = () => {
           referrer:  document.referrer || null,
           converted: false,
         });
+
+        // Record purchase session (once per browser session — deduplicate via sessionStorage)
+        const sessionKey = `rh_ps_${courseId}`;
+        if (!sessionStorage.getItem(sessionKey)) {
+          sessionStorage.setItem(sessionKey, "1");
+          await supabase.from("purchase_sessions").insert({
+            course_id:   courseId,
+            referrer:    document.referrer || null,
+            user_agent:  navigator.userAgent || null,
+          });
+        }
 
         const verifiedUrl = course.affiliate_url
           ? buildVerifiedPurchaseUrl(course.affiliate_url)
@@ -195,6 +217,20 @@ const AffiliateRedirect = () => {
                 ))}
               </ul>
 
+              {/* Giveaway teaser */}
+              <div className="rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-right">
+                <div className="flex items-center gap-2 mb-1">
+                  <Gift size={13} className="text-primary" />
+                  <p className="text-xs font-bold text-primary">הגרלה חודשית ₪5,000</p>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  לאחר הרכישה כתבו ביקורת מאומתת — ותקבלו כניסה אוטומטית להגרלה החודשית.{" "}
+                  <Link to="/giveaway" className="text-primary hover:underline font-medium">
+                    פרטים נוספים ←
+                  </Link>
+                </p>
+              </div>
+
               {/* Disclosure */}
               <div className="rounded-lg border border-border/30 bg-muted/30 px-4 py-3 text-right">
                 <p className="text-[9px] text-muted-foreground/70 leading-relaxed">
@@ -227,6 +263,20 @@ const AffiliateRedirect = () => {
                 <p className="text-xs text-primary/70 mt-1">תנאים מסופקים ישירות על ידי הספק</p>
               </div>
             )}
+
+            {/* Giveaway teaser */}
+            <div className="rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-right">
+              <div className="flex items-center gap-2 mb-1">
+                <Gift size={13} className="text-primary" />
+                <p className="text-xs font-bold text-primary">הגרלה חודשית ₪5,000</p>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                לאחר הרכישה כתבו ביקורת מאומתת — ותקבלו כניסה אוטומטית להגרלה החודשית.{" "}
+                <Link to="/giveaway" className="text-primary hover:underline font-medium">
+                  פרטים נוספים ←
+                </Link>
+              </p>
+            </div>
 
             <div className="rounded-lg border border-border/30 bg-muted/30 px-4 py-3 text-right">
               <p className="text-[9px] text-muted-foreground/70 leading-relaxed">

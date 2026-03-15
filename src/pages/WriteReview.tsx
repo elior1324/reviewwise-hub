@@ -1,221 +1,427 @@
+/**
+ * WriteReview — Token-based review submission page
+ * ─────────────────────────────────────────────────
+ * Reached via /review/:token (link in the 7-day review request email).
+ *
+ * Flow:
+ *  1. Look up review_requests row by token → get course/business + verified_purchase
+ *  2. Validate token is not expired and not already used (reviewed_at IS NULL)
+ *  3. User fills out the review form (RTL, Hebrew)
+ *  4. On submit: call submit-review edge function with verifiedPurchase = true
+ *  5. Create giveaway_entries row
+ *  6. Mark review_requests.reviewed_at = now()
+ *  7. Show post-submit giveaway confirmation
+ */
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldCheck, Star, Sparkles, BadgeCheck, Clock } from "lucide-react";
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { ShieldCheck, Star, Gift, Trophy, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useToast } from "@/hooks/use-toast";
-import ReceiptUploader from "@/components/ReceiptUploader";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { sanitizeText } from "@/lib/sanitize";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const REVIEW_MIN_LENGTH = 10;
 const REVIEW_MAX_LENGTH = 2000;
+const SUBJECT_MAX_LENGTH = 60;
+
+interface RequestContext {
+  id:                   string;   // review_request.id
+  token:                string;
+  userEmail:            string;
+  courseId:             string | null;
+  businessId:           string | null;
+  verifiedPurchaseId:   string | null;
+  productName:          string;
+  businessName:         string;
+  businessSlug:         string | null;
+  alreadyReviewed:      boolean;
+  expired:              boolean;
+}
+
+const RequiredMark = () => <span className="text-destructive mr-0.5">*</span>;
 
 const WriteReview = () => {
-  const { token } = useParams();
-  const { toast } = useToast();
-  const [rating, setRating] = useState(0);
-  const [reviewText, setReviewText] = useState("");
-  const [name, setName] = useState("");
-  const [anonymous, setAnonymous] = useState(false);
-  const [receiptVerified, setReceiptVerified] = useState<boolean | null>(null);
-  const [showUploader, setShowUploader] = useState(false);
+  const { token } = useParams<{ token: string }>();
+  const { user }  = useAuth();
+
+  // ── Page state
+  const [ctx, setCtx]             = useState<RequestContext | null>(null);
+  const [loading, setLoading]     = useState(true);
+  const [tokenError, setTokenError] = useState<"not_found" | "expired" | "used" | null>(null);
+
+  // ── Form state
+  const [rating, setRating]           = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [subject, setSubject]         = useState("");
+  const [reviewText, setReviewText]   = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ── Submit state
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted]   = useState(false);
+  const [giveawayEntered, setGiveawayEntered] = useState(false);
+
+  // ── 1. Validate token on mount ────────────────────────────────────────────
+  useEffect(() => {
+    if (!token) { setTokenError("not_found"); setLoading(false); return; }
+    document.title = "כתבו ביקורת מאומתת | ReviewHub";
+
+    const validateToken = async () => {
+      const { data: rr } = await supabase
+        .from("review_requests")
+        .select(`
+          id, token, user_email, course_id, business_id, verified_purchase_id,
+          reviewed_at, expires_at,
+          courses ( name ),
+          businesses ( name, slug )
+        `)
+        .eq("token", token)
+        .maybeSingle();
+
+      if (!rr) { setTokenError("not_found"); setLoading(false); return; }
+      if (rr.reviewed_at) { setTokenError("used"); setLoading(false); return; }
+      if (rr.expires_at && new Date(rr.expires_at) < new Date()) {
+        setTokenError("expired"); setLoading(false); return;
+      }
+
+      const courseName   = (rr.courses as any)?.name   || "";
+      const bizName      = (rr.businesses as any)?.name || "";
+      const bizSlug      = (rr.businesses as any)?.slug || null;
+
+      setCtx({
+        id:                 rr.id,
+        token:              rr.token,
+        userEmail:          rr.user_email,
+        courseId:           rr.course_id,
+        businessId:         rr.business_id,
+        verifiedPurchaseId: rr.verified_purchase_id,
+        productName:        courseName || bizName,
+        businessName:       bizName,
+        businessSlug:       bizSlug,
+        alreadyReviewed:    false,
+        expired:            false,
+      });
+      setLoading(false);
+    };
+
+    validateToken();
+  }, [token]);
+
+  // ── 2. Submit handler ─────────────────────────────────────────────────────
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (rating === 0) {
-      toast({ title: "אנא בחרו דירוג", variant: "destructive" });
-      return;
-    }
-    if (reviewText.trim().length < REVIEW_MIN_LENGTH) {
-      toast({ title: "הביקורת קצרה מדי", description: `כתבו לפחות ${REVIEW_MIN_LENGTH} תווים`, variant: "destructive" });
-      return;
-    }
-    if (!turnstileToken) {
-      toast({ title: "אנא אמתו שאתם לא רובוט", variant: "destructive" });
-      return;
+
+    if (!ctx) return;
+    if (rating === 0)                           return;
+    if (!subject.trim())                        return;
+    if (reviewText.trim().length < REVIEW_MIN_LENGTH) return;
+    if (!turnstileToken)                        return;
+
+    setSubmitting(true);
+
+    const cleanSubject = sanitizeText(subject, SUBJECT_MAX_LENGTH);
+    const cleanText    = sanitizeText(reviewText, REVIEW_MAX_LENGTH);
+
+    try {
+      // ── Call submit-review edge function (handles Turnstile + DB insert)
+      const { data: fnResult, error: fnError } = await supabase.functions.invoke(
+        "submit-review",
+        {
+          body: {
+            turnstileToken,
+            businessId:          ctx.businessId,
+            courseId:            ctx.courseId,
+            rating,
+            subject:             cleanSubject,
+            reviewText:          cleanText,
+            trainingDuration:    "reviewed_via_email",
+            verifiedPurchase:    true,
+            indemnityAccepted:   true,
+            indemnityAcceptedAt: new Date().toISOString(),
+            verificationStatus:  "purchase_verified",
+            verifiedPurchaseId:  ctx.verifiedPurchaseId,
+          },
+        }
+      );
+
+      if (fnError || fnResult?.error) {
+        console.error("submit-review error:", fnError || fnResult?.error);
+        setSubmitting(false);
+        return;
+      }
+
+      // ── Mark review_request as used
+      await supabase
+        .from("review_requests")
+        .update({ reviewed_at: new Date().toISOString() })
+        .eq("id", ctx.id);
+
+      // ── Create giveaway entry (one per review + one per user per month)
+      const reviewId   = fnResult?.reviewId;
+      const authUserId = user?.id ?? null;
+      const giveawayMonth = (() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      })();
+
+      if (reviewId && authUserId) {
+        const { error: entryError } = await supabase.from("giveaway_entries").insert({
+          user_id:              authUserId,
+          review_id:            reviewId,
+          verified_purchase_id: ctx.verifiedPurchaseId,
+          giveaway_month:       giveawayMonth,
+        });
+
+        // 23505 = unique violation (already has entry this month) — not a problem
+        if (!entryError || entryError.code === "23505") {
+          setGiveawayEntered(!entryError);
+        }
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      console.error("WriteReview submit error:", err);
     }
 
-    // Sanitize before submission
-    const _cleanReviewText = sanitizeText(reviewText, REVIEW_MAX_LENGTH);
-    const _cleanName       = sanitizeText(name, 100);
-
-    if (receiptVerified) {
-      toast({
-        title: "💥 בום! צברתם 200 נקודות (2x מאומת)!",
-        description: "ביקורת מאומתת מקבלת יותר נקודות אמון ותג Verified Reviewer.",
-      });
-    } else if (receiptVerified === false) {
-      toast({
-        title: "💥 בום! צברתם 100 נקודות!",
-        description: "הביקורת נשלחה! האימות עדיין בבדיקה — נקודות הבונוס יתווספו לאחר אישור.",
-      });
-    } else {
-      toast({
-        title: "💥 בום! צברתם 100 נקודות!",
-        description: "הביקורת נשלחה! המשיכו לכתוב, לצבור נקודות אמון ולקבל תגים.",
-      });
-    }
+    setSubmitting(false);
   };
 
+  // ── Loading ───────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center" dir="rtl">
+        <Loader2 className="animate-spin text-primary" size={32} />
+      </div>
+    );
+  }
+
+  // ── Token errors ──────────────────────────────────────────────────────────
+  if (tokenError) {
+    const msgs: Record<NonNullable<typeof tokenError>, { title: string; body: string }> = {
+      not_found: { title: "הקישור לא תקין",   body: "הקישור לביקורת שגוי או לא קיים. בדקו שהעתקתם את הקישור המלא מהמייל." },
+      expired:   { title: "הקישור פג תוקפו",  body: "קישורי ביקורת תקפים ל-30 יום מרגע קבלת המייל. ניתן לכתוב ביקורת גם ישירות מדף הקורס." },
+      used:      { title: "הביקורת כבר נשלחה", body: "כבר שלחתם ביקורת דרך קישור זה. תודה על השתתפותכם!" },
+    };
+    const { title, body } = msgs[tokenError];
+
+    return (
+      <div className="min-h-screen bg-background noise-overlay" dir="rtl">
+        <Navbar />
+        <div className="container pt-24 pb-16 max-w-lg text-center">
+          <AlertCircle size={40} className="mx-auto mb-4 text-muted-foreground" />
+          <h1 className="font-display font-bold text-2xl mb-2">{title}</h1>
+          <p className="text-muted-foreground">{body}</p>
+          <Link to="/search" className="mt-6 inline-block">
+            <Button variant="outline">חיפוש קורסים</Button>
+          </Link>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // ── Post-submission success ───────────────────────────────────────────────
+  if (submitted && ctx) {
+    return (
+      <div className="min-h-screen bg-background noise-overlay" dir="rtl">
+        <Navbar />
+        <div className="container pt-24 pb-16 max-w-lg">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center space-y-6"
+          >
+            <div className="w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center mx-auto">
+              <CheckCircle2 size={32} className="text-primary" />
+            </div>
+
+            <h1 className="font-display font-bold text-2xl">תודה על הביקורת! 🙌</h1>
+            <p className="text-muted-foreground">
+              הביקורת המאומתת שלכם על <strong className="text-foreground">{ctx.productName}</strong> פורסמה בהצלחה.
+            </p>
+
+            {/* Giveaway confirmation */}
+            <div className={`rounded-2xl border p-6 text-right space-y-3 ${
+              giveawayEntered
+                ? "border-primary/25 bg-primary/5"
+                : "border-border/40 bg-muted/20"
+            }`}>
+              {giveawayEntered ? (
+                <>
+                  <div className="flex items-center gap-3">
+                    <Trophy size={22} className="text-primary" />
+                    <span className="font-display font-bold text-lg">נכנסתם להגרלה! 🎉</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    נרשמתם אוטומטית להגרלה החודשית — <strong className="text-foreground">פרס ₪5,000</strong> לרכישת כל קורס, שירות דיגיטלי, SaaS או מוצר ב-ReviewHub.
+                  </p>
+                  <Link to="/giveaway">
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 mt-1">
+                      <Gift size={14} />
+                      לדף ההגרלה
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3">
+                    <Gift size={20} className="text-muted-foreground" />
+                    <span className="font-semibold text-foreground">הגרלה חודשית</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    יש לכם כבר כניסה להגרלה החודשית — רק כניסה אחת בחודש לכל משתמש.
+                  </p>
+                </>
+              )}
+            </div>
+
+            {ctx.businessSlug && (
+              <Link to={`/biz/${ctx.businessSlug}`}>
+                <Button variant="outline" className="gap-2">
+                  לדף {ctx.businessName}
+                </Button>
+              </Link>
+            )}
+          </motion.div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // ── Main review form ──────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background noise-overlay">
+    <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <Navbar />
       <div className="container pt-24 pb-16 max-w-2xl">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-2 text-trust-green text-sm font-medium mb-4">
-            <ShieldCheck size={18} />
-            ביקורת רכישה מאומתת
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+
+          {/* Verified badge */}
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={18} className="text-primary" />
+            <span className="text-sm font-medium text-primary">ביקורת רכישה מאומתת</span>
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs">
+              Verified Purchase
+            </Badge>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="rounded-xl p-4 mb-6 border border-primary/20 bg-primary/5 backdrop-blur-sm"
-          >
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Sparkles size={18} className="text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-display font-semibold text-foreground">
-                  ביקורת מאומתת = אמון גבוה יותר
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  אימות רכישה מעניק תג <strong className="text-foreground">Verified Reviewer</strong> ומחזק את משקל הביקורת בדירוגים.
-                </p>
-              </div>
-            </div>
-          </motion.div>
+          <h1 className="font-display font-bold text-2xl text-foreground">
+            ספרו על החוויה שלכם
+            {ctx?.productName && <span className="text-primary"> עם {ctx.productName}</span>}
+          </h1>
 
+          {/* Giveaway incentive callout */}
+          <div className="rounded-xl border border-primary/25 bg-primary/5 px-5 py-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+              <Gift size={20} className="text-primary" />
+            </div>
+            <div>
+              <p className="font-semibold text-foreground text-sm">הגרלה חודשית — ₪5,000</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                שליחת ביקורת זו תכניס אתכם אוטומטית להגרלה.{" "}
+                <Link to="/giveaway" className="text-primary hover:underline">פרטים ←</Link>
+              </p>
+            </div>
+          </div>
+
+          {/* Review form */}
           <Card className="shadow-card animated-border bg-card">
             <CardHeader>
               <CardTitle className="font-display">כתבו ביקורת</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
+
+                {/* Star rating */}
                 <div>
-                  <Label className="mb-2 block">הדירוג שלכם</Label>
+                  <p className="text-sm font-medium text-foreground mb-2">הדירוג שלכם <RequiredMark /></p>
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map(i => (
-                      <button key={i} type="button" onClick={() => setRating(i)} className="focus:outline-none">
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setRating(i)}
+                        onMouseEnter={() => setHoverRating(i)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="focus:outline-none transition-transform hover:scale-110"
+                      >
                         <Star
                           size={32}
-                          className={`transition-colors ${i <= rating ? "fill-star text-star" : "fill-star-empty text-star-empty"} hover:fill-star hover:text-star`}
+                          className={`transition-colors ${
+                            i <= (hoverRating || rating)
+                              ? "fill-star text-star"
+                              : "fill-star-empty text-star-empty"
+                          }`}
                         />
                       </button>
                     ))}
                   </div>
                 </div>
 
+                {/* Subject */}
                 <div>
-                  <Label htmlFor="name" className="mb-2 block">השם שלכם</Label>
-                  <Input id="name" placeholder="השם שלכם" value={name} onChange={e => setName(e.target.value)} disabled={anonymous} className="glass border-border/50" />
+                  <p className="text-sm font-medium text-foreground mb-2">נושא הביקורת <RequiredMark /></p>
+                  <Input
+                    placeholder="לדוגמה: חוויית למידה מעולה"
+                    value={subject}
+                    onChange={e => { if (e.target.value.length <= SUBJECT_MAX_LENGTH) setSubject(e.target.value); }}
+                    maxLength={SUBJECT_MAX_LENGTH}
+                    className="glass border-border/50"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1 text-left">{subject.length}/{SUBJECT_MAX_LENGTH}</p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Switch id="anonymous" checked={anonymous} onCheckedChange={setAnonymous} />
-                  <Label htmlFor="anonymous">שליחה אנונימית</Label>
-                </div>
-
+                {/* Review text */}
                 <div>
-                  <Label htmlFor="review" className="mb-2 block">הביקורת שלכם</Label>
+                  <p className="text-sm font-medium text-foreground mb-2">פירוט הביקורת <RequiredMark /></p>
                   <Textarea
-                    id="review"
-                    placeholder="שתפו את החוויה שלכם עם הקורס..."
+                    placeholder="שתפו את החוויה שלכם בהרחבה — מה למדתם, מה השתפר, מה חסר..."
                     value={reviewText}
                     onChange={e => { if (e.target.value.length <= REVIEW_MAX_LENGTH) setReviewText(e.target.value); }}
                     maxLength={REVIEW_MAX_LENGTH}
                     rows={5}
-                    className="glass border-border/50"
+                    className="glass border-border/50 resize-none"
                   />
                   <p className="text-xs text-muted-foreground mt-1 text-left">
                     {reviewText.length}/{REVIEW_MAX_LENGTH} תווים
                   </p>
                 </div>
 
-                {/* 2X Points Boost Section */}
-                <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => setShowUploader(!showUploader)}
-                    className="w-full p-4 flex items-center justify-between hover:bg-emerald-500/10 transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0">
-                        <BadgeCheck size={20} className="text-emerald-500" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-display font-bold text-foreground flex items-center gap-2 flex-wrap">
-                          ⭐ 2X POINTS BOOST
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          אמתו את הרכישה שלכם וטפסו בלידרבורד <strong className="text-emerald-600">מהר כפול!</strong>
-                        </p>
-                      </div>
-                    </div>
-                    <div className="shrink-0 mr-2">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        receiptVerified ? "border-emerald-500 bg-emerald-500" : "border-border"
-                      }`}>
-                        {receiptVerified && <BadgeCheck size={14} className="text-white" />}
-                      </div>
-                    </div>
-                  </button>
-
-                  {showUploader && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="border-t border-emerald-500/15 p-4"
-                    >
-                      <ReceiptUploader
-                        businessId=""
-                        onVerified={(verified) => setReceiptVerified(verified)}
-                      />
-                    </motion.div>
-                  )}
-
-                  {/* Pending verification message */}
-                  {receiptVerified === false && (
-                    <div className="border-t border-emerald-500/15 p-3 flex items-center gap-2.5 bg-amber-500/5">
-                      <Clock size={16} className="text-amber-500 shrink-0" />
-                      <p className="text-xs text-muted-foreground">
-                        <strong className="text-foreground">אימות בבדיקה.</strong> בונוס x2 הנקודות יתווסף ברגע שהצוות שלנו יאשר את ההוכחה שלכם.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Verified success */}
-                  {receiptVerified === true && (
-                    <div className="border-t border-emerald-500/15 p-3 flex items-center gap-2.5 bg-emerald-500/5">
-                      <BadgeCheck size={16} className="text-emerald-500 shrink-0" />
-                      <p className="text-xs text-emerald-600 font-medium">
-                        ✅ רכישה אומתה — הביקורת שלכם תזכה ב-2x נקודות!
-                      </p>
-                    </div>
-                  )}
+                {/* Verification notice */}
+                <div className="rounded-lg bg-muted/40 border border-border/40 px-4 py-3 flex items-center gap-3">
+                  <ShieldCheck size={15} className="text-primary shrink-0" />
+                  <p className="text-xs text-muted-foreground">
+                    הביקורת שלכם תפורסם עם תג <strong className="text-foreground">Verified Purchase</strong> — הרכישה אומתה אוטומטית דרך ReviewHub.
+                  </p>
                 </div>
 
                 <TurnstileWidget
-                  onSuccess={(token) => setTurnstileToken(token)}
+                  onSuccess={t => setTurnstileToken(t)}
                   onError={() => setTurnstileToken(null)}
-                  className="flex justify-center mt-2"
+                  className="flex justify-center"
                 />
 
-                <Button type="submit" disabled={!turnstileToken} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" size="lg">
-                  שליחת ביקורת
+                <Button
+                  type="submit"
+                  disabled={submitting || !turnstileToken || rating === 0 || !subject.trim() || reviewText.trim().length < REVIEW_MIN_LENGTH}
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2"
+                  size="lg"
+                >
+                  {submitting && <Loader2 size={16} className="animate-spin" />}
+                  {submitting ? "שולח..." : "שלחו ביקורת + כניסה להגרלה"}
                 </Button>
+
+                <p className="text-[11px] text-muted-foreground/60 text-center leading-relaxed">
+                  הגשת ביקורת מהווה הסכמה לתקנון ReviewHub. הביקורת מבטאת דעתכם האישית.
+                </p>
               </form>
             </CardContent>
           </Card>

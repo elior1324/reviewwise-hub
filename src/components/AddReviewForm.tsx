@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, PenLine, LogIn, ShieldCheck, ShieldX, Plus, HelpCircle, Upload, X, FileText, Image as ImageIcon, Loader2, MessageSquare } from "lucide-react";
+import { Star, PenLine, LogIn, ShieldCheck, ShieldX, Plus, HelpCircle, Upload, X, FileText, Image as ImageIcon, Loader2, MessageSquare, Gift, Trophy } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -62,6 +62,8 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
   const [isOpen, setIsOpen] = useState(false);
   const [showTierDialog, setShowTierDialog] = useState(false);
   const [reviewType, setReviewType] = useState<"verified" | "open" | null>(null);
+  const [showGiveawayConfirm, setShowGiveawayConfirm] = useState(false);
+  const [giveawayEntryIsNew, setGiveawayEntryIsNew]   = useState(true);
   const [showIndemnity, setShowIndemnity] = useState(false);
   const [indemnityAcceptedAt, setIndemnityAcceptedAt] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
@@ -225,11 +227,36 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
         return;
       }
 
-      toast.success("הביקורת נשלחה בהצלחה! ✨", {
-        description: receiptVerified
-          ? "הביקורת שלכם תפורסם כביקורת רכישה מאומתת."
-          : "הביקורת שלכם תפורסם ללא תג רכישה מאומתת.",
-      });
+      // ── Giveaway entry for verified reviews ──────────────────────────────
+      if (receiptVerified && user && fnResult?.reviewId) {
+        const giveawayMonth = (() => {
+          const d = new Date();
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        })();
+
+        const { error: entryError } = await supabase.from("giveaway_entries").insert({
+          user_id:        user.id,
+          review_id:      fnResult.reviewId,
+          giveaway_month: giveawayMonth,
+        });
+
+        // 23505 = unique violation:
+        //   - review_id already used (shouldn't happen, review is new)
+        //   - (user_id, giveaway_month) already exists → user already has entry this month
+        if (entryError && entryError.code !== "23505") {
+          console.warn("[AddReviewForm] giveaway insert error:", entryError);
+        }
+
+        // Show giveaway confirm in all cases — distinguish "new entry" vs "already have one"
+        setGiveawayEntryIsNew(!entryError);
+        setShowGiveawayConfirm(true);
+      } else {
+        toast.success("הביקורת נשלחה בהצלחה! ✨", {
+          description: receiptVerified
+            ? "הביקורת שלכם תפורסם כביקורת רכישה מאומתת."
+            : "הביקורת שלכם תפורסם ללא תג רכישה מאומתת.",
+        });
+      }
 
       // Reset form
       setRating(0);
@@ -328,6 +355,54 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
         }}
         onDismiss={() => setShowIndemnity(false)}
       />
+
+      {/* Post-review Giveaway Confirmation Dialog */}
+      <Dialog open={showGiveawayConfirm} onOpenChange={setShowGiveawayConfirm}>
+        <DialogContent className="max-w-sm text-right">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center">
+                <Trophy size={20} className="text-primary" />
+              </div>
+              <DialogTitle className="font-display text-lg">
+              {giveawayEntryIsNew ? "נכנסתם להגרלה! 🎉" : "הביקורת נשלחה בהצלחה! ✨"}
+            </DialogTitle>
+            </div>
+            <DialogDescription asChild>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                {giveawayEntryIsNew ? (
+                  <p>הביקורת המאומתת שלכם נשמרה בהצלחה ונרשמתם אוטומטית להגרלה החודשית.</p>
+                ) : (
+                  <p>הביקורת המאומתת שלכם נשמרה בהצלחה. כבר יש לכם כניסה להגרלה החודש — כניסה אחת לכל משתמש בחודש.</p>
+                )}
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Gift size={15} className="text-primary" />
+                    <span className="font-bold text-foreground text-sm">פרס: ₪5,000</span>
+                  </div>
+                  <p className="text-xs leading-relaxed">
+                    ניתן לשימוש לרכישת כל קורס, שירות דיגיטלי, SaaS או מוצר שמופיע ב-ReviewHub.
+                  </p>
+                  <p className="text-xs text-muted-foreground/70">
+                    הגרלה מתקיימת ב-1 לכל חודש.
+                  </p>
+                </div>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 mt-2">
+            <Link to="/giveaway" className="flex-1">
+              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 text-sm">
+                <Gift size={14} />
+                לדף ההגרלה
+              </Button>
+            </Link>
+            <Button variant="outline" onClick={() => setShowGiveawayConfirm(false)} className="text-sm">
+              סגור
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {!isOpen ? (
         <Button

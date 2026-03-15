@@ -18,6 +18,7 @@ import ComparePage from "./pages/ComparePage";
 import BusinessProfile from "./pages/BusinessProfile";
 import CoursePage from "./pages/CoursePage";
 import AffiliateRedirect from "./pages/AffiliateRedirect";
+import GiveawayPage from "./pages/GiveawayPage";
 
 // Auth + legal
 import AuthPage from "./pages/AuthPage";
@@ -84,6 +85,7 @@ const App = () => (
             <Route path="/biz/:slug" element={<BusinessProfile />} />
             <Route path="/course/:courseId" element={<CoursePage />} />
             <Route path="/go/:courseId" element={<AffiliateRedirect />} />
+            <Route path="/giveaway" element={<GiveawayPage />} />
 
             {/* Embeddable widget page — bare iframe, no navbar/footer */}
             <Route path="/widget/:slug" element={<WidgetPage />} />
