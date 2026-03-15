@@ -138,6 +138,50 @@ export interface AffiliateClick {
   revenue?: number;
 }
 
+/**
+ * 5/5 Affiliate Trust Model — transaction record.
+ * Displayed in the creator's Verified Sales dashboard.
+ */
+export interface AffiliateTransaction {
+  id: string;
+  courseId: string;
+  courseName: string;
+  transactionId: string;
+  buyerEmail?: string;       // hashed for privacy in display
+  listPrice: number;         // original market price
+  learnerDiscount: number;   // 5% of listPrice
+  platformFee: number;       // 5% of listPrice (ReviewHub revenue)
+  verifiedPrice: number;     // listPrice - learnerDiscount (what buyer paid)
+  creatorNet: number;        // verifiedPrice - platformFee (creator receives)
+  paidAt: string;            // ISO timestamp
+  verifiedAt?: string;       // when purchase was verified by ReviewHub
+  reviewSubmitted: boolean;  // whether a verified review followed
+}
+
+/**
+ * Webhook payload shape received from creator payment systems.
+ * Documented in the API spec for creator integrations.
+ */
+export interface PurchaseWebhookPayload {
+  event:         "purchase_completed";
+  course_id:     string;
+  creator_id:    string;
+  buyer_email:   string;
+  list_price:    number;
+  paid_price:    number;
+  transaction_id: string;
+}
+
+/** 5/5 model rate constants — exported for display/calculation in UI */
+export const VERIFIED_DEAL = {
+  LEARNER_DISCOUNT_PCT:   5,      // % instant discount for learner
+  PLATFORM_FEE_PCT:       5,      // % operational fee for ReviewHub
+  TOTAL_TRUST_CHARGE_PCT: 10,     // total from list price
+  COUPON_CODE:            "RH5",
+  REF_PARAM:              "reviewhub",
+  COOKIE_DAYS:            30,
+} as const;
+
 // ─── Digital Professional Categories ────────────────────
 // Professionals who operate in the digital economy.
 // Must NOT overlap with SAAS_CATEGORIES (used for type detection).

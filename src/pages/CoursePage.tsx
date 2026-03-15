@@ -6,13 +6,19 @@ import ReviewSummary from "@/components/ReviewSummary";
 import AddReviewForm from "@/components/AddReviewForm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, ExternalLink, Users } from "lucide-react";
+import { ShieldCheck, ExternalLink, Users, Tag, Info, Lock } from "lucide-react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { generateReviewSummary, type Review } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
 import { sanitizeUrl } from "@/lib/sanitize";
+import {
+  computeVerifiedPricing,
+  buildVerifiedPurchaseUrl,
+  setAffiliateCookie,
+  formatPrice,
+} from "@/lib/affiliate";
 
 interface CourseData {
   id: string;
@@ -202,27 +208,98 @@ const CoursePage = () => {
                 <p className="text-muted-foreground text-sm mt-2 max-w-2xl">{course.description}</p>
               )}
             </div>
+            {/* ── Verified Deal Pricing Panel (5/5 Trust Model) ────────────── */}
             <div className="text-right">
-              {course.price > 0 && (
-                <p className="font-display font-bold text-2xl text-foreground mb-2">₪{course.price.toLocaleString()}</p>
-              )}
-              {course.affiliateUrl && sanitizeUrl(course.affiliateUrl) && (
-                <div className="space-y-2">
-                  {/* Community Discount Label — v2.0 */}
-                  <div className="flex flex-col items-end gap-1 mb-2">
-                    <p className="text-[12px] text-primary font-semibold leading-relaxed text-right max-w-[280px]">
-                      10% הנחה לקהילת ReviewHub — כולל אימות רכישה אוטומטי
-                    </p>
-                    <p className="text-[10px] text-muted-foreground/70 leading-relaxed text-right max-w-[280px]">
-                      רכישה דרך קישור זה מעניקה סטטוס &quot;קונה מאומת&quot; אוטומטית ומאפשרת כתיבת ביקורת מאומתת. עמלת תפעול עשויה להיווצר — אינה משפיעה על ציון האמון.
+              {course.affiliateUrl && sanitizeUrl(course.affiliateUrl) ? (
+                (() => {
+                  const pricing      = computeVerifiedPricing(course.price > 0 ? course.price : 0);
+                  const purchaseUrl  = buildVerifiedPurchaseUrl(sanitizeUrl(course.affiliateUrl)!);
+                  const hasPrice     = course.price > 0;
+
+                  return (
+                    <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3 w-full max-w-[310px] ml-auto">
+                      {/* Verified Deal badge */}
+                      <div className="flex items-center gap-1.5">
+                        <Tag size={13} className="text-primary" />
+                        <span className="text-xs font-bold text-primary tracking-wide uppercase">Verified Deal</span>
+                        <span className="text-xs text-muted-foreground">· מחיר קהילת ReviewHub</span>
+                      </div>
+
+                      {/* Price comparison */}
+                      {hasPrice && (
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">מחיר שוק</span>
+                            <span className="font-medium text-muted-foreground line-through">
+                              {formatPrice(pricing.listPrice)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-foreground">מחיר מאומת (חברי ReviewHub)</span>
+                            <span className="font-display font-bold text-xl text-primary">
+                              {formatPrice(pricing.verifiedPrice)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                            <span className="text-[11px] bg-primary/15 text-primary font-bold px-2 py-0.5 rounded-full">
+                              חיסכון של {formatPrice(pricing.learnerDiscount)} ({pricing.learnerDiscountPct}%)
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* CTA */}
+                      <a
+                        href={purchaseUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setAffiliateCookie(course.id)}
+                      >
+                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 w-full font-semibold">
+                          <ShieldCheck size={15} />
+                          רכישה מאומתת{hasPrice ? ` — ${formatPrice(pricing.verifiedPrice)}` : ""}
+                          <ExternalLink size={14} />
+                        </Button>
+                      </a>
+
+                      {/* What you get */}
+                      <ul className="space-y-1 text-[11px] text-muted-foreground">
+                        <li className="flex items-center gap-1.5">
+                          <ShieldCheck size={10} className="text-primary shrink-0" />
+                          {hasPrice ? `הנחה מיידית של ${pricing.learnerDiscountPct}% — ללא קוד` : "הנחה מאומתת מיידית — ללא קוד"}
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <ShieldCheck size={10} className="text-primary shrink-0" />
+                          סטטוס &quot;קונה מאומת&quot; אוטומטי
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <ShieldCheck size={10} className="text-primary shrink-0" />
+                          אפשרות לכתוב ביקורת מאומתת (משקל ×1.0)
+                        </li>
+                        <li className="flex items-center gap-1.5">
+                          <ShieldCheck size={10} className="text-primary shrink-0" />
+                          מעקב 30 יום — הנחה תחול גם אם תרכשו מאוחר יותר
+                        </li>
+                      </ul>
+
+                      {/* Trust firewall disclosure */}
+                      <p className="text-[9px] text-muted-foreground/60 leading-relaxed border-t border-border/30 pt-2">
+                        עמלת תפעול של 5% נגבית מהיוצר. אינה משפיעה על ציון האמון — &quot;חומת אמון&quot; מבדילה לחלוטין בין עסקאות מסחריות לחישוב הציון.
+                      </p>
+                    </div>
+                  );
+                })()
+              ) : (
+                /* No affiliate URL — show market price only */
+                course.price > 0 && (
+                  <div className="rounded-xl border border-border/50 bg-card/60 p-4 text-right max-w-[310px] ml-auto">
+                    <p className="text-xs text-muted-foreground mb-1">מחיר שוק</p>
+                    <p className="font-display font-bold text-2xl text-foreground">₪{course.price.toLocaleString()}</p>
+                    <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
+                      קישור רכישה מאומת אינו זמין עדיין לקורס זה.
                     </p>
                   </div>
-                  <a href={sanitizeUrl(course.affiliateUrl)} target="_blank" rel="noopener noreferrer">
-                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 w-full">
-                      המשיכו לרכישה מאומתת <ExternalLink size={16} />
-                    </Button>
-                  </a>
-                </div>
+                )
               )}
             </div>
           </div>

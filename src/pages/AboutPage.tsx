@@ -1,9 +1,10 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { ShieldCheck, Target, BookOpen, Users, Award, TrendingUp, CheckCircle, XCircle, BarChart2, AlertTriangle, Clock, Star } from "lucide-react";
+import { ShieldCheck, Target, BookOpen, Users, Award, TrendingUp, CheckCircle, XCircle, BarChart2, AlertTriangle, Clock, Star, Tag, BadgePercent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { computeVerifiedPricing, formatPrice, LEARNER_DISCOUNT_RATE, PLATFORM_FEE_RATE, TOTAL_TRUST_CHARGE } from "@/lib/affiliate";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -52,20 +53,54 @@ const AboutPage = () => {
         </motion.div>
       </section>
 
-      {/* Operational Commission — Transparency Statement */}
+      {/* 5/5 Verified Deal — Operational Transparency */}
       <section className="border-y border-border/50">
         <div className="container py-20">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="max-w-3xl mx-auto">
             <motion.div variants={fadeUp} custom={0} className="flex items-center gap-3 mb-6">
-              <Target size={24} className="text-primary" />
+              <Tag size={24} className="text-primary" />
               <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-                שקיפות תפעולית — כיצד אנחנו פועלים
+                מודל 5 / 5 — שקיפות תפעולית מלאה
               </h2>
             </motion.div>
-            <motion.div variants={fadeUp} custom={1} className="rounded-xl border border-border/50 bg-card/60 p-6 space-y-4 text-foreground/80 leading-relaxed">
-              <p>
-                ReviewHub גובה עמלת תפעול מעסקאות המתבצעות דרך קישורי רכישה מאומתת. עמלה זו מממנת את תשתית האימות ואת הנחת 10% שניתנת ללומד. "חומת אמון" מבנית מבדילה לחלוטין בין כל תשלום מסחרי לבין חישוב ציון האמון — ציון האמון מחושב מנתוני ביקורות בלבד, ולא ניתן להשפיע עליו בכסף.
+            <motion.div variants={fadeUp} custom={1} className="space-y-5">
+              <p className="text-foreground/80 leading-relaxed">
+                ReviewHub פועלת לפי מודל <strong className="text-foreground">5/5 Verified Deal</strong> — תשתית מסחרית שנבנתה על עיקרון Win-Win-Win: הלומד חוסך, היוצר צובר אמון, והפלטפורמה מרוויחה מתפעול.
               </p>
+
+              {/* Live economics table */}
+              {(() => {
+                const ex = computeVerifiedPricing(1000);
+                return (
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 overflow-hidden">
+                    <div className="bg-primary/10 px-5 py-3">
+                      <p className="text-sm font-bold text-foreground">דוגמה: קורס במחיר {formatPrice(ex.listPrice)}</p>
+                    </div>
+                    <div className="divide-y divide-border/40 text-sm">
+                      {[
+                        { label: "מחיר שוק (רשמי)",                    value: formatPrice(ex.listPrice),        highlight: false },
+                        { label: `הנחת לומד (${ex.learnerDiscountPct}%) — מיידית בקופה`, value: `−${formatPrice(ex.learnerDiscount)}`, highlight: true  },
+                        { label: "לומד משלם בפועל",                    value: formatPrice(ex.verifiedPrice),    highlight: false },
+                        { label: `עמלת ReviewHub (${ex.platformFeePct}%)`,               value: `−${formatPrice(ex.platformFee)}`,    highlight: false },
+                        { label: "יוצר מקבל",                         value: formatPrice(ex.creatorNet),       highlight: true  },
+                      ].map(({ label, value, highlight }) => (
+                        <div
+                          key={label}
+                          className={`flex items-center justify-between px-5 py-3 ${highlight ? "bg-primary/5 font-semibold" : ""}`}
+                        >
+                          <span className={highlight ? "text-primary" : "text-muted-foreground"}>{label}</span>
+                          <span className={highlight ? "text-primary" : "text-foreground"}>{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-foreground/80 leading-relaxed">
+                <strong className="text-foreground block mb-1">חומת אמון (Trust Firewall)</strong>
+                כל עסקה מסחרית — עמלת תפעול, מנוי Pro, שדרוג Enterprise — מתבצעת במערכת נפרדת לחלוטין ממנגנון חישוב ציון האמון. ציון האמון מחושב מנתוני ביקורות בלבד, ולא ניתן להשפיע עליו בכסף.
+              </div>
             </motion.div>
           </motion.div>
         </div>

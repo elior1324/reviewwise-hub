@@ -10,8 +10,9 @@ import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
   Award, ArrowLeft, CheckCircle, Users, X, Crown, Sparkles,
   Lock, MessageSquare, FileText, Webhook, LineChart, Headphones,
-  UserCheck, Globe, ChevronDown, HelpCircle, Eye
+  UserCheck, Globe, ChevronDown, HelpCircle, Eye, Tag, BadgePercent
 } from "lucide-react";
+import { LEARNER_DISCOUNT_RATE, PLATFORM_FEE_RATE, TOTAL_TRUST_CHARGE, computeVerifiedPricing, formatPrice } from "@/lib/affiliate";
 import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -44,7 +45,7 @@ const PRO_FEATURES: Feature[] = [
   { icon: BarChart3, title: "דאשבורד אנליטיקס", desc: "עקבו אחר דירוגים, מגמות וביקורות חדשות בזמן אמת.", tooltip: "לוח בקרה עם גרפים ונתונים בזמן אמת — דירוגים, מגמות, ביקורות חדשות ואחוזי מענה." },
   { icon: Code, title: "וידג׳טים להטמעה", desc: "הציגו ביקורות ודירוגים באתר שלכם בשורת קוד אחת.", tooltip: "קוד קצר שמטמיע קרוסלת ביקורות או תג דירוג ישירות באתר שלכם — ללא מתכנת." },
   { icon: Zap, title: "בקשות ביקורת אוטומטיות", desc: "שלחו קישורי ביקורת ייחודיים או העלו CSV של רכישות.", tooltip: "שלחו ללקוחות קישור אישי לכתיבת ביקורת, או העלו רשימת רכישות ותנו למערכת לעשות את השאר." },
-  { icon: TrendingUp, title: "קישורי רכישה מאומתת", desc: "קישורי רכישה דרך ReviewHub עם מעקב קליקים והמרות. כל קישור מגיע עם גילוי נאות מובנה — הגולש מבין שהרכישה עוברת דרך תשתית האימות. ציון האמון אינו מושפע.", tooltip: "קישורי הרכישה המאומתת מציגים גילוי נאות ברור לגולשים. ציון האמון מחושב באופן עצמאי ואינו מושפע מהשתתפות בתוכנית. עמלות תפעול תומכות בתשתית האימות בלבד." },
+  { icon: Tag, title: "Verified Deal — מודל 5/5", desc: "כל קישור רכישה מפעיל אוטומטית הנחה של 5% ללומד + עמלת תפעול של 5% ל-ReviewHub. הלומד רוכש במחיר מאומת, מקבל סטטוס \"קונה מאומת\" אוטומטית, ויכול לכתוב ביקורת מאומתת (×1.0 משקל). עמלה 5% = CAC קבועה ומבוססת הצלחה בלבד.", tooltip: "מודל 5/5 אמון: לומד מקבל 5% הנחה מיידית. ReviewHub גובה 5% מהיוצר. מעקב 30 יום — ההנחה תחול גם אם הלומד חוזר לרכוש ישירות תוך 30 ימים. ציון האמון מחושב באופן עצמאי ואינו מושפע." },
   { icon: Globe, title: "רשתות חברתיות ואתר", desc: "חברו YouTube, Instagram, TikTok, LinkedIn, Facebook ואתר האינטרנט שלכם לפרופיל העסקי.", tooltip: "הוסיפו קישורים לכל הרשתות החברתיות שלכם ולאתר — הכל מופיע בפרופיל העסקי." },
   { icon: Award, title: "סיכומי AI שבועיים", desc: "ניתוח אוטומטי של ביקורות עם תובנות לשיפור.", tooltip: "כל שבוע תקבלו דוח AI שמנתח את הביקורות, מזהה מגמות ונותן המלצות לשיפור." },
   { icon: Headphones, title: "תמיכה בעדיפות", desc: "תמיכה מהירה עם מענה תוך 4 שעות בימי עבודה.", tooltip: "פניות שלכם מטופלות לפני כולם — מענה מובטח תוך 4 שעות בימי עבודה." },
@@ -89,7 +90,7 @@ const PLANS = [
       "דאשבורד מתקדם עם אנליטיקס",
       "וידג׳טים להטמעה באתר",
       "בקשות ביקורת אוטומטיות",
-      "מערכת אפיליאט מלאה — פרטים לאחר הרשמה",
+      "Verified Deal — מודל 5/5 (לומד חוסך 5%, ReviewHub גובה 5%)",
       "תמיכה בעדיפות",
     ],
     excluded: ["סיכומי AI שבועיים", "חיבור CRM ולידים", "Google Ads Review Stars", "דוחות AI יומיים"],
@@ -327,6 +328,99 @@ const BusinessLanding = () => {
               <p className="text-sm text-muted-foreground mt-1">{label}</p>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* ── 5/5 Verified Deal Economics Section ──────────────────────────── */}
+      <section className="border-y border-primary/20 bg-primary/5">
+        <div className="container py-16">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 bg-primary/15 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+              <Tag size={14} /> מודל 5 / 5 — Verified Deal
+            </div>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">
+              Win-Win-Win — לומד, יוצר, ופלטפורמה
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              10% מהמחיר הרשמי — מחולק שווה בשווה. הלומד חוסך, ReviewHub מרוויחה, והיוצר מקבל ביקורות מאומתות.
+            </p>
+          </div>
+
+          {/* Economics table — live example */}
+          <div className="max-w-2xl mx-auto">
+            {/* Live price calculator example */}
+            {(() => {
+              const example = computeVerifiedPricing(1000);
+              return (
+                <div className="rounded-xl border border-primary/30 bg-card/80 overflow-hidden">
+                  <div className="bg-primary/10 px-5 py-3 flex items-center gap-2">
+                    <BadgePercent size={16} className="text-primary" />
+                    <span className="font-display font-semibold text-sm text-foreground">דוגמה: קורס במחיר {formatPrice(example.listPrice)}</span>
+                  </div>
+                  <div className="divide-y divide-border/40">
+                    <div className="flex items-center justify-between px-5 py-3 text-sm">
+                      <span className="text-muted-foreground">מחיר שוק (מחיר רשמי)</span>
+                      <span className="font-semibold text-foreground">{formatPrice(example.listPrice)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-5 py-3 text-sm bg-primary/5">
+                      <span className="text-primary font-medium">הנחת לומד ({example.learnerDiscountPct}%) — מיידית בקופה</span>
+                      <span className="text-primary font-bold">−{formatPrice(example.learnerDiscount)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-5 py-3 text-sm">
+                      <span className="text-muted-foreground">לומד משלם בפועל</span>
+                      <span className="font-bold text-foreground">{formatPrice(example.verifiedPrice)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-5 py-3 text-sm">
+                      <span className="text-muted-foreground">עמלת ReviewHub ({example.platformFeePct}%) — מבוסס הצלחה</span>
+                      <span className="text-muted-foreground">−{formatPrice(example.platformFee)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-5 py-3 font-bold bg-card/60">
+                      <span className="text-foreground">יוצר מקבל</span>
+                      <span className="text-primary text-lg">{formatPrice(example.creatorNet)}</span>
+                    </div>
+                  </div>
+                  <div className="px-5 py-3 bg-muted/30 text-xs text-muted-foreground text-right leading-relaxed">
+                    עמלת ReviewHub ({example.platformFeePct}%) היא עמלת CAC קבועה ומבוססת הצלחה בלבד — אתם משלמים רק על עסקאות שהושלמו. ציון האמון מחושב באופן עצמאי ואינו מושפע מהעמלה.
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 3-column benefit summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              {[
+                {
+                  who:    "הלומד",
+                  benefit:`${LEARNER_DISCOUNT_RATE * 100}% הנחה מיידית`,
+                  sub:    "+ סטטוס קונה מאומת + ביקורת מאומתת (×1.0)",
+                  color:  "border-blue-500/30 bg-blue-500/5 text-blue-600 dark:text-blue-400",
+                },
+                {
+                  who:    "ReviewHub",
+                  benefit:`${PLATFORM_FEE_RATE * 100}% עמלת תפעול`,
+                  sub:    "מממנת תשתית אימות עצמאית — לא משפיעה על ציון",
+                  color:  "border-primary/30 bg-primary/5 text-primary",
+                },
+                {
+                  who:    "היוצר",
+                  benefit:`CAC קבועה — ${TOTAL_TRUST_CHARGE * 100}% מבוסס הצלחה`,
+                  sub:    "ביקורות מאומתות → ציון אמון גבוה → גידול אורגני",
+                  color:  "border-emerald-500/30 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400",
+                },
+              ].map(({ who, benefit, sub, color }) => (
+                <div key={who} className={`rounded-xl border p-4 ${color}`}>
+                  <p className="font-bold text-sm mb-1">{who}</p>
+                  <p className="font-display font-semibold text-base leading-snug">{benefit}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{sub}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Trust firewall note */}
+            <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-muted-foreground text-right leading-relaxed">
+              <strong className="text-foreground">חומת אמון:</strong> כל עסקה מסחרית (עמלה, מנוי, שדרוג) מבוצעת במערכת נפרדת לחלוטין ממנגנון חישוב ציון האמון. הספרה הכלכלית לא נוגעת בספרת האמון — זה תנאי יסוד לעצמאות הפלטפורמה.
+            </div>
+          </div>
         </div>
       </section>
 
@@ -648,7 +742,9 @@ const BusinessLanding = () => {
               { q: "איך מאמתים שהביקורת אמיתית?", a: "אימות רכישה מתבצע דרך חשבונית שהלקוח מעלה, אימות אוטומטי מול מערכת התשלומים, או קישור ביקורת ייעודי שנשלח רק ללקוחות שרכשו. ביקורות מאומתות מסומנות ב-✅." },
               { q: "מה קורה אם לקוח כותב ביקורת שלילית?", a: "תוכלו להגיב באופן מקצועי מלוח הבקרה. מחקרים מראים שתגובה מקצועית לביקורת שלילית דווקא מגבירה אמון. ביקורות שמפרות כללים ניתן לדווח ונבדוק תוך 24-48 שעות." },
               { q: "איך מטמיעים וידג'ט באתר שלי?", a: "מלוח הבקרה, גשו ל'וידג'ט להטמעה'. תקבלו קוד HTML/JavaScript פשוט — הדביקו אותו באתר שלכם. הוידג'ט מציג את הדירוג והביקורות ומתעדכן אוטומטית. זמין מתוכנית מקצועי." },
-              { q: "מה זה מערכת קישורי הרכישה המאומתת?", a: "כשלומד רוכש דרך קישור ReviewHub מאומת, הרכישה עוברת דרך תשתית האימות שלנו — הלומד מקבל אוטומטית סטטוס \"קונה מאומת\" ויכול לכתוב ביקורת מאומתת. ביקורות מאומתות נושאות פי 2.5 משקל מביקורות קהילתיות בחישוב ציון האמון. עמלת תפעול נוצרת מהתהליך — היא אינה משפיעה על ציון האמון." },
+              { q: "מה זה מודל 5/5 Verified Deal?", a: "מודל 5/5 מחלק את עמלת האמון (10% מהמחיר הרשמי) שווה בשווה: הלומד מקבל 5% הנחה מיידית בקופה, ו-ReviewHub גובה 5% עמלת תפעול מהיוצר. דוגמה: קורס ב-₪1,000 — הלומד משלם ₪950, ReviewHub מקבלת ₪50, היוצר מקבל ₪900. EAC (עלות גיוס לקוח) של 10% — מבוסס הצלחה בלבד, ללא תשלום מראש." },
+              { q: "מה זה מערכת קישורי הרכישה המאומתת?", a: "כשלומד לוחץ על קישור ReviewHub, הוא מועבר לדף הרכישה של היוצר עם פרמטרים ?ref=reviewhub&coupon=RH5 — שמפעילים אוטומטית את ההנחה של 5%. עוגיית מעקב של 30 יום מבטיחה שגם אם הלומד חוזר לרכוש ישירות תוך 30 ימים, ההנחה ועמלת האימות יחולו. לאחר הרכישה — webhook ממערכת התשלומים שולח אות לאימות, הלומד מקבל סטטוס \"קונה מאומת\" ויכול לכתוב ביקורת מאומתת (×1.0 משקל)." },
+              { q: "מה ה-CAC שלי עם ReviewHub?", a: "עלות גיוס לקוח (CAC) שלכם היא 10% קבוע מבוסס הצלחה — אתם משלמים רק על עסקאות שהושלמו. אין תשלום מראש, אין עלות קליק, אין תשלום על חשיפה. בנוסף, כל לקוח שנרכש דרך ReviewHub הופך ל\"קונה מאומת\" ויכול לכתוב ביקורת שמקבלת ×1.0 משקל בחישוב ציון האמון שלכם — תשלום שמחולל אפקט גדל בציון האמון." },
               { q: "מה כולל דוח ה-AI?", a: "דוח ה-AI מנתח את הביקורות שלכם ומזהה חוזקות, חולשות, מגמות והמלצות קונקרטיות לצמיחה. במקצועי: שבועי, באנטרפרייז: יומי." },
               { q: "יש תקופת ניסיון?", a: "כן! תוכנית מקצועי כוללת 14 ימי ניסיון חינם. תוכלו לבטל בכל עת ללא חיוב." },
               { q: "אפשר לבטל את המנוי?", a: "כן, תוכלו לבטל בכל עת. לאחר הביטול, החשבון ירד לתוכנית סטארטר. כל הביקורות שנאספו נשמרות." },
