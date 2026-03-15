@@ -318,8 +318,11 @@ const SearchPage = () => {
               )}
             </div>
             {isAiRanked && top5Month && (
-              <p className="text-xs text-muted-foreground mb-3 mr-7">דירוג חודשי מבוסס ביקורות מאומתות רכישה — עודכן לאחרונה ב-{top5Month}</p>
+              <p className="text-xs text-muted-foreground mb-1 mr-7">דירוג חודשי מבוסס ביקורות מאומתות רכישה — עודכן לאחרונה ב-{top5Month}</p>
             )}
+            <p className="text-[10px] text-muted-foreground/60 mb-3 mr-7">
+              הקשר הטכני של ReviewHub עם ספקי קורסים ושירותים משמש לצורכי אימות בלבד. יוצרים אינם יכולים לשלם על דירוג גבוה יותר, על הסרת ביקורות שליליות, או על השפעה על ציון האמון. ספק ללא קשר שותפות אך עם ציון אמון גבוה יופיע במיקומו הנכון.
+            </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 auto-rows-fr">
               {top5Overall.map((biz, i) => (
                 <motion.div

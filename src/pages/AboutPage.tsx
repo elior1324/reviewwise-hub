@@ -53,6 +53,34 @@ const AboutPage = () => {
         </motion.div>
       </section>
 
+      {/* Operational Commission — Transparency Statement */}
+      <section className="border-y border-border/50">
+        <div className="container py-20">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="max-w-3xl mx-auto">
+            <motion.div variants={fadeUp} custom={0} className="flex items-center gap-3 mb-6">
+              <Target size={24} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
+                שקיפות תפעולית — כיצד אנחנו פועלים
+              </h2>
+            </motion.div>
+            <motion.div variants={fadeUp} custom={1} className="rounded-xl border border-border/50 bg-card/60 p-6 space-y-4 text-foreground/80 leading-relaxed">
+              <p>
+                ReviewHub פועלת כרשת אימות עצמאית.
+              </p>
+              <p>
+                כדי להבטיח שהביקורות בפלטפורמה מבוססות על עסקאות אמיתיות, ReviewHub מתחברת למערכות תשלום ורישום. כאשר מתבצעת רכישה דרך הפלטפורמה, מתקבל אות טכני המאפשר למערכת לאמת את אמיתות המשוב העתידי.
+              </p>
+              <p>
+                <strong className="text-foreground">עמלת התפעול</strong> הנוצרת מתהליך זה מאפשרת לפלטפורמה להישאר נקייה מפרסום ומהשפעה מסחרית — תוך שמירה על ציון אמון אובייקטיבי שלא ניתן לרכישה.
+              </p>
+              <p className="text-sm text-muted-foreground border-t border-border/40 pt-3">
+                <strong className="text-foreground">לתשומת לבכם:</strong> שיתופי הפעולה הטכניים עם ספקי קורסים ושירותים משמשים לצורכי אימות בלבד. יוצרים אינם יכולים לשלם על דירוג גבוה יותר בתוצאות החיפוש, על הסרת ביקורות שליליות, או על השפעה על ציון האמון. ציון האמון נגזר אך ורק ממשוב לומדים אמיתי, אותות החזרים ופעילות מותג לאורך זמן.
+              </p>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* What We Are Not */}
       <section className="border-y border-border/50">
         <div className="container py-20">
@@ -268,7 +296,7 @@ const AboutPage = () => {
               </Link>
               <Link to="/register">
                 <Button size="lg" variant="outline" className="border-border/50 font-semibold">
-                  הצטרפו כיוצר
+                  רשמו עסק לאימות
                 </Button>
               </Link>
             </div>

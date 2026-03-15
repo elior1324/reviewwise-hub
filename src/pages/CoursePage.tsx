@@ -201,11 +201,16 @@ const CoursePage = () => {
                 <p className="font-display font-bold text-2xl text-foreground mb-2">₪{course.price.toLocaleString()}</p>
               )}
               {course.affiliateUrl && sanitizeUrl(course.affiliateUrl) && (
-                <a href={sanitizeUrl(course.affiliateUrl)} target="_blank" rel="noopener noreferrer">
-                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
-                    לדף הקורס <ExternalLink size={16} />
-                  </Button>
-                </a>
+                <div className="space-y-2">
+                  <a href={sanitizeUrl(course.affiliateUrl)} target="_blank" rel="noopener noreferrer">
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 w-full">
+                      המשיכו לרכישה מאומתת <ExternalLink size={16} />
+                    </Button>
+                  </a>
+                  <p className="text-[10px] text-muted-foreground/70 leading-relaxed text-right max-w-[240px]">
+                    רכישה דרך קישור זה מאפשרת קבלת סטטוס ״קונה מאומת״ ומסייעת לאמת ביקורות עתידיות. לשקיפות: ReviewHub עשויה לקבל אות תפעולי — אינו משפיע על ציון האמון.
+                  </p>
+                </div>
               )}
             </div>
           </div>

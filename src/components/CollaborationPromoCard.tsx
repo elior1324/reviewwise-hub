@@ -95,7 +95,7 @@ const CollaborationPromoCard = ({
                 <div className="w-36 h-36 rounded-2xl border border-primary/20 bg-primary/5 flex flex-col items-center justify-center gap-2 p-4">
                   <Handshake size={32} className="text-primary" />
                   <p className="text-center text-xs font-semibold text-foreground leading-tight">
-                    הצעה בלעדית לגולשי ReviewHub
+                    תנאי רכישה מסונכרנים
                   </p>
                   <div className="bg-primary text-primary-foreground text-lg font-bold px-3 py-1 rounded-lg">
                     -10%

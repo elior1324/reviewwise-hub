@@ -90,7 +90,7 @@ const CollaborationSetupModal = ({
 
     toast({
       title: "תוכנית שיתוף הפעולה הופעלה!",
-      description: "הפרופיל הציבורי שלכם יציג את ההצעה הבלעדית לגולשי ReviewHub.",
+      description: "הפרופיל הציבורי שלכם יציג תנאי רכישה מסונכרנים לגולשי ReviewHub.",
     });
 
     setStep("done");
@@ -128,16 +128,14 @@ const CollaborationSetupModal = ({
         {step === "intro" && (
           <div className="space-y-5">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              הצטרפו לתוכנית ואפשרו ל-ReviewHub לשלוח אליכם לקוחות חדשים.
-              הגולש מקבל <strong className="text-foreground">10% הנחה</strong> — אתם מקבלים
-              לקוח נוסף, ו-ReviewHub מקבלת עמלת הפניה. כולם מרוויחים.
+              הצטרפו לתוכנית שיתוף הפעולה ואפשרו ל-ReviewHub לחבר אתכם עם לקוחות פוטנציאליים דרך תשתית האימות. גולשים שיגיעו דרך ReviewHub יוכלו לרכוש עם תנאי מסונכרנים — ורכישתם תעבור אימות לביקורת מאומתת עתידית. ReviewHub עשויה לקבל אות תפעולי מרכישות אלו — הדבר מצוין בגילוי נאות ברור לגולש ואינו משפיע על ציון האמון שלכם.
             </p>
 
             <div className="grid gap-3">
               {[
-                ["לקוחות חדשים", "ReviewHub שולחת גולשים ישירות לפרופיל ואתר שלכם."],
-                ["10% הנחה לגולש", "ההנחה פועלת כעמלת שיווק עבור ReviewHub — שקופה לחלוטין."],
-                ["השתתפות אופציונלית", "ניתן להפסיק בכל עת. עסקים שאינם משתתפים ממשיכים להופיע רגיל."],
+                ["אימות רכישה מוגבר", "רכישות דרך ReviewHub עוברות תהליך אימות ומאפשרות ביקורות מאומתות."],
+                ["תנאי מסונכרנים לגולש", "תנאי הרכישה המסונכרנים מסופקים ישירות על ידי הספק — שקופים לחלוטין."],
+                ["השתתפות אופציונלית", "ניתן להפסיק בכל עת. עסקים שאינם משתתפים ממשיכים להופיע ומדורגים לפי ציון אמון."],
               ].map(([title, desc]) => (
                 <div key={title} className="flex gap-3 items-start">
                   <div className="mt-0.5 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -154,8 +152,8 @@ const CollaborationSetupModal = ({
             <div className="rounded-lg border border-border/40 bg-muted/20 p-3 flex gap-2 text-xs text-muted-foreground">
               <Info size={14} className="text-primary shrink-0 mt-0.5" />
               <span>
-                פרופיל הציבורי שלכם יציג תיבת "הצעה בלעדית של ReviewHub" כאשר התוכנית פעילה.
-                הגולש יראה גילוי נאות ברור.
+                הפרופיל הציבורי שלכם יציג תיבת "תנאי רכישה מסונכרנים" כאשר התוכנית פעילה.
+                הגולש יראה גילוי נאות ברור — כולל הסבר על תשתית האימות.
               </span>
             </div>
 
@@ -289,7 +287,7 @@ const CollaborationSetupModal = ({
             <div>
               <p className="font-display font-bold text-lg text-foreground">התוכנית פעילה!</p>
               <p className="text-sm text-muted-foreground mt-1">
-                הפרופיל הציבורי שלכם מציג עכשיו את ההצעה הבלעדית לגולשי ReviewHub.
+                הפרופיל הציבורי שלכם מציג עכשיו תנאי רכישה מסונכרנים לגולשי ReviewHub.
               </p>
             </div>
 

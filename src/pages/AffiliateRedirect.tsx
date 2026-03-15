@@ -97,37 +97,44 @@ const AffiliateRedirect = () => {
 
         {!error && target?.kind === "course" && (
           <>
-            <h1 className="font-display font-bold text-xl text-foreground">מעביר אותך לאתר הקורס...</h1>
+            <h1 className="font-display font-bold text-xl text-foreground">מעביר אותך לאימות רכישה...</h1>
             <p className="text-muted-foreground">{target.name}</p>
-            <p className="text-xs text-muted-foreground">מופנה דרך ReviewHub</p>
-            <p className="text-[10px] text-muted-foreground/70 mt-1">
-              גילוי נאות: ReviewHub עשויה לקבל עמלה מרכישות דרך קישור זה
-            </p>
+            <p className="text-xs text-muted-foreground">עוברים דרך תשתית האימות של ReviewHub</p>
+            <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-right space-y-1 mt-2">
+              <p className="text-xs text-foreground/80 leading-relaxed">
+                <strong className="text-foreground">מדוע לרכוש דרך קישור זה?</strong><br />
+                רכישה דרך קישור ReviewHub מאומת מבטיחה שהמשוב שלכם יוכל להיות מאומת. רק עסקאות שעוברות דרך תשתית האימות של ReviewHub מעניקות למשתמש סטטוס <span className="text-primary font-medium">״קונה מאומת״</span> — שמעניק לביקורת שלהם משקל גבוה יותר בציון האמון ומאפשר ל-ReviewHub לסייע בסכסוכים הנוגעים לתוכן הקורס.
+              </p>
+              <p className="text-[10px] text-muted-foreground/70 border-t border-border/30 pt-2">
+                לשקיפות מלאה: רכישות דרך קישור זה מייצרות אות טכני לאימות ומסייעות לתפעול תשתית האימות של ReviewHub. אות זה אינו משפיע על דירוג המוצר.
+              </p>
+            </div>
           </>
         )}
 
         {!error && target?.kind === "business" && (
           <>
             <h1 className="font-display font-bold text-xl text-foreground">
-              מעביר אותך לאתר {target.name}...
+              מעביר אותך לאימות רכישה — {target.name}
             </h1>
             <p className="text-sm text-muted-foreground">
-              אתם ניגשים לעסק זה דרך ReviewHub
+              עוברים דרך תשתית האימות של ReviewHub
             </p>
 
             {/* Coupon display */}
             {(target.method === "coupon" || target.method === "both") && target.coupon && (
               <div className="mx-auto inline-block border border-primary/30 bg-primary/5 rounded-xl px-5 py-3">
-                <p className="text-xs text-muted-foreground mb-1">השתמשו בקוד זה לקבלת הנחה:</p>
+                <p className="text-xs text-muted-foreground mb-1">תנאי רכישה מסונכרנים — קוד לאימות בקופה:</p>
                 <p className="font-mono font-bold text-2xl text-primary tracking-widest">{target.coupon}</p>
-                <p className="text-xs text-primary/70 mt-1">10% הנחה בקופה</p>
+                <p className="text-xs text-primary/70 mt-1">תנאים מסופקים ישירות על ידי הספק</p>
               </div>
             )}
 
-            <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
-              גילוי נאות: ReviewHub עשויה לקבל עמלת הפניה אם תרכשו דרך קישור זה.
-              ההנחה מסופקת ישירות על ידי העסק.
-            </p>
+            <div className="rounded-lg border border-border/30 bg-muted/30 px-4 py-3 text-right">
+              <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
+                לשקיפות מלאה: רכישות דרך קישור זה עוברות דרך תשתית האימות של ReviewHub ומסייעות לאמת את אמיתות המשוב העתידי. ReviewHub עשויה לקבל אות תפעולי מרכישה זו. פעולה זו אינה משפיעה על ציון האמון האובייקטיבי של הספק.
+              </p>
+            </div>
           </>
         )}
       </div>

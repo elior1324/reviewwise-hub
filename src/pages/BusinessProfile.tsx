@@ -489,7 +489,7 @@ const BusinessProfile = () => {
           avgResponseHours={avgResponseHours}
         />
 
-        {/* ── Collaboration: Exclusive Offer ──────────────────────────────── */}
+        {/* ── Collaboration: Synchronized Purchase Conditions ──────────────── */}
         {collabActive && (
           <motion.div
             initial={{ opacity: 0, y: -6 }}
@@ -506,14 +506,14 @@ const BusinessProfile = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
                     <p className="font-display font-bold text-base text-foreground">
-                      הצעה בלעדית לגולשי ReviewHub
+                      תנאי רכישה מסונכרנים
                     </p>
                     <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wide">
-                      בלעדי
+                      מאומת
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    קבלו <strong className="text-foreground">10% הנחה</strong> כשניגשים לעסק זה דרך ReviewHub.
+                    גישה דרך ReviewHub מאפשרת תנאי רכישה מסונכרנים ומבטיחה שהרכישה תעבור תהליך אימות לביקורת מאומתת עתידית.
                     {(collabMethod === "coupon" || collabMethod === "both") && !couponRevealed && (
                       <button
                         onClick={() => setCouponRevealed(true)}
@@ -548,7 +548,7 @@ const BusinessProfile = () => {
                     onClick={handleCollabAccess}
                     className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shrink-0"
                   >
-                    <Link2 size={15} /> גישה עם הנחה
+                    <Link2 size={15} /> המשיכו לרכישה מאומתת
                   </Button>
                 )}
               </div>
@@ -557,8 +557,7 @@ const BusinessProfile = () => {
               <div className="mt-3 flex items-start gap-1.5 text-[11px] text-muted-foreground/70">
                 <Info size={11} className="mt-0.5 shrink-0" />
                 <span>
-                  ReviewHub עשויה לקבל עמלת הפניה אם תרכשו דרך קישור זה. ההנחה מסופקת
-                  ישירות על ידי העסק ואינה מוענקת על ידי ReviewHub.
+                  לשקיפות מלאה: רכישות דרך קישור זה עוברות דרך תשתית האימות של ReviewHub ומסייעות לאמת ביקורות עתידיות. ReviewHub עשויה לקבל אות תפעולי מרכישה זו. פעולה זו אינה משפיעה על ציון האמון האובייקטיבי של הספק.
                 </span>
               </div>
             </div>
