@@ -239,14 +239,14 @@ const Index = () => {
         <motion.div className="container py-16 md:py-24 relative" style={{ opacity: heroOpacity, y: heroY }}>
           <motion.div className="max-w-4xl mx-auto text-center" initial="hidden" animate="visible">
             <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
-              <ShieldCheck size={16} aria-hidden="true" /> תשתית אימות עצמאית לחינוך דיגיטלי · ביקורות מאומתות רכישה בלבד
+              <ShieldCheck size={16} aria-hidden="true" /> ביקורות מאומתות רכישה · כיוון ברור לקהילה הדיגיטלית
             </motion.div>
             <motion.h1 id="hero-heading" variants={fadeUp} custom={1} className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-4">
-              מצאו קורסים שאפשר{" "}
-              <span className="gradient-text glow-text">באמת לסמוך עליהם</span>
+              המצפן של{" "}
+              <span className="gradient-text glow-text">הקהילה הדיגיטלית</span>
             </motion.h1>
             <motion.p variants={fadeUp} custom={2} className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-              ReviewHub מדרגת קורסים דיגיטליים לפי ביקורות מאומתות רכישה בלבד — לא פרסום, לא דעות, לא תשלום לשיפור דירוג. ציון אמון עצמאי לכל קורס.
+              ReviewHub היא המצפן של הקהילה הדיגיטלית — כל קורס מקבל ציון אמון מבוסס ביקורות מאומתות רכישה. מצאו את הכיוון הנכון לפני שאתם משקיעים.
             </motion.p>
             {/*
               role="search" identifies this as the site's primary search form for
@@ -258,7 +258,7 @@ const Index = () => {
                 {/* Search icon is decorative — the input's aria-label conveys the purpose */}
                 <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
-                  placeholder="חפשו קורסים — שיווק, AI, פיתוח, עיצוב, יזמות ועוד"
+                  placeholder="מצאו את הכיוון הנכון — שיווק, AI, פיתוח, עיצוב, יזמות ועוד"
                   aria-label="חיפוש קורסים דיגיטליים"
                   className="pr-10 h-12 glass border-border/50 w-full"
                   value={searchQuery}
@@ -280,9 +280,9 @@ const Index = () => {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <BookOpen size={22} className="text-primary" />
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">קורסים מובילים — ביקורות מאומתות</h2>
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">קורסים שהקהילה מכוונת אליהם</h2>
             </div>
-            <p className="text-muted-foreground mt-1">קורסים מדורגים לפי ציון האמון — מבוסס על ביקורות מאומתות רכישה בלבד. לא ניתן לרכוש מיקום.</p>
+            <p className="text-muted-foreground mt-1">דירוג מבוסס ציון אמון — מחושב מביקורות מאומתות רכישה בלבד. לא ניתן לרכוש מיקום.</p>
           </div>
           <Link to="/search?tab=courses">
             <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
@@ -310,7 +310,7 @@ const Index = () => {
               <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">Trending Now</h2>
               <span className="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">↑ הכי נסקרים השבוע</span>
             </div>
-            <p className="text-muted-foreground mt-1">קורסים עם הכי הרבה ביקורות חדשות ב-7 הימים האחרונים — מתעדכן כל 6 שעות</p>
+            <p className="text-muted-foreground mt-1">הקהילה הדיגיטלית מדברת — קורסים עם הכי הרבה ביקורות חדשות ב-7 ימים האחרונים</p>
           </div>
           <Link to="/search?sort=trending">
             <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
@@ -341,7 +341,7 @@ const Index = () => {
               <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">Rising Courses</h2>
               <span className="text-xs font-semibold bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-2 py-0.5 rounded-full">↑ בניית מומנטום</span>
             </div>
-            <p className="text-muted-foreground mt-1">קורסים שציון האמון שלהם עלה הכי הרבה ב-30 הימים האחרונים — גם יוצרים קטנים יכולים להגיע לדף הבית</p>
+            <p className="text-muted-foreground mt-1">קורסים שצוברים כיוון — ציון האמון שלהם עלה הכי הרבה ב-30 הימים האחרונים. גם יוצרים קטנים על המפה.</p>
           </div>
           <Link to="/search?sort=rising">
             <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
@@ -373,7 +373,7 @@ const Index = () => {
                 <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">Editor Picks</h2>
                 <span className="text-xs font-semibold bg-primary/15 text-primary px-2 py-0.5 rounded-full">נבחר ידנית</span>
               </div>
-              <p className="text-muted-foreground mt-1">בחירה שבועית של צוות ReviewHub — קורסים שהצטיינו באיכות, עדכניות, או בתחום שזקוק לחשיפה</p>
+              <p className="text-muted-foreground mt-1">המצפן בחר — קורסים שהוכיחו כיוון ברור: תוכן איכותי, יוצר אמין, ותחום שהקהילה צריכה</p>
             </div>
             <Link to="/search?sort=editor_picks">
               <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
@@ -537,10 +537,10 @@ const Index = () => {
             variants={staggerContainer}
           >
             {[
-              { icon: Star, label: "ביקורות מאומתות רכישה", value: stats.reviews > 0 ? stats.reviews.toLocaleString() : "0" },
-              { icon: Users, label: "ישויות דיגיטליות מאומתות", value: stats.businesses > 0 ? stats.businesses.toLocaleString() : "0" },
-              { icon: ShieldCheck, label: "ביקורות נתמכות בהוכחת רכישה", value: "100%" },
-              { icon: TrendingUp, label: "מתודולוגיה פתוחה לציבור", value: "פתוח" },
+              { icon: Star, label: "ביקורות מאומתות מהקהילה", value: stats.reviews > 0 ? stats.reviews.toLocaleString() : "0" },
+              { icon: Users, label: "קורסים על המפה הדיגיטלית", value: stats.businesses > 0 ? stats.businesses.toLocaleString() : "0" },
+              { icon: ShieldCheck, label: "כל ביקורת מגובה ברכישה אמיתית", value: "100%" },
+              { icon: TrendingUp, label: "מתודולוגיה שקופה ופתוחה", value: "פתוח" },
             ].map(({ icon: Icon, label, value }) => (
               <motion.div key={label} variants={scaleIn}>
                 <motion.div
@@ -563,8 +563,8 @@ const Index = () => {
 
       {/* Scrolling testimonials marquee */}
       <TestimonialsSection
-        title="ביקורות מאומתות — מהכלכלה הדיגיטלית האמיתית"
-        description="כל ביקורת קושרה להוכחת רכישה לפני שפורסמה. לא ניתן לרכוש מיקום, לא ניתן להסיר ביקורת שלילית, ולא ניתן לכתוב ביקורת ללא אימות עצמאי."
+        title="קולות מהקהילה הדיגיטלית"
+        description="כל ביקורת קושרה להוכחת רכישה לפני שפורסמה. המצפן לא משקר — לא ניתן לרכוש מיקום, לא ניתן להסיר ביקורת שלילית, ולא ניתן לכתוב ביקורת ללא אימות עצמאי."
         className="border-t border-border/40"
         testimonials={[
           {
@@ -637,8 +637,8 @@ const Index = () => {
       {/* Recent Reviews */}
       <section className="container py-20">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}>
-          <motion.h2 variants={fadeUp} custom={0} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">אימותים אחרונים מהמאגר</motion.h2>
-          <motion.p variants={fadeUp} custom={1} className="text-muted-foreground mb-10">ביקורות מאומתות שנוספו לאחרונה על כלים דיגיטליים, מומחים וקורסים</motion.p>
+          <motion.h2 variants={fadeUp} custom={0} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">מה הקהילה אומרת עכשיו</motion.h2>
+          <motion.p variants={fadeUp} custom={1} className="text-muted-foreground mb-10">ביקורות מאומתות רכישה שנוספו לאחרונה — הקהילה מכוונת, אתם מחליטים</motion.p>
         </motion.div>
         {recentReviews.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -675,7 +675,7 @@ const Index = () => {
               className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6"
             >
               <ShieldCheck size={16} aria-hidden="true" />
-              תשתית האמון של הכלכלה הדיגיטלית
+              המצפן של הקהילה הדיגיטלית
             </motion.div>
 
             <motion.h2
@@ -685,7 +685,7 @@ const Index = () => {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="font-display font-bold text-3xl md:text-5xl text-foreground mb-4"
             >
-              נתונים, לא טענות שיווקיות
+              כיוון ברור, לא טענות שיווקיות
             </motion.h2>
 
             <motion.p
@@ -695,25 +695,25 @@ const Index = () => {
               transition={{ delay: 0.3, duration: 0.5 }}
               className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto"
             >
-              כל ציון אמון מחושב מנתוני רכישה ממשיים. הכלכלה הדיגיטלית זקוקה לשכבת אמון עצמאית — ReviewHub היא אותה שכבה.
+              כל ציון אמון מחושב מנתוני רכישה ממשיים — לא פרסום, לא דעות. הקהילה הדיגיטלית צריכה מצפן עצמאי, ו-ReviewHub היא אותו מצפן.
             </motion.p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
               {[
                 {
                   step: "01",
-                  title: "אימות רכישה",
-                  desc: "רק מי שרכש בפועל — קורס, כלי SaaS או שירות דיגיטלי — יכול לכתוב ביקורת. מאמתים מול נתוני רכישה ממשיים, לא הצהרות.",
+                  title: "הקהילה רוכשת ומדווחת",
+                  desc: "רק מי שרכש בפועל יכול לכתוב ביקורת. המצפן מתבסס על ניסיון אמיתי בשטח — לא הצהרות, לא פרסום.",
                 },
                 {
                   step: "02",
-                  title: "ציון אמון לכלכלה הדיגיטלית",
-                  desc: "ציון האמון v2.0 מורכב מארבעה מרכיבים: איכות ביקורות (עד 20 נקודות), נפח לוגריתמי (עד 25 נקודות), עדכניות (עד 25 נקודות), ועקביות (עד 30 נקודות) — כפול מכפיל יחס ביקורות מאומתות. יוצר קטן עם 5 ביקורות מאומתות מצוינות יכול להגיע לרמת Elite.",
+                  title: "המצפן מחשב כיוון",
+                  desc: "ציון האמון מורכב מארבעה מרכיבים: איכות, נפח, עדכניות ועקביות — כפול מכפיל יחס ביקורות מאומתות. יוצר קטן עם 5 ביקורות מצוינות יכול להגיע לרמת Elite.",
                 },
                 {
                   step: "03",
-                  title: "שקיפות מלאה",
-                  desc: "ציונים אינם למכירה. ביקורות לא ניתנות למחיקה על ידי הספק. ReviewHub פועלת כשכבת אמון עצמאית — לא כפלטפורמת שיווק.",
+                  title: "הכיוון לא למכירה",
+                  desc: "ציונים אינם למכירה. ביקורות שליליות אינן ניתנות למחיקה. ReviewHub פועלת כמצפן עצמאי — לא כפלטפורמת שיווק.",
                 },
               ].map((item, i) => (
                 <motion.div
@@ -743,12 +743,12 @@ const Index = () => {
             >
               <Link to="/about">
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
-                  קראו על המתודולוגיה
+                  איך עובד המצפן?
                 </Button>
               </Link>
               <Link to="/search">
                 <Button size="lg" variant="outline" className="border-border/50 font-semibold">
-                  חפשו ביקורות מאומתות
+                  גלו את הכיוון הנכון
                 </Button>
               </Link>
             </motion.div>
@@ -763,18 +763,18 @@ const Index = () => {
             <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
               <HelpCircle size={14} /> שאלות נפוצות
             </motion.div>
-            <motion.h2 variants={fadeUp} custom={1} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">שאלות ותשובות</motion.h2>
-            <motion.p variants={fadeUp} custom={2} className="text-muted-foreground max-w-xl mx-auto">על המתודולוגיה, האימות, והעצמאות שלנו</motion.p>
+            <motion.h2 variants={fadeUp} custom={1} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">שאלות על המצפן</motion.h2>
+            <motion.p variants={fadeUp} custom={2} className="text-muted-foreground max-w-xl mx-auto">על המתודולוגיה, האימות, ולמה המצפן לא משקר</motion.p>
           </motion.div>
           <div className="max-w-3xl mx-auto space-y-3">
             {[
-              { q: "מה זה ReviewHub?", a: "ReviewHub היא תשתית אימות עצמאית לחינוך דיגיטלי. הפלטפורמה מדרגת קורסים אונליין לפי ביקורות מאומתות רכישה — לא פרסום, לא דעות, ולא תשלום לשיפור דירוג. ציון האמון מחושב אוטומטית ולא ניתן לרכישה." },
-              { q: "אילו קורסים מדורגים ב-ReviewHub?", a: "ReviewHub v1.0 מתמקדת בחינוך דיגיטלי: קורסי שיווק דיגיטלי, פיתוח תוכנה, AI, עיצוב UI/UX, יזמות, פרילנסינג, פיננסים, וידאו, כתיבה ומכירות. קטגוריות נוספות (מומחים דיגיטליים, כלי SaaS) יתווספו בשלב 2." },
-              { q: "איך אני יודע שהביקורות אמיתיות?", a: "אנחנו מאמתים מול נתוני רכישה ממשיים — לא על בסיס הצהרה עצמית. רק מי שרכש בפועל יכול לכתוב ביקורת. ביקורות מאומתות מסומנות במפורש. ספקים לא יכולים למחוק ביקורות שליליות." },
-              { q: "איך מחושב ציון האמון?", a: "ציון האמון (0–100) מורכב משלושה מרכיבים: נפח ביקורות מאומתות (עד 40 נקודות), יחס החזרים ותלונות (עד 35 נקודות), ותקופת פעילות מוכחת (עד 25 נקודות). המתודולוגיה המלאה פתוחה לציבור." },
-              { q: "האם השימוש באתר עולה כסף?", a: "לא. עיון בביקורות, חיפוש, השוואות וכתיבת ביקורות — הכל חינמי. ReviewHub מתוחזקת כשכבה עצמאית של אמין — ללא ניגודי אינטרסים." },
-              { q: "איך כותבים ביקורת?", a: "הירשמו (חינם), ואז כתבו ביקורת על כלי, מומחה או קורס שרכשתם — דרך קישור ייעודי מהספק, או ישירות דרך עמוד הפרופיל. נדרש אימות רכישה לביקורת מאומתת." },
-              { q: "אפשר לכתוב ביקורת בעילום שם?", a: "כן. תוכלו לסמן ביקורת אנונימית גם אם אימתתם רכישה — שמכם לא יוצג, אבל תג \"רכישה מאומתת\" יישאר כדי לשמור על אמינות הנתון." },
+              { q: "מה זה ReviewHub?", a: "ReviewHub היא המצפן של הקהילה הדיגיטלית — פלטפורמת אימות עצמאית לקורסים אונליין. כל קורס מקבל ציון אמון המחושב מביקורות מאומתות רכישה בלבד. לא פרסום, לא דעות, ולא תשלום לשיפור דירוג. המצפן לא משקר." },
+              { q: "לאיזה קורסים המצפן מכוון?", a: "ReviewHub מכסה את כל תחומי החינוך הדיגיטלי: שיווק דיגיטלי, פיתוח תוכנה, AI, עיצוב UI/UX, יזמות, פרילנסינג, פיננסים, וידאו, כתיבה ומכירות. קטגוריות נוספות (מומחים דיגיטליים, כלי SaaS) יתווספו בשלב 2." },
+              { q: "איך אני יודע שהמצפן מדויק?", a: "המצפן מתבסס על נתוני רכישה ממשיים — לא הצהרות עצמיות. רק מי שרכש בפועל יכול לכתוב ביקורת. ביקורות מאומתות מסומנות במפורש. יוצרים לא יכולים למחוק ביקורות שליליות." },
+              { q: "איך מחושב ציון האמון של המצפן?", a: "ציון האמון (0–100) מורכב מארבעה מרכיבים: איכות ביקורות (עד 20 נקודות), נפח לוגריתמי (עד 25), עדכניות (עד 25), ועקביות (עד 30) — כפול מכפיל יחס ביקורות מאומתות. המתודולוגיה פתוחה לציבור." },
+              { q: "האם השימוש במצפן עולה כסף?", a: "לא. עיון בביקורות, חיפוש, השוואות וכתיבת ביקורות — הכל חינמי לגמרי. המצפן עצמאי ואינו ממומן על ידי יוצרי הקורסים." },
+              { q: "איך תורמים למצפן?", a: "הירשמו (חינם) ואז כתבו ביקורת על קורס שרכשתם — דרך קישור ייעודי מהיוצר, או ישירות דרך עמוד הקורס. נדרש אימות רכישה לביקורת מאומתת. כל ביקורת מכוונת את הקהילה קצת יותר טוב." },
+              { q: "אפשר לכתוב ביקורת בעילום שם?", a: "כן. תוכלו לסמן ביקורת אנונימית גם אם אימתתם רכישה — שמכם לא יוצג, אבל תג \"רכישה מאומתת\" יישאר. המצפן שומר על אמינות הנתון גם בעילום שם." },
             ].map(({ q, a }, i) => (
               <motion.div
                 key={i}
