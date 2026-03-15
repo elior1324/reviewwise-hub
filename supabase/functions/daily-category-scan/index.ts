@@ -13,6 +13,33 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // ── Authentication guard ────────────────────────────────────────────────
+  // This function uses the service-role key internally and MUST NOT be
+  // callable by unauthenticated users. Callers must supply the shared
+  // CRON_SECRET token in the Authorization header.
+  //
+  // The secret is set as an Edge Function secret in Supabase:
+  //   supabase secrets set CRON_SECRET=<strong-random-value>
+  //
+  // The Supabase pg_cron trigger must send:
+  //   Authorization: Bearer <CRON_SECRET>
+  const CRON_SECRET = Deno.env.get("CRON_SECRET");
+  if (CRON_SECRET) {
+    const authHeader = req.headers.get("Authorization") ?? "";
+    if (authHeader !== `Bearer ${CRON_SECRET}`) {
+      console.warn("[daily-category-scan] Unauthorized request — invalid or missing CRON_SECRET");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+  } else {
+    // If CRON_SECRET is not configured, log a warning.
+    // In production CRON_SECRET must always be set — remove this fallback
+    // once the secret is confirmed in the Supabase dashboard.
+    console.warn("[daily-category-scan] CRON_SECRET is not set — running without auth guard. Set CRON_SECRET in Edge Function secrets.");
+  }
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

@@ -3,6 +3,54 @@ import { createClient }      from "https://esm.sh/@supabase/supabase-js@2";
 import { checkAiRateLimit }  from "../_shared/rate-limit.ts";
 import { getCorsHeaders }    from "../_shared/cors.ts";
 
+// ── SSRF guard ─────────────────────────────────────────────────────────────
+// Validates a webhook URL before firing it.  Blocks:
+//   • Non-HTTPS schemes (http, file, ftp, etc.)
+//   • Private/loopback IPv4 and IPv6 ranges
+//   • Cloud metadata endpoints (169.254.x.x, AWS/GCP/Azure magic IPs)
+function isWebhookUrlSafe(rawUrl: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return false; // unparseable
+  }
+
+  // Only HTTPS allowed
+  if (parsed.protocol !== "https:") return false;
+
+  const hostname = parsed.hostname.toLowerCase();
+
+  // Block localhost
+  if (hostname === "localhost") return false;
+
+  // Block IPv6 loopback / link-local
+  if (hostname.startsWith("[")) {
+    const ipv6 = hostname.slice(1, -1);
+    if (ipv6 === "::1") return false;
+    if (ipv6.startsWith("fe80:")) return false;
+    if (ipv6.startsWith("fc") || ipv6.startsWith("fd")) return false;
+  }
+
+  // Block private / reserved IPv4 ranges
+  const ipv4 = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4) {
+    const [, a, b, c, d] = ipv4.map(Number);
+    if (
+      a === 10 ||                          // 10.0.0.0/8
+      (a === 172 && b >= 16 && b <= 31) || // 172.16.0.0/12
+      (a === 192 && b === 168) ||          // 192.168.0.0/16
+      (a === 127) ||                       // 127.0.0.0/8 loopback
+      (a === 169 && b === 254) ||          // 169.254.0.0/16 link-local / metadata
+      (a === 100 && b >= 64 && b <= 127) || // 100.64.0.0/10 shared address space
+      (a === 0) ||                         // 0.0.0.0/8
+      (a === 255)                          // broadcast
+    ) return false;
+  }
+
+  return true;
+}
+
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -162,13 +210,23 @@ ${reviewsSummary}
 
     if (webhooks && webhooks.length > 0) {
       const payload = { event: "report_generated", business_id, report_type, created_at: now.toISOString() };
-      await Promise.allSettled(webhooks.map((wh: any) =>
-        fetch(wh.url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...(wh.secret ? { "X-Webhook-Secret": wh.secret } : {}) },
-          body: JSON.stringify(payload),
-        })
-      ));
+      await Promise.allSettled(
+        webhooks
+          .filter((wh: any) => {
+            if (!isWebhookUrlSafe(wh.url)) {
+              console.warn("[generate-ai-report] Blocked unsafe webhook URL:", wh.url);
+              return false;
+            }
+            return true;
+          })
+          .map((wh: any) =>
+            fetch(wh.url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", ...(wh.secret ? { "X-Webhook-Secret": wh.secret } : {}) },
+              body: JSON.stringify(payload),
+            })
+          )
+      );
     }
 
     return new Response(JSON.stringify({ success: true, report_type, reviews_analyzed: reviews.length }), {

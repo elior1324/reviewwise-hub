@@ -77,7 +77,7 @@ serve(async (req: Request) => {
   // from silently accepting unauthenticated bot signups/logins.
   if (!TURNSTILE_SECRET_KEY) {
     console.error("[auth-gate] TURNSTILE_SECRET_KEY is not configured — refusing all requests");
-    return fail("Server misconfiguration — please contact support", {}, cors);
+    return fail("Server misconfiguration — please contact support", {}, corsHeaders);
   }
 
   // ── Parse body ─────────────────────────────────────────────────────────
@@ -85,24 +85,24 @@ serve(async (req: Request) => {
   try {
     body = await req.json();
   } catch {
-    return fail("Invalid JSON body", {}, cors);
+    return fail("Invalid JSON body", {}, corsHeaders);
   }
 
   const { action, email, password, displayName, turnstileToken } = body;
 
   // ── Validate action + required fields ──────────────────────────────────
   if (action !== "login" && action !== "signup") {
-    return fail("Invalid action — must be 'login' or 'signup'", {}, cors);
+    return fail("Invalid action — must be 'login' or 'signup'", {}, corsHeaders);
   }
   if (!email || typeof email !== "string" || !email.includes("@")) {
-    return fail("A valid email address is required", {}, cors);
+    return fail("A valid email address is required", {}, corsHeaders);
   }
   if (!password || typeof password !== "string" || (password as string).length < 8) {
-    return fail("Password must be at least 8 characters", {}, cors);
+    return fail("Password must be at least 8 characters", {}, corsHeaders);
   }
   // Token presence check — before hitting Cloudflare to fail fast
   if (!turnstileToken || typeof turnstileToken !== "string") {
-    return fail("Human verification token is required. Please complete the CAPTCHA.", {}, cors);
+    return fail("Human verification token is required. Please complete the CAPTCHA.", {}, corsHeaders);
   }
 
   // ── Step 1: Verify Turnstile with Cloudflare siteverify API ────────────
@@ -127,7 +127,7 @@ serve(async (req: Request) => {
     return fail(
       "Human verification service unavailable — please try again in a moment.",
       {},
-      cors,
+      corsHeaders,
     );
   }
 
@@ -136,7 +136,7 @@ serve(async (req: Request) => {
     return fail(
       "Human verification failed. Please refresh the page and try again.",
       {},
-      cors,
+      corsHeaders,
     );
   }
 
@@ -159,7 +159,7 @@ serve(async (req: Request) => {
         return fail("account_locked", {
           locked_until:    rl.locked_until    ?? null,
           failed_attempts: rl.failed_attempts ?? 0,
-        }, cors);
+        }, corsHeaders);
       }
     } catch (e) {
       // Non-fatal: if RPC fails, allow the attempt (fail open to avoid
@@ -184,11 +184,14 @@ serve(async (req: Request) => {
     }
 
     if (authError || !authData?.session) {
+      // Log the real error internally for debugging, but NEVER send raw Supabase
+      // error messages to the client — they leak whether an email is registered
+      // ("Invalid login credentials" vs "Email not confirmed" vs "User not found").
       console.warn("[auth-gate] login failed:", authError?.message);
       return fail(
-        authError?.message ?? "Authentication failed",
-        { code: (authError as any)?.code ?? null },
-        cors,
+        "Invalid email or password. Please try again.",
+        {},
+        corsHeaders,
       );
     }
 
@@ -201,7 +204,7 @@ serve(async (req: Request) => {
         id:    authData.user?.id    ?? null,
         email: authData.user?.email ?? null,
       },
-    }, cors);
+    }, corsHeaders);
   }
 
   // ── Action: signup ─────────────────────────────────────────────────────
@@ -212,12 +215,21 @@ serve(async (req: Request) => {
   });
 
   if (signupError) {
+    // Log real error internally. Return generic message to prevent email
+    // enumeration (e.g. "User already registered" reveals account existence).
     console.warn("[auth-gate] signup failed:", signupError.message);
-    return fail(signupError.message, {}, cors);
+
+    // Special case: if email already exists Supabase returns status 422 with
+    // a specific code. We intentionally suppress this to prevent enumeration.
+    return fail(
+      "Registration could not be completed. If you already have an account, please log in instead.",
+      {},
+      corsHeaders,
+    );
   }
 
   if (!signupData?.user) {
-    return fail("Signup failed — please try again or contact support.", {}, cors);
+    return fail("Signup failed — please try again or contact support.", {}, corsHeaders);
   }
 
   // If email confirmation is disabled in this Supabase project, a live session
@@ -235,5 +247,5 @@ serve(async (req: Request) => {
       id:    signupData.user.id,
       email: signupData.user.email,
     },
-  }, cors);
+  }, corsHeaders);
 });
