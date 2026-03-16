@@ -317,6 +317,30 @@ const BusinessRegister = () => {
 
                 <FormPrivacyNotice className="mt-1" />
 
+                {/* ── Affiliate opt-in sits here, inside the form, so every
+                    user sees it before reaching the submit button ──────── */}
+                <div className="border-t border-border/40 pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <TrendingUp size={14} className="text-primary" />
+                    <span className="font-display font-semibold text-sm text-foreground">
+                      תוכנית שותפים — אופציונלי
+                    </span>
+                  </div>
+                  <AffiliateOptInCard
+                    enrolled={affiliateEnrolled}
+                    onChange={setAffiliateEnrolled}
+                    businessSlug={
+                      form.businessName
+                        ? form.businessName
+                            .toLowerCase()
+                            .replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "")
+                            .replace(/\s+/g, "-")
+                            .slice(0, 30)
+                        : undefined
+                    }
+                  />
+                </div>
+
                 <Button
                   type="submit"
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
@@ -328,34 +352,6 @@ const BusinessRegister = () => {
               </form>
             </CardContent>
           </Card>
-
-          {/* ── Affiliate Program Opt-In ────────────────────────────────── */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mb-6"
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp size={16} className="text-primary" />
-              <h2 className="font-display font-semibold text-base text-foreground">
-                שלב 2 — תוכנית שותפים (אופציונלי)
-              </h2>
-            </div>
-            <AffiliateOptInCard
-              enrolled={affiliateEnrolled}
-              onChange={setAffiliateEnrolled}
-              businessSlug={
-                form.businessName
-                  ? form.businessName
-                      .toLowerCase()
-                      .replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "")
-                      .replace(/\s+/g, "-")
-                      .slice(0, 30)
-                  : undefined
-              }
-            />
-          </motion.div>
         </motion.div>
       </div>
       <Footer />

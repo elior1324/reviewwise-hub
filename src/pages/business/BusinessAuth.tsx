@@ -8,13 +8,14 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, Loader2, MailCheck, RefreshCw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import { validatePassword } from "@/lib/password-validation";
 import { translateAuthError } from "@/lib/auth-errors";
 import PasswordStrengthMeter from "@/components/ui/password-strength-meter";
+import { supabase } from "@/integrations/supabase/client";
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -31,9 +32,15 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
   const [loading, setLoading] = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+
+  // ── B-02: Email confirmation state (shown after successful signup) ──────────
+  const [showEmailConfirm, setShowEmailConfirm] = useState(false);
+  const [confirmedEmail, setConfirmedEmail] = useState("");
+  const [resending, setResending] = useState(false);
+
   const { signIn, signUp, signInWithGoogle, signInWithApple } = useAuth();
   const navigate = useNavigate();
-  const [appleLoading, setAppleLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,18 +59,21 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
           return;
         }
         if (!turnstileToken) {
-  toast.error("אנא השלימו את אימות האנושיות");
-  setLoading(false);
-  return;
-}
-const { data, error } = await signUp(email, password, name, turnstileToken);
+          toast.error("אנא השלימו את אימות האנושיות");
+          setLoading(false);
+          return;
+        }
+        const { data, error } = await signUp(email, password, name, turnstileToken);
 
         if (error) throw error;
         if (!data?.user) {
-          // Supabase returned no error but also no user — auth hook likely blocked signup silently
           throw new Error("ההרשמה נכשלה — ייתכן בעיה בשרת. אנא נסו שנית או פנו לתמיכה.");
         }
-        toast.success("החשבון נוצר בהצלחה!", { description: "בדקו את האימייל שלכם לאימות החשבון." });
+
+        // ── B-02: Instead of a disappearing toast, show a persistent confirmation screen ──
+        setConfirmedEmail(email);
+        setShowEmailConfirm(true);
+
       } else {
         const { error } = await signIn(email, password);
         if (error) throw error;
@@ -73,6 +83,19 @@ const { data, error } = await signUp(email, password, name, turnstileToken);
       toast.error(translateAuthError(err.message));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({ type: "signup", email: confirmedEmail });
+      if (error) throw error;
+      toast.success("אימייל האימות נשלח מחדש בהצלחה");
+    } catch (err: any) {
+      toast.error("שגיאה בשליחה מחדש: " + err.message);
+    } finally {
+      setResending(false);
     }
   };
 
@@ -93,6 +116,74 @@ const { data, error } = await signUp(email, password, name, turnstileToken);
       setAppleLoading(false);
     }
   };
+
+  // ── B-02: Email confirmation screen (replaces the form after successful signup) ─
+  if (showEmailConfirm) {
+    return (
+      <div className="min-h-screen bg-background noise-overlay" dir="rtl">
+        <BusinessNavbar />
+        <div className="container py-20 flex justify-center">
+          <Card className="w-full max-w-md shadow-card bg-card">
+            <CardContent className="pt-8 pb-8 text-center space-y-5">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                <MailCheck size={32} className="text-primary" />
+              </div>
+              <div>
+                <h2 className="font-display font-bold text-xl text-foreground mb-2">
+                  בדקו את תיבת האימייל שלכם
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  שלחנו קישור לאימות החשבון לכתובת:
+                </p>
+                <p className="font-mono text-sm font-semibold text-primary mt-1 break-all">
+                  {confirmedEmail}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-border/50 bg-muted/30 p-4 text-right space-y-2 text-sm text-muted-foreground">
+                <p className="font-semibold text-foreground text-xs uppercase tracking-wider mb-2">השלבים הבאים:</p>
+                {[
+                  "לחצו על הקישור באימייל לאימות החשבון",
+                  "לאחר האימות תועברו לדף הרשמת העסק",
+                  "מלאו את פרטי העסק שלכם ותוכלו להתחיל",
+                ].map((step, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    <span>{step}</span>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                לא קיבלתם את האימייל? בדקו את תיקיית הספאם, או:
+              </p>
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={handleResendEmail}
+                disabled={resending}
+              >
+                {resending ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                שלח שוב את האימייל
+              </Button>
+
+              <Separator />
+
+              <p className="text-sm text-muted-foreground">
+                כבר אימתתם?{" "}
+                <Link to="/business/login" className="text-primary hover:underline font-medium">
+                  התחברו כאן
+                </Link>
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        <BusinessFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
@@ -209,6 +300,18 @@ const { data, error } = await signUp(email, password, name, turnstileToken);
                 )}
               </div>
 
+              {/* B-03: Forgot Password link — login mode only ─────────────────────── */}
+              {mode === "login" && (
+                <div className="text-left">
+                  <Link
+                    to="/reset-password"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    שכחתם סיסמה?
+                  </Link>
+                </div>
+              )}
+
               {mode === "signup" && (
                 <PrivacyConsentCheckbox
                   checked={privacyConsent}
@@ -219,12 +322,15 @@ const { data, error } = await signUp(email, password, name, turnstileToken);
 
               {mode === "login" && <FormPrivacyNotice className="mt-1" />}
 
-              <Turnstile
-                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-                onSuccess={(token) => setTurnstileToken(token)}
-                onExpire={() => setTurnstileToken(null)}
-                onError={() => setTurnstileToken(null)}
-               />
+              {/* B-04: Turnstile only in signup — not needed for login ──────────── */}
+              {mode === "signup" && (
+                <Turnstile
+                  siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                  onSuccess={(token) => setTurnstileToken(token)}
+                  onExpire={() => setTurnstileToken(null)}
+                  onError={() => setTurnstileToken(null)}
+                />
+              )}
 
               <Button
                 type="submit"

@@ -44,7 +44,6 @@ import {
   BarChart3,
   RefreshCw,
   Percent,
-  Sparkles,
   RotateCcw,
   PauseCircle,
   PlayCircle,

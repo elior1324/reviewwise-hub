@@ -70,7 +70,8 @@ const AuthCallback = () => {
       if (business) {
         navigate("/business/dashboard", { replace: true });
       } else {
-        navigate("/", { replace: true });
+        // New OAuth user — send to business registration so they can complete onboarding
+        navigate("/register", { replace: true });
       }
     };
     // ── Exchange the OAuth code for a session (PKCE) ───────────────────────
@@ -103,19 +104,6 @@ const AuthCallback = () => {
         }
 
         fail("No session after code exchange (PKCE verifier missing). Start login from /business/login in the same tab.");
-
-        if (sessionError) {
-          fail(`getSession failed: ${sessionError.message}`);
-          return;
-        }
-
-          const currentSession = sessionData.session;
-          if (!currentSession) {
-          fail("No session after code exchange");
-          return;
-        }
-
-        await redirectForUser(session.user.id);
       } catch (e) {
         fail(`Unexpected error: ${String(e)}`);
       }
