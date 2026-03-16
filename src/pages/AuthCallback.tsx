@@ -10,10 +10,11 @@
  *   4. The Supabase client (detectSessionInUrl: true, flowType: "pkce") detects
  *      the code in the URL and begins the async token exchange.
  *   5. Once the exchange completes, onAuthStateChange fires SIGNED_IN.
- *   6. This page listens for that event, then checks the `businesses` table
- *      for a row owned by this user and redirects:
- *        has business → /business/dashboard
- *        otherwise    → /
+ *   6. This page listens for that event, checks the URL for ?intent=business
+ *      (set by BusinessAuth) and the `businesses` table, then redirects:
+ *        has business                          → /business/dashboard
+ *        no business + intent=business         → /register   (business onboarding)
+ *        no business + no intent (AuthPage)    → /           (learner homepage)
  *
  * WHY onAuthStateChange instead of getSession():
  *   Calling getSession() immediately on mount creates a race condition —
@@ -41,16 +42,18 @@ const AuthCallback = () => {
     if (ranRef.current) return;
     ranRef.current = true;
 
-    // ── Failure path helper ────────────────────────────────────────────────
-    const fail = (reason: string) => {
-      console.error("[AuthCallback] OAuth callback failed:", reason);
-      toast.error("ההתחברות עם Google נכשלה. נסו שוב.");
-      navigate("/business/login", { replace: true });
-    };
-
     // ── Check for an error param in the URL (e.g. user denied access) ─────
     const params = new URLSearchParams(window.location.search);
     const urlError = params.get("error");
+
+    // ── Failure path helper ────────────────────────────────────────────────
+    // Route failures back to the appropriate login page based on intent
+    const isBusinessIntentEarly = params.get("intent") === "business";
+    const fail = (reason: string) => {
+      console.error("[AuthCallback] OAuth callback failed:", reason);
+      toast.error("ההתחברות עם Google נכשלה. נסו שוב.");
+      navigate(isBusinessIntentEarly ? "/business/login" : "/auth", { replace: true });
+    };
     if (urlError) {
       fail(`URL error param: ${urlError} — ${params.get("error_description") ?? ""}`);
       return;
@@ -68,10 +71,14 @@ const AuthCallback = () => {
         .maybeSingle();
 
       if (business) {
+        // Existing business owner — always go to dashboard
         navigate("/business/dashboard", { replace: true });
-      } else {
-        // New OAuth user — send to business registration so they can complete onboarding
+      } else if (isBusinessIntentEarly) {
+        // New user who explicitly chose a business account — register business
         navigate("/register", { replace: true });
+      } else {
+        // New regular (learner) user — go to homepage
+        navigate("/", { replace: true });
       }
     };
     // ── Exchange the OAuth code for a session (PKCE) ───────────────────────
@@ -103,7 +110,7 @@ const AuthCallback = () => {
           return;
         }
 
-        fail("No session after code exchange (PKCE verifier missing). Start login from /business/login in the same tab.");
+        fail("No session after code exchange (PKCE verifier missing). Start login from the same tab.");
       } catch (e) {
         fail(`Unexpected error: ${String(e)}`);
       }

@@ -101,7 +101,11 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
 
   const handleGoogleAuth = async () => {
     setGoogleLoading(true);
-    const { error } = await signInWithGoogle();
+    // Pass intent=business so AuthCallback knows to funnel the user into
+    // business registration (instead of the regular learner homepage).
+    const { error } = await signInWithGoogle(
+      `${window.location.origin}/auth/callback?intent=business`
+    );
     if (error) {
       toast.error(error.message || "שגיאה בהתחברות עם Google");
       setGoogleLoading(false);
