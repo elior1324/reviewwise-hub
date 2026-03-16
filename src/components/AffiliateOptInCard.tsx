@@ -25,6 +25,8 @@ import {
   Link2,
   XCircle,
   Check,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import {
   Tooltip,
@@ -37,11 +39,11 @@ import {
 export type AffiliateMode = "reviewhub_model" | "personal_affiliate" | "none";
 
 interface Props {
-  mode:                AffiliateMode;
-  personalAffiliateUrl: string;
-  onChange:            (mode: AffiliateMode) => void;
-  onUrlChange:         (url: string) => void;
-  businessSlug?:       string;
+  mode:                  AffiliateMode;
+  personalAffiliateUrls: string[];
+  onChange:              (mode: AffiliateMode) => void;
+  onUrlsChange:          (urls: string[]) => void;
+  businessSlug?:         string;
 }
 
 // ── Split rows (for ReviewHub model explanation) ──────────────────────────────
@@ -136,9 +138,9 @@ const OptionCard = ({
 
 const AffiliateOptInCard = ({
   mode,
-  personalAffiliateUrl,
+  personalAffiliateUrls,
   onChange,
-  onUrlChange,
+  onUrlsChange,
   businessSlug,
 }: Props) => {
   const previewLink = businessSlug
@@ -226,34 +228,85 @@ const AffiliateOptInCard = ({
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
               <Link2 size={13} className="text-primary shrink-0" />
-              <p className="text-xs font-bold text-foreground">קישור שותפים אישי</p>
+              <p className="text-xs font-bold text-foreground">קישורי שותפים אישיים</p>
             </div>
-            <Input
-              placeholder="https://your-affiliate-system.com/track?ref=XYZ"
-              value={personalAffiliateUrl}
-              onChange={e => onUrlChange(e.target.value)}
-              className="text-sm font-mono"
-              dir="ltr"
-              onClick={e => e.stopPropagation()}
-            />
-            <p className="text-[10px] text-muted-foreground">
-              כל לחיצה על כפתור הרכישה ב-ReviewHub תפנה ישירות לכתובת זו · ללא עמלת ReviewHub
-            </p>
-            {personalAffiliateUrl && (() => {
-              try { new URL(personalAffiliateUrl); return (
-                <div className="flex items-center gap-1.5 text-emerald-600">
-                  <Check size={12} />
-                  <span className="text-[10px] font-semibold">כתובת URL תקינה</span>
-                </div>
-              ); } catch {
-                return (
-                  <div className="flex items-center gap-1.5 text-red-500">
-                    <XCircle size={12} />
-                    <span className="text-[10px] font-semibold">כתובת URL לא תקינה — הזינו כתובת מלאה (https://...)</span>
+
+            {/* Dynamic URL rows */}
+            {personalAffiliateUrls.map((url, index) => (
+              <div key={index} className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  {/* "ראשי" badge on first entry */}
+                  <div className="relative flex-1">
+                    {index === 0 && (
+                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[8px] font-bold text-primary bg-primary/10 border border-primary/20 px-1 py-0.5 rounded z-10 pointer-events-none">
+                        ראשי
+                      </span>
+                    )}
+                    <Input
+                      placeholder="https://your-affiliate-system.com/track?ref=XYZ"
+                      value={url}
+                      onChange={e => {
+                        const updated = [...personalAffiliateUrls];
+                        updated[index] = e.target.value;
+                        onUrlsChange(updated);
+                      }}
+                      className={`text-sm font-mono ${index === 0 ? "pr-14" : ""}`}
+                      dir="ltr"
+                      onClick={e => e.stopPropagation()}
+                    />
                   </div>
-                );
-              }
-            })()}
+                  {/* Remove button — only when more than one row */}
+                  {personalAffiliateUrls.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation();
+                        onUrlsChange(personalAffiliateUrls.filter((_, i) => i !== index));
+                      }}
+                      className="text-muted-foreground hover:text-destructive transition-colors shrink-0 p-0.5"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
+                {/* Per-row validation */}
+                {url && (() => {
+                  try {
+                    new URL(url);
+                    return (
+                      <div className="flex items-center gap-1 text-emerald-600">
+                        <Check size={10} />
+                        <span className="text-[9px] font-semibold">כתובת URL תקינה</span>
+                      </div>
+                    );
+                  } catch {
+                    return (
+                      <div className="flex items-center gap-1 text-red-500">
+                        <XCircle size={10} />
+                        <span className="text-[9px] font-semibold">לא תקינה — הזינו https://...</span>
+                      </div>
+                    );
+                  }
+                })()}
+              </div>
+            ))}
+
+            {/* Add URL button */}
+            <button
+              type="button"
+              onClick={e => {
+                e.stopPropagation();
+                onUrlsChange([...personalAffiliateUrls, ""]);
+              }}
+              className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-semibold mt-1"
+            >
+              <Plus size={12} />
+              הוסף קישור
+            </button>
+
+            <p className="text-[10px] text-muted-foreground">
+              לחיצה על "לרכישה" ב-ReviewHub תפנה לקישור הראשי · ניתן להוסיף קישורים ללא הגבלה · ללא עמלת ReviewHub
+            </p>
           </div>
         </OptionCard>
 
@@ -285,7 +338,7 @@ const AffiliateOptInCard = ({
           <div className="flex items-center gap-2">
             <Link2 size={14} className="text-blue-600" />
             <p className="text-xs font-medium text-blue-700">
-              {personalAffiliateUrl ? "קישור שותפים אישי יוגדר מיד לאחר ההרשמה" : "הזינו קישור שותפים אישי למעלה"}
+              {personalAffiliateUrls.some(u => u.trim()) ? "קישורי שותפים אישיים יוגדרו מיד לאחר ההרשמה" : "הזינו לפחות קישור שותפים אחד למעלה"}
             </p>
           </div>
         </div>

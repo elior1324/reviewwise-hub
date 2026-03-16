@@ -61,8 +61,8 @@ const BusinessRegister = () => {
 
   const [socialLinks, setSocialLinks] = useState<SocialLinksData>({});
   const [privacyConsent, setPrivacyConsent] = useState(false);
-  const [affiliateMode,        setAffiliateMode]        = useState<AffiliateMode>("none");
-  const [personalAffiliateUrl, setPersonalAffiliateUrl] = useState("");
+  const [affiliateMode,          setAffiliateMode]          = useState<AffiliateMode>("none");
+  const [personalAffiliateUrls,  setPersonalAffiliateUrls]  = useState<string[]>([""]);
   const [submitting, setSubmitting] = useState(false);
 
   // Guard: redirect if user already has a registered business
@@ -157,8 +157,15 @@ const BusinessRegister = () => {
           founder_name: cleanFounderName || null,
           pricing_model: isSaas && form.pricingModel ? form.pricingModel : null,
           // Affiliate program — new three-mode field + backwards-compat legacy boolean
-          affiliate_mode:            affiliateMode,
-          personal_affiliate_url:    affiliateMode === "personal_affiliate" ? (personalAffiliateUrl.trim() || null) : null,
+          affiliate_mode:             affiliateMode,
+          // Singular URL — first valid entry (backwards compat)
+          personal_affiliate_url:     affiliateMode === "personal_affiliate"
+            ? (personalAffiliateUrls.find(u => u.trim()) ?? null)
+            : null,
+          // Array column — all valid entries
+          personal_affiliate_urls:    affiliateMode === "personal_affiliate"
+            ? personalAffiliateUrls.filter(u => u.trim())
+            : [],
           affiliate_enrolled:        affiliateMode === "reviewhub_model",
           affiliate_enrolled_at:     affiliateMode === "reviewhub_model" ? new Date().toISOString() : null,
           affiliate_program_status:  affiliateMode === "reviewhub_model" ? "enrolled" :
@@ -402,9 +409,9 @@ const BusinessRegister = () => {
                   </div>
                   <AffiliateOptInCard
                     mode={affiliateMode}
-                    personalAffiliateUrl={personalAffiliateUrl}
+                    personalAffiliateUrls={personalAffiliateUrls}
                     onChange={setAffiliateMode}
-                    onUrlChange={setPersonalAffiliateUrl}
+                    onUrlsChange={setPersonalAffiliateUrls}
                     businessSlug={
                       form.businessName
                         ? form.businessName

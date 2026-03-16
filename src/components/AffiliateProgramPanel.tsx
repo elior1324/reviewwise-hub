@@ -53,6 +53,8 @@ import {
   CheckCircle2,
   Settings2,
   Save,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import {
   LEARNER_DISCOUNT_RATE,
@@ -157,10 +159,13 @@ const SplitGrid = () => (
 const AffiliatStatusBanner = ({
   mode,
   personalUrl,
+  personalUrlCount = 0,
 }: {
-  mode: AffiliateMode;
-  personalUrl: string | null;
+  mode:             AffiliateMode;
+  personalUrl:      string | null;
+  personalUrlCount?: number;
 }) => {
+  const urlCountLabel = personalUrlCount > 1 ? ` · ${personalUrlCount} קישורים מוגדרים` : "";
   const CONFIG: Record<AffiliateMode, {
     label: string;
     sub:   string;
@@ -177,7 +182,9 @@ const AffiliatStatusBanner = ({
     },
     personal_affiliate: {
       label: "קישור שותפים אישי",
-      sub:   personalUrl ? `מפנה דרך: ${personalUrl.substring(0, 50)}${personalUrl.length > 50 ? "…" : ""}` : "טרם הוגדר קישור אישי",
+      sub:   personalUrl
+        ? `מפנה דרך: ${personalUrl.substring(0, 45)}${personalUrl.length > 45 ? "…" : ""}${urlCountLabel}`
+        : "טרם הוגדר קישור אישי",
       color: "text-blue-700 dark:text-blue-400",
       bg:    "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800",
       dot:   personalUrl ? "bg-blue-500" : "bg-amber-500",
@@ -267,9 +274,11 @@ const ModeCard = ({
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledChange }: Props) => {
-  const [affiliateMode,        setAffiliateMode]        = useState<AffiliateMode>("none");
-  const [personalAffiliateUrl, setPersonalAffiliateUrl] = useState("");
-  const [urlInputDraft,        setUrlInputDraft]        = useState("");
+  const [affiliateMode,         setAffiliateMode]         = useState<AffiliateMode>("none");
+  const [personalAffiliateUrl,  setPersonalAffiliateUrl]  = useState("");
+  const [personalAffiliateUrls, setPersonalAffiliateUrls] = useState<string[]>([""]);
+  const [urlInputDraft,         setUrlInputDraft]         = useState("");
+  const [urlsDraft,             setUrlsDraft]             = useState<string[]>([""]);
   const [enrolled,             setEnrolled]             = useState(false);
   const [programStatus,        setProgramStatus]        = useState<AffiliateProgramStatus>("not_set");
   const [loading,              setLoading]              = useState(true);
@@ -301,20 +310,27 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
     try {
       const { data: biz } = await supabase
         .from("businesses")
-        .select("affiliate_enrolled, affiliate_program_status, affiliate_mode, personal_affiliate_url")
+        .select("affiliate_enrolled, affiliate_program_status, affiliate_mode, personal_affiliate_url, personal_affiliate_urls")
         .eq("id", businessId)
         .single();
 
       if (biz) {
-        const mode    = (biz.affiliate_mode as AffiliateMode) || "none";
-        const status  = (biz.affiliate_program_status as AffiliateProgramStatus) || "not_set";
-        const url     = (biz.personal_affiliate_url as string) || "";
+        const mode     = (biz.affiliate_mode as AffiliateMode) || "none";
+        const status   = (biz.affiliate_program_status as AffiliateProgramStatus) || "not_set";
+        const url      = (biz.personal_affiliate_url as string) || "";
+        // Load URL array; fall back to wrapping singular URL
+        const rawUrls  = (biz as any).personal_affiliate_urls as string[] | null;
+        const urls: string[] = Array.isArray(rawUrls) && rawUrls.length > 0
+          ? rawUrls
+          : url ? [url] : [""];
         setAffiliateMode(mode);
         setDraftMode(mode);
         setEnrolled(!!biz.affiliate_enrolled);
         setProgramStatus(status);
         setPersonalAffiliateUrl(url);
+        setPersonalAffiliateUrls(urls);
         setUrlInputDraft(url);
+        setUrlsDraft([...urls]);
       }
 
       // Stats only relevant for reviewhub_model
@@ -349,13 +365,14 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
 
     if (!businessId) return;
 
-    // Validate personal URL if that mode is selected
-    if (draftMode === "personal_affiliate" && urlInputDraft.trim()) {
-      try {
-        new URL(urlInputDraft.trim());
-      } catch {
-        toast.error("כתובת URL לא תקינה — הזינו כתובת מלאה (לדוגמה: https://example.com/track)");
-        return;
+    // Validate all personal URLs if that mode is selected
+    if (draftMode === "personal_affiliate") {
+      const nonEmpty = urlsDraft.filter(u => u.trim());
+      for (const u of nonEmpty) {
+        try { new URL(u.trim()); } catch {
+          toast.error(`כתובת URL לא תקינה: ${u.trim()} — הזינו כתובת מלאה (https://...)`);
+          return;
+        }
       }
     }
 
@@ -368,11 +385,17 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
       draftMode === "personal_affiliate" ? "enrolled" :  // still "active" in intent
       programStatus === "enrolled" || programStatus === "paused" ? "paused" : programStatus;
 
+    const validUrls = draftMode === "personal_affiliate"
+      ? urlsDraft.filter(u => u.trim())
+      : [];
+    const primaryUrl = validUrls[0] ?? null;
+
     const updatePayload: Record<string, unknown> = {
-      affiliate_mode:          draftMode,
-      personal_affiliate_url:  draftMode === "personal_affiliate" ? (urlInputDraft.trim() || null) : null,
-      affiliate_enrolled:      isEnrolled,
-      affiliate_enrolled_at:   isEnrolled ? new Date().toISOString() : null,
+      affiliate_mode:           draftMode,
+      personal_affiliate_url:   primaryUrl,
+      personal_affiliate_urls:  validUrls,
+      affiliate_enrolled:       isEnrolled,
+      affiliate_enrolled_at:    isEnrolled ? new Date().toISOString() : null,
       affiliate_program_status: newStatus,
     };
 
@@ -385,7 +408,8 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
       if (error) throw error;
 
       setAffiliateMode(draftMode);
-      setPersonalAffiliateUrl(draftMode === "personal_affiliate" ? urlInputDraft.trim() : "");
+      setPersonalAffiliateUrl(primaryUrl ?? "");
+      setPersonalAffiliateUrls(validUrls.length > 0 ? validUrls : [""]);
       setEnrolled(isEnrolled);
       setProgramStatus(newStatus);
       onEnrolledChange?.(isEnrolled, newStatus);
@@ -496,7 +520,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
         <Button
           variant="outline"
           size="sm"
-          onClick={() => { setSettingsOpen(o => !o); setDraftMode(affiliateMode); setUrlInputDraft(personalAffiliateUrl); }}
+          onClick={() => { setSettingsOpen(o => !o); setDraftMode(affiliateMode); setUrlInputDraft(personalAffiliateUrl); setUrlsDraft([...personalAffiliateUrls]); }}
           className="gap-1.5 shrink-0"
         >
           <Settings2 size={13} />
@@ -505,7 +529,11 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
       </div>
 
       {/* ── Status banner — always visible ────────────────────────────────── */}
-      <AffiliatStatusBanner mode={affiliateMode} personalUrl={personalAffiliateUrl || null} />
+      <AffiliatStatusBanner
+        mode={affiliateMode}
+        personalUrl={personalAffiliateUrl || null}
+        personalUrlCount={personalAffiliateUrls.filter(u => u.trim()).length}
+      />
 
       {/* ── Settings panel — shown when editing ───────────────────────────── */}
       {settingsOpen && (
@@ -539,23 +567,91 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
               selected={draftMode}
               onSelect={setDraftMode}
               title="קישור שותפים אישי"
-              description="יש לכם מערכת שותפים משלכם? הדביקו את קישור המעקב שלכם כאן. כל לחיצה על /go/שם-העסק תפנה ישירות לקישור שלכם — ללא עמלת ReviewHub."
+              description="יש לכם מערכת שותפים משלכם? הדביקו את קישורי המעקב שלכם כאן. כל לחיצה על /go/שם-העסק תפנה לקישור הראשי — ללא עמלת ReviewHub."
             >
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <Link2 size={13} className="text-primary shrink-0" />
-                  <p className="text-xs font-bold text-foreground">קישור שותפים אישי</p>
+                  <p className="text-xs font-bold text-foreground">קישורי שותפים אישיים</p>
                 </div>
-                <Input
-                  placeholder="https://your-affiliate-system.com/track?ref=XYZ"
-                  value={urlInputDraft}
-                  onChange={e => setUrlInputDraft(e.target.value)}
-                  className="text-sm font-mono"
-                  dir="ltr"
-                  onClick={e => e.stopPropagation()}
-                />
+
+                {/* Dynamic URL rows */}
+                {urlsDraft.map((url, index) => (
+                  <div key={index} className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        {index === 0 && (
+                          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[8px] font-bold text-primary bg-primary/10 border border-primary/20 px-1 py-0.5 rounded z-10 pointer-events-none">
+                            ראשי
+                          </span>
+                        )}
+                        <Input
+                          placeholder="https://your-affiliate-system.com/track?ref=XYZ"
+                          value={url}
+                          onChange={e => {
+                            const updated = [...urlsDraft];
+                            updated[index] = e.target.value;
+                            setUrlsDraft(updated);
+                            // Keep singular draft in sync with first entry
+                            if (index === 0) setUrlInputDraft(e.target.value);
+                          }}
+                          className={`text-sm font-mono ${index === 0 ? "pr-14" : ""}`}
+                          dir="ltr"
+                          onClick={e => e.stopPropagation()}
+                        />
+                      </div>
+                      {urlsDraft.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation();
+                            const updated = urlsDraft.filter((_, i) => i !== index);
+                            setUrlsDraft(updated);
+                            if (index === 0) setUrlInputDraft(updated[0] ?? "");
+                          }}
+                          className="text-muted-foreground hover:text-destructive transition-colors shrink-0 p-0.5"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                    {/* Per-row validation */}
+                    {url.trim() && (() => {
+                      try {
+                        new URL(url.trim());
+                        return (
+                          <div className="flex items-center gap-1 text-emerald-600">
+                            <Check size={10} />
+                            <span className="text-[9px] font-semibold">כתובת URL תקינה</span>
+                          </div>
+                        );
+                      } catch {
+                        return (
+                          <div className="flex items-center gap-1 text-red-500">
+                            <XCircle size={10} />
+                            <span className="text-[9px] font-semibold">לא תקינה — הזינו https://...</span>
+                          </div>
+                        );
+                      }
+                    })()}
+                  </div>
+                ))}
+
+                {/* Add URL button */}
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation();
+                    setUrlsDraft([...urlsDraft, ""]);
+                  }}
+                  className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-semibold mt-1"
+                >
+                  <Plus size={12} />
+                  הוסף קישור
+                </button>
+
                 <p className="text-[10px] text-muted-foreground">
-                  כל לחיצה על הקישור ב-ReviewHub תפנה ישירות לכתובת זו · ללא גביית עמלה על ידי ReviewHub
+                  לחיצה על "לרכישה" תפנה לקישור הראשי · ניתן להוסיף קישורים ללא הגבלה
                 </p>
               </div>
             </ModeCard>
@@ -625,35 +721,56 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
       {/* ── PERSONAL AFFILIATE mode ───────────────────────────────────────── */}
       {affiliateMode === "personal_affiliate" && !settingsOpen && (
         <div className="space-y-4">
-          {/* Personal URL card */}
+          {/* Personal URLs card */}
           <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-950/20 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Link2 size={14} className="text-blue-600 dark:text-blue-400" />
-              <p className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wide">קישור שותפים אישי — פעיל</p>
-            </div>
-            {personalAffiliateUrl ? (
-              <>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="flex-1 rounded-lg bg-background border border-border/60 px-3 py-2.5 overflow-hidden">
-                    <code className="text-sm text-blue-600 dark:text-blue-400 font-mono break-all">{personalAffiliateUrl}</code>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.open(personalAffiliateUrl, "_blank")}
-                    className="shrink-0"
-                  >
-                    <ExternalLink size={13} />
-                  </Button>
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-2">
-                  כל לחיצה על "לרכישה" בדף העסק שלכם ב-ReviewHub תפנה ישירות לקישור זה.
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <Link2 size={14} className="text-blue-600 dark:text-blue-400" />
+                <p className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                  קישורי שותפים אישיים — פעילים
                 </p>
-              </>
+              </div>
+              {personalAffiliateUrls.filter(u => u.trim()).length > 0 && (
+                <span className="text-[10px] font-bold text-blue-600 bg-blue-100 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700 px-2 py-0.5 rounded-full">
+                  {personalAffiliateUrls.filter(u => u.trim()).length} קישורים
+                </span>
+              )}
+            </div>
+            {personalAffiliateUrls.filter(u => u.trim()).length > 0 ? (
+              <div className="space-y-2">
+                {personalAffiliateUrls.filter(u => u.trim()).map((url, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    {index === 0 && (
+                      <span className="text-[8px] font-bold text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded shrink-0">
+                        ראשי
+                      </span>
+                    )}
+                    {index > 0 && (
+                      <span className="text-[8px] font-bold text-muted-foreground bg-muted/60 border border-border/40 px-1.5 py-0.5 rounded shrink-0">
+                        {index + 1}
+                      </span>
+                    )}
+                    <div className="flex-1 rounded-lg bg-background border border-border/60 px-3 py-2 overflow-hidden">
+                      <code className="text-xs text-blue-600 dark:text-blue-400 font-mono break-all">{url}</code>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(url, "_blank")}
+                      className="shrink-0 h-8 w-8 p-0"
+                    >
+                      <ExternalLink size={12} />
+                    </Button>
+                  </div>
+                ))}
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  לחיצה על "לרכישה" בדף העסק תפנה לקישור הראשי. לניהול קישורים לחצו "ערוך הגדרות".
+                </p>
+              </div>
             ) : (
               <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 mt-1">
                 <AlertCircle size={14} className="shrink-0" />
-                <p className="text-xs">לא הוגדר קישור אישי — לחצו "ערוך הגדרות" להוספה.</p>
+                <p className="text-xs">לא הוגדרו קישורים — לחצו "ערוך הגדרות" להוספה.</p>
               </div>
             )}
           </div>

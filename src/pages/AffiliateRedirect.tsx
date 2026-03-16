@@ -17,7 +17,7 @@ import {
 type RedirectTarget =
   | { kind: "course";    name: string; url: string; price: number | null }
   | { kind: "business";  name: string; url: string; coupon: string | null; method: string | null }
-  | { kind: "personal";  name: string; url: string };
+  | { kind: "personal";  name: string; url: string; additionalUrls?: string[] };
 
 const AffiliateRedirect = () => {
   const { courseId } = useParams(); // doubles as business slug for collab links
@@ -34,20 +34,31 @@ const AffiliateRedirect = () => {
         //    Checks affiliate_mode (new), affiliate_enrolled (legacy), and collaboration_active
         const { data: biz } = await supabase
           .from("businesses")
-          .select("id, name, website, slug, affiliate_enrolled, affiliate_link_active, affiliate_mode, personal_affiliate_url, collaboration_active, collaboration_method, collaboration_coupon")
+          .select("id, name, website, slug, affiliate_enrolled, affiliate_link_active, affiliate_mode, personal_affiliate_url, personal_affiliate_urls, collaboration_active, collaboration_method, collaboration_coupon")
           .eq("slug", courseId)
           .maybeSingle();
 
         // ── 1a-i. Personal affiliate link mode ────────────────────────────
         //    Business has its own affiliate/tracking system; redirect directly.
-        if (biz && (biz.affiliate_mode === "personal_affiliate") && biz.personal_affiliate_url) {
-          setTarget({
-            kind: "personal",
-            name: biz.name,
-            url:  biz.personal_affiliate_url,
-          });
-          setTimeout(() => { window.location.href = biz.personal_affiliate_url; }, 3000);
-          return;
+        //    Prefer the array (personal_affiliate_urls), fall back to singular.
+        if (biz && (biz.affiliate_mode === "personal_affiliate")) {
+          const rawUrls = (biz as any).personal_affiliate_urls as string[] | null;
+          const allUrls: string[] = Array.isArray(rawUrls) && rawUrls.length > 0
+            ? rawUrls.filter((u: string) => u.trim())
+            : biz.personal_affiliate_url ? [biz.personal_affiliate_url] : [];
+
+          if (allUrls.length > 0) {
+            const primaryUrl     = allUrls[0];
+            const additionalUrls = allUrls.slice(1);
+            setTarget({
+              kind:           "personal",
+              name:           biz.name,
+              url:            primaryUrl,
+              additionalUrls: additionalUrls.length > 0 ? additionalUrls : undefined,
+            });
+            setTimeout(() => { window.location.href = primaryUrl; }, 3000);
+            return;
+          }
         }
 
         // ── 1a-ii. ReviewHub affiliate model (new affiliate_mode field) ───
@@ -426,6 +437,25 @@ const AffiliateRedirect = () => {
                 </div>
               ))}
             </div>
+
+            {/* Additional URLs (when business has more than one) */}
+            {(target as any).additionalUrls && (target as any).additionalUrls.length > 0 && (
+              <div className="rounded-xl border border-blue-200/60 bg-blue-50/30 p-4 text-right">
+                <p className="text-xs font-bold text-blue-700 mb-2">קישורים נוספים מהספק</p>
+                {((target as any).additionalUrls as string[]).map((url: string, i: number) => (
+                  <a
+                    key={i}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 font-mono truncate"
+                  >
+                    <Link2 size={10} className="shrink-0" />
+                    {url.length > 50 ? url.substring(0, 50) + "…" : url}
+                  </a>
+                ))}
+              </div>
+            )}
 
             <div className="rounded-lg border border-border/30 bg-muted/30 px-4 py-3 text-right">
               <p className="text-[9px] text-muted-foreground/70 leading-relaxed">
