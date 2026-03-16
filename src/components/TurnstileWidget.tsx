@@ -19,7 +19,9 @@
  *   To re-enable: set VITE_TURNSTILE_SITE_KEY in .env.local and remove DEV_BYPASS_CAPTCHA.
  */
 import { Turnstile } from "@marsidev/react-turnstile";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface TurnstileWidgetProps {
   onSuccess: (token: string) => void;
@@ -45,6 +47,8 @@ if (DEV_BYPASS_CAPTCHA) {
 }
 
 const TurnstileWidget = ({ onSuccess, onError, onExpire, className }: TurnstileWidgetProps) => {
+  const [widgetReady, setWidgetReady] = useState(false);
+
   // --- DEV MODE: auto-pass CAPTCHA so forms are not blocked during development ---
   useEffect(() => {
     if (DEV_BYPASS_CAPTCHA) {
@@ -63,14 +67,25 @@ const TurnstileWidget = ({ onSuccess, onError, onExpire, className }: TurnstileW
 
   // --- PRODUCTION: render the real Turnstile widget ---
   return (
-    <div className={className}>
-      <Turnstile
-        siteKey={TURNSTILE_SITE_KEY!}
-        onSuccess={onSuccess}
-        onError={onError}
-        onExpire={onExpire}
-        options={{ theme: "auto", size: "flexible" }}
-      />
+    <div className={cn("relative", className)}>
+      {/* Skeleton shown while Cloudflare JS initialises the widget */}
+      {!widgetReady && (
+        <div className="h-[65px] rounded-lg bg-muted animate-pulse flex items-center justify-center gap-2 text-xs text-muted-foreground select-none">
+          <Loader2 size={14} className="animate-spin shrink-0" />
+          מאמת שאתם לא רובוט…
+        </div>
+      )}
+      {/* Turnstile always in DOM so Cloudflare can initialise; hidden under skeleton */}
+      <div className={widgetReady ? undefined : "invisible absolute inset-0 overflow-hidden"}>
+        <Turnstile
+          siteKey={TURNSTILE_SITE_KEY!}
+          onBeforeInteractive={() => setWidgetReady(true)}
+          onSuccess={(token) => { setWidgetReady(true); onSuccess(token); }}
+          onError={onError}
+          onExpire={onExpire}
+          options={{ theme: "auto", size: "flexible" }}
+        />
+      </div>
     </div>
   );
 };

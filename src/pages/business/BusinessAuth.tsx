@@ -96,12 +96,32 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
         setShowEmailConfirm(true);
 
       } else {
-        const { error } = await signIn(email, password);
-        if (error) throw error;
+        // Login — requires Turnstile token just like signup
+        if (!turnstileToken) {
+          toast.error("אנא השלימו את אימות האנושיות");
+          setLoading(false);
+          return;
+        }
+        const { error } = await signIn(email, password, turnstileToken);
+        if (error) {
+          // error may be an AuthError (extends Error) or a plain object { message: string }
+          const msg = error instanceof Error
+            ? error.message
+            : (typeof error === "object" && error !== null && "message" in error)
+              ? String((error as { message: unknown }).message)
+              : String(error);
+          toast.error(translateAuthError(msg));
+          setLoading(false);
+          return;
+        }
         navigate("/business/dashboard");
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = err instanceof Error
+        ? err.message
+        : (typeof err === "object" && err !== null && "message" in err)
+          ? String((err as { message: unknown }).message)
+          : String(err);
       toast.error(translateAuthError(msg));
     } finally {
       setLoading(false);
@@ -508,8 +528,8 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
 
               {mode === "login" && <FormPrivacyNotice className="mt-1" />}
 
-              {/* Turnstile — signup only, using the wrapper that handles dev bypass */}
-              {mode === "signup" && (
+              {/* Turnstile — required for both login and signup */}
+              {(
                 <>
                   {turnstileError ? (
                     <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 flex items-start gap-3">

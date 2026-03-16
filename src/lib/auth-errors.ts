@@ -30,6 +30,21 @@ export const translateAuthError = (msg: string): string => {
     return "שגיאת אימות דו-שלבי — נסו שנית.";
   }
 
+  // ── auth-gate edge function errors ────────────────────────────────────────
+  if (m.includes("human verification token is required") || m.includes("please complete the captcha"))
+    return "נדרש אימות CAPTCHA — אנא אמתו שאתם לא רובוט.";
+  if (m.includes("human verification failed"))
+    return "אימות ה-CAPTCHA נכשל — נסו שוב.";
+  if (m.includes("registration could not be completed"))
+    return "ההרשמה לא הושלמה — נסו שנית.";
+  if (m.includes("invalid email or password"))
+    return "פרטי התחברות שגויים — בדקו אימייל וסיסמה.";
+  if (m.includes("server misconfiguration"))
+    return "שגיאת הגדרות שרת — פנו לתמיכה.";
+  // Catch "[object Object]" — plain object coerced to string by String(err)
+  if (m === "[object object]")
+    return "אירעה שגיאה — נסו שוב. אם הבעיה נמשכת, פנו לתמיכה.";
+
   // ── Standard Supabase Auth errors ─────────────────────────────────────────
   if (m.includes("invalid login credentials"))
     return "פרטי התחברות שגויים — בדקו אימייל וסיסמה.";

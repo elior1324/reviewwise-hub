@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock, User, Loader2, ArrowRight, ShieldAlert, AlertTriangle, CheckCheck, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Loader2, ArrowRight, ShieldAlert, AlertTriangle, CheckCheck, AlertCircle, MailCheck, RefreshCw } from "lucide-react";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -35,7 +35,15 @@ const AuthPage = () => {
   const [confirmPassword,     setConfirmPassword]     = useState("");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileToken,    setTurnstileToken]    = useState<string | null>(null);
+  const [turnstileError,    setTurnstileError]    = useState(false);
+  const [turnstileAttempts, setTurnstileAttempts] = useState(0);
+  const [turnstileKey,      setTurnstileKey]      = useState(0);
+
+  // Email confirmation screen state (shown after successful signup)
+  const [showEmailConfirm, setShowEmailConfirm] = useState(false);
+  const [confirmedEmail,   setConfirmedEmail]   = useState("");
+  const [resending,        setResending]        = useState(false);
 
   // MFA state — populated after a successful password auth that requires AAL2
   const [mfaFactorId,   setMfaFactorId]   = useState<string>("");
@@ -143,7 +151,9 @@ const AuthPage = () => {
       } else if (!data?.user) {
         toast.error("ההרשמה נכשלה — ייתכן בעיה בשרת. אנא נסו שנית או פנו לתמיכה.");
       } else {
-        toast.success("נרשמתם בהצלחה! בדקו את המייל לאימות.");
+        // Show persistent email confirmation screen instead of a disappearing toast
+        setConfirmedEmail(email);
+        setShowEmailConfirm(true);
       }
 
     } else {
@@ -186,6 +196,21 @@ const AuthPage = () => {
     }
   };
 
+  // ── Resend confirmation email ───────────────────────────────────────────────
+  const handleResendEmail = async () => {
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({ type: "signup", email: confirmedEmail });
+      if (error) throw error;
+      toast.success("אימייל האימות נשלח מחדש בהצלחה");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error("שגיאה בשליחה מחדש: " + msg);
+    } finally {
+      setResending(false);
+    }
+  };
+
   // ── MFA callbacks ──────────────────────────────────────────────────────────
   const handleMfaSuccess = () => {
     toast.success("התחברתם בהצלחה!");
@@ -222,6 +247,76 @@ const AuthPage = () => {
     : "צרו חשבון חדש תוך שניות";
 
   // ─────────────────────────────────────────────────────────────────────────
+
+  // ── Email confirmation screen — shown after successful signup ───────────────
+  if (showEmailConfirm) {
+    return (
+      <div className="min-h-screen bg-background" dir="rtl">
+        <Navbar />
+        <div className="container flex items-center justify-center pt-28 pb-16 min-h-screen">
+          <Card className="w-full max-w-md elegant-card">
+            <CardContent className="pt-8 pb-8 text-center space-y-5">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                <MailCheck size={32} className="text-primary" />
+              </div>
+              <div>
+                <h2 className="font-display font-bold text-xl text-foreground mb-2">
+                  בדקו את תיבת האימייל שלכם
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  שלחנו קישור לאימות החשבון לכתובת:
+                </p>
+                <p className="font-mono text-sm font-semibold text-primary mt-1 break-all">
+                  {confirmedEmail}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-border/50 bg-muted/30 p-4 text-right space-y-2 text-sm text-muted-foreground">
+                <p className="font-semibold text-foreground text-xs uppercase tracking-wider mb-2">השלבים הבאים:</p>
+                {[
+                  "לחצו על הקישור באימייל לאימות החשבון",
+                  "לאחר האימות תוכלו להתחבר ולכתוב ביקורות",
+                ].map((step, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    <span>{step}</span>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                לא קיבלתם את האימייל? בדקו את תיקיית הספאם, או:
+              </p>
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={handleResendEmail}
+                disabled={resending}
+              >
+                {resending ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                שלח שוב את האימייל
+              </Button>
+
+              <Separator />
+
+              <p className="text-sm text-muted-foreground">
+                כבר אימתתם?{" "}
+                <button
+                  onClick={() => { setShowEmailConfirm(false); setMode("login"); }}
+                  className="text-primary hover:underline font-medium"
+                >
+                  התחברו כאן
+                </button>
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   // MFA step — replace the whole card with the verify widget
   if (mode === "mfa") {
@@ -474,11 +569,56 @@ const AuthPage = () => {
 
               {/* Turnstile — hidden in forgot mode */}
               {!isForgot && (
-                <TurnstileWidget
-                  onSuccess={(token) => setTurnstileToken(token)}
-                  onError={() => setTurnstileToken(null)}
-                  className="flex justify-center mt-2"
-                />
+                <>
+                  {turnstileError ? (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 flex items-start gap-3">
+                      <AlertCircle size={16} className="text-destructive shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-destructive font-medium">אימות CAPTCHA נכשל</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          לא הצלחנו לאמת שאתם לא רובוט. לחצו על "נסו שוב" או רעננו את הדף.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 text-xs gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10"
+                        onClick={() => {
+                          setTurnstileError(false);
+                          setTurnstileToken(null);
+                          setTurnstileAttempts(0);
+                          setTurnstileKey(k => k + 1);
+                        }}
+                      >
+                        <RefreshCw size={12} />
+                        נסו שוב
+                      </Button>
+                    </div>
+                  ) : (
+                    <TurnstileWidget
+                      key={turnstileKey}
+                      onSuccess={(token) => {
+                        setTurnstileToken(token);
+                        setTurnstileError(false);
+                        setTurnstileAttempts(0);
+                      }}
+                      onError={() => {
+                        setTurnstileToken(null);
+                        const next = turnstileAttempts + 1;
+                        setTurnstileAttempts(next);
+                        if (next <= 1) {
+                          // Silent auto-retry on first error
+                          setTurnstileKey(k => k + 1);
+                        } else {
+                          setTurnstileError(true);
+                        }
+                      }}
+                      onExpire={() => setTurnstileToken(null)}
+                      className="flex justify-center mt-2"
+                    />
+                  )}
+                </>
               )}
 
               <Button
