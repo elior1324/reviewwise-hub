@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, PenLine, LogIn, ShieldCheck, ShieldX, Plus, HelpCircle, Upload, X, FileText, Image as ImageIcon, Loader2, MessageSquare, Gift, Trophy, AlertCircle, RefreshCw } from "lucide-react";
+import { Star, PenLine, LogIn, ShieldCheck, ShieldX, Plus, HelpCircle, Upload, X, FileText, Image as ImageIcon, Loader2, MessageSquare, Gift, Trophy, AlertCircle, RefreshCw, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -73,6 +73,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
   const [duration, setDuration] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [receiptVerified, setReceiptVerified] = useState(isVerifiedPurchaser);
+  const [anonymous, setAnonymous] = useState(false);
 
   // File upload state
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -208,6 +209,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
             reviewText:            cleanReviewText,
             trainingDuration:      duration,
             verifiedPurchase:      receiptVerified,
+            anonymous:             anonymous,
             indemnityAccepted:     true,
             indemnityAcceptedAt:   indemnityAcceptedAt,
             verificationStatus:    receiptVerified ? "purchase_verified" : "email_verified",
@@ -269,6 +271,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
       setReviewText("");
       setDuration("");
       setUploadedFiles([]);
+      setAnonymous(false);
       setReviewType(null);
       setIsOpen(false);
     } catch {
@@ -550,6 +553,37 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  {/* Anonymous toggle */}
+                  <div className="flex items-center justify-between gap-4 px-3 py-3 rounded-lg border border-border/40 bg-muted/20">
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <EyeOff size={16} className="text-muted-foreground shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground">פרסום אנונימי</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          שמכם לא יוצג — הביקורת תפורסם בשם "אנונימי".
+                          {anonymous && (
+                            <span className="text-primary/80 font-medium"> הנקודות עדיין יזוכו לחשבונכם.</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={anonymous}
+                      onClick={() => setAnonymous(a => !a)}
+                      className={`relative inline-flex shrink-0 w-10 h-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40 ${
+                        anonymous ? "bg-primary" : "bg-muted-foreground/30"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                          anonymous ? "translate-x-4" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
                   </div>
 
                   {/* File upload section */}

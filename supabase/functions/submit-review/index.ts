@@ -110,10 +110,16 @@ serve(async (req: Request) => {
       reviewText,
       trainingDuration,
       verifiedPurchase = false,
+      // anonymous: reviewer chose to hide their name publicly.
+      // user_id is still stored internally so points are correctly awarded.
+      anonymous: anonymousFlag = false,
       indemnityAccepted = false,
       indemnityAcceptedAt = null,
       verificationStatus = "anonymous",
     } = body;
+
+    // Coerce to boolean — never trust client types blindly
+    const isAnonymous = anonymousFlag === true;
 
     // ── Legal compliance gate: indemnity must be accepted ─────────────────
     if (!indemnityAccepted) {
@@ -335,8 +341,11 @@ serve(async (req: Request) => {
         training_duration:     trainingDuration,
         // ✅ FIXED: server-verified value only — client's claim is ignored
         verified_purchase:     serverVerifiedPurchase,
+        // Store actual name internally; display logic in ReviewCard uses
+        // the anonymous flag to show "אנונימי" publicly while keeping
+        // reviewer_name available for moderation / dispute resolution.
         reviewer_name:         cleanReviewerName,
-        anonymous:             false,
+        anonymous:             isAnonymous,
         submission_ip:         submissionIp,
         submission_user_agent: submissionUa,
         // Legal compliance fields (migration 20260311000005)
