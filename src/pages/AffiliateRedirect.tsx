@@ -29,15 +29,62 @@ const AffiliateRedirect = () => {
       if (!courseId) { setError(true); return; }
 
       try {
-        // ── 1. Try business slug first (collaboration referral) ──────────
+        // ── 1. Try business slug — affiliate program link ─────────────────
+        //    Checks both affiliate_enrolled (new) and collaboration_active (legacy collab)
         const { data: biz } = await supabase
           .from("businesses")
-          .select("id, name, website, collaboration_active, collaboration_method, collaboration_coupon")
+          .select("id, name, website, slug, affiliate_enrolled, affiliate_link_active, collaboration_active, collaboration_method, collaboration_coupon")
           .eq("slug", courseId)
-          .eq("collaboration_active", true)
           .maybeSingle();
 
-        if (biz && biz.website) {
+        // ── 1a. Affiliate program (new) ───────────────────────────────────
+        if (biz && biz.website && biz.affiliate_enrolled && biz.affiliate_link_active !== false) {
+          // Generate unique session token for dedup (same visitor same session)
+          const sessionToken = `rh_aff_${biz.id}_${Date.now()}`;
+          const sessionKey   = `rh_aff_sess_${biz.id}`;
+          const isNewSession = !sessionStorage.getItem(sessionKey);
+          if (isNewSession) sessionStorage.setItem(sessionKey, sessionToken);
+
+          // Track affiliate click
+          const { data: clickRecord } = await supabase
+            .from("business_affiliate_clicks")
+            .insert({
+              business_id:   biz.id,
+              session_token: isNewSession ? sessionToken : sessionStorage.getItem(sessionKey),
+              referrer:      document.referrer || null,
+              user_agent:    navigator.userAgent || null,
+              landing_url:   biz.website,
+            })
+            .select("id")
+            .single();
+
+          // Store click ID in sessionStorage for conversion attribution
+          if (clickRecord?.id) {
+            sessionStorage.setItem(`rh_aff_click_${biz.id}`, clickRecord.id);
+          }
+
+          // Build affiliate URL with tracking params
+          let destUrl = biz.website;
+          try {
+            const u = new URL(biz.website);
+            u.searchParams.set("ref",    "reviewhub");
+            u.searchParams.set("coupon", AFFILIATE_COUPON_CODE);
+            destUrl = u.toString();
+          } catch { /* keep original if URL is malformed */ }
+
+          setTarget({
+            kind:   "business",
+            name:   biz.name,
+            url:    destUrl,
+            coupon: AFFILIATE_COUPON_CODE,   // always RH5 for affiliate
+            method: "affiliate",
+          });
+          setTimeout(() => { window.location.href = destUrl; }, 3000);
+          return;
+        }
+
+        // ── 1b. Legacy collaboration program ─────────────────────────────
+        if (biz && biz.website && biz.collaboration_active) {
           await supabase.from("referral_clicks").insert({
             business_id:   biz.id,
             business_slug: courseId,
@@ -65,6 +112,17 @@ const AffiliateRedirect = () => {
           };
           setTarget(tgt);
           setTimeout(() => { window.location.href = biz.website; }, 3000);
+          return;
+        }
+
+        // ── 1c. Business exists but affiliate is not enabled ──────────────
+        if (biz && !biz.affiliate_enrolled && !biz.collaboration_active) {
+          // Redirect directly to business website (no tracking, no discount)
+          if (biz.website) {
+            setTimeout(() => { window.location.href = biz.website; }, 1500);
+          } else {
+            setError(true);
+          }
           return;
         }
 
@@ -241,8 +299,86 @@ const AffiliateRedirect = () => {
           );
         })()}
 
-        {/* Business/Collaboration redirect */}
-        {!error && target?.kind === "business" && (
+        {/* Business redirect — Affiliate Program (new) */}
+        {!error && target?.kind === "business" && target.method === "affiliate" && (
+          <>
+            <div className="flex items-center justify-center gap-2">
+              <Tag size={16} className="text-primary" />
+              <span className="text-sm font-bold text-primary tracking-wide uppercase">תוכנית שותפים — Affiliate Deal</span>
+            </div>
+
+            <h1 className="font-display font-bold text-xl text-foreground">
+              {target.name}
+            </h1>
+            <p className="text-sm text-muted-foreground">מעביר אותך לרכישה עם הנחה מאומתת...</p>
+
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Clock size={14} />
+              <span>עוברים בעוד {countdown} שניות</span>
+            </div>
+
+            {/* 5% Discount badge */}
+            <div className="mx-auto inline-block border border-primary/30 bg-primary/10 rounded-xl px-5 py-3">
+              <p className="text-xs text-muted-foreground mb-1">קוד הנחה — מופעל אוטומטית בקישור:</p>
+              <p className="font-mono font-bold text-2xl text-primary tracking-widest">{AFFILIATE_COUPON_CODE}</p>
+              <p className="text-xs text-primary/70 mt-1">הנחה של 5% על המחיר המלא</p>
+            </div>
+
+            {/* Split explainer */}
+            <div className="rounded-xl border border-border/30 bg-muted/20 p-4 text-right space-y-2">
+              <p className="text-xs font-bold text-foreground mb-2">פירוט חלוקת מחיר — תוכנית שותפים:</p>
+              {[
+                { label: "אתם חוסכים (5%)", value: "5% הנחה", color: "text-emerald-600" },
+                { label: "עמלת ReviewHub", value: "5% מהספק", color: "text-blue-600" },
+                { label: "לספק נשאר",      value: "90%",       color: "text-primary"   },
+              ].map(r => (
+                <div key={r.label} className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{r.label}</span>
+                  <span className={`font-bold ${r.color}`}>{r.value}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Benefits */}
+            <ul className="space-y-1.5 text-xs text-muted-foreground text-right">
+              {[
+                `הנחה מיידית של 5% — עם קוד ${AFFILIATE_COUPON_CODE} בקישור`,
+                "רכישה זו מוכרת אוטומטית כ\"קנייה מאומתת\" — ביקורת עתידית תקבל משקל גבוה יותר",
+                "הגרלה חודשית ₪5,000 — כתבו ביקורת מאומתת לאחר הרכישה",
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-1.5">
+                  <ShieldCheck size={10} className="text-primary shrink-0 mt-0.5" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            {/* Giveaway teaser */}
+            <div className="rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-right">
+              <div className="flex items-center gap-2 mb-1">
+                <Gift size={13} className="text-primary" />
+                <p className="text-xs font-bold text-primary">הגרלה חודשית ₪5,000</p>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                לאחר הרכישה כתבו ביקורת מאומתת — ותקבלו כניסה אוטומטית להגרלה החודשית.{" "}
+                <Link to="/giveaway" className="text-primary hover:underline font-medium">
+                  פרטים נוספים ←
+                </Link>
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-border/30 bg-muted/30 px-4 py-3 text-right">
+              <p className="text-[9px] text-muted-foreground/70 leading-relaxed">
+                <strong className="text-muted-foreground">גילוי נאות:</strong> קישור זה הוא חלק מתוכנית השותפים של ReviewHub.
+                ReviewHub גובה עמלת {PLATFORM_FEE_RATE * 100}% מהעסק על כל עסקה שתיוצג לספק. ההנחה ניתנת ישירות מהמחיר המלא.
+                פעולה זו אינה משפיעה על ציון האמון האובייקטיבי של הספק.
+              </p>
+            </div>
+          </>
+        )}
+
+        {/* Business redirect — Legacy Collaboration */}
+        {!error && target?.kind === "business" && target.method !== "affiliate" && (
           <>
             <h1 className="font-display font-bold text-xl text-foreground">
               מעביר אותך לאימות רכישה — {target.name}

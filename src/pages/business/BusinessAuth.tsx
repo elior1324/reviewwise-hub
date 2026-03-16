@@ -57,7 +57,6 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
   return;
 }
 const { data, error } = await signUp(email, password, name, turnstileToken);
- await signUp(email, password, name,turnstileToken);
 
         if (error) throw error;
         if (!data?.user) {
@@ -219,8 +218,8 @@ const { data, error } = await signUp(email, password, name, turnstileToken);
               )}
 
               {mode === "login" && <FormPrivacyNotice className="mt-1" />}
-               ...
-               <Turnstile
+
+              <Turnstile
                 siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
                 onSuccess={(token) => setTurnstileToken(token)}
                 onExpire={() => setTurnstileToken(null)}

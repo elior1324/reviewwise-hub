@@ -23,6 +23,7 @@ import CouponInput    from "@/components/CouponInput";
 import CollaborationPromoCard from "@/components/CollaborationPromoCard";
 import { type CollabConfig } from "@/components/CollaborationSetupModal";
 import GoogleLinkingPanel from "@/components/GoogleLinkingPanel";
+import AffiliateProgramPanel from "@/components/AffiliateProgramPanel";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { type Review, type Course } from "@/data/mockData";
 import { useState, useEffect } from "react";
@@ -396,6 +397,13 @@ const BusinessDashboard = () => {
   const [referralClickCount, setReferralClickCount] = useState(0);
   const [referralClicksData, setReferralClicksData] = useState<{ date: string; clicks: number }[]>([]);
 
+  // Affiliate program state (tracked at dashboard level for the promo banner)
+  const [affiliateEnrolled, setAffiliateEnrolled] = useState(false);
+  const [affiliateProgramStatus, setAffiliateProgramStatus] = useState<string>("not_set");
+
+  // Active dashboard tab (controlled so the affiliate promo banner can deep-link into the tab)
+  const [activeTab, setActiveTab] = useState("analytics");
+
   // Compliance panel state
   const [complianceReviews, setComplianceReviews] = useState<any[]>([]);
   const [openReports, setOpenReports] = useState<any[]>([]);
@@ -455,6 +463,9 @@ const BusinessDashboard = () => {
       setBusinessSlug(biz.slug);
       setBusinessInfo({ name: biz.name, email: biz.email || user.email || "" });
       setDbTier((biz.subscription_tier || "free") as SubscriptionTier);
+      // Affiliate program lifecycle
+      setAffiliateEnrolled(!!biz.affiliate_enrolled);
+      setAffiliateProgramStatus(biz.affiliate_program_status || "not_set");
 
       // Fetch monthly review count
       const startOfMonth = new Date();
@@ -857,6 +868,47 @@ const BusinessDashboard = () => {
           />
         )}
 
+        {/* ── Affiliate Program Promo Banner (real, non-enrolled users only) ── */}
+        {!isDemo && businessId && !affiliateEnrolled && (
+          <div className="mb-6 rounded-xl border border-emerald-500/25 bg-emerald-50/20 dark:bg-emerald-900/10 px-5 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                  <TrendingUp size={18} className="text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold text-sm text-foreground">
+                      {affiliateProgramStatus === "declined"
+                        ? "עדיין לא מאוחר להצטרף לתוכנית השותפים"
+                        : affiliateProgramStatus === "paused"
+                        ? "תוכנית השותפים מושהית — הפעילו אותה מחדש"
+                        : "הצטרפו לתוכנית השותפים של ReviewHub"}
+                    </p>
+                    {affiliateProgramStatus === "declined" && (
+                      <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-[10px]">דחיתם בהרשמה</Badge>
+                    )}
+                    {affiliateProgramStatus === "paused" && (
+                      <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-[10px]">מושהה</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    קבלו קישור ייחודי · לקוחות מקבלים 5% הנחה · אתם שומרים 90% · ללא עלות כניסה
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => setActiveTab("affiliate-program")}
+                className="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+              >
+                <TrendingUp size={13} />
+                {affiliateProgramStatus === "paused" ? "הפעל מחדש" : "הפעל עכשיו"}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* ── Coupon Redemption (real users only) ─────────────────────── */}
         {!isDemo && businessId && (
           <div className="mb-6">
@@ -1009,7 +1061,7 @@ const BusinessDashboard = () => {
           </div>
         )}
 
-        <Tabs defaultValue="analytics" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* ── 4-Module Tab Navigation ──────────────────────────────────────────── */}
           <div className="rounded-xl border border-border/40 bg-card/50 p-3 space-y-3">
 
@@ -1080,7 +1132,20 @@ const BusinessDashboard = () => {
               </TabsList>
             </div>
 
-            {/* Module 4: Integrations */}
+            {/* Module 4: Monetization */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
+                <TrendingUp size={10} className="text-emerald-500" />
+                <span className="text-emerald-600/80">מונטיזציה</span>
+              </p>
+              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+                <TabsTrigger value="affiliate-program" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-emerald-600 data-[state=active]:text-white gap-1">
+                  <TrendingUp size={13} className="ml-1" /> תוכנית שותפים
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* Module 5: Integrations */}
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
                 <Link2 size={10} className="text-accent" />
@@ -1911,6 +1976,19 @@ const BusinessDashboard = () => {
           {/* ── WhatsApp Review Collection Tab ───────────────────────────── */}
           <TabsContent value="trust-whatsapp">
             <WhatsAppFlowPanel businessId={businessId} isDemo={isDemo} />
+          </TabsContent>
+
+          {/* ── Affiliate Program Tab ─────────────────────────────────────── */}
+          <TabsContent value="affiliate-program">
+            <AffiliateProgramPanel
+              businessId={businessId}
+              businessSlug={businessSlug}
+              isDemo={isDemo}
+              onEnrolledChange={(enrolled, status) => {
+                setAffiliateEnrolled(enrolled);
+                setAffiliateProgramStatus(status);
+              }}
+            />
           </TabsContent>
         </Tabs>
       </div>

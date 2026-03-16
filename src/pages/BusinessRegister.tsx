@@ -6,8 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, ShieldCheck, Sparkles, Link2 } from "lucide-react";
-import { useState } from "react";
+import { Building2, ShieldCheck, Sparkles, Link2, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useCategories } from "@/hooks/useCategories";
@@ -18,6 +18,7 @@ import SocialLinksEditor, { type SocialLinksData } from "@/components/SocialLink
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import { sanitizeText, sanitizeUrl } from "@/lib/sanitize";
+import AffiliateOptInCard from "@/components/AffiliateOptInCard";
 
 const OTHER_VALUE = "__other__";
 
@@ -46,6 +47,23 @@ const BusinessRegister = () => {
 
   const [socialLinks, setSocialLinks] = useState<SocialLinksData>({});
   const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [affiliateEnrolled, setAffiliateEnrolled] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Guard: redirect if user already has a registered business
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("businesses")
+      .select("id")
+      .eq("owner_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          navigate("/business/dashboard");
+        }
+      });
+  }, [user, navigate]);
 
   const categories = form.businessType === "freelancer" ? freelancerCats : courseCats;
   const filteredCategories = categories.filter(c => c !== "אחר");
@@ -67,9 +85,11 @@ const BusinessRegister = () => {
 
     if (!user) {
       toast({ title: "יש להתחבר כדי לרשום עסק", variant: "destructive" });
-      navigate("/auth");
+      navigate("/business/login", { state: { from: "/register" } });
       return;
     }
+
+    setSubmitting(true);
 
     // ── URL validation ─────────────────────────────────────────────────────────
     const websiteInput = canEditSocials ? (socialLinks.website || form.website) : form.website;
@@ -110,6 +130,10 @@ const BusinessRegister = () => {
           website: sanitizeUrl(canEditSocials ? (socialLinks.website || form.website) : form.website) || null,
           description: cleanDescription || null,
           social_links: socialLinksJson,
+          // Affiliate program opt-in (status persisted even on decline so dashboard can re-prompt)
+          affiliate_enrolled:        affiliateEnrolled,
+          affiliate_enrolled_at:     affiliateEnrolled ? new Date().toISOString() : null,
+          affiliate_program_status:  affiliateEnrolled ? "enrolled" : "declined",
         } as any)
         .select("id")
         .single();
@@ -129,24 +153,32 @@ const BusinessRegister = () => {
         if (!evalError && evalData) {
           if (evalData.status === "already_exists") {
             await supabase.from("businesses").update({ category: evalData.category }).eq("id", biz.id);
-            toast({ title: "העסק נרשם בהצלחה! 🎉", description: `הוצב בקטגוריה: ${evalData.category}` });
           } else if (evalData.status === "approved" || evalData.status === "mapped_to_existing") {
             await supabase.from("businesses").update({ category: evalData.category }).eq("id", biz.id);
-            toast({ title: "העסק נרשם בהצלחה! 🎉✨", description: `קטגוריה חדשה נוצרה: ${evalData.category}` });
-          } else if (evalData.status === "pending") {
-            toast({ title: "העסק נרשם בהצלחה! 🎉", description: evalData.message || `העסק שויך לקטגוריית "אחר" בינתיים.` });
-          } else {
-            toast({ title: "העסק נרשם בהצלחה! 🎉", description: `שויך לקטגוריית "אחר"` });
           }
-        } else {
-          toast({ title: "העסק נרשם בהצלחה! 🎉", description: "שויך לקטגוריית \"אחר\" בינתיים." });
         }
-      } else {
-        toast({ title: "העסק נרשם בהצלחה! 🎉", description: "תוכלו לגשת ללוח הבקרה שלכם." });
       }
+
+      // Success — show different toast based on affiliate enrollment
+      if (affiliateEnrolled) {
+        toast({
+          title: "העסק נרשם בהצלחה! 🎉",
+          description: `הצטרפתם לתוכנית השותפים. הקישור שלכם: reviewshub.info/go/${slug}`,
+        });
+      } else {
+        toast({
+          title: "העסק נרשם בהצלחה! 🎉",
+          description: "תוכלו להצטרף לתוכנית השותפים בכל עת מלוח הבקרה.",
+        });
+      }
+
+      // Always navigate to dashboard after successful registration
+      navigate("/business/dashboard");
     } catch (err: any) {
       console.error("Registration error:", err);
       toast({ title: "שגיאה ברישום", description: err.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -285,12 +317,45 @@ const BusinessRegister = () => {
 
                 <FormPrivacyNotice className="mt-1" />
 
-                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary" size="lg" disabled={!privacyConsent}>
-                  הרשמה ויצירת פרופיל
+                <Button
+                  type="submit"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
+                  size="lg"
+                  disabled={!privacyConsent || submitting}
+                >
+                  {submitting ? "רושם את העסק..." : "הרשמה ויצירת פרופיל"}
                 </Button>
               </form>
             </CardContent>
           </Card>
+
+          {/* ── Affiliate Program Opt-In ────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-6"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp size={16} className="text-primary" />
+              <h2 className="font-display font-semibold text-base text-foreground">
+                שלב 2 — תוכנית שותפים (אופציונלי)
+              </h2>
+            </div>
+            <AffiliateOptInCard
+              enrolled={affiliateEnrolled}
+              onChange={setAffiliateEnrolled}
+              businessSlug={
+                form.businessName
+                  ? form.businessName
+                      .toLowerCase()
+                      .replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "")
+                      .replace(/\s+/g, "-")
+                      .slice(0, 30)
+                  : undefined
+              }
+            />
+          </motion.div>
         </motion.div>
       </div>
       <Footer />
