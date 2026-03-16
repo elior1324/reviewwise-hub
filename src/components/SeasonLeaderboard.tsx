@@ -2,7 +2,8 @@
  * SeasonLeaderboard — Public ranking of top community contributors.
  *
  * Reputation-only (no monetary incentives):
- * - Points are Trust Points (status points) with zero cash value.
+ * - Points shown here are Community Points (status/reputation only) with zero cash value.
+ * - Community Points are SEPARATE from Activity Points (redeemable for rewards via /user/referrals).
  * - Verified reviews receive more points and stronger weight in ranking.
  */
 
@@ -81,7 +82,7 @@ const PodiumCard = ({ row, cfg }: { row: LeaderRow; cfg: (typeof RANK_CONFIG)[nu
       </div>
 
       <p className={`text-xl font-black mt-3 ${cfg.color}`}>{row.points.toLocaleString("he-IL")}</p>
-      <p className="text-[9px] text-muted-foreground">נקודות אמון</p>
+      <p className="text-[9px] text-muted-foreground">נקודות קהילה</p>
     </motion.div>
   );
 };
@@ -130,7 +131,7 @@ const LeaderTableRow = ({ row, myId, delay }: { row: LeaderRow; myId: string | u
 
       <div className="text-right shrink-0">
         <p className="text-sm font-bold text-foreground">{row.points.toLocaleString("he-IL")}</p>
-        <p className="text-[9px] text-muted-foreground">נקודות אמון</p>
+        <p className="text-[9px] text-muted-foreground">נקודות קהילה</p>
       </div>
     </motion.div>
   );
@@ -264,7 +265,8 @@ const SeasonLeaderboard = ({ compact = false, limit = 10 }: Props) => {
       </div>
 
       <p className="text-[11px] text-muted-foreground/70 text-center leading-relaxed">
-        נקודות אמון הן מדד מוניטין בלבד. אין להן ערך כספי ואי אפשר להמיר/למשוך/להעביר אותן.
+        נקודות קהילה הן מדד מוניטין בלבד. אין להן ערך כספי ואי אפשר להמיר/למשוך/להעביר אותן.
+        הן נפרדות ממנגנון הנקודות הניתנות למימוש להטבות פלטפורמה.
       </p>
     </div>
   );

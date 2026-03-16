@@ -5,7 +5,7 @@ import {
   ShieldCheck, Target, BookOpen, Users, Award, TrendingUp,
   CheckCircle, XCircle, BarChart2, AlertTriangle, Clock, Star,
   Tag, BadgePercent, Trophy, Sparkles, ChevronRight, Gift,
-  Activity, ShieldAlert,
+  Activity, ShieldAlert, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -492,8 +492,8 @@ const AboutPage = () => {
               שמעניק לנתונים את האמינות שלהם.
             </motion.p>
 
-            {/* Three-column ecosystem cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* Four-card ecosystem grid — two rows of two */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               {[
                 {
                   icon: Star,
@@ -512,9 +512,16 @@ const AboutPage = () => {
                 {
                   icon: Trophy,
                   title: "נקודות והטבות",
-                  desc: "פעילות בפלטפורמה — כולל הזמנת חברים — צוברת נקודות בפרופיל האישי שלכם. נקודות מספיקות מזכות בהטבות פלטפורמה ממשיות.",
+                  desc: "פעילות בפלטפורמה — ביקורות, השתתפות קהילתית, הזמנת חברים — צוברת נקודות הניתנות למימוש להטבות ממשיות. הנקודות אינן קשורות לציון האמון.",
                   iconColor: "text-amber-500",
                   iconBg:    "bg-amber-500/10",
+                },
+                {
+                  icon: BarChart3,
+                  title: "דירוג קהילה",
+                  desc: "תורמי הקהילה מופיעים בלוח המובילים לפי נקודות קהילה — מדד מוניטין עצמאי, נפרד מנקודות ההטבות וללא ערך כספי.",
+                  iconColor: "text-violet-500",
+                  iconBg:    "bg-violet-500/10",
                 },
               ].map(({ icon: Icon, title, desc, iconColor, iconBg }, i) => (
                 <motion.div

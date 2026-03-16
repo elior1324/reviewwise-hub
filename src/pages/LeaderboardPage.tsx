@@ -1,9 +1,10 @@
 /**
- * LeaderboardPage — Public ranking of top reviewers by Trust Points.
+ * LeaderboardPage — Public ranking of top reviewers by Community Points.
  *
  * Reputation-only (no monetary incentives):
- * - Trust Points have zero cash value.
- * - Verified reviews receive more points and stronger weight.
+ * - Community Points are reputation status points with zero cash value.
+ * - They are SEPARATE from Activity Points (redeemable for platform rewards via /user/referrals).
+ * - Verified reviews receive more Community Points and stronger weight in ranking.
  */
 
 import { motion } from "framer-motion";
@@ -26,7 +27,7 @@ export default function LeaderboardPage() {
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">טבלת המובילים</h1>
           <p className="text-muted-foreground max-w-lg mx-auto text-sm md:text-base leading-relaxed">
-            דירוג הכותבים נקבע לפי <strong className="text-foreground">נקודות אמון</strong> ותרומה לקהילה.
+            דירוג הכותבים נקבע לפי <strong className="text-foreground">נקודות קהילה</strong> ותרומה לקהילה.
             ביקורות מאומתות מקבלות יותר נקודות ומשקל גבוה יותר.
           </p>
         </motion.div>
@@ -37,7 +38,12 @@ export default function LeaderboardPage() {
         <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <Info size={12} aria-hidden="true" />
-            נקודות אמון הן מוניטין בלבד. אין להן ערך כספי ואי אפשר להמיר/למשוך/להעביר אותן.
+            נקודות קהילה הן מוניטין בלבד — ללא ערך כספי ואי אפשר להמיר אותן.
+          </span>
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-muted-foreground/70">
+            <Info size={12} aria-hidden="true" />
+            לנקודות הניתנות למימוש להטבות פלטפורמה, ראו{" "}
+            <a href="/user/referrals" className="text-primary hover:underline">לוח ההזמנות</a>.
           </span>
         </div>
       </div>
@@ -54,7 +60,7 @@ export default function LeaderboardPage() {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-lg font-bold text-foreground mb-6 flex items-center justify-center gap-2">
             <Sparkles size={18} className="text-primary" aria-hidden="true" />
-            איך לצבור נקודות אמון?
+            איך לצבור נקודות קהילה?
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

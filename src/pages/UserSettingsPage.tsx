@@ -662,25 +662,53 @@ const PointsSection = ({ userId }: { userId: string }) => {
     );
   }
 
+  // Inline tier logic (mirrors UserReferralDashboard thresholds — do not modify)
+  const tierLabel =
+    totalPoints >= 600 ? "Ambassador" :
+    totalPoints >= 300 ? "Influencer" :
+    totalPoints >= 150 ? "Explorer"   : "Starter";
+  const tierColor =
+    totalPoints >= 600 ? "text-amber-600 bg-amber-500/10 border-amber-500/30" :
+    totalPoints >= 300 ? "text-emerald-600 bg-emerald-500/10 border-emerald-500/30" :
+    totalPoints >= 150 ? "text-primary bg-primary/10 border-primary/30" :
+                         "text-muted-foreground bg-muted/40 border-border/40";
+
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-xl font-semibold mb-1">נקודות ופרסים</h2>
-        <p className="text-sm text-muted-foreground">עקבו אחר הנקודות שצברתם ואחר הדרגה שלכם</p>
+        <p className="text-sm text-muted-foreground">
+          נקודות אלו צוברות פעילות מאומתת — ביקורות, השתתפות קהילתית, והזמנת חברים.
+          ניתן לממש אותן להטבות פלטפורמה כגון הנחה על קורס.
+        </p>
       </div>
 
-      {/* Total points hero */}
+      {/* Total points hero + tier badge */}
       <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-6 max-w-xs text-center space-y-2">
         <Trophy className="w-10 h-10 mx-auto text-primary" />
         <p className="text-4xl font-bold">{totalPoints}</p>
         <p className="text-sm text-muted-foreground">סה״כ נקודות שנצברו</p>
+        <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-lg border ${tierColor}`}>
+          {tierLabel}
+        </span>
       </div>
 
-      {/* Leaderboard CTA */}
+      {/* Primary CTA — tier progress & rewards */}
+      <div className="rounded-xl border border-primary/30 p-4 bg-primary/5 flex items-center justify-between gap-4 max-w-lg">
+        <div className="space-y-0.5">
+          <p className="font-medium text-sm">מסע הנקודות והפרסים</p>
+          <p className="text-xs text-muted-foreground">ראו את מסלול הדרגות, התקדמות הרמה, ומימוש הטבות</p>
+        </div>
+        <Button variant="default" size="sm" asChild>
+          <a href="/user/referrals">לדף הפרסים</a>
+        </Button>
+      </div>
+
+      {/* Secondary CTA — community leaderboard */}
       <div className="rounded-xl border border-border p-4 bg-card flex items-center justify-between gap-4 max-w-lg">
         <div className="space-y-0.5">
-          <p className="font-medium text-sm">לוח המובילים</p>
-          <p className="text-xs text-muted-foreground">ראו את הדרגה שלכם ביחס לשאר המשתמשים</p>
+          <p className="font-medium text-sm">דירוג קהילה</p>
+          <p className="text-xs text-muted-foreground">ראו את המיקום שלכם ביחס לתורמי הקהילה (נקודות קהילה — נפרדות)</p>
         </div>
         <Button variant="outline" size="sm" asChild>
           <a href="/leaderboard">לוח המובילים</a>
