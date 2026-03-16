@@ -769,7 +769,7 @@ const BusinessDashboard = () => {
               <p className="font-display font-semibold text-foreground">🎯 מצב דמו — כך ייראה לוח הבקרה שלכם אחרי ההרשמה</p>
             </div>
             <p className="text-sm text-muted-foreground mb-3">כל הנתונים כאן הם לדוגמה בלבד. הירשמו כדי לראות את הנתונים האמיתיים שלכם.</p>
-            <Button onClick={() => navigate("/business/auth")} className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button onClick={() => navigate("/business/signup")} className="bg-primary text-primary-foreground hover:bg-primary/90">
               הירשמו עכשיו — חינם
             </Button>
           </div>

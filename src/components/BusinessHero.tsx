@@ -279,7 +279,7 @@ const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
             {/* Methodology Link */}
             <div className="flex items-center gap-1.5 mr-auto self-end">
               <Link
-                to="/methodology"
+                to="/#how-it-works"
                 className="text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
                 aria-label="כיצד מחושב ציון האמון?"
               >
