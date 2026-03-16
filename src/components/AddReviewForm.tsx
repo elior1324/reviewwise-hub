@@ -81,6 +81,9 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileError, setTurnstileError] = useState(false);
   const [turnstileKey, setTurnstileKey] = useState(0); // increment to remount widget
+  // Track how many times the widget has fired onError so we can auto-retry
+  // once before surfacing the error panel to the user.
+  const [turnstileAttempts, setTurnstileAttempts] = useState(0);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -659,6 +662,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                         onClick={() => {
                           setTurnstileError(false);
                           setTurnstileToken(null);
+                          setTurnstileAttempts(0);
                           setTurnstileKey(k => k + 1);
                         }}
                       >
@@ -669,8 +673,24 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                   ) : (
                     <TurnstileWidget
                       key={turnstileKey}
-                      onSuccess={(token) => { setTurnstileToken(token); setTurnstileError(false); }}
-                      onError={() => { setTurnstileToken(null); setTurnstileError(true); }}
+                      onSuccess={(token) => {
+                        setTurnstileToken(token);
+                        setTurnstileError(false);
+                        setTurnstileAttempts(0);
+                      }}
+                      onError={() => {
+                        setTurnstileToken(null);
+                        const nextAttempt = turnstileAttempts + 1;
+                        setTurnstileAttempts(nextAttempt);
+                        if (nextAttempt <= 1) {
+                          // First failure: silent auto-retry (covers transient
+                          // network glitches or slow Cloudflare script load).
+                          setTurnstileKey(k => k + 1);
+                        } else {
+                          // Second failure: surface the error panel.
+                          setTurnstileError(true);
+                        }
+                      }}
                       onExpire={() => { setTurnstileToken(null); }}
                       className="flex justify-center mt-2"
                     />

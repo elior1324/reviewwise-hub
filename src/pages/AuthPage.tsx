@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock, User, Loader2, ArrowRight, ShieldAlert, AlertTriangle } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Loader2, ArrowRight, ShieldAlert, AlertTriangle, CheckCheck, AlertCircle } from "lucide-react";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -32,6 +32,8 @@ const AuthPage = () => {
   const [loading,        setLoading]        = useState(false);
   const [googleLoading,  setGoogleLoading]  = useState(false);
   const [appleLoading,   setAppleLoading]   = useState(false);
+  const [confirmPassword,     setConfirmPassword]     = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
@@ -82,6 +84,13 @@ const AuthPage = () => {
       return;
     }
     if (mode === "signup") {
+      if (password !== confirmPassword) {
+        toast.error("הסיסמאות אינן תואמות", {
+          description: "וודאו שהסיסמה ואישורה זהים.",
+        });
+        setLoading(false);
+        return;
+      }
       const pwCheck = validatePassword(password);
       if (!pwCheck.valid) {
         toast.error(pwCheck.message);
@@ -197,6 +206,7 @@ const AuthPage = () => {
     loading ||
     isLocked ||
     (isSignup && !privacyConsent) ||
+    (isSignup && confirmPassword.length > 0 && password !== confirmPassword) ||
     (!isForgot && !turnstileToken);
 
   const title = isForgot
@@ -402,6 +412,52 @@ const AuthPage = () => {
                   {/* Strength meter — shown while typing in signup */}
                   {isSignup && password.length > 0 && (
                     <PasswordStrengthMeter password={password} />
+                  )}
+                </div>
+              )}
+
+              {/* Confirm password — signup only */}
+              {isSignup && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">אימות סיסמה</Label>
+                  <div className="relative">
+                    <Lock className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      className="pr-10 pl-10"
+                      dir="ltr"
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(v => !v)}
+                      className="absolute left-3 top-3 text-muted-foreground hover:text-foreground"
+                      aria-label={showConfirmPassword ? "הסתר סיסמה" : "הצג סיסמה"}
+                    >
+                      {showConfirmPassword
+                        ? <EyeOff className="h-4 w-4" aria-hidden="true" />
+                        : <Eye   className="h-4 w-4" aria-hidden="true" />
+                      }
+                    </button>
+                  </div>
+                  {/* Inline match feedback */}
+                  {confirmPassword.length > 0 && (
+                    password === confirmPassword ? (
+                      <p className="text-xs text-emerald-500 flex items-center gap-1">
+                        <CheckCheck className="h-3 w-3" aria-hidden="true" />
+                        הסיסמאות תואמות
+                      </p>
+                    ) : (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                        הסיסמאות אינן תואמות
+                      </p>
+                    )
                   )}
                 </div>
               )}

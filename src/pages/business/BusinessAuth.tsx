@@ -4,11 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
-import { Turnstile } from "@marsidev/react-turnstile";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Mail, Lock, User, Eye, EyeOff, Loader2, MailCheck, RefreshCw } from "lucide-react";
+import {
+  Mail, Lock, User, Eye, EyeOff, Loader2, MailCheck, RefreshCw,
+  CheckCheck, AlertCircle, ArrowRight,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
@@ -24,24 +27,35 @@ interface BusinessAuthProps {
 }
 
 const BusinessAuth = ({ mode }: BusinessAuthProps) => {
-  const [email, setEmail] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [privacyConsent, setPrivacyConsent] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [appleLoading, setAppleLoading] = useState(false);
+  const [email,               setEmail]               = useState("");
+  const [turnstileToken,      setTurnstileToken]      = useState<string | null>(null);
+  const [turnstileError,      setTurnstileError]      = useState(false);
+  const [turnstileAttempts,   setTurnstileAttempts]   = useState(0);
+  const [turnstileKey,        setTurnstileKey]        = useState(0);
+  const [password,            setPassword]            = useState("");
+  const [confirmPassword,     setConfirmPassword]     = useState("");
+  const [showPassword,        setShowPassword]        = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [name,                setName]                = useState("");
+  const [loading,             setLoading]             = useState(false);
+  const [privacyConsent,      setPrivacyConsent]      = useState(false);
+  const [googleLoading,       setGoogleLoading]       = useState(false);
+  const [appleLoading,        setAppleLoading]        = useState(false);
 
   // ── B-02: Email confirmation state (shown after successful signup) ──────────
   const [showEmailConfirm, setShowEmailConfirm] = useState(false);
-  const [confirmedEmail, setConfirmedEmail] = useState("");
-  const [resending, setResending] = useState(false);
+  const [confirmedEmail,   setConfirmedEmail]   = useState("");
+  const [resending,        setResending]        = useState(false);
+
+  // ── Forgot-password inline mode ─────────────────────────────────────────────
+  const [forgotMode,  setForgotMode]  = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSent,  setForgotSent]  = useState(false);
 
   const { signIn, signUp, signInWithGoogle, signInWithApple } = useAuth();
   const navigate = useNavigate();
 
+  // ── Main submit ─────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -49,6 +63,13 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
       if (mode === "signup") {
         if (!privacyConsent) {
           toast.error("יש לאשר את מדיניות הפרטיות ותנאי השימוש");
+          setLoading(false);
+          return;
+        }
+        if (password !== confirmPassword) {
+          toast.error("הסיסמאות אינן תואמות", {
+            description: "וודאו שהסיסמה ואישורה זהים.",
+          });
           setLoading(false);
           return;
         }
@@ -79,26 +100,56 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
         if (error) throw error;
         navigate("/business/dashboard");
       }
-    } catch (err: any) {
-      toast.error(translateAuthError(err.message));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(translateAuthError(msg));
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Resend confirmation email ───────────────────────────────────────────────
   const handleResendEmail = async () => {
     setResending(true);
     try {
       const { error } = await supabase.auth.resend({ type: "signup", email: confirmedEmail });
       if (error) throw error;
       toast.success("אימייל האימות נשלח מחדש בהצלחה");
-    } catch (err: any) {
-      toast.error("שגיאה בשליחה מחדש: " + err.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error("שגיאה בשליחה מחדש: " + msg);
     } finally {
       setResending(false);
     }
   };
 
+  // ── Forgot password — send reset email ─────────────────────────────────────
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail.trim()) {
+      toast.error("אנא הזינו כתובת אימייל");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setForgotSent(true);
+      toast.success("קישור לאיפוס סיסמה נשלח לאימייל שלכם.", {
+        description: "בדקו את תיבת הדואר הנכנס (וגם ספאם).",
+        duration: 6000,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(translateAuthError(msg));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── OAuth handlers ──────────────────────────────────────────────────────────
   const handleGoogleAuth = async () => {
     setGoogleLoading(true);
     // Pass intent=business so AuthCallback knows to funnel the user into
@@ -121,7 +172,7 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
     }
   };
 
-  // ── B-02: Email confirmation screen (replaces the form after successful signup) ─
+  // ── B-02: Email confirmation screen ────────────────────────────────────────
   if (showEmailConfirm) {
     return (
       <div className="min-h-screen bg-background noise-overlay" dir="rtl">
@@ -189,6 +240,88 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
     );
   }
 
+  // ── Forgot-password screen ──────────────────────────────────────────────────
+  if (forgotMode) {
+    return (
+      <div className="min-h-screen bg-background noise-overlay" dir="rtl">
+        <BusinessNavbar />
+        <div className="container py-20 flex justify-center">
+          <Card className="w-full max-w-md shadow-card bg-card">
+            <CardHeader className="text-center">
+              <CardTitle className="font-display text-2xl">שכחתם סיסמה?</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                הזינו את כתובת האימייל שלכם ונשלח קישור לאיפוס הסיסמה
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {forgotSent ? (
+                /* ── Success state ── */
+                <div className="space-y-4 text-center">
+                  <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto">
+                    <MailCheck size={28} className="text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground mb-1">הקישור נשלח!</p>
+                    <p className="text-sm text-muted-foreground">
+                      בדקו את תיבת הדואר הנכנס עבור{" "}
+                      <span className="font-medium text-foreground">{forgotEmail}</span>
+                      {" "}(כולל ספאם).
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => { setForgotMode(false); setForgotSent(false); setForgotEmail(""); }}
+                  >
+                    ← חזרה להתחברות
+                  </Button>
+                </div>
+              ) : (
+                /* ── Send-reset form ── */
+                <form onSubmit={handleForgotSubmit} className="space-y-4">
+                  <div className="relative">
+                    <Mail size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="email"
+                      placeholder="כתובת אימייל"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      className="pr-10 glass border-border/50"
+                      required
+                      dir="ltr"
+                      autoComplete="email"
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2"
+                    disabled={loading}
+                  >
+                    {loading
+                      ? <><Loader2 size={16} className="animate-spin" /> שולח...</>
+                      : <><ArrowRight size={16} /> שלחו קישור לאיפוס</>
+                    }
+                  </Button>
+
+                  <button
+                    type="button"
+                    onClick={() => setForgotMode(false)}
+                    className="w-full text-sm text-primary hover:underline text-center"
+                  >
+                    ← חזרה להתחברות
+                  </button>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        <BusinessFooter />
+      </div>
+    );
+  }
+
+  // ── Main auth form ──────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <BusinessNavbar />
@@ -263,6 +396,8 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
                   />
                 </div>
               )}
+
+              {/* Email */}
               <div className="relative">
                 <Mail size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -273,8 +408,11 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
                   className="pr-10 glass border-border/50"
                   required
                   dir="ltr"
+                  autoComplete="email"
                 />
               </div>
+
+              {/* Password */}
               <div className="space-y-1">
                 <div className="relative">
                   <Lock size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -287,6 +425,7 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
                     required
                     minLength={8}
                     dir="ltr"
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
                   />
                   <button
                     type="button"
@@ -304,15 +443,58 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
                 )}
               </div>
 
-              {/* B-03: Forgot Password link — login mode only ─────────────────────── */}
+              {/* Confirm password — signup only */}
+              {mode === "signup" && (
+                <div className="space-y-1">
+                  <div className="relative">
+                    <Lock size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="אימות סיסמה"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pr-10 pl-10 glass border-border/50"
+                      required
+                      minLength={8}
+                      dir="ltr"
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(v => !v)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={showConfirmPassword ? "הסתר סיסמה" : "הצג סיסמה"}
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {/* Inline match feedback */}
+                  {confirmPassword.length > 0 && (
+                    password === confirmPassword ? (
+                      <p className="text-xs text-emerald-500 flex items-center gap-1">
+                        <CheckCheck size={12} aria-hidden="true" />
+                        הסיסמאות תואמות
+                      </p>
+                    ) : (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle size={12} aria-hidden="true" />
+                        הסיסמאות אינן תואמות
+                      </p>
+                    )
+                  )}
+                </div>
+              )}
+
+              {/* Forgot password link — login mode only */}
               {mode === "login" && (
                 <div className="text-left">
-                  <Link
-                    to="/reset-password"
+                  <button
+                    type="button"
+                    onClick={() => { setForgotMode(true); setForgotEmail(email); }}
                     className="text-xs text-muted-foreground hover:text-primary transition-colors"
                   >
                     שכחתם סיסמה?
-                  </Link>
+                  </button>
                 </div>
               )}
 
@@ -326,20 +508,67 @@ const BusinessAuth = ({ mode }: BusinessAuthProps) => {
 
               {mode === "login" && <FormPrivacyNotice className="mt-1" />}
 
-              {/* B-04: Turnstile only in signup — not needed for login ──────────── */}
+              {/* Turnstile — signup only, using the wrapper that handles dev bypass */}
               {mode === "signup" && (
-                <Turnstile
-                  siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-                  onSuccess={(token) => setTurnstileToken(token)}
-                  onExpire={() => setTurnstileToken(null)}
-                  onError={() => setTurnstileToken(null)}
-                />
+                <>
+                  {turnstileError ? (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 flex items-start gap-3">
+                      <AlertCircle size={16} className="text-destructive shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-destructive font-medium">אימות CAPTCHA נכשל</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          לא הצלחנו לאמת שאתם לא רובוט. לחצו על "נסו שוב" או רעננו את הדף.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 text-xs gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10"
+                        onClick={() => {
+                          setTurnstileError(false);
+                          setTurnstileToken(null);
+                          setTurnstileAttempts(0);
+                          setTurnstileKey(k => k + 1);
+                        }}
+                      >
+                        <RefreshCw size={12} />
+                        נסו שוב
+                      </Button>
+                    </div>
+                  ) : (
+                    <TurnstileWidget
+                      key={turnstileKey}
+                      onSuccess={(token) => {
+                        setTurnstileToken(token);
+                        setTurnstileError(false);
+                        setTurnstileAttempts(0);
+                      }}
+                      onError={() => {
+                        setTurnstileToken(null);
+                        const next = turnstileAttempts + 1;
+                        setTurnstileAttempts(next);
+                        if (next <= 1) {
+                          // Silent auto-retry on first error
+                          setTurnstileKey(k => k + 1);
+                        } else {
+                          setTurnstileError(true);
+                        }
+                      }}
+                      onExpire={() => setTurnstileToken(null)}
+                    />
+                  )}
+                </>
               )}
 
               <Button
                 type="submit"
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2"
-                disabled={loading || (mode === "signup" && !privacyConsent)}
+                disabled={
+                  loading ||
+                  (mode === "signup" && !privacyConsent) ||
+                  (mode === "signup" && confirmPassword.length > 0 && password !== confirmPassword)
+                }
               >
                 {loading && <Loader2 size={16} className="animate-spin" />}
                 {loading ? "טוען..." : mode === "login" ? "התחברו" : "צרו חשבון"}

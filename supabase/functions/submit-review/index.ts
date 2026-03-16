@@ -157,9 +157,20 @@ serve(async (req: Request) => {
     // presence on the client. Here we validate it with Cloudflare's API.
     const turnstileSecretKey = Deno.env.get("TURNSTILE_SECRET_KEY") ?? "";
 
+    // Special dev-mode token emitted by TurnstileWidget when
+    // VITE_TURNSTILE_SITE_KEY is not configured on the frontend.
+    // We allow this through so development/staging environments with a
+    // TURNSTILE_SECRET_KEY but no site key still work end-to-end.
+    const DEV_BYPASS_TOKEN = "dev-bypass-token";
+    const isDevBypass = (turnstileToken as string) === DEV_BYPASS_TOKEN;
+
     if (!turnstileSecretKey) {
-      // No secret configured → log a warning but allow in development
-      console.warn("[submit-review] TURNSTILE_SECRET_KEY not set — skipping verification (dev mode)");
+      // No secret configured → log a warning but allow in development.
+      console.warn("[submit-review] TURNSTILE_SECRET_KEY not set — skipping Turnstile verification (dev mode)");
+    } else if (isDevBypass) {
+      // Frontend is running without a Turnstile site key — all other
+      // validation (JWT auth, rate-limit, spam-score) still applies.
+      console.warn("[submit-review] Dev-bypass token received — skipping Cloudflare verification (VITE_TURNSTILE_SITE_KEY not set on frontend)");
     } else {
       const formData = new URLSearchParams();
       formData.set("secret",   turnstileSecretKey);
