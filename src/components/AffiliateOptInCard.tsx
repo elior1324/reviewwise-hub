@@ -2,25 +2,17 @@
  * AffiliateOptInCard
  *
  * Shown at the end of the business registration form.
- * Explains the ReviewHub Affiliate Program and lets the owner opt in.
+ * Lets the owner choose one of three affiliate modes:
  *
- * Business model (5 / 5 split):
- *   • Customer gets  5% discount (coupon RH5)
- *   • ReviewHub gets 5% commission
- *   • Business keeps the remaining 90%
+ *   reviewhub_model    → ReviewHub 5/5 split (recommended)
+ *   personal_affiliate → Business provides own affiliate/tracking URL
+ *   none               → No affiliate program
  *
- * This component is purely presentational — the parent (BusinessRegister)
- * owns the `enrolled` boolean state and passes an `onChange` callback.
+ * Parent (BusinessRegister) owns state and receives changes via onChange.
  */
 
-import { Switch } from "@/components/ui/switch";
-import { Label }  from "@/components/ui/label";
+import { Input }  from "@/components/ui/input";
 import { Badge }  from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   TrendingUp,
   Tag,
@@ -30,15 +22,30 @@ import {
   Users,
   Percent,
   BadgeDollarSign,
+  Link2,
+  XCircle,
+  Check,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+export type AffiliateMode = "reviewhub_model" | "personal_affiliate" | "none";
 
 interface Props {
-  enrolled: boolean;
-  onChange:  (enrolled: boolean) => void;
-  businessSlug?: string; // shown as preview link (optional — not yet saved)
+  mode:                AffiliateMode;
+  personalAffiliateUrl: string;
+  onChange:            (mode: AffiliateMode) => void;
+  onUrlChange:         (url: string) => void;
+  businessSlug?:       string;
 }
 
-// The three parties and their share
+// ── Split rows (for ReviewHub model explanation) ──────────────────────────────
+
 const SPLIT_ROWS = [
   {
     icon:  <Tag size={14} className="text-emerald-500" />,
@@ -66,206 +73,230 @@ const SPLIT_ROWS = [
   },
 ];
 
-const BENEFITS = [
-  {
-    icon: <Users size={13} className="text-primary" />,
-    text: "לקוחות חדשים מגיעים דרך דף העסק שלכם ב-ReviewHub",
-  },
-  {
-    icon: <ShieldCheck size={13} className="text-primary" />,
-    text: "כל רכישה דרך הקישור מסומנת אוטומטית כ\"קנייה מאומתת\"",
-  },
-  {
-    icon: <Percent size={13} className="text-primary" />,
-    text: "אין עלות כניסה — שילמו רק כשיש המרה בפועל",
-  },
-  {
-    icon: <TrendingUp size={13} className="text-primary" />,
-    text: "לוח בקרה עם נתוני קליקים, המרות ועמלות בזמן אמת",
-  },
-];
+// ── Option card ───────────────────────────────────────────────────────────────
 
-const AffiliateOptInCard = ({ enrolled, onChange, businessSlug }: Props) => {
+const OptionCard = ({
+  optionMode,
+  current,
+  onSelect,
+  title,
+  description,
+  badge,
+  children,
+}: {
+  optionMode:  AffiliateMode;
+  current:     AffiliateMode;
+  onSelect:    (m: AffiliateMode) => void;
+  title:       string;
+  description: string;
+  badge?:      string;
+  children?:   React.ReactNode;
+}) => {
+  const isActive = current === optionMode;
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(optionMode)}
+      className={`w-full text-right rounded-xl border-2 transition-all duration-200 p-4 ${
+        isActive
+          ? "border-primary bg-primary/5 shadow-sm"
+          : "border-border/60 bg-card hover:border-primary/40 hover:bg-muted/10"
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        {/* Radio indicator */}
+        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+          isActive ? "border-primary" : "border-border/60"
+        }`}>
+          {isActive && <div className="w-2 h-2 rounded-full bg-primary" />}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-sm font-bold ${isActive ? "text-primary" : "text-foreground"}`}>
+              {title}
+            </span>
+            {badge && (
+              <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${
+                isActive ? "border-primary/40 text-primary bg-primary/5" : "border-border/60"
+              }`}>
+                {badge}
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed text-right">{description}</p>
+          {isActive && children && <div className="mt-3">{children}</div>}
+        </div>
+      </div>
+    </button>
+  );
+};
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+
+const AffiliateOptInCard = ({
+  mode,
+  personalAffiliateUrl,
+  onChange,
+  onUrlChange,
+  businessSlug,
+}: Props) => {
   const previewLink = businessSlug
     ? `reviewshub.info/go/${businessSlug}`
     : "reviewshub.info/go/שם-העסק-שלכם";
 
   return (
-    <div
-      className={`rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
-        enrolled
-          ? "border-primary/40 bg-primary/3 shadow-md shadow-primary/10"
-          : "border-border/60 bg-card"
-      }`}
-    >
+    <div className={`rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
+      mode !== "none"
+        ? "border-primary/40 bg-primary/3 shadow-md shadow-primary/10"
+        : "border-border/60 bg-card"
+    }`}>
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 p-5 pb-4">
-        <div className="flex items-center gap-3">
+      <div className="p-5 pb-3">
+        <div className="flex items-center gap-3 mb-1">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
             <TrendingUp size={20} className="text-primary" />
           </div>
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <h3 className="font-display font-bold text-base text-foreground leading-tight">
-                תוכנית שותפים — ReviewHub Affiliate
+                הגדרות שותפים — Affiliate
               </h3>
-              <Badge
-                variant="outline"
-                className="text-[10px] font-bold border-primary/40 text-primary bg-primary/5 px-1.5 py-0"
-              >
+              <Badge variant="outline" className="text-[10px] font-bold border-border/60 text-muted-foreground px-1.5 py-0">
                 אופציונלי
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              הגדילו את החשיפה — ReviewHub מביא לקוחות, אתם שומרים 90%
-            </p>
+            <p className="text-xs text-muted-foreground">בחרו כיצד לקוחות מגיעים אליכם דרך ReviewHub</p>
           </div>
-        </div>
-
-        {/* Toggle */}
-        <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
-          <Switch
-            id="affiliate-toggle"
-            checked={enrolled}
-            onCheckedChange={onChange}
-            className="data-[state=checked]:bg-primary"
-          />
-          <Label
-            htmlFor="affiliate-toggle"
-            className={`text-[10px] font-bold cursor-pointer transition-colors ${
-              enrolled ? "text-primary" : "text-muted-foreground"
-            }`}
-          >
-            {enrolled ? "פעיל ✓" : "כבוי"}
-          </Label>
         </div>
       </div>
 
-      {/* Revenue split visual */}
-      <div className="px-5 pb-4">
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
-          חלוקת הכנסות — כל עסקה
-        </p>
+      {/* Three option cards */}
+      <div className="px-5 pb-4 space-y-2">
 
-        {/* Visual bar */}
-        <div className="flex rounded-lg overflow-hidden h-4 mb-3 border border-border/40">
-          <div
-            className="bg-emerald-400 flex items-center justify-center text-[9px] font-bold text-white transition-all"
-            style={{ width: "5%" }}
-            title="5% הנחה ללקוח"
-          />
-          <div
-            className="bg-blue-400 flex items-center justify-center text-[9px] font-bold text-white transition-all"
-            style={{ width: "5%" }}
-            title="5% עמלת ReviewHub"
-          />
-          <div
-            className="bg-primary flex items-center justify-center text-[9px] font-bold text-white flex-1 transition-all"
-            title="90% לעסק"
-          >
-            90% לעסק
-          </div>
-        </div>
-
-        {/* Split rows */}
-        <div className="space-y-1.5">
-          {SPLIT_ROWS.map((row) => (
-            <div
-              key={row.label}
-              className={`flex items-center justify-between rounded-lg border px-3 py-2 ${row.bg}`}
-            >
-              <div className="flex items-center gap-2">
-                {row.icon}
-                <span className="text-xs font-medium text-foreground">{row.label}</span>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info size={10} className="text-muted-foreground cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-[200px] text-xs">
-                    {row.note}
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <span className={`text-sm font-bold ${row.color}`}>{row.share}</span>
+        {/* Option 1 — ReviewHub 5/5 model */}
+        <OptionCard
+          optionMode="reviewhub_model"
+          current={mode}
+          onSelect={onChange}
+          title="מודל עמלה של ReviewHub (5% / 5%)"
+          description="ReviewHub מייצר קישור ייחודי. לקוחות מקבלים 5% הנחה, ReviewHub גובה 5%, העסק שומר 90%."
+          badge="מומלץ"
+        >
+          {/* Revenue split visual */}
+          <div className="space-y-1.5">
+            <div className="flex rounded-lg overflow-hidden h-3 mb-2 border border-border/40">
+              <div className="bg-emerald-400" style={{ width: "5%" }} title="5% הנחה ללקוח" />
+              <div className="bg-blue-400"    style={{ width: "5%" }} title="5% עמלת ReviewHub" />
+              <div className="bg-primary flex items-center justify-center text-[8px] font-bold text-white flex-1" title="90% לעסק">90%</div>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Example */}
-      <div className="px-5 pb-4">
-        <div className="rounded-xl bg-muted/40 border border-border/40 p-3">
-          <p className="text-[10px] font-bold text-muted-foreground mb-2">
-            דוגמה — רכישה ב-₪1,000:
-          </p>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            {[
-              { label: "לקוח משלם",   amount: "₪950",  sub: "חסך ₪50",       color: "text-emerald-600" },
-              { label: "ReviewHub",    amount: "₪50",   sub: "עמלת פלטפורם",  color: "text-blue-600"   },
-              { label: "העסק מקבל",  amount: "₪900",  sub: "90% מהעסקה",    color: "text-primary"    },
-            ].map((item) => (
-              <div key={item.label} className="bg-background rounded-lg p-2 border border-border/30">
-                <div className={`font-bold text-base leading-none ${item.color}`}>
-                  {item.amount}
+            {SPLIT_ROWS.map(row => (
+              <div key={row.label} className={`flex items-center justify-between rounded-lg border px-3 py-1.5 ${row.bg}`}>
+                <div className="flex items-center gap-2">
+                  {row.icon}
+                  <span className="text-xs font-medium text-foreground">{row.label}</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info size={10} className="text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[200px] text-xs">{row.note}</TooltipContent>
+                  </Tooltip>
                 </div>
-                <div className="text-[9px] text-muted-foreground mt-1">{item.label}</div>
-                <div className="text-[9px] text-muted-foreground/60">{item.sub}</div>
+                <span className={`text-sm font-bold ${row.color}`}>{row.share}</span>
               </div>
             ))}
           </div>
-        </div>
+
+          {/* Preview link */}
+          <div className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border/40 px-3 py-2 mt-2">
+            <ExternalLink size={12} className="text-primary shrink-0" />
+            <code className="text-xs text-primary font-mono truncate">{previewLink}</code>
+          </div>
+          <p className="text-[9px] text-muted-foreground mt-1">הקישור יופעל מיד לאחר ההרשמה · ניתן לשינוי בכל עת מלוח הבקרה</p>
+        </OptionCard>
+
+        {/* Option 2 — Personal affiliate */}
+        <OptionCard
+          optionMode="personal_affiliate"
+          current={mode}
+          onSelect={onChange}
+          title="קישור שותפים אישי"
+          description="יש לכם מערכת שותפים משלכם? הדביקו את הקישור — ReviewHub יפנה אליו ישירות ללא גביית עמלה."
+        >
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Link2 size={13} className="text-primary shrink-0" />
+              <p className="text-xs font-bold text-foreground">קישור שותפים אישי</p>
+            </div>
+            <Input
+              placeholder="https://your-affiliate-system.com/track?ref=XYZ"
+              value={personalAffiliateUrl}
+              onChange={e => onUrlChange(e.target.value)}
+              className="text-sm font-mono"
+              dir="ltr"
+              onClick={e => e.stopPropagation()}
+            />
+            <p className="text-[10px] text-muted-foreground">
+              כל לחיצה על כפתור הרכישה ב-ReviewHub תפנה ישירות לכתובת זו · ללא עמלת ReviewHub
+            </p>
+            {personalAffiliateUrl && (() => {
+              try { new URL(personalAffiliateUrl); return (
+                <div className="flex items-center gap-1.5 text-emerald-600">
+                  <Check size={12} />
+                  <span className="text-[10px] font-semibold">כתובת URL תקינה</span>
+                </div>
+              ); } catch {
+                return (
+                  <div className="flex items-center gap-1.5 text-red-500">
+                    <XCircle size={12} />
+                    <span className="text-[10px] font-semibold">כתובת URL לא תקינה — הזינו כתובת מלאה (https://...)</span>
+                  </div>
+                );
+              }
+            })()}
+          </div>
+        </OptionCard>
+
+        {/* Option 3 — None */}
+        <OptionCard
+          optionMode="none"
+          current={mode}
+          onSelect={onChange}
+          title="ללא תוכנית שותפים"
+          description="כפתור הרכישה יפנה ישירות לאתרכם, ללא מעקב ייחוס ועמלות. ניתן להפעיל תוכנית שותפים בכל עת מלוח הבקרה."
+        />
+
       </div>
 
-      {/* Benefits */}
-      <div className="px-5 pb-4">
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
-          מה תקבלו?
-        </p>
-        <ul className="space-y-1.5">
-          {BENEFITS.map((b, i) => (
-            <li key={i} className="flex items-start gap-2 text-xs text-foreground/80">
-              <span className="shrink-0 mt-0.5">{b.icon}</span>
-              {b.text}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Preview link */}
-      <div className="px-5 pb-4">
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-          הקישור הייחודי שלכם
-        </p>
-        <div className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border/40 px-3 py-2">
-          <ExternalLink size={12} className="text-primary shrink-0" />
-          <code className="text-xs text-primary font-mono truncate">{previewLink}</code>
-        </div>
-        <p className="text-[9px] text-muted-foreground mt-1">
-          הקישור יופעל מיד לאחר השלמת ההרשמה
-        </p>
-      </div>
-
-      {/* Active confirmation banner */}
-      {enrolled && (
+      {/* Active confirmation footer */}
+      {mode === "reviewhub_model" && (
         <div className="border-t border-primary/20 bg-primary/5 px-5 py-3">
           <div className="flex items-center gap-2">
             <ShieldCheck size={14} className="text-primary" />
             <p className="text-xs font-medium text-primary">
-              הצטרפתם לתוכנית השותפים — הקישור שלכם יהיה פעיל מיד לאחר ההרשמה
+              הצטרפתם למודל 5/5 — הקישור יהיה פעיל מיד לאחר ההרשמה
             </p>
           </div>
-          <p className="text-[9px] text-muted-foreground mt-1 mr-6">
-            ניתן לבטל את ההשתתפות בכל עת דרך לוח הבקרה ← תוכנית שותפים
-          </p>
+        </div>
+      )}
+
+      {mode === "personal_affiliate" && (
+        <div className="border-t border-blue-200/60 bg-blue-50/40 px-5 py-3">
+          <div className="flex items-center gap-2">
+            <Link2 size={14} className="text-blue-600" />
+            <p className="text-xs font-medium text-blue-700">
+              {personalAffiliateUrl ? "קישור שותפים אישי יוגדר מיד לאחר ההרשמה" : "הזינו קישור שותפים אישי למעלה"}
+            </p>
+          </div>
         </div>
       )}
 
       {/* Legal note */}
       <div className="px-5 pb-4 pt-2">
         <p className="text-[9px] text-muted-foreground/60 leading-relaxed">
-          ההצטרפות לתוכנית השותפים אופציונלית לחלוטין ואינה משפיעה על ציון האמון של העסק.
-          עמלת 5% מחושבת מהמחיר ברוטו ומנוכית לאחר אישור הרכישה.
-          ReviewHub שומרת לעצמה את הזכות לעדכן את תנאי התוכנית עם הודעה מראש.
+          הגדרות תוכנית השותפים אופציונליות לחלוטין ואינן משפיעות על ציון האמון של העסק.
+          ניתן לשנות את הבחירה בכל עת מלוח הבקרה תחת "הגדרות שותפים".
+          במודל ReviewHub, עמלת 5% מחושבת מהמחיר ברוטו ומנוכית לאחר אישור הרכישה.
         </p>
       </div>
     </div>

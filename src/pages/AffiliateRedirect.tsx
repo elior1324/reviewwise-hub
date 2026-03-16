@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ShieldCheck, Tag, Clock, Gift } from "lucide-react";
+import { ShieldCheck, Tag, Clock, Gift, Link2 } from "lucide-react";
 import {
   setAffiliateCookie,
   buildVerifiedPurchaseUrl,
@@ -16,7 +16,8 @@ import {
 
 type RedirectTarget =
   | { kind: "course";    name: string; url: string; price: number | null }
-  | { kind: "business";  name: string; url: string; coupon: string | null; method: string | null };
+  | { kind: "business";  name: string; url: string; coupon: string | null; method: string | null }
+  | { kind: "personal";  name: string; url: string };
 
 const AffiliateRedirect = () => {
   const { courseId } = useParams(); // doubles as business slug for collab links
@@ -30,15 +31,32 @@ const AffiliateRedirect = () => {
 
       try {
         // ── 1. Try business slug — affiliate program link ─────────────────
-        //    Checks both affiliate_enrolled (new) and collaboration_active (legacy collab)
+        //    Checks affiliate_mode (new), affiliate_enrolled (legacy), and collaboration_active
         const { data: biz } = await supabase
           .from("businesses")
-          .select("id, name, website, slug, affiliate_enrolled, affiliate_link_active, collaboration_active, collaboration_method, collaboration_coupon")
+          .select("id, name, website, slug, affiliate_enrolled, affiliate_link_active, affiliate_mode, personal_affiliate_url, collaboration_active, collaboration_method, collaboration_coupon")
           .eq("slug", courseId)
           .maybeSingle();
 
-        // ── 1a. Affiliate program (new) ───────────────────────────────────
-        if (biz && biz.website && biz.affiliate_enrolled && biz.affiliate_link_active !== false) {
+        // ── 1a-i. Personal affiliate link mode ────────────────────────────
+        //    Business has its own affiliate/tracking system; redirect directly.
+        if (biz && (biz.affiliate_mode === "personal_affiliate") && biz.personal_affiliate_url) {
+          setTarget({
+            kind: "personal",
+            name: biz.name,
+            url:  biz.personal_affiliate_url,
+          });
+          setTimeout(() => { window.location.href = biz.personal_affiliate_url; }, 3000);
+          return;
+        }
+
+        // ── 1a-ii. ReviewHub affiliate model (new affiliate_mode field) ───
+        const isReviewhubModel =
+          biz?.affiliate_mode === "reviewhub_model" ||
+          // legacy rows that predate affiliate_mode but have affiliate_enrolled=true
+          (biz?.affiliate_mode === "none" && biz?.affiliate_enrolled && biz?.affiliate_link_active !== false);
+
+        if (biz && biz.website && isReviewhubModel && biz.affiliate_link_active !== false) {
           // Generate unique session token for dedup (same visitor same session)
           const sessionToken = `rh_aff_${biz.id}_${Date.now()}`;
           const sessionKey   = `rh_aff_sess_${biz.id}`;
@@ -371,6 +389,48 @@ const AffiliateRedirect = () => {
               <p className="text-[9px] text-muted-foreground/70 leading-relaxed">
                 <strong className="text-muted-foreground">גילוי נאות:</strong> קישור זה הוא חלק מתוכנית השותפים של ReviewHub.
                 ReviewHub גובה עמלת {PLATFORM_FEE_RATE * 100}% מהעסק על כל עסקה שתיוצג לספק. ההנחה ניתנת ישירות מהמחיר המלא.
+                פעולה זו אינה משפיעה על ציון האמון האובייקטיבי של הספק.
+              </p>
+            </div>
+          </>
+        )}
+
+        {/* Personal affiliate redirect */}
+        {!error && target?.kind === "personal" && (
+          <>
+            <div className="flex items-center justify-center gap-2">
+              <Link2 size={16} className="text-blue-600" />
+              <span className="text-sm font-bold text-blue-600 tracking-wide uppercase">קישור שותפים אישי</span>
+            </div>
+
+            <h1 className="font-display font-bold text-xl text-foreground">
+              {target.name}
+            </h1>
+            <p className="text-sm text-muted-foreground">מעביר אותך דרך מערכת השותפים של הספק...</p>
+
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Clock size={14} />
+              <span>עוברים בעוד {countdown} שניות</span>
+            </div>
+
+            <div className="rounded-xl border border-border/30 bg-muted/20 p-4 text-right space-y-2">
+              <p className="text-xs font-bold text-foreground mb-1">מידע על ההפניה</p>
+              {[
+                "הספק משתמש במערכת שותפים משלו — אתם מועברים ישירות אליה",
+                "תנאי הרכישה וההנחות נקבעים על ידי הספק",
+                "רכישה מאומתת ב-ReviewHub תאפשר כתיבת ביקורת עם משקל גבוה",
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                  <ShieldCheck size={10} className="text-primary shrink-0 mt-0.5" />
+                  {item}
+                </div>
+              ))}
+            </div>
+
+            <div className="rounded-lg border border-border/30 bg-muted/30 px-4 py-3 text-right">
+              <p className="text-[9px] text-muted-foreground/70 leading-relaxed">
+                <strong className="text-muted-foreground">גילוי נאות:</strong> קישור זה מפנה למערכת השותפים האישית של הספק.
+                ReviewHub אינה גובה עמלה על הפניות מסוג זה ואינה אחראית לתנאי העסקה.
                 פעולה זו אינה משפיעה על ציון האמון האובייקטיבי של הספק.
               </p>
             </div>

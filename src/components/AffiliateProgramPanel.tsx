@@ -1,20 +1,20 @@
 /**
  * AffiliateProgramPanel
  *
- * Full-featured affiliate program management panel shown inside BusinessDashboard
- * under the "affiliate" tab.
+ * Full affiliate management panel inside BusinessDashboard → "affiliate" tab.
  *
- * Lifecycle-aware: reads affiliate_program_status from the DB to deliver the right
- * UX for each state:
+ * Supports three affiliate modes (affiliate_mode column on businesses):
  *
- *   enrolled  → full stats + referral link + toggle to pause
- *   paused    → minimal re-activate CTA with stats still visible
- *   declined  → personalised "you said no at registration — change your mind?" re-engagement
- *   not_set   → generic "join the programme" empty state
+ *   reviewhub_model    → ReviewHub 5/5 split. Platform generates the referral
+ *                        link, tracks clicks & conversions, shows stats.
+ *   personal_affiliate → Business uses its own affiliate/tracking URL. We
+ *                        redirect /go/:slug → personal_affiliate_url. No RH
+ *                        commission tracking.
+ *   none               → No affiliate program. /go/:slug redirects directly
+ *                        to the business website without tracking.
  *
- * Duplicate-activation guard: optimistic state update is rolled back on DB error;
- * the server-side column constraint (CHECK ... IN ('not_set','declined','enrolled','paused'))
- * prevents any out-of-band corruption.
+ * The legacy affiliate_program_status lifecycle (enrolled/paused/declined/not_set)
+ * is still used to power the ReviewHub model stats history & toggle semantics.
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button }  from "@/components/ui/button";
 import { Badge }   from "@/components/ui/badge";
 import { Switch }  from "@/components/ui/switch";
+import { Input }   from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -47,6 +48,11 @@ import {
   RotateCcw,
   PauseCircle,
   PlayCircle,
+  Link2,
+  XCircle,
+  CheckCircle2,
+  Settings2,
+  Save,
 } from "lucide-react";
 import {
   LEARNER_DISCOUNT_RATE,
@@ -56,6 +62,8 @@ import {
 } from "@/lib/affiliate";
 
 // ── Types ────────────────────────────────────────────────────────────────────
+
+type AffiliateMode         = "reviewhub_model" | "personal_affiliate" | "none";
 type AffiliateProgramStatus = "not_set" | "declined" | "enrolled" | "paused";
 
 interface AffiliateStats {
@@ -84,11 +92,11 @@ interface Props {
   businessId:        string | null;
   businessSlug:      string;
   isDemo:            boolean;
-  /** Called whenever enrollment state changes so the parent can sync its own UI (e.g. to dismiss the promo banner) */
   onEnrolledChange?: (enrolled: boolean, status: AffiliateProgramStatus) => void;
 }
 
 // ── Demo data ─────────────────────────────────────────────────────────────────
+
 const DEMO_STATS: AffiliateStats = {
   total_clicks:        248,
   clicks_30d:          73,
@@ -107,7 +115,8 @@ const DEMO_CONVERSIONS: Conversion[] = [
   { id: "d4", transaction_amount: 490,  customer_discount:  24, platform_commission:  24, business_net:  442, coupon_code: "RH5", status: "pending",   created_at: new Date(Date.now() - 86400000 * 4).toISOString() },
 ];
 
-// ── Stat Card ─────────────────────────────────────────────────────────────────
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
 const StatCard = ({
   icon, label, value, sub, color = "text-primary",
 }: {
@@ -127,7 +136,6 @@ const StatCard = ({
   </div>
 );
 
-// ── Revenue split mini-grid (reused in both empty states) ──────────────────────
 const SplitGrid = () => (
   <div className="flex justify-center gap-3 flex-wrap">
     {[
@@ -143,15 +151,134 @@ const SplitGrid = () => (
   </div>
 );
 
+// ── Affiliate Status Banner ─────────────────────────────────────────────────
+// Shows the currently active affiliate mode at a glance.
+
+const AffiliatStatusBanner = ({
+  mode,
+  personalUrl,
+}: {
+  mode: AffiliateMode;
+  personalUrl: string | null;
+}) => {
+  const CONFIG: Record<AffiliateMode, {
+    label: string;
+    sub:   string;
+    color: string;
+    bg:    string;
+    dot:   string;
+  }> = {
+    reviewhub_model: {
+      label: "מודל עמלה של ReviewHub (5% / 5%)",
+      sub:   "לקוחות מקבלים 5% הנחה · ReviewHub גובה 5% עמלה · העסק שומר 90%",
+      color: "text-emerald-700 dark:text-emerald-400",
+      bg:    "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800",
+      dot:   "bg-emerald-500",
+    },
+    personal_affiliate: {
+      label: "קישור שותפים אישי",
+      sub:   personalUrl ? `מפנה דרך: ${personalUrl.substring(0, 50)}${personalUrl.length > 50 ? "…" : ""}` : "טרם הוגדר קישור אישי",
+      color: "text-blue-700 dark:text-blue-400",
+      bg:    "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800",
+      dot:   personalUrl ? "bg-blue-500" : "bg-amber-500",
+    },
+    none: {
+      label: "תוכנית שותפים לא פעילה",
+      sub:   "לקוחות מגיעים לאתרכם ישירות ללא מעקב",
+      color: "text-muted-foreground",
+      bg:    "bg-muted/30 border-border/40",
+      dot:   "bg-muted-foreground/50",
+    },
+  };
+
+  const cfg = CONFIG[mode];
+
+  return (
+    <div className={`rounded-xl border px-4 py-3 flex items-start gap-3 ${cfg.bg}`}>
+      <div className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${cfg.dot}`} />
+      <div className="min-w-0">
+        <p className={`text-sm font-bold ${cfg.color}`}>
+          סטטוס שותפים: {cfg.label}
+        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">{cfg.sub}</p>
+      </div>
+    </div>
+  );
+};
+
+// ── Mode Selector ─────────────────────────────────────────────────────────────
+// Three-card selector for choosing affiliate mode in the dashboard.
+
+const ModeCard = ({
+  mode,
+  selected,
+  onSelect,
+  title,
+  description,
+  badge,
+  children,
+}: {
+  mode:        AffiliateMode;
+  selected:    AffiliateMode;
+  onSelect:    (m: AffiliateMode) => void;
+  title:       string;
+  description: string;
+  badge?:      string;
+  children?:   React.ReactNode;
+}) => {
+  const isActive = selected === mode;
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(mode)}
+      className={`w-full text-right rounded-xl border-2 transition-all duration-200 p-4 ${
+        isActive
+          ? "border-primary bg-primary/5 shadow-sm"
+          : "border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20"
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+          isActive ? "border-primary" : "border-border/60"
+        }`}>
+          {isActive && <div className="w-2 h-2 rounded-full bg-primary" />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-sm font-bold ${isActive ? "text-primary" : "text-foreground"}`}>
+              {title}
+            </span>
+            {badge && (
+              <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${
+                isActive ? "border-primary/40 text-primary bg-primary/5" : "border-border/60"
+              }`}>
+                {badge}
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{description}</p>
+          {isActive && children && <div className="mt-3">{children}</div>}
+        </div>
+      </div>
+    </button>
+  );
+};
+
 // ── Main Component ─────────────────────────────────────────────────────────────
+
 const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledChange }: Props) => {
-  const [enrolled,         setEnrolled]         = useState(false);
-  const [programStatus,    setProgramStatus]    = useState<AffiliateProgramStatus>("not_set");
-  const [loading,          setLoading]          = useState(true);
-  const [toggling,         setToggling]         = useState(false);
-  const [stats,            setStats]            = useState<AffiliateStats | null>(null);
-  const [conversions,      setConversions]      = useState<Conversion[]>([]);
-  const [copied,           setCopied]           = useState(false);
+  const [affiliateMode,        setAffiliateMode]        = useState<AffiliateMode>("none");
+  const [personalAffiliateUrl, setPersonalAffiliateUrl] = useState("");
+  const [urlInputDraft,        setUrlInputDraft]        = useState("");
+  const [enrolled,             setEnrolled]             = useState(false);
+  const [programStatus,        setProgramStatus]        = useState<AffiliateProgramStatus>("not_set");
+  const [loading,              setLoading]              = useState(true);
+  const [saving,               setSaving]              = useState(false);
+  const [stats,                setStats]               = useState<AffiliateStats | null>(null);
+  const [conversions,          setConversions]          = useState<Conversion[]>([]);
+  const [copied,               setCopied]              = useState(false);
+  const [settingsOpen,         setSettingsOpen]        = useState(false);
+  const [draftMode,            setDraftMode]           = useState<AffiliateMode>("none");
 
   const referralLink = `reviewshub.info/go/${businessSlug}`;
   const fullLink     = `https://reviewshub.info/go/${businessSlug}`;
@@ -159,6 +286,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
   // ── Load ──────────────────────────────────────────────────────────────────
   const loadData = useCallback(async () => {
     if (isDemo) {
+      setAffiliateMode("reviewhub_model");
       setEnrolled(true);
       setProgramStatus("enrolled");
       setStats(DEMO_STATS);
@@ -171,25 +299,28 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
 
     setLoading(true);
     try {
-      // 1. Enrollment status + lifecycle status
       const { data: biz } = await supabase
         .from("businesses")
-        .select("affiliate_enrolled, affiliate_program_status")
+        .select("affiliate_enrolled, affiliate_program_status, affiliate_mode, personal_affiliate_url")
         .eq("id", businessId)
         .single();
 
       if (biz) {
-        const enrolled = !!biz.affiliate_enrolled;
-        const status   = (biz.affiliate_program_status as AffiliateProgramStatus) || "not_set";
-        setEnrolled(enrolled);
+        const mode    = (biz.affiliate_mode as AffiliateMode) || "none";
+        const status  = (biz.affiliate_program_status as AffiliateProgramStatus) || "not_set";
+        const url     = (biz.personal_affiliate_url as string) || "";
+        setAffiliateMode(mode);
+        setDraftMode(mode);
+        setEnrolled(!!biz.affiliate_enrolled);
         setProgramStatus(status);
+        setPersonalAffiliateUrl(url);
+        setUrlInputDraft(url);
       }
 
-      // 2. Stats via RPC (always fetch even when not enrolled, so paused users can still see history)
+      // Stats only relevant for reviewhub_model
       const { data: statsData } = await supabase.rpc("get_affiliate_stats", { p_business_id: businessId });
       if (statsData) setStats(statsData as AffiliateStats);
 
-      // 3. Recent conversions
       const { data: convData } = await supabase
         .from("business_affiliate_conversions")
         .select("id, transaction_amount, customer_discount, platform_commission, business_net, coupon_code, status, created_at")
@@ -207,37 +338,91 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // ── Toggle enrollment ─────────────────────────────────────────────────────
-  const handleToggleEnrollment = async (requestedValue: boolean) => {
+  // ── Save affiliate mode change ─────────────────────────────────────────────
+  const handleSaveMode = async () => {
     if (isDemo) {
-      const newStatus: AffiliateProgramStatus = requestedValue ? "enrolled" : "paused";
-      setEnrolled(requestedValue);
-      setProgramStatus(newStatus);
-      toast.success(requestedValue
-        ? "הצטרפתם לתוכנית השותפים! (דמו)"
-        : "עזבתם את תוכנית השותפים (דמו)"
-      );
+      setAffiliateMode(draftMode);
+      toast.success("הגדרות עודכנו (דמו)");
+      setSettingsOpen(false);
       return;
     }
 
     if (!businessId) return;
 
-    // ── Idempotency guard: if already in the desired state, do nothing ──────
-    if (requestedValue && enrolled) {
-      toast.info("תוכנית השותפים כבר פעילה — הקישור שלכם פעיל.");
-      return;
+    // Validate personal URL if that mode is selected
+    if (draftMode === "personal_affiliate" && urlInputDraft.trim()) {
+      try {
+        new URL(urlInputDraft.trim());
+      } catch {
+        toast.error("כתובת URL לא תקינה — הזינו כתובת מלאה (לדוגמה: https://example.com/track)");
+        return;
+      }
     }
-    if (!requestedValue && !enrolled) {
-      toast.info("תוכנית השותפים כבר כבויה.");
+
+    setSaving(true);
+
+    // Derive the legacy affiliate_enrolled + affiliate_program_status from the new mode
+    const isEnrolled  = draftMode === "reviewhub_model";
+    const newStatus: AffiliateProgramStatus =
+      draftMode === "reviewhub_model"    ? "enrolled" :
+      draftMode === "personal_affiliate" ? "enrolled" :  // still "active" in intent
+      programStatus === "enrolled" || programStatus === "paused" ? "paused" : programStatus;
+
+    const updatePayload: Record<string, unknown> = {
+      affiliate_mode:          draftMode,
+      personal_affiliate_url:  draftMode === "personal_affiliate" ? (urlInputDraft.trim() || null) : null,
+      affiliate_enrolled:      isEnrolled,
+      affiliate_enrolled_at:   isEnrolled ? new Date().toISOString() : null,
+      affiliate_program_status: newStatus,
+    };
+
+    try {
+      const { error } = await supabase
+        .from("businesses")
+        .update(updatePayload as any)
+        .eq("id", businessId);
+
+      if (error) throw error;
+
+      setAffiliateMode(draftMode);
+      setPersonalAffiliateUrl(draftMode === "personal_affiliate" ? urlInputDraft.trim() : "");
+      setEnrolled(isEnrolled);
+      setProgramStatus(newStatus);
+      onEnrolledChange?.(isEnrolled, newStatus);
+
+      setSettingsOpen(false);
+
+      const modeLabels: Record<AffiliateMode, string> = {
+        reviewhub_model:    "מודל ReviewHub (5%/5%) הופעל",
+        personal_affiliate: "קישור שותפים אישי נשמר",
+        none:               "תוכנית השותפים הושבתה",
+      };
+      toast.success(modeLabels[draftMode]);
+    } catch (err: any) {
+      toast.error("שגיאה בשמירת הגדרות: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── ReviewHub model toggle (pause / resume) ────────────────────────────────
+  const handleToggleReviewhubModel = async (requestedValue: boolean) => {
+    if (isDemo) {
+      const newStatus: AffiliateProgramStatus = requestedValue ? "enrolled" : "paused";
+      setEnrolled(requestedValue);
+      setProgramStatus(newStatus);
+      toast.success(requestedValue ? "הצטרפתם לתוכנית השותפים! (דמו)" : "עזבתם את תוכנית השותפים (דמו)");
       return;
     }
 
-    // ── Optimistic update ───────────────────────────────────────────────────
+    if (!businessId) return;
+    if (requestedValue && enrolled) { toast.info("תוכנית השותפים כבר פעילה — הקישור שלכם פעיל."); return; }
+    if (!requestedValue && !enrolled) { toast.info("תוכנית השותפים כבר כבויה."); return; }
+
     const prevEnrolled = enrolled;
     const prevStatus   = programStatus;
     const newStatus: AffiliateProgramStatus = requestedValue ? "enrolled" : "paused";
 
-    setToggling(true);
     setEnrolled(requestedValue);
     setProgramStatus(newStatus);
 
@@ -245,28 +430,21 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
       const { error } = await supabase
         .from("businesses")
         .update({
-          affiliate_enrolled:        requestedValue,
-          affiliate_enrolled_at:     requestedValue ? new Date().toISOString() : null,
-          affiliate_program_status:  newStatus,
+          affiliate_enrolled:       requestedValue,
+          affiliate_enrolled_at:    requestedValue ? new Date().toISOString() : null,
+          affiliate_program_status: newStatus,
+          affiliate_mode:           requestedValue ? "reviewhub_model" : "none",
         } as any)
         .eq("id", businessId);
 
       if (error) throw error;
-
+      if (!requestedValue) setAffiliateMode("none");
       onEnrolledChange?.(requestedValue, newStatus);
-
-      toast.success(
-        requestedValue
-          ? "הצטרפתם לתוכנית השותפים — הקישור שלכם פעיל!"
-          : "תוכנית השותפים הושהתה. הקישור הושבת."
-      );
+      toast.success(requestedValue ? "הצטרפתם לתוכנית השותפים — הקישור שלכם פעיל!" : "תוכנית השותפים הושהתה. הקישור הושבת.");
     } catch (err: any) {
-      // ── Rollback optimistic update on error ──────────────────────────────
       setEnrolled(prevEnrolled);
       setProgramStatus(prevStatus);
       toast.error("שגיאה בעדכון הגדרות: " + err.message);
-    } finally {
-      setToggling(false);
     }
   };
 
@@ -278,7 +456,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
     setTimeout(() => setCopied(false), 2500);
   };
 
-  // ── Status badge ──────────────────────────────────────────────────────────
+  // ── Status badge helper ────────────────────────────────────────────────────
   const statusBadge = (s: string) => {
     if (s === "confirmed") return <Badge className="bg-green-100 text-green-700 border-green-200 text-[10px] font-bold">אושרה</Badge>;
     if (s === "cancelled") return <Badge className="bg-red-100 text-red-700 border-red-200 text-[10px] font-bold">בוטלה</Badge>;
@@ -290,404 +468,428 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
     return (
       <div className="flex items-center justify-center py-16 text-muted-foreground gap-2">
         <Loader2 size={18} className="animate-spin" />
-        <span className="text-sm">טוען נתוני תוכנית השותפים...</span>
+        <span className="text-sm">טוען הגדרות שותפים...</span>
       </div>
     );
   }
 
-  // ── Empty state: DECLINED during onboarding ────────────────────────────────
-  if (!enrolled && programStatus === "declined") {
-    return (
-      <div className="space-y-6 pb-4" dir="rtl">
-        {/* Header */}
-        <div className="flex items-center gap-2">
-          <TrendingUp size={20} className="text-primary" />
-          <h2 className="font-display font-bold text-xl text-foreground">תוכנית שותפים — Affiliate</h2>
-        </div>
-
-        {/* Re-engagement card */}
-        <div className="rounded-2xl border-2 border-dashed border-amber-300/60 bg-amber-50/30 dark:bg-amber-900/10 p-8 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-4">
-            <RotateCcw size={24} className="text-amber-600 dark:text-amber-400" />
-          </div>
-          <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-xs mb-3">דחיתם את ההצעה בהרשמה</Badge>
-          <h3 className="font-display font-bold text-lg text-foreground mb-2">
-            עדיין לא מאוחר להצטרף
-          </h3>
-          <p className="text-sm text-muted-foreground mb-1 max-w-sm mx-auto">
-            בחרתם לא להצטרף לתוכנית השותפים בעת ההרשמה — אבל ניתן להפעיל אותה בכל רגע.
-          </p>
-          <p className="text-xs text-muted-foreground mb-6">
-            ההפעלה מיידית · אין עלות כניסה · משלמים רק כשיש המרה בפועל
-          </p>
-
-          <SplitGrid />
-
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button
-              onClick={() => handleToggleEnrollment(true)}
-              className="glow-primary gap-2"
-              disabled={toggling}
-            >
-              {toggling
-                ? <Loader2 size={14} className="animate-spin" />
-                : <PlayCircle size={14} />
-              }
-              הפעל תוכנית שותפים עכשיו
-            </Button>
-          </div>
-
-          {/* What you get */}
-          <div className="mt-6 text-right max-w-sm mx-auto space-y-2">
-            {[
-              "קישור ייחודי reviewshub.info/go/" + businessSlug,
-              "לקוחות מקבלים 5% הנחה אוטומטית עם קוד " + AFFILIATE_COUPON_CODE,
-              "מעקב קליקים והמרות בזמן אמת",
-              "דוח עמלות ורכישות ישירות בלוח הבקרה",
-            ].map((item, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <Check size={13} className="text-primary shrink-0 mt-0.5" />
-                <span className="text-xs text-muted-foreground">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Empty state: PAUSED (was enrolled, then disabled) ─────────────────────
-  if (!enrolled && programStatus === "paused") {
-    return (
-      <div className="space-y-6 pb-4" dir="rtl">
-        <div className="flex items-center gap-2">
-          <TrendingUp size={20} className="text-primary" />
-          <h2 className="font-display font-bold text-xl text-foreground">תוכנית שותפים — Affiliate</h2>
-          <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-xs">מושהה</Badge>
-        </div>
-
-        <div className="rounded-2xl border border-amber-200/60 bg-amber-50/20 dark:bg-amber-900/10 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
-              <PauseCircle size={20} className="text-amber-600" />
-            </div>
-            <div>
-              <p className="font-semibold text-foreground text-sm">התוכנית מושהית כרגע</p>
-              <p className="text-xs text-muted-foreground">הקישור כבוי. קליקים חדשים לא נרשמים. המרות קודמות נשמרות.</p>
-            </div>
-          </div>
-
-          <Button
-            onClick={() => handleToggleEnrollment(true)}
-            className="gap-2"
-            disabled={toggling}
-            variant="outline"
-          >
-            {toggling
-              ? <Loader2 size={14} className="animate-spin" />
-              : <PlayCircle size={14} className="text-emerald-600" />
-            }
-            הפעל שוב את תוכנית השותפים
-          </Button>
-        </div>
-
-        {/* Historical stats still visible even while paused */}
-        {stats && (stats.total_conversions > 0 || stats.total_clicks > 0) && (
-          <>
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">היסטוריה</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 opacity-70">
-              <StatCard icon={<MousePointerClick size={13} />} label="קליקים סה״כ"      value={stats.total_clicks.toLocaleString("he-IL")} />
-              <StatCard icon={<ShoppingCart size={13} />}      label="המרות סה״כ"       value={stats.total_conversions.toLocaleString("he-IL")} color="text-emerald-600" />
-              <StatCard icon={<Percent size={13} />}           label="אחוז המרה"         value={`${stats.conversion_rate}%`} color="text-amber-600" />
-              <StatCard icon={<BadgeDollarSign size={13} />}   label="הכנסה גולמית סה״כ" value={formatPrice(stats.total_revenue)} color="text-blue-600" />
-            </div>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  // ── Empty state: NOT_SET (never made a decision) ───────────────────────────
-  if (!enrolled && (programStatus === "not_set")) {
-    return (
-      <div className="space-y-6 pb-4" dir="rtl">
-        <div className="flex items-center gap-2">
-          <TrendingUp size={20} className="text-primary" />
-          <h2 className="font-display font-bold text-xl text-foreground">תוכנית שותפים — Affiliate</h2>
-        </div>
-
-        <div className="rounded-2xl border-2 border-dashed border-border/60 bg-muted/20 p-8 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <TrendingUp size={24} className="text-primary" />
-          </div>
-          <h3 className="font-display font-bold text-lg text-foreground mb-2">
-            הצטרפו לתוכנית השותפים
-          </h3>
-          <p className="text-sm text-muted-foreground mb-1 max-w-sm mx-auto">
-            קבלו קישור ייחודי — כל לקוח שיגיע דרכו יקבל הנחה של 5%, ואתם שומרים 90% מהעסקה.
-          </p>
-          <p className="text-xs text-muted-foreground mb-6">ללא עלות כניסה — שילמו רק כשיש המרה בפועל</p>
-
-          <SplitGrid />
-
-          <Button onClick={() => handleToggleEnrollment(true)} className="mt-6 glow-primary gap-2" disabled={toggling}>
-            {toggling ? <Loader2 size={14} className="animate-spin" /> : <TrendingUp size={14} />}
-            הצטרף לתוכנית השותפים
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── ENROLLED — full panel ──────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6 pb-4" dir="rtl">
 
-      {/* Header + toggle */}
+      {/* ── Page header ───────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp size={20} className="text-primary" />
-            <h2 className="font-display font-bold text-xl text-foreground">תוכנית שותפים — Affiliate</h2>
-            {isDemo && (
-              <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600 bg-amber-50">דמו</Badge>
-            )}
+            <h2 className="font-display font-bold text-xl text-foreground">הגדרות שותפים — Affiliate</h2>
+            {isDemo && <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600 bg-amber-50">דמו</Badge>}
           </div>
           <p className="text-sm text-muted-foreground">
-            לקוחות מגיעים דרך ReviewHub · אתם שומרים 90% · הם מקבלים 5% הנחה
+            בחרו כיצד ReviewHub ישלח לכם לקוחות וכיצד ייוחסו הרכישות
           </p>
         </div>
 
-        {/* Enrollment toggle */}
-        <div className="flex items-center gap-3 bg-muted/40 rounded-xl border border-border/60 px-4 py-3">
-          <div className="text-right">
-            <p className="text-xs font-bold text-foreground">תוכנית פעילה</p>
-            <p className="text-[10px] text-muted-foreground">לחצו להשהיה זמנית</p>
-          </div>
-          {toggling ? (
-            <Loader2 size={18} className="animate-spin text-primary" />
-          ) : (
-            <Switch
-              checked={enrolled}
-              onCheckedChange={handleToggleEnrollment}
-              className="data-[state=checked]:bg-primary"
-            />
-          )}
-        </div>
+        {/* Settings toggle button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => { setSettingsOpen(o => !o); setDraftMode(affiliateMode); setUrlInputDraft(personalAffiliateUrl); }}
+          className="gap-1.5 shrink-0"
+        >
+          <Settings2 size={13} />
+          {settingsOpen ? "סגור הגדרות" : "ערוך הגדרות"}
+        </Button>
       </div>
 
-      {/* Referral link */}
-      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <ExternalLink size={14} className="text-primary" />
-          <p className="text-xs font-bold text-primary uppercase tracking-wide">הקישור הייחודי שלכם</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex-1 rounded-lg bg-background border border-border/60 px-3 py-2.5">
-            <code className="text-sm text-primary font-mono">{referralLink}</code>
-          </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleCopy}
-            className="shrink-0 gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-          >
-            {copied ? <Check size={13} /> : <Copy size={13} />}
-            {copied ? "הועתק!" : "העתק"}
-          </Button>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => window.open(fullLink, "_blank")}
-                className="shrink-0 border-border/60"
-              >
-                <ArrowUpRight size={13} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>פתח בכרטיסייה חדשה</TooltipContent>
-          </Tooltip>
-        </div>
-        <p className="text-[10px] text-muted-foreground mt-2">
-          שתפו קישור זה בכל ערוץ — לקוחות שיגיעו דרכו יקבלו 5% הנחה אוטומטית עם קוד{" "}
-          <code className="font-mono font-bold text-primary">{AFFILIATE_COUPON_CODE}</code>
-        </p>
-      </div>
+      {/* ── Status banner — always visible ────────────────────────────────── */}
+      <AffiliatStatusBanner mode={affiliateMode} personalUrl={personalAffiliateUrl || null} />
 
-      {/* Stats grid */}
-      {stats && (
-        <>
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">סטטיסטיקות</p>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={loadData}
-                className="h-7 px-2 text-muted-foreground hover:text-foreground"
-              >
-                <RefreshCw size={12} className="mr-1" />
-                <span className="text-xs">רענן</span>
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <StatCard
-                icon={<MousePointerClick size={13} />}
-                label="קליקים (30 יום)"
-                value={stats.clicks_30d.toLocaleString("he-IL")}
-                sub={`סה״כ: ${stats.total_clicks.toLocaleString("he-IL")}`}
-              />
-              <StatCard
-                icon={<ShoppingCart size={13} />}
-                label="המרות (30 יום)"
-                value={stats.conversions_30d.toLocaleString("he-IL")}
-                sub={`סה״כ: ${stats.total_conversions.toLocaleString("he-IL")}`}
-                color="text-emerald-600"
-              />
-              <StatCard
-                icon={<Percent size={13} />}
-                label="אחוז המרה"
-                value={`${stats.conversion_rate}%`}
-                sub="מקליק לרכישה"
-                color={stats.conversion_rate >= 10 ? "text-emerald-600" : "text-amber-600"}
-              />
-              <StatCard
-                icon={<BadgeDollarSign size={13} />}
-                label="עמלות (סה״כ)"
-                value={formatPrice(stats.platform_commission)}
-                sub={`הנחות ללקוחות: ${formatPrice(stats.customer_discount)}`}
-                color="text-blue-600"
-              />
-            </div>
+      {/* ── Settings panel — shown when editing ───────────────────────────── */}
+      {settingsOpen && (
+        <div className="rounded-xl border-2 border-primary/20 bg-primary/3 p-5 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Settings2 size={14} className="text-primary" />
+            <p className="text-sm font-bold text-foreground">הגדרות תוכנית שותפים</p>
           </div>
 
-          {/* Revenue visual */}
-          <div className="rounded-xl border border-border/60 bg-card p-4">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">
-              פירוט הכנסות מאומתות — עסקאות מאושרות
-            </p>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                {
-                  icon:  <Tag size={14} className="text-emerald-500" />,
-                  label: "חסכון ללקוחות",
-                  value: formatPrice(stats.customer_discount),
-                  sub:   `${LEARNER_DISCOUNT_RATE * 100}% הנחה`,
-                  color: "text-emerald-600",
-                },
-                {
-                  icon:  <BadgeDollarSign size={14} className="text-blue-500" />,
-                  label: "עמלת ReviewHub",
-                  value: formatPrice(stats.platform_commission),
-                  sub:   `${PLATFORM_FEE_RATE * 100}% עמלת פלטפורם`,
-                  color: "text-blue-600",
-                },
-                {
-                  icon:  <TrendingUp size={14} className="text-primary" />,
-                  label: "הכנסה גולמית",
-                  value: formatPrice(stats.total_revenue),
-                  sub:   "לפני ניכוי עמלה",
-                  color: "text-primary",
-                },
-              ].map(item => (
-                <div key={item.label} className="text-center rounded-lg bg-muted/30 border border-border/40 p-3">
-                  <div className="flex items-center justify-center gap-1 text-muted-foreground mb-2">
-                    {item.icon}
-                    <span className="text-[10px] font-medium">{item.label}</span>
-                  </div>
-                  <div className={`font-bold text-xl ${item.color}`}>{item.value}</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</div>
+          {/* Three mode cards */}
+          <div className="space-y-3">
+
+            {/* Option 1 — ReviewHub model */}
+            <ModeCard
+              mode="reviewhub_model"
+              selected={draftMode}
+              onSelect={setDraftMode}
+              title="מודל עמלה של ReviewHub (5% / 5%)"
+              description="ReviewHub מייצר קישור ייחודי עבורכם. כל רכישה שמגיעה דרכו מעניקה ללקוח 5% הנחה, ו-ReviewHub גובה 5% עמלה. העסק שומר 90%."
+              badge="מומלץ"
+            >
+              <SplitGrid />
+              <p className="text-[11px] text-muted-foreground mt-2">
+                קישורכם: <code className="text-primary font-mono">{referralLink}</code>
+              </p>
+            </ModeCard>
+
+            {/* Option 2 — Personal affiliate */}
+            <ModeCard
+              mode="personal_affiliate"
+              selected={draftMode}
+              onSelect={setDraftMode}
+              title="קישור שותפים אישי"
+              description="יש לכם מערכת שותפים משלכם? הדביקו את קישור המעקב שלכם כאן. כל לחיצה על /go/שם-העסק תפנה ישירות לקישור שלכם — ללא עמלת ReviewHub."
+            >
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Link2 size={13} className="text-primary shrink-0" />
+                  <p className="text-xs font-bold text-foreground">קישור שותפים אישי</p>
                 </div>
-              ))}
-            </div>
+                <Input
+                  placeholder="https://your-affiliate-system.com/track?ref=XYZ"
+                  value={urlInputDraft}
+                  onChange={e => setUrlInputDraft(e.target.value)}
+                  className="text-sm font-mono"
+                  dir="ltr"
+                  onClick={e => e.stopPropagation()}
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  כל לחיצה על הקישור ב-ReviewHub תפנה ישירות לכתובת זו · ללא גביית עמלה על ידי ReviewHub
+                </p>
+              </div>
+            </ModeCard>
+
+            {/* Option 3 — None */}
+            <ModeCard
+              mode="none"
+              selected={draftMode}
+              onSelect={setDraftMode}
+              title="ללא תוכנית שותפים"
+              description="כפתור הרכישה בדף העסק יפנה ישירות לאתרכם — ללא מעקב ייחוס, ללא הנחות לקוחות, וללא עמלות."
+            />
+
           </div>
-        </>
+
+          {/* Save / Cancel */}
+          <div className="flex items-center justify-end gap-3 pt-2 border-t border-border/30">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSettingsOpen(false)}
+              disabled={saving}
+            >
+              ביטול
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSaveMode}
+              disabled={saving}
+              className="gap-1.5"
+            >
+              {saving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+              שמור הגדרות
+            </Button>
+          </div>
+        </div>
       )}
 
-      {/* Recent conversions table */}
-      <div>
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">המרות אחרונות</p>
+      {/* ════════════════════════════════════════════════════════════════════════
+          MODE-SPECIFIC CONTENT
+          ════════════════════════════════════════════════════════════════════ */}
 
-        {conversions.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
-            <BarChart3 size={32} className="text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground font-medium">עדיין אין המרות</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              שתפו את הקישור שלכם — כל רכישה דרכו תופיע כאן
+      {/* ── NONE mode ─────────────────────────────────────────────────────── */}
+      {affiliateMode === "none" && !settingsOpen && (
+        <div className="rounded-2xl border-2 border-dashed border-border/60 bg-muted/20 p-8 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <XCircle size={24} className="text-muted-foreground" />
+          </div>
+          <h3 className="font-display font-bold text-lg text-foreground mb-2">
+            תוכנית שותפים לא מוגדרת
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4 max-w-sm mx-auto">
+            לחצו על "ערוך הגדרות" כדי לבחור מודל שותפים — ReviewHub 5/5, או קישור שותפים אישי.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => { setSettingsOpen(true); setDraftMode("reviewhub_model"); }}
+            className="gap-1.5"
+          >
+            <Settings2 size={13} />
+            הגדר תוכנית שותפים
+          </Button>
+        </div>
+      )}
+
+      {/* ── PERSONAL AFFILIATE mode ───────────────────────────────────────── */}
+      {affiliateMode === "personal_affiliate" && !settingsOpen && (
+        <div className="space-y-4">
+          {/* Personal URL card */}
+          <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-950/20 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Link2 size={14} className="text-blue-600 dark:text-blue-400" />
+              <p className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wide">קישור שותפים אישי — פעיל</p>
+            </div>
+            {personalAffiliateUrl ? (
+              <>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex-1 rounded-lg bg-background border border-border/60 px-3 py-2.5 overflow-hidden">
+                    <code className="text-sm text-blue-600 dark:text-blue-400 font-mono break-all">{personalAffiliateUrl}</code>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(personalAffiliateUrl, "_blank")}
+                    className="shrink-0"
+                  >
+                    <ExternalLink size={13} />
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  כל לחיצה על "לרכישה" בדף העסק שלכם ב-ReviewHub תפנה ישירות לקישור זה.
+                </p>
+              </>
+            ) : (
+              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 mt-1">
+                <AlertCircle size={14} className="shrink-0" />
+                <p className="text-xs">לא הוגדר קישור אישי — לחצו "ערוך הגדרות" להוספה.</p>
+              </div>
+            )}
+          </div>
+
+          {/* ReviewHub referral link — still works as the entry point */}
+          <div className="rounded-xl border border-border/60 bg-card p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ExternalLink size={14} className="text-primary" />
+              <p className="text-xs font-bold text-primary uppercase tracking-wide">קישור כניסה ב-ReviewHub</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 rounded-lg bg-background border border-border/60 px-3 py-2.5">
+                <code className="text-sm text-primary font-mono">{referralLink}</code>
+              </div>
+              <Button size="sm" variant="outline" onClick={handleCopy} className="shrink-0 gap-1.5">
+                {copied ? <Check size={13} /> : <Copy size={13} />}
+                {copied ? "הועתק!" : "העתק"}
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">
+              לקוחות המגיעים דרך קישור זה יופנו אוטומטית לקישור השותפים האישי שלכם.
             </p>
           </div>
-        ) : (
-          <div className="rounded-xl border border-border/60 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40 border-b border-border/60">
-                <tr>
-                  {["תאריך", "סכום", "הנחה ללקוח", "עמלה", "לעסק", "סטטוס"].map(h => (
-                    <th key={h} className="text-right text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-wider">
-                      {h}
-                    </th>
+
+          {/* Info callout */}
+          <div className="rounded-xl border border-border/40 bg-muted/20 p-4">
+            <div className="flex items-start gap-2">
+              <Info size={14} className="text-primary shrink-0 mt-0.5" />
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p className="font-semibold text-foreground">כיצד זה עובד?</p>
+                <p>כל לחיצה על הקישור ReviewHub ({referralLink}) תפנה ישירות לקישור השותפים שהגדרתם.</p>
+                <p>המעקב, הניתוח, ועמלות השותפים מנוהלים במלואם במערכת השותפים שלכם — ReviewHub אינה גובה עמלה.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── REVIEWHUB MODEL — full panel ──────────────────────────────────── */}
+      {affiliateMode === "reviewhub_model" && (
+        <>
+          {/* Active/Paused toggle — only for reviewhub_model */}
+          {!settingsOpen && (
+            <div className="flex items-center justify-between gap-4 bg-muted/40 rounded-xl border border-border/60 px-4 py-3">
+              <div className="text-right">
+                <p className="text-xs font-bold text-foreground">
+                  {enrolled ? "תוכנית פעילה — הקישור שלכם פעיל" : "תוכנית מושהית"}
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {enrolled ? "לחצו להשהיה זמנית" : "לחצו להפעלה מחדש"}
+                </p>
+              </div>
+              <Switch
+                checked={enrolled}
+                onCheckedChange={handleToggleReviewhubModel}
+                className="data-[state=checked]:bg-primary"
+              />
+            </div>
+          )}
+
+          {/* PAUSED sub-state */}
+          {!enrolled && programStatus === "paused" && !settingsOpen && (
+            <div className="rounded-xl border border-amber-200/60 bg-amber-50/20 dark:bg-amber-900/10 p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+                  <PauseCircle size={20} className="text-amber-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground text-sm">התוכנית מושהית כרגע</p>
+                  <p className="text-xs text-muted-foreground">הקישור כבוי. קליקים חדשים לא נרשמים. המרות קודמות נשמרות.</p>
+                </div>
+              </div>
+              <Button onClick={() => handleToggleReviewhubModel(true)} className="gap-2" variant="outline">
+                <PlayCircle size={14} className="text-emerald-600" />
+                הפעל שוב
+              </Button>
+            </div>
+          )}
+
+          {/* Referral link — always show when mode is reviewhub */}
+          {enrolled && !settingsOpen && (
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <ExternalLink size={14} className="text-primary" />
+                <p className="text-xs font-bold text-primary uppercase tracking-wide">הקישור הייחודי שלכם</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 rounded-lg bg-background border border-border/60 px-3 py-2.5">
+                  <code className="text-sm text-primary font-mono">{referralLink}</code>
+                </div>
+                <Button size="sm" variant="outline" onClick={handleCopy} className="shrink-0 gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
+                  {copied ? <Check size={13} /> : <Copy size={13} />}
+                  {copied ? "הועתק!" : "העתק"}
+                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" variant="outline" onClick={() => window.open(fullLink, "_blank")} className="shrink-0 border-border/60">
+                      <ArrowUpRight size={13} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>פתח בכרטיסייה חדשה</TooltipContent>
+                </Tooltip>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-2">
+                שתפו קישור זה — לקוחות שיגיעו דרכו יקבלו 5% הנחה אוטומטית עם קוד{" "}
+                <code className="font-mono font-bold text-primary">{AFFILIATE_COUPON_CODE}</code>
+              </p>
+            </div>
+          )}
+
+          {/* Stats */}
+          {stats && enrolled && (
+            <>
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">סטטיסטיקות</p>
+                  <Button size="sm" variant="ghost" onClick={loadData} className="h-7 px-2 text-muted-foreground hover:text-foreground">
+                    <RefreshCw size={12} className="mr-1" />
+                    <span className="text-xs">רענן</span>
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <StatCard icon={<MousePointerClick size={13} />} label="קליקים (30 יום)"    value={stats.clicks_30d.toLocaleString("he-IL")}       sub={`סה״כ: ${stats.total_clicks.toLocaleString("he-IL")}`} />
+                  <StatCard icon={<ShoppingCart size={13} />}      label="המרות (30 יום)"     value={stats.conversions_30d.toLocaleString("he-IL")}   sub={`סה״כ: ${stats.total_conversions.toLocaleString("he-IL")}`} color="text-emerald-600" />
+                  <StatCard icon={<Percent size={13} />}           label="אחוז המרה"           value={`${stats.conversion_rate}%`}                     sub="מקליק לרכישה" color={stats.conversion_rate >= 10 ? "text-emerald-600" : "text-amber-600"} />
+                  <StatCard icon={<BadgeDollarSign size={13} />}   label="עמלות (סה״כ)"        value={formatPrice(stats.platform_commission)}          sub={`הנחות ללקוחות: ${formatPrice(stats.customer_discount)}`} color="text-blue-600" />
+                </div>
+              </div>
+
+              {/* Revenue visual */}
+              <div className="rounded-xl border border-border/60 bg-card p-4">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">פירוט הכנסות מאומתות — עסקאות מאושרות</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { icon: <Tag size={14} className="text-emerald-500" />,           label: "חסכון ללקוחות",   value: formatPrice(stats.customer_discount),   sub: `${LEARNER_DISCOUNT_RATE * 100}% הנחה`,           color: "text-emerald-600" },
+                    { icon: <BadgeDollarSign size={14} className="text-blue-500" />,  label: "עמלת ReviewHub",   value: formatPrice(stats.platform_commission), sub: `${PLATFORM_FEE_RATE * 100}% עמלת פלטפורם`,     color: "text-blue-600"    },
+                    { icon: <TrendingUp size={14} className="text-primary" />,         label: "הכנסה גולמית",    value: formatPrice(stats.total_revenue),       sub: "לפני ניכוי עמלה",                                color: "text-primary"     },
+                  ].map(item => (
+                    <div key={item.label} className="text-center rounded-lg bg-muted/30 border border-border/40 p-3">
+                      <div className="flex items-center justify-center gap-1 text-muted-foreground mb-2">
+                        {item.icon}
+                        <span className="text-[10px] font-medium">{item.label}</span>
+                      </div>
+                      <div className={`font-bold text-xl ${item.color}`}>{item.value}</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</div>
+                    </div>
                   ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/40">
-                {conversions.map((c, i) => (
-                  <tr key={c.id} className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
-                    <td className="px-3 py-2.5 text-xs text-muted-foreground">
-                      {new Date(c.created_at).toLocaleDateString("he-IL")}
-                    </td>
-                    <td className="px-3 py-2.5 text-xs font-medium">
-                      {c.transaction_amount ? formatPrice(c.transaction_amount) : "—"}
-                    </td>
-                    <td className="px-3 py-2.5 text-xs text-emerald-600 font-medium">
-                      {c.customer_discount ? `−${formatPrice(c.customer_discount)}` : "—"}
-                    </td>
-                    <td className="px-3 py-2.5 text-xs text-blue-600 font-medium">
-                      {c.platform_commission ? formatPrice(c.platform_commission) : "—"}
-                    </td>
-                    <td className="px-3 py-2.5 text-xs text-primary font-bold">
-                      {c.business_net ? formatPrice(c.business_net) : "—"}
-                    </td>
-                    <td className="px-3 py-2.5">{statusBadge(c.status)}</td>
-                  </tr>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Historical stats when paused */}
+          {!enrolled && stats && (stats.total_conversions > 0 || stats.total_clicks > 0) && (
+            <>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">היסטוריה</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 opacity-70">
+                <StatCard icon={<MousePointerClick size={13} />} label="קליקים סה״כ"       value={stats.total_clicks.toLocaleString("he-IL")} />
+                <StatCard icon={<ShoppingCart size={13} />}      label="המרות סה״כ"         value={stats.total_conversions.toLocaleString("he-IL")} color="text-emerald-600" />
+                <StatCard icon={<Percent size={13} />}           label="אחוז המרה"           value={`${stats.conversion_rate}%`}                color="text-amber-600" />
+                <StatCard icon={<BadgeDollarSign size={13} />}   label="הכנסה גולמית סה״כ"  value={formatPrice(stats.total_revenue)}            color="text-blue-600" />
+              </div>
+            </>
+          )}
+
+          {/* Conversions table */}
+          {enrolled && (
+            <div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">המרות אחרונות</p>
+              {conversions.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
+                  <BarChart3 size={32} className="text-muted-foreground/40 mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground font-medium">עדיין אין המרות</p>
+                  <p className="text-xs text-muted-foreground mt-1">שתפו את הקישור שלכם — כל רכישה דרכו תופיע כאן</p>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-border/60 overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/40 border-b border-border/60">
+                      <tr>
+                        {["תאריך", "סכום", "הנחה ללקוח", "עמלה", "לעסק", "סטטוס"].map(h => (
+                          <th key={h} className="text-right text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-wider">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/40">
+                      {conversions.map((c, i) => (
+                        <tr key={c.id} className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
+                          <td className="px-3 py-2.5 text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString("he-IL")}</td>
+                          <td className="px-3 py-2.5 text-xs font-medium">{c.transaction_amount ? formatPrice(c.transaction_amount) : "—"}</td>
+                          <td className="px-3 py-2.5 text-xs text-emerald-600 font-medium">{c.customer_discount ? `−${formatPrice(c.customer_discount)}` : "—"}</td>
+                          <td className="px-3 py-2.5 text-xs text-blue-600 font-medium">{c.platform_commission ? formatPrice(c.platform_commission) : "—"}</td>
+                          <td className="px-3 py-2.5 text-xs text-primary font-bold">{c.business_net ? formatPrice(c.business_net) : "—"}</td>
+                          <td className="px-3 py-2.5">{statusBadge(c.status)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* How it works */}
+          {enrolled && (
+            <div className="rounded-xl border border-border/40 bg-muted/20 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Info size={14} className="text-primary" />
+                <p className="text-xs font-bold text-foreground">איך זה עובד?</p>
+              </div>
+              <ol className="space-y-2">
+                {[
+                  `שתפו את הקישור reviewshub.info/go/${businessSlug} בכל ערוץ — אתר, אימייל, WhatsApp, רשתות חברתיות.`,
+                  `לקוח שמגיע דרך הקישור רואה דף עם הסבר על ה-5% הנחה וקוד RH5. הוא מועבר לאתר שלכם.`,
+                  `לאחר רכישה — ReviewHub מקבלת אות המרה ומתעדת את העסקה.`,
+                  `העסקה מוצגת כ"ממתינה" עד לאישור. לאחר 14 יום מבוצע ניכוי עמלת 5%.`,
+                ].map((step, i) => (
+                  <li key={i} className="flex gap-2.5 text-xs text-muted-foreground">
+                    <span className="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0 text-[10px]">{i + 1}</span>
+                    {step}
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* How it works */}
-      <div className="rounded-xl border border-border/40 bg-muted/20 p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Info size={14} className="text-primary" />
-          <p className="text-xs font-bold text-foreground">איך זה עובד?</p>
-        </div>
-        <ol className="space-y-2">
-          {[
-            `שתפו את הקישור reviewshub.info/go/${businessSlug} בכל ערוץ — אתר, אימייל, WhatsApp, רשתות חברתיות.`,
-            `לקוח שמגיע דרך הקישור רואה דף עם הסבר על ה-5% הנחה וקוד RH5. הוא מועבר לאתר שלכם.`,
-            `לאחר רכישה — ReviewHub מקבלת אות המרה (דרך הפרמטר ?ref=reviewhub בקישור) ומתעדת את העסקה.`,
-            `העסקה מוצגת כ"ממתינה" עד לאישור. לאחר 14 יום מבוצע ניכוי עמלת 5% ממה שהעסק קיבל.`,
-          ].map((step, i) => (
-            <li key={i} className="flex gap-2.5 text-xs text-muted-foreground">
-              <span className="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0 text-[10px]">
-                {i + 1}
-              </span>
-              {step}
-            </li>
-          ))}
-        </ol>
-
-        <div className="mt-3 pt-3 border-t border-border/40">
-          <div className="flex items-start gap-2">
-            <AlertCircle size={12} className="text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
-              ניתן להשהות את התוכנית בכל עת. השהיה מפסיקה מעקב קליקים חדש אך אינה משפיעה על המרות שכבר תועדו.
-              עמלות מאושרות אינן ניתנות להחזר. ReviewHub שומרת את הזכות לעדכן את תנאי התוכנית עם הודעה מראש של 30 יום.
-            </p>
-          </div>
-        </div>
-      </div>
+              </ol>
+              <div className="mt-3 pt-3 border-t border-border/40">
+                <div className="flex items-start gap-2">
+                  <AlertCircle size={12} className="text-amber-500 shrink-0 mt-0.5" />
+                  <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
+                    ניתן להשהות את התוכנית בכל עת. השהיה מפסיקה מעקב קליקים חדש אך אינה משפיעה על המרות שכבר תועדו.
+                    עמלות מאושרות אינן ניתנות להחזר. ReviewHub שומרת את הזכות לעדכן את תנאי התוכנית עם הודעה מראש של 30 יום.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

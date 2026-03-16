@@ -18,7 +18,7 @@ import SocialLinksEditor, { type SocialLinksData } from "@/components/SocialLink
 import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import { sanitizeText, sanitizeUrl } from "@/lib/sanitize";
-import AffiliateOptInCard from "@/components/AffiliateOptInCard";
+import AffiliateOptInCard, { type AffiliateMode } from "@/components/AffiliateOptInCard";
 import { type PricingModel, PRICING_MODEL_LABELS } from "@/data/mockData";
 
 const OTHER_VALUE = "__other__";
@@ -61,7 +61,8 @@ const BusinessRegister = () => {
 
   const [socialLinks, setSocialLinks] = useState<SocialLinksData>({});
   const [privacyConsent, setPrivacyConsent] = useState(false);
-  const [affiliateEnrolled, setAffiliateEnrolled] = useState(false);
+  const [affiliateMode,        setAffiliateMode]        = useState<AffiliateMode>("none");
+  const [personalAffiliateUrl, setPersonalAffiliateUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // Guard: redirect if user already has a registered business
@@ -155,10 +156,13 @@ const BusinessRegister = () => {
           social_links: socialLinksJson,
           founder_name: cleanFounderName || null,
           pricing_model: isSaas && form.pricingModel ? form.pricingModel : null,
-          // Affiliate program opt-in (status persisted even on decline so dashboard can re-prompt)
-          affiliate_enrolled:        affiliateEnrolled,
-          affiliate_enrolled_at:     affiliateEnrolled ? new Date().toISOString() : null,
-          affiliate_program_status:  affiliateEnrolled ? "enrolled" : "declined",
+          // Affiliate program — new three-mode field + backwards-compat legacy boolean
+          affiliate_mode:            affiliateMode,
+          personal_affiliate_url:    affiliateMode === "personal_affiliate" ? (personalAffiliateUrl.trim() || null) : null,
+          affiliate_enrolled:        affiliateMode === "reviewhub_model",
+          affiliate_enrolled_at:     affiliateMode === "reviewhub_model" ? new Date().toISOString() : null,
+          affiliate_program_status:  affiliateMode === "reviewhub_model" ? "enrolled" :
+                                     affiliateMode === "personal_affiliate" ? "enrolled" : "declined",
         } as any)
         .select("id")
         .single();
@@ -183,16 +187,21 @@ const BusinessRegister = () => {
         }
       }
 
-      // Success — show different toast based on affiliate enrollment
-      if (affiliateEnrolled) {
+      // Success — show different toast based on affiliate mode chosen
+      if (affiliateMode === "reviewhub_model") {
         toast({
           title: "העסק נרשם בהצלחה! 🎉",
-          description: `הצטרפתם לתוכנית השותפים. הקישור שלכם: reviewshub.info/go/${slug}`,
+          description: `הצטרפתם למודל 5/5 של ReviewHub. הקישור שלכם: reviewshub.info/go/${slug}`,
+        });
+      } else if (affiliateMode === "personal_affiliate") {
+        toast({
+          title: "העסק נרשם בהצלחה! 🎉",
+          description: "קישור השותפים האישי הוגדר. ניתן לעדכנו בכל עת מלוח הבקרה.",
         });
       } else {
         toast({
           title: "העסק נרשם בהצלחה! 🎉",
-          description: "תוכלו להצטרף לתוכנית השותפים בכל עת מלוח הבקרה.",
+          description: "תוכלו להגדיר תוכנית שותפים בכל עת מלוח הבקרה תחת 'הגדרות שותפים'.",
         });
       }
 
@@ -392,8 +401,10 @@ const BusinessRegister = () => {
                     </span>
                   </div>
                   <AffiliateOptInCard
-                    enrolled={affiliateEnrolled}
-                    onChange={setAffiliateEnrolled}
+                    mode={affiliateMode}
+                    personalAffiliateUrl={personalAffiliateUrl}
+                    onChange={setAffiliateMode}
+                    onUrlChange={setPersonalAffiliateUrl}
                     businessSlug={
                       form.businessName
                         ? form.businessName
