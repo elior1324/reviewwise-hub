@@ -19,6 +19,7 @@ import {
 import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
 import ModerationCaseTracker from "@/components/ModerationCaseTracker";
 import IntegrationsTab from "@/components/IntegrationsTab";
+import CouponInput    from "@/components/CouponInput";
 import CollaborationPromoCard from "@/components/CollaborationPromoCard";
 import { type CollabConfig } from "@/components/CollaborationSetupModal";
 import GoogleLinkingPanel from "@/components/GoogleLinkingPanel";
@@ -854,6 +855,20 @@ const BusinessDashboard = () => {
             onConfigChange={setCollabConfig}
             referralClickCount={referralClickCount}
           />
+        )}
+
+        {/* ── Coupon Redemption (real users only) ─────────────────────── */}
+        {!isDemo && businessId && (
+          <div className="mb-6">
+            <CouponInput
+              businessId={businessId}
+              onSuccess={(billingStartsAt) => {
+                console.log("[CouponInput] billing starts at:", billingStartsAt);
+                // Optionally refresh the page / subscription tier after redemption
+                window.location.reload();
+              }}
+            />
+          </div>
         )}
 
         {/* Demo Tier Selector */}
