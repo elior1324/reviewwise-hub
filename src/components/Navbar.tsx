@@ -31,6 +31,7 @@ const PRODUCT_LINKS = [
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productOpen, setProductOpen] = useState(false);
+  const [communityOpen, setCommunityOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -230,10 +231,52 @@ const Navbar = () => {
               <Link to="/search" className={navLinkCls("/search")}>
                 ספריית האמון
               </Link>
-              <Link to="/leaderboard" className={navLinkCls("/leaderboard")}>
-                <Trophy size={14} aria-hidden="true" />
-                קהילה
-              </Link>
+              {/* ── קהילה dropdown — Leaderboard + Referrals ── */}
+              <DropdownMenu open={communityOpen} onOpenChange={setCommunityOpen}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={`text-sm transition-colors flex items-center gap-1 focus-visible:outline-none relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
+                      isActive("/leaderboard") || isActive("/user/referrals")
+                        ? "text-foreground font-semibold after:bg-primary"
+                        : "text-muted-foreground hover:text-foreground after:bg-transparent"
+                    }`}
+                    aria-haspopup="menu"
+                    aria-expanded={communityOpen}
+                  >
+                    <Trophy size={14} aria-hidden="true" />
+                    קהילה
+                    <ChevronDown
+                      size={13}
+                      className={`transition-transform duration-200 ${communityOpen ? "rotate-180" : ""}`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" className="w-48" style={{ direction: "rtl" }}>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/leaderboard"
+                      className="flex items-center gap-2 w-full"
+                      onClick={() => setCommunityOpen(false)}
+                    >
+                      <Trophy size={15} className="text-muted-foreground shrink-0" aria-hidden="true" />
+                      לוח המובילים
+                    </Link>
+                  </DropdownMenuItem>
+                  {user && (
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/user/referrals"
+                        className="flex items-center gap-2 w-full"
+                        onClick={() => setCommunityOpen(false)}
+                      >
+                        <Gift size={15} className="text-primary shrink-0" aria-hidden="true" />
+                        <span className="text-primary font-medium">הזמינו חברים</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Link to="/compare" className={navLinkCls("/compare")}>
                 <Scale size={14} aria-hidden="true" />
                 השוואה
@@ -296,12 +339,6 @@ const Navbar = () => {
                 <DropdownMenuItem onClick={isBusinessMode ? handleSwitchToConsumer : handleSwitchToBusiness}>
                   <ArrowLeftRight size={14} className="ml-2" aria-hidden="true" />
                   {isBusinessMode ? "גלישה רגילה" : "פרופיל עסקי"}
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/user/referrals" className="flex items-center gap-2 w-full text-primary font-medium">
-                    <Gift size={14} className="ml-2 text-primary" aria-hidden="true" />
-                    הזמינו חברים
-                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to={isBusinessMode ? "/business/settings" : "/settings"} className="flex items-center gap-2 w-full">
@@ -451,14 +488,31 @@ const Navbar = () => {
                 )}
               </div>
 
-              <div className="border-t border-border/30 pt-1">
+              <div className="border-t border-border/30 pt-2 pb-1">
+                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider px-0 mb-1">
+                  קהילה
+                </p>
                 <Link
                   to="/leaderboard"
-                  className="block text-sm py-3 min-h-[44px] flex items-center"
+                  className="flex items-center gap-2 text-sm py-2.5 min-h-[44px] text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >
-                  קהילה
+                  <Trophy size={14} aria-hidden="true" />
+                  לוח המובילים
                 </Link>
+                {user && (
+                  <Link
+                    to="/user/referrals"
+                    className="flex items-center gap-2 text-sm py-2.5 min-h-[44px] text-primary font-medium"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <Gift size={14} aria-hidden="true" />
+                    הזמינו חברים
+                  </Link>
+                )}
+              </div>
+
+              <div className="border-t border-border/30 pt-1">
                 <Link
                   to="/compare"
                   className="block text-sm py-3 min-h-[44px] flex items-center"
@@ -495,14 +549,6 @@ const Navbar = () => {
                 )}
                 {user && (
                   <>
-                    <Link
-                      to="/user/referrals"
-                      className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-primary font-medium"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <Gift size={14} aria-hidden="true" />
-                      הזמינו חברים
-                    </Link>
                     <Link
                       to="/settings"
                       className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-muted-foreground hover:text-foreground"
