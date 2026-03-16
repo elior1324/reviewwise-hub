@@ -4,6 +4,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Smooth anchor scroll — used by /#how-it-works and similar hash links */
+html {
+  scroll-behavior: smooth;
+}
+/* Respect OS-level reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* Accessibility overrides */
 .a11y-high-contrast {
   --foreground: 0 0% 100% !important;

@@ -604,7 +604,7 @@ const Index = () => {
       )}
 
       {/* How Verification Works — institutional methodology section */}
-      <section id="how-it-works" className="container py-20">
+      <section id="how-it-works" className="container py-20 scroll-mt-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
