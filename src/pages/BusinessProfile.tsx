@@ -16,7 +16,7 @@ import TransparencyScore from "@/components/TransparencyScore";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star, ArrowUpDown } from "lucide-react";
+import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star, ArrowUpDown, TrendingUp, TrendingDown, Minus, AlertTriangle, Brain } from "lucide-react";
 import { PrestigeBadge, computeEligibleBadges, buildBadgeEmbedCode, BADGE_CONFIG } from "@/components/PrestigeBadge";
 import { useState, useEffect, useMemo } from "react";
 import { generateReviewSummary, FREELANCER_CATEGORIES, SAAS_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
@@ -63,6 +63,12 @@ const BusinessProfile = () => {
     reviewCount: number; periodLabel: string; generatedAt: string;
   } | null>(null);
 
+  // AI Intelligence signals (from daily-ai-scan pipeline)
+  const [aiSummary, setAiSummary]           = useState<string | null>(null);
+  const [aiSentimentScore, setAiSentimentScore] = useState<number | null>(null);
+  const [aiTrendingScore, setAiTrendingScore]   = useState<number | null>(null);
+  const [aiFlags, setAiFlags]               = useState<string[]>([]);
+
   useEffect(() => {
     if (!slug) return;
 
@@ -76,7 +82,7 @@ const BusinessProfile = () => {
       //   Rating and reviewCount are computed below from the reviews we fetch.
       const { data: bizData } = await supabase
         .from("businesses")
-        .select("id, slug, name, website, email, phone, category, description, verified, collaboration_active, collaboration_method, collaboration_coupon, trust_status, trust_status_reason, transparency_score, response_rate, avg_response_hours, verified_review_ratio")
+        .select("id, slug, name, website, email, phone, category, description, verified, collaboration_active, collaboration_method, collaboration_coupon, trust_status, trust_status_reason, transparency_score, response_rate, avg_response_hours, verified_review_ratio, ai_summary, sentiment_score, trending_score, ai_flags")
         .eq("slug", slug)
         .maybeSingle();
 
@@ -96,6 +102,12 @@ const BusinessProfile = () => {
       setResponseRate(bizData.response_rate ?? null);
       setAvgResponseHours(bizData.avg_response_hours ?? null);
       setVerifiedReviewRatio(bizData.verified_review_ratio ?? null);
+
+      // AI Intelligence signals
+      setAiSummary(bizData.ai_summary ?? null);
+      setAiSentimentScore(bizData.sentiment_score ?? null);
+      setAiTrendingScore(bizData.trending_score ?? null);
+      setAiFlags(Array.isArray(bizData.ai_flags) ? bizData.ai_flags : []);
 
       // Collaboration program state
       setCollabActive(bizData.collaboration_active || false);
@@ -558,6 +570,18 @@ const BusinessProfile = () => {
           responseRate={responseRate}
           avgResponseHours={avgResponseHours}
         />
+
+        {/* ── AI Intelligence Insights ──────────────────────────────────────
+            Shown only when the daily-ai-scan pipeline has data for this profile.
+            Renders: AI summary, trending signal, sentiment indicator, anomaly flags. */}
+        {(aiSummary || aiSentimentScore !== null || aiTrendingScore !== null || aiFlags.length > 0) && (
+          <AiInsightsSection
+            summary={aiSummary}
+            sentimentScore={aiSentimentScore}
+            trendingScore={aiTrendingScore}
+            flags={aiFlags}
+          />
+        )}
 
         {/* ── Collaboration: Synchronized Purchase Conditions ──────────────── */}
         {collabActive && (
@@ -1304,6 +1328,150 @@ function EarnedBadgesSection({ slug, name, rating, verifiedCount, type, category
             rating={rating}
           />
         ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// ── AiInsightsSection ─────────────────────────────────────────────────────────
+// Displays the AI intelligence layer signals for a business profile:
+//   – 3-sentence AI-written summary (from daily-ai-scan → generate-profile-summary)
+//   – Trending signal badge (growing / stable / declining)
+//   – Sentiment score bar
+//   – Anomaly flag warnings (if any open flags exist)
+
+interface AiInsightsSectionProps {
+  summary:        string | null;
+  sentimentScore: number | null;
+  trendingScore:  number | null;
+  flags:          string[];
+}
+
+function trendingInfo(score: number | null): {
+  label: string;
+  Icon:  React.FC<{ size?: number; className?: string }>;
+  color: string;
+  bg:    string;
+} {
+  if (score === null) return { label: "אין נתונים", Icon: Minus, color: "text-muted-foreground", bg: "bg-muted/30" };
+  if (score >= 3)     return { label: "צמיחה מהירה מאוד", Icon: TrendingUp,   color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800" };
+  if (score >= 2)     return { label: "צמיחה חזקה",        Icon: TrendingUp,   color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800" };
+  if (score >= 1.3)   return { label: "צמיחה מתונה",       Icon: TrendingUp,   color: "text-blue-500",    bg: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800" };
+  if (score >= 0.7)   return { label: "יציב",               Icon: Minus,        color: "text-muted-foreground", bg: "bg-muted/20 border-border/40" };
+  return                    { label: "ירידה בנפח",          Icon: TrendingDown, color: "text-orange-500",  bg: "bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800" };
+}
+
+const FLAG_LABELS: Record<string, string> = {
+  rating_spike:        "קפיצה חריגה בדירוגים",
+  review_flood:        "גל ביקורות חשוד",
+  coordinated_timing:  "תזמון מתואם",
+  sentiment_mismatch:  "אי-התאמת סנטימנט",
+  velocity_anomaly:    "אנומליית קצב",
+};
+
+function AiInsightsSection({ summary, sentimentScore, trendingScore, flags }: AiInsightsSectionProps) {
+  const trending = trendingInfo(trendingScore);
+  const TrendIcon = trending.Icon;
+  const sentimentPct = sentimentScore !== null ? Math.round(sentimentScore * 100) : null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="mb-8 rounded-xl border border-border/40 bg-card/50 overflow-hidden"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border/30">
+        <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <Brain size={14} className="text-primary" />
+        </div>
+        <span className="font-display font-semibold text-sm text-foreground">
+          תובנות AI
+        </span>
+        <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wide mr-auto">
+          מחושב אוטומטית
+        </span>
+      </div>
+
+      <div className="p-5 space-y-4">
+
+        {/* Anomaly flags — shown at top in a warning band */}
+        {flags.length > 0 && (
+          <div className="flex items-start gap-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-3">
+            <AlertTriangle size={15} className="text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1">
+                דגלי בטיחות פתוחים
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {flags.map(f => (
+                  <span
+                    key={f}
+                    className="text-[11px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700 px-2 py-0.5 rounded-full"
+                  >
+                    {FLAG_LABELS[f] ?? f}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Metric row: trending + sentiment */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+          {/* Trending badge */}
+          {trendingScore !== null && (
+            <div className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${trending.bg}`}>
+              <TrendIcon size={18} className={trending.color} />
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">
+                  מגמה
+                </p>
+                <p className={`text-sm font-semibold ${trending.color}`}>
+                  {trending.label}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Sentiment score */}
+          {sentimentPct !== null && (
+            <div className="rounded-lg border border-border/40 bg-background/60 px-4 py-3">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                סנטימנט חיובי
+              </p>
+              <div className="flex items-center gap-2.5">
+                <div className="flex-1 h-2 bg-muted/40 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      sentimentPct >= 70 ? "bg-emerald-500" :
+                      sentimentPct >= 45 ? "bg-blue-500" : "bg-orange-400"
+                    }`}
+                    style={{ width: `${sentimentPct}%` }}
+                  />
+                </div>
+                <span className="text-sm font-bold text-foreground tabular-nums w-10 text-left">
+                  {sentimentPct}%
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* AI-written summary */}
+        {summary && (
+          <div className="rounded-lg bg-muted/20 border border-border/30 px-4 py-3">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+              ניתוח AI — מבוסס ביקורות
+            </p>
+            <p className="text-sm text-foreground leading-relaxed">
+              {summary}
+            </p>
+          </div>
+        )}
+
       </div>
     </motion.div>
   );

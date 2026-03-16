@@ -33,10 +33,15 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 
 const SUPABASE_URL    = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY     = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const OPENAI_KEY      = Deno.env.get("OPENAI_API_KEY") || "";
-const RESEND_KEY      = Deno.env.get("RESEND_API_KEY") || "";
-const FRONTEND_URL    = Deno.env.get("FRONTEND_URL") || "https://reviewhub.co.il";
+const LOVABLE_KEY     = Deno.env.get("LOVABLE_API_KEY") || "";   // primary
+const OPENAI_KEY      = Deno.env.get("OPENAI_API_KEY")  || "";   // optional second-opinion
+const RESEND_KEY      = Deno.env.get("RESEND_API_KEY")  || "";
+const FRONTEND_URL    = Deno.env.get("FRONTEND_URL")    || "https://reviewhub.co.il";
 const FROM_EMAIL      = "ReviewHub Trust & Safety <noreply@reviewshub.info>";
+
+const AI_GATEWAY      = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const PRIMARY_MODEL   = "google/gemini-2.5-flash";   // Gemini — always available
+const SECONDARY_MODEL = "gpt-4o-mini";               // OpenAI — optional second-opinion
 
 // ─── Compliance Rules ─────────────────────────────────────────────────────────
 
@@ -116,80 +121,145 @@ function ruleBasedClassify(reviewText: string, reportReason: string): Compliance
   return null; // needs AI classification
 }
 
-// ─── GPT-4o classification fallback ──────────────────────────────────────────
+// ─── AI classification — Gemini primary, OpenAI optional second-opinion ──────
+//
+// Architecture:
+//   1. Gemini 2.5 Flash (via Lovable gateway) is ALWAYS attempted first.
+//      It is the primary, self-contained model — no separate API key needed.
+//   2. If OPENAI_API_KEY is set AND Gemini returns "escalate_human",
+//      OpenAI GPT-4o-mini provides a second opinion to reduce false escalations.
+//   3. If both disagree, escalate to human (most conservative).
+
+const DECISION_TO_STATUS: Record<string, ComplianceResult["newStatus"]> = {
+  remove_immediately:   "removed",
+  reject_report:        "verified",
+  freeze_request_proof: "under_review",
+  escalate_human:       "under_review",
+  approve:              "verified",
+};
+
+const COMPLIANCE_SYSTEM_PROMPT = `You are the neutral compliance moderator for ReviewHub, a trust verification platform.
+Analyze the reported review and respond using exactly one of these rules:
+
+RULE_1: Review contains profanity, harassment, personal attacks, or personal data (phone/email/address) → "remove_immediately"
+RULE_2: Report is pure disagreement with opinion / subjective experience — no factual claim → "reject_report"
+RULE_3: Report claims factual falsehood (reviewer was never a customer, event never happened) → "freeze_request_proof"
+RULE_4: Review shows spam, coordinated manipulation, or commercial solicitation → "remove_immediately"
+Default: Unclear case → "escalate_human"
+
+Respond ONLY with valid JSON (no markdown, no extra text):
+{"decision":"<decision>","rule":"<RULE_N>","reason":"<one sentence in Hebrew>"}`;
+
+async function callGeminiCompliance(
+  reviewText: string,
+  reportReason: string,
+  businessName: string,
+): Promise<ComplianceResult | null> {
+  if (!LOVABLE_KEY) return null;
+
+  try {
+    const res = await fetch(AI_GATEWAY, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: PRIMARY_MODEL,
+        temperature: 0,
+        max_tokens: 200,
+        messages: [
+          { role: "system", content: COMPLIANCE_SYSTEM_PROMPT },
+          { role: "user",   content: `Business: ${businessName}\nReport: ${reportReason}\nReview: ${reviewText}` },
+        ],
+      }),
+    });
+
+    if (!res.ok) return null;
+    const data  = await res.json();
+    const raw   = data.choices?.[0]?.message?.content?.trim() || "{}";
+    const clean = raw.replace(/```json?|```/g, "").trim();
+    const p     = JSON.parse(clean);
+
+    return {
+      decision:  p.decision  || "escalate_human",
+      rule:      p.rule      || "AI_GEMINI",
+      reason:    p.reason    || "סיבה לא ידועה.",
+      newStatus: DECISION_TO_STATUS[p.decision] || "under_review",
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function callOpenAICompliance(
+  reviewText: string,
+  reportReason: string,
+  businessName: string,
+): Promise<ComplianceResult | null> {
+  if (!OPENAI_KEY) return null;
+
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${OPENAI_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: SECONDARY_MODEL,
+        temperature: 0,
+        max_tokens: 200,
+        messages: [
+          { role: "system", content: COMPLIANCE_SYSTEM_PROMPT },
+          { role: "user",   content: `Business: ${businessName}\nReport: ${reportReason}\nReview: ${reviewText}` },
+        ],
+      }),
+    });
+
+    if (!res.ok) return null;
+    const data  = await res.json();
+    const raw   = data.choices?.[0]?.message?.content?.trim() || "{}";
+    const p     = JSON.parse(raw.replace(/```json?|```/g, "").trim());
+
+    return {
+      decision:  p.decision  || "escalate_human",
+      rule:      p.rule      || "AI_OPENAI",
+      reason:    p.reason    || "סיבה לא ידועה.",
+      newStatus: DECISION_TO_STATUS[p.decision] || "under_review",
+    };
+  } catch {
+    return null;
+  }
+}
 
 async function aiClassify(
   reviewText: string,
   reportReason: string,
-  businessName: string
+  businessName: string,
 ): Promise<ComplianceResult> {
-  if (!OPENAI_KEY) {
-    // No API key — conservative escalation
+  // Step 1: Gemini (always attempted)
+  const geminiResult = await callGeminiCompliance(reviewText, reportReason, businessName);
+
+  if (!geminiResult) {
+    // Gemini unavailable entirely — escalate
     return {
       decision:  "escalate_human",
-      rule:      "FALLBACK",
+      rule:      "AI_UNAVAILABLE",
       reason:    "מערכת ה-AI אינה זמינה — הדוח הועבר לבדיקת Trust & Safety.",
       newStatus: "under_review",
     };
   }
 
-  const systemPrompt = `You are the neutral compliance moderator for ReviewHub, a trust verification platform.
-Your task is to analyze reported reviews and act according to these rules:
+  // Step 2: If Gemini is uncertain, ask OpenAI for a second opinion
+  if (geminiResult.decision === "escalate_human" && OPENAI_KEY) {
+    const openaiResult = await callOpenAICompliance(reviewText, reportReason, businessName);
 
-RULE_1: If review contains profanity, harassment, personal attacks unrelated to product, or personal data (phone, address, email) → decision: "remove_immediately"
-RULE_2: If the report is simply disagreement with an opinion or subjective experience → decision: "reject_report"
-RULE_3: If report claims factual falsehood (reviewer was never a customer, event never happened) → decision: "freeze_request_proof"
-RULE_4: If review shows spam patterns, coordinated manipulation, or commercial solicitation → decision: "remove_immediately"
-Default: If unclear → decision: "escalate_human"
-
-Respond ONLY with valid JSON:
-{"decision":"<decision>","rule":"<RULE_N>","reason":"<one sentence in Hebrew referencing the rule>"}`;
-
-  const userPrompt = `Business: ${businessName}
-Report reason: ${reportReason}
-Review text: ${reviewText}`;
-
-  try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${OPENAI_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0,
-        max_tokens: 200,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user",   content: userPrompt },
-        ],
-      }),
-    });
-
-    const data = await res.json();
-    const raw  = data.choices?.[0]?.message?.content?.trim() || "{}";
-    const parsed = JSON.parse(raw.replace(/```json?|```/g, "").trim());
-
-    const decisionMap: Record<string, ComplianceResult["newStatus"]> = {
-      remove_immediately:  "removed",
-      reject_report:       "verified",
-      freeze_request_proof:"under_review",
-      escalate_human:      "under_review",
-      approve:             "verified",
-    };
-
-    return {
-      decision:  parsed.decision  || "escalate_human",
-      rule:      parsed.rule      || "AI",
-      reason:    parsed.reason    || "סיבה לא ידועה — הועבר לבדיקה ידנית.",
-      newStatus: decisionMap[parsed.decision] || "under_review",
-    };
-  } catch {
-    return {
-      decision:  "escalate_human",
-      rule:      "AI_ERROR",
-      reason:    "שגיאה בעיבוד AI — הועבר לבדיקת Trust & Safety.",
-      newStatus: "under_review",
-    };
+    if (openaiResult && openaiResult.decision !== "escalate_human") {
+      // OpenAI has a confident answer — use it, noting the dual-model source
+      return {
+        ...openaiResult,
+        rule: `${openaiResult.rule} (confirmed by second-opinion)`,
+      };
+    }
+    // Both escalate → keep escalating
   }
+
+  return geminiResult;
 }
 
 // ─── Email notification helpers ───────────────────────────────────────────────
