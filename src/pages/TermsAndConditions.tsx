@@ -66,7 +66,7 @@ const TermsAndConditions = () => {
           {/* Definitions */}
           <Section icon={FileText} title="הגדרות">
             <p>
-              כאשר אנו אומרים <strong>״אתם״</strong> או <strong>״שלכם״</strong> — אנו מתכוונים לישות או לעסק שאתם מייצגים. כאשר אנו אומרים <strong>״ReviewHub״</strong>, <strong>״אנחנו״</strong>, <strong>״שלנו״</strong> או <strong>״אותנו״</strong> — אנו מתכוונים לחברת ReviewHub בע"מ, הרשומה בישראל.
+              כאשר אנו אומרים <strong>״אתם״</strong> או <strong>״שלכם״</strong> — אנו מתכוונים לישות או לעסק שאתם מייצגים. כאשר אנו אומרים <strong>״ReviewHub״</strong>, <strong>״אנחנו״</strong>, <strong>״שלנו״</strong> או <strong>״אותנו״</strong> — אנו מתכוונים לחברת ReviewHub, הרשומה בישראל.
             </p>
             <p className="mt-3">
               <strong>״פלטפורמה״</strong> — פלטפורמת הביקורות שלנו המתארחת באתר ReviewHub, כל תת-דומיין, אפליקציה או שירות נלווה.
@@ -518,7 +518,7 @@ const TermsAndConditions = () => {
               אם יש לכם שאלות בנוגע לתנאי שימוש אלה, אתם מוזמנים לפנות אלינו:
             </p>
             <div className="mt-4 p-4 rounded-xl bg-secondary/50 border border-border/50 space-y-2 text-sm">
-              <p className="font-semibold text-foreground">ReviewHub בע"מ</p>
+              <p className="font-semibold text-foreground">ReviewHub</p>
               <p className="text-muted-foreground">כתובת: תל אביב, ישראל</p>
               <p className="text-muted-foreground">אימייל: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></p>
             </div>

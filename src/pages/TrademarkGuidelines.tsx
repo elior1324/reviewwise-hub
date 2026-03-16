@@ -53,7 +53,7 @@ const TrademarkGuidelines = () => {
           {/* Designs Ownership */}
           <Section icon={Stamp} title="1. עיצובי ReviewHub">
             <p className="mb-3">
-              עיצובי ReviewHub הם רכוש של ReviewHub בע"מ ומוגנים בהתאם לחוק זכות יוצרים, התשס"ח-2007, פקודת סימני מסחר [נוסח חדש], התשל"ב-1972, וכל חקיקה רלוונטית אחרת.
+              עיצובי ReviewHub הם רכוש של ReviewHub ומוגנים בהתאם לחוק זכות יוצרים, התשס"ח-2007, פקודת סימני מסחר [נוסח חדש], התשל"ב-1972, וכל חקיקה רלוונטית אחרת.
             </p>
             <p className="mb-3">
               שום דבר בהנחיות אלה לא ייחשב כהעברת בעלות בעיצובי ReviewHub ללקוח. הלקוח מקבל רישיון לא-בלעדי בלבד לשימוש בעיצובי ReviewHub כמפורט בהנחיות אלה ובהסכם הלקוח עם ReviewHub, כל עוד ללקוח רישיון תקף.
@@ -110,7 +110,7 @@ const TrademarkGuidelines = () => {
               במקרה של שאלות בנוגע להנחיות סימני המסחר, ניתן ליצור קשר עם ReviewHub בכתובת הבאה:
             </p>
             <div className="mt-4 p-4 rounded-xl bg-secondary/50 border border-border/50 space-y-2 text-sm">
-              <p className="font-semibold text-foreground">ReviewHub בע"מ</p>
+              <p className="font-semibold text-foreground">ReviewHub</p>
               <p className="text-muted-foreground">כתובת: תל אביב, ישראל</p>
               <p className="text-muted-foreground">אימייל: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></p>
             </div>

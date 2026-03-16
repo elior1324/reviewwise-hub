@@ -71,7 +71,7 @@ const RefundPolicy = () => {
             <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
               <li><strong>דוא"ל:</strong> שליחת הודעת ביטול לכתובת <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></li>
               <li><strong>טופס מקוון:</strong> באמצעות פנייה דרך עמוד "צור קשר" באתר</li>
-              <li><strong>דואר רשום:</strong> ReviewHub בע"מ, תל אביב, ישראל</li>
+              <li><strong>דואר רשום:</strong> ReviewHub, תל אביב, ישראל</li>
             </ul>
             <p className="mb-3">הודעת הביטול צריכה לכלול:</p>
             <ul className="list-disc pr-6 space-y-1 text-muted-foreground">
@@ -136,7 +136,7 @@ const RefundPolicy = () => {
           <Section icon={Mail} title="יצירת קשר בנושא ביטולים והחזרים">
             <p>לכל שאלה בנושא ביטול עסקה או החזר כספי:</p>
             <div className="mt-4 p-4 rounded-xl bg-secondary/50 border border-border/50 space-y-2 text-sm">
-              <p className="font-semibold text-foreground">ReviewHub בע"מ</p>
+              <p className="font-semibold text-foreground">ReviewHub</p>
               <p className="text-muted-foreground">אימייל: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></p>
               <p className="text-muted-foreground">כתובת: תל אביב, ישראל</p>
             </div>

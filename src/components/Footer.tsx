@@ -177,12 +177,12 @@ const Footer = () => {
       <div className="border-t border-border/50 mt-8 pt-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-muted-foreground">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 justify-center sm:justify-start">
-            <span className="font-semibold text-foreground/70">ReviewHub בע"מ · ישראל</span>
+            <span className="font-semibold text-foreground/70">ReviewHub · ישראל</span>
             <a href="mailto:support@reviewshub.info" className="hover:text-primary transition-colors">
               support@reviewshub.info
             </a>
           </div>
-          <p>© {new Date().getFullYear()} ReviewHub בע"מ. כל הזכויות שמורות.</p>
+          <p>© {new Date().getFullYear()} ReviewHub. כל הזכויות שמורות.</p>
         </div>
       </div>
     </div>

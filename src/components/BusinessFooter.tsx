@@ -83,12 +83,12 @@ const BusinessFooter = () => (
       <div className="border-t border-border/50 mt-8 pt-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-xs text-muted-foreground text-center md:text-right">
-            <p className="font-semibold text-foreground mb-1">ReviewHub בע"מ</p>
+            <p className="font-semibold text-foreground mb-1">ReviewHub</p>
             <p>ישראל</p>
             <p>אימייל: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></p>
           </div>
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} ReviewHub בע"מ. כל הזכויות שמורות.
+            © {new Date().getFullYear()} ReviewHub. כל הזכויות שמורות.
           </p>
         </div>
       </div>

@@ -41,7 +41,7 @@ const ModernSlaveryStatement = () => {
               שנת הכספים ינואר 2025 — דצמבר 2025
             </p>
             <p className="text-muted-foreground mt-2">
-              ReviewHub בע"מ נוקטת גישת אפס סובלנות כלפי עבדות וסחר בבני אדם בפעילות העסקית ובשרשראות האספקה שלנו.
+              ReviewHub נוקטת גישת אפס סובלנות כלפי עבדות וסחר בבני אדם בפעילות העסקית ובשרשראות האספקה שלנו.
             </p>
           </motion.div>
         </div>
@@ -59,7 +59,7 @@ const ModernSlaveryStatement = () => {
               ReviewHub מארחת ביקורות כדי לעזור לצרכנים לקנות בביטחון ולספק לעסקים תובנות עשירות לשיפור חוויית הלקוח. ככל שיותר צרכנים משתמשים בפלטפורמה ומשתפים את דעותיהם, כך התובנות שאנו מציעים לעסקים עשירות יותר.
             </p>
             <p>
-              ReviewHub בע"מ היא חברה רשומה בישראל ומפעילה את פעילותה מתל אביב.
+              ReviewHub היא חברה רשומה בישראל ומפעילה את פעילותה מתל אביב.
             </p>
           </Section>
 
@@ -159,12 +159,12 @@ const ModernSlaveryStatement = () => {
               אם יש לכם שאלות או חששות בנוגע למחויבותנו למניעת עבדות מודרנית וסחר בבני אדם, אתם מוזמנים לפנות אלינו:
             </p>
             <div className="mt-4 p-4 rounded-xl bg-secondary/50 border border-border/50 space-y-2 text-sm">
-              <p className="font-semibold text-foreground">ReviewHub בע"מ</p>
+              <p className="font-semibold text-foreground">ReviewHub</p>
               <p className="text-muted-foreground">כתובת: תל אביב, ישראל</p>
               <p className="text-muted-foreground">אימייל: <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></p>
             </div>
             <p className="mt-4 text-muted-foreground text-sm">
-              הצהרה זו אושרה על ידי הנהלת ReviewHub בע"מ ועודכנה לאחרונה: מרץ 2026
+              הצהרה זו אושרה על ידי הנהלת ReviewHub ועודכנה לאחרונה: מרץ 2026
             </p>
           </Section>
 
