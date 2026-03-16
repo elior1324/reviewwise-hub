@@ -62,11 +62,14 @@ interface OwnerBusiness {
 function useOwnerBusiness() {
   const { user, loading: authLoading } = useAuth();
   const [business, setBusiness] = useState<OwnerBusiness | null>(null);
-  const [bLoading, setBLoading] = useState(false);
+  // Start as true so the banner never flashes "no business" before the query
+  // resolves — it only shows after we've actually confirmed the result.
+  const [bLoading, setBLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
       setBusiness(null);
+      setBLoading(false);
       return;
     }
     setBLoading(true);
@@ -75,7 +78,10 @@ function useOwnerBusiness() {
       .select("id, slug, name, rating, review_count, category, verified, subscription_tier, logo_url")
       .eq("owner_id", user.id)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("[useOwnerBusiness] failed to fetch business:", error.message);
+        }
         setBusiness((data as OwnerBusiness | null) ?? null);
         setBLoading(false);
       });

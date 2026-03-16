@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, PenLine, LogIn, ShieldCheck, ShieldX, Plus, HelpCircle, Upload, X, FileText, Image as ImageIcon, Loader2, MessageSquare, Gift, Trophy } from "lucide-react";
+import { Star, PenLine, LogIn, ShieldCheck, ShieldX, Plus, HelpCircle, Upload, X, FileText, Image as ImageIcon, Loader2, MessageSquare, Gift, Trophy, AlertCircle, RefreshCw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -79,6 +79,8 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
   const [showFileDialog, setShowFileDialog] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileError, setTurnstileError] = useState(false);
+  const [turnstileKey, setTurnstileKey] = useState(0); // increment to remount widget
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -639,20 +641,57 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
 
                   <FormPrivacyNotice className="mt-1" />
 
-                  <TurnstileWidget
-                    onSuccess={(token) => setTurnstileToken(token)}
-                    onError={() => setTurnstileToken(null)}
-                    className="flex justify-center mt-2"
-                  />
+                  {/* Turnstile CAPTCHA */}
+                  {turnstileError ? (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 flex items-start gap-3">
+                      <AlertCircle size={16} className="text-destructive shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-destructive font-medium">אימות CAPTCHA נכשל</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          לא הצלחנו לאמת שאתם לא רובוט. לחצו על "נסו שוב" או רעננו את הדף.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 text-xs gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10"
+                        onClick={() => {
+                          setTurnstileError(false);
+                          setTurnstileToken(null);
+                          setTurnstileKey(k => k + 1);
+                        }}
+                      >
+                        <RefreshCw size={12} />
+                        נסו שוב
+                      </Button>
+                    </div>
+                  ) : (
+                    <TurnstileWidget
+                      key={turnstileKey}
+                      onSuccess={(token) => { setTurnstileToken(token); setTurnstileError(false); }}
+                      onError={() => { setTurnstileToken(null); setTurnstileError(true); }}
+                      onExpire={() => { setTurnstileToken(null); }}
+                      className="flex justify-center mt-2"
+                    />
+                  )}
 
-                  <Button
-                    type="submit"
-                    disabled={submitting || uploading || !turnstileToken}
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2"
-                  >
-                    {(submitting || uploading) && <Loader2 size={16} className="animate-spin" />}
-                    {uploading ? "מעלה קבצים..." : submitting ? "שולח..." : "פרסום ביקורת"}
-                  </Button>
+                  {/* Submit button — with reason hint when disabled */}
+                  <div className="space-y-1.5">
+                    <Button
+                      type="submit"
+                      disabled={submitting || uploading || !turnstileToken}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2"
+                    >
+                      {(submitting || uploading) && <Loader2 size={16} className="animate-spin" />}
+                      {uploading ? "מעלה קבצים..." : submitting ? "שולח..." : "פרסום ביקורת"}
+                    </Button>
+                    {!turnstileToken && !turnstileError && (
+                      <p className="text-center text-xs text-muted-foreground">
+                        ממתין לאישור אנטי-ספאם — אנא השלימו את הווידג׳ט למעלה
+                      </p>
+                    )}
+                  </div>
                 </form>
               </CardContent>
             </Card>

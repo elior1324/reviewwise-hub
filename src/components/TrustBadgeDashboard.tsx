@@ -81,28 +81,41 @@ const BADGE_VARIANTS: {
 
 // ─── Embed code builders ──────────────────────────────────────────────────────
 
-function buildScriptEmbed(slug: string, size: BadgeSize): string {
-  return `<!-- ReviewWise Trust Badge — ${size} -->
-<div class="reviewhub-widget"
-     data-slug="${slug}"
-     data-size="${size}">
-</div>
-<script src="https://reviewhub.co.il/reviewhub-widget.js" async></script>`;
-}
+// Map TrustBadgeDashboard size names → WidgetPage variant query param
+const SIZE_TO_VARIANT: Record<BadgeSize, "mini" | "sidebar" | "full"> = {
+  compact:  "mini",
+  standard: "sidebar",
+  expanded: "full",
+};
+
+// iframe dimensions per WidgetPage variant
+const VARIANT_DIMS: Record<"mini" | "sidebar" | "full", { w: string; h: string }> = {
+  mini:    { w: "280",  h: "68"  },
+  sidebar: { w: "320",  h: "520" },
+  full:    { w: "100%", h: "224" },
+};
 
 function buildIframeEmbed(slug: string, size: BadgeSize): string {
-  const supaUrl = import.meta.env.VITE_SUPABASE_URL;
-  const w = size === "compact" ? 300 : size === "standard" ? 310 : 360;
-  const h = size === "compact" ? 68  : size === "standard" ? 130 : 220;
-  return `<iframe
-  src="${supaUrl}/functions/v1/widget-data?slug=${slug}&format=html"
+  const variant = SIZE_TO_VARIANT[size];
+  const { w, h } = VARIANT_DIMS[variant];
+  const base = "https://reviewhub.co.il";
+  return `<!-- ReviewHub Widget (${size}) -->
+<!-- לחיצה על הווידג'ט תפתח את דף הביקורות של העסק ב-ReviewHub -->
+<iframe
+  src="${base}/widget/${slug}?v=${variant}"
   width="${w}"
   height="${h}"
   frameborder="0"
   scrolling="no"
-  title="ReviewWise — ביקורות מאומתות"
+  allow="popups"
+  title="ReviewHub — ביקורות מאומתות של ${slug}"
   style="border:none;overflow:hidden;border-radius:16px;">
 </iframe>`;
+}
+
+// Script embed — identical to iframe; there is no external loader script.
+function buildScriptEmbed(slug: string, size: BadgeSize): string {
+  return buildIframeEmbed(slug, size);
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -313,7 +326,7 @@ const TrustBadgeDashboard = ({
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                     }`}
                   >
-                    {t === "script" ? "סקריפט JS" : "iFrame"}
+                    {t === "script" ? "קוד הטמעה" : "iFrame מפורש"}
                   </button>
                 ))}
               </div>
@@ -323,9 +336,7 @@ const TrustBadgeDashboard = ({
           </div>
 
           <p className="text-xs text-muted-foreground">
-            {embedType === "script"
-              ? "מומלץ — נטען באופן אסינכרוני, מתעדכן אוטומטית, תומך במספר תגים בעמוד."
-              : "פשוט ויעיל — עובד בכל פלטפורמה שמאפשרת iFrame."}
+            הביקורות והדירוג מתעדכנים אוטומטית — אין צורך לשנות את הקוד לאחר ההטמעה.
           </p>
         </CardHeader>
 

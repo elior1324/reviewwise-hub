@@ -24,6 +24,8 @@ import { useEffect } from "react";
 interface TurnstileWidgetProps {
   onSuccess: (token: string) => void;
   onError?: () => void;
+  /** Called when a previously-issued token expires (~2 min after issue). */
+  onExpire?: () => void;
   className?: string;
 }
 
@@ -42,7 +44,7 @@ if (DEV_BYPASS_CAPTCHA) {
   );
 }
 
-const TurnstileWidget = ({ onSuccess, onError, className }: TurnstileWidgetProps) => {
+const TurnstileWidget = ({ onSuccess, onError, onExpire, className }: TurnstileWidgetProps) => {
   // --- DEV MODE: auto-pass CAPTCHA so forms are not blocked during development ---
   useEffect(() => {
     if (DEV_BYPASS_CAPTCHA) {
@@ -66,6 +68,7 @@ const TurnstileWidget = ({ onSuccess, onError, className }: TurnstileWidgetProps
         siteKey={TURNSTILE_SITE_KEY!}
         onSuccess={onSuccess}
         onError={onError}
+        onExpire={onExpire}
         options={{ theme: "auto", size: "flexible" }}
       />
     </div>

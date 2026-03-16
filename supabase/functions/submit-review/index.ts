@@ -382,10 +382,11 @@ serve(async (req: Request) => {
     }
 
     return jsonResp({
-      success:         true,
+      success:          true,
+      reviewId:         insertedReview?.id ?? null,
       verifiedPurchase: serverVerifiedPurchase,
-      spamFlagged:     isFlaggedSpam,
-      spamScore:       Math.min(1.0, Math.round(spamScore * 1000) / 1000),
+      spamFlagged:      isFlaggedSpam,
+      spamScore:        Math.min(1.0, Math.round(spamScore * 1000) / 1000),
     }, 200, cors);
 
   } catch (err) {
