@@ -50,6 +50,7 @@ const Index = () => {
   const [topCourseProviders, setTopCourseProviders] = useState<Business[]>([]);
   const [topSaasTools, setTopSaasTools] = useState<Business[]>([]);
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
+  const [marqueeReviews, setMarqueeReviews] = useState<Array<{ author: { name: string; handle: string; avatar: string }; text: string; href?: string }>>([]);
   const [freelancerCatCounts, setFreelancerCatCounts] = useState<Record<string, number>>({});
   const [courseCatCounts, setCourseCatCounts] = useState<Record<string, number>>({});
   const [stats, setStats] = useState({ reviews: 0, businesses: 0 });
@@ -124,14 +125,14 @@ const Index = () => {
     };
 
     const fetchReviews = async () => {
-      // Fetch recent reviews via the secure public_reviews view
+      // Fetch recent reviews — 12 rows covers both the marquee (up to 8) and recent cards (3)
       const { data } = await supabase
         .from("reviews")
-        .select("*, courses(name), business_responses(text, created_at)")
+        .select("*, courses(name), businesses(name, slug), business_responses(text, created_at)")
         .order("created_at", { ascending: false })
-        .limit(6);
+        .limit(12);
 
-      if (data) {
+      if (data && data.length > 0) {
         // Expert detection among these reviews
         const expertCounts: Record<string, number> = {};
         data.forEach((r: any) => {
@@ -151,17 +152,18 @@ const Index = () => {
         });
         const earlyBirdIds = new Set(Object.values(businessFirsts).flat());
 
+        // ── Recent Reviews (bottom grid, 3 cards) ─────────────────────────────
         const mapped: Review[] = data.slice(0, 3).map((r: any) => ({
           id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
+          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
           rating: r.rating,
           text: r.text,
-          courseName: r.courses?.name || "",
+          courseName: r.courses?.name || r.businesses?.name || "",
           courseId: r.course_id,
-          businessSlug: "",
+          businessSlug: r.businesses?.slug || "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified || false,
+          verified: r.verified || r.is_purchase_verified || false,
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at !== r.created_at ? new Date(r.updated_at).toLocaleDateString("he-IL") : undefined,
           flagged: r.flagged || false,
@@ -169,12 +171,57 @@ const Index = () => {
           likeCount: r.like_count || 0,
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: (expertCounts[r.user_id] || 0) >= 3,
+          reviewSource: r.review_source || undefined,
           ownerResponse: r.business_responses?.[0] ? {
             text: r.business_responses[0].text,
             date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
         }));
         setRecentReviews(mapped);
+
+        // ── Marquee / Community Voices (scrolling strip, up to 8 cards) ───────
+        const AVATAR_COLORS = ["b6e3f4", "c0aede", "d1f4e0", "ffd5dc", "ffdfbf", "e8d5f4"];
+        const marqueeMapped = data.slice(0, 8).map((r: any, i: number) => {
+          const isAnon    = r.anonymous || false;
+          const isVerified = r.verified || r.is_purchase_verified || false;
+          const isCommunity = r.review_source === "community";
+
+          const displayName = isAnon
+            ? "אנונימי"
+            : (r.reviewer_name || "משתמש");
+
+          // Deterministic avatar seed — use reviewer_name or review id for anonymous
+          const avatarSeed  = isAnon
+            ? `anon-${r.id}`
+            : encodeURIComponent(r.reviewer_name || r.id);
+          const bgColor = AVATAR_COLORS[i % AVATAR_COLORS.length];
+          const avatar  = `https://api.dicebear.com/9.x/avataaars/svg?seed=${avatarSeed}&backgroundColor=${bgColor}`;
+
+          // Sub-label: source badge + business/course name
+          const businessLabel = r.businesses?.name || r.courses?.name || "";
+          let sourceBadge: string;
+          if (isAnon)        sourceBadge = "ביקורת אנונימית";
+          else if (isVerified) sourceBadge = "✓ ביקורת מאומתת";
+          else if (isCommunity) sourceBadge = "ביקורת קהילה";
+          else                sourceBadge = "ביקורת מאומתת";
+          const handle = businessLabel ? `${sourceBadge} · ${businessLabel}` : sourceBadge;
+
+          // Snippet — cap at 180 chars so cards stay compact
+          const snippet = r.text && r.text.length > 180
+            ? r.text.slice(0, 177) + "…"
+            : (r.text || "");
+
+          const businessSlug = r.businesses?.slug;
+          return {
+            author: { name: displayName, handle, avatar },
+            text: snippet,
+            href: businessSlug ? `/business/${businessSlug}` : undefined,
+          };
+        });
+        setMarqueeReviews(marqueeMapped);
+      } else {
+        setRecentReviews([]);
+        setMarqueeReviews([]);
       }
     };
 
@@ -561,78 +608,30 @@ const Index = () => {
       {/* "Why ReviewHub?" bento feature grid with glowing border effect */}
       <FeaturesGrid />
 
-      {/* Scrolling testimonials marquee */}
-      <TestimonialsSection
-        title="קולות מהקהילה הדיגיטלית"
-        description="כל ביקורת קושרה להוכחת רכישה לפני שפורסמה. המצפן לא משקר — לא ניתן לרכוש מיקום, לא ניתן להסיר ביקורת שלילית, ולא ניתן לכתוב ביקורת ללא אימות עצמאי."
-        className="border-t border-border/40"
-        testimonials={[
-          {
-            author: {
-              name: "דנה לוי",
-              handle: "@dana_levy",
-              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=dana-levy&backgroundColor=b6e3f4",
-            },
-            text: "הקורס שינה לי את הדרך שאני חושבת על שיווק. תוצאות אמיתיות תוך שלושה שבועות — ממש לא ציפיתי לזה.",
-          },
-          {
-            author: {
-              name: "יובל כהן",
-              handle: "@yuval_cohen",
-              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=yuval-cohen&backgroundColor=c0aede",
-            },
-            text: "עבדתי עם המעצבת על האתר שלי — מקצועית, מדויקת, ועומדת בזמנים. פשוט תענוג לעבוד איתה.",
-          },
-          {
-            author: {
-              name: "שיר מזרחי",
-              handle: "@shir_mizrachi",
-              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=shir-mizrachi&backgroundColor=d1f4e0",
-            },
-            text: "המנטור לא רק לימד — הוא ממש ישב איתי על הפרויקט. קיבלתי ידע שאני משתמשת בו כל יום.",
-          },
-          {
-            author: {
-              name: "אורי גרין",
-              handle: "@uri_green",
-              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=uri-green&backgroundColor=ffd5dc",
-            },
-            text: "סוף סוף מצאתי פרילנסרית שכתבה תוכן בדיוק לפי קול המותג שלנו. ממליץ בחום לכל עסק קטן.",
-          },
-          {
-            author: {
-              name: "נועה בן-דוד",
-              handle: "@noa_bendavid",
-              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=noa-bendavid&backgroundColor=b6e3f4",
-            },
-            text: "קורס הנתונים הוא הכי פרקטי שמצאתי ברשת. כל שיעור מסתיים בפרויקט אמיתי — ממש לא תיאורטי.",
-          },
-          {
-            author: {
-              name: "עמיר ברק",
-              handle: "@amir_barak",
-              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=amir-barak&backgroundColor=c0aede",
-            },
-            text: "חסכתי חצי שנה של לימוד עצמי. הקורס בנוי חכם — מתחיל מאפס ומגיע לדברים מורכבים בצעדים הגיוניים.",
-          },
-          {
-            author: {
-              name: "מיה רוזן",
-              handle: "@mia_rosen",
-              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=mia-rosen&backgroundColor=d1f4e0",
-            },
-            text: "הייתה לי שאלה שנה אחרי שסיימתי את הקורס — המרצה ענה תוך 24 שעות. שירות כזה לא מוצאים בשום מקום.",
-          },
-          {
-            author: {
-              name: "לירן אזולאי",
-              handle: "@liran_azulay",
-              avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=liran-azulay&backgroundColor=ffd5dc",
-            },
-            text: "הביקורות באתר הן אמיתיות לחלוטין. ReviewHub היא הפלטפורמה הראשונה שאני באמת סומך עליה.",
-          },
-        ]}
-      />
+      {/* Scrolling testimonials marquee — real reviews from DB only */}
+      {marqueeReviews.length > 0 ? (
+        <TestimonialsSection
+          title="קולות מהקהילה הדיגיטלית"
+          description="כל ביקורת קושרה להוכחת רכישה לפני שפורסמה. המצפן לא משקר — לא ניתן לרכוש מיקום, לא ניתן להסיר ביקורת שלילית, ולא ניתן לכתוב ביקורת ללא אימות עצמאי."
+          className="border-t border-border/40"
+          testimonials={marqueeReviews}
+        />
+      ) : (
+        <section className="border-t border-border/40 bg-background py-16 md:py-24 text-center px-4">
+          <p className="text-2xl md:text-3xl font-display font-semibold text-foreground mb-3">
+            קולות מהקהילה הדיגיטלית
+          </p>
+          <p className="text-muted-foreground max-w-md mx-auto mb-6">
+            עדיין לא נכתבו ביקורות — היו הראשונים לשתף את החוויה שלכם.
+          </p>
+          <a
+            href="/search"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            מצאו קורס וכתבו ביקורת
+          </a>
+        </section>
+      )}
 
       {/* Recent Reviews */}
       <section className="container py-20">
