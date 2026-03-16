@@ -10,7 +10,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, LayoutDashboard, ShieldCheck,
-  ArrowLeftRight, Home, Tag, ChevronDown, BarChart3, Package, BookOpen,
+  ArrowLeftRight, Home, Tag, ChevronDown, BarChart3, Package, BookOpen, Settings,
 } from "lucide-react";
 import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
@@ -205,10 +205,20 @@ const BusinessNavbar = () => {
 
               {userOpen && (
                 <div
-                  className="absolute top-full left-0 w-36 rounded-xl border border-zinc-700/80 bg-zinc-800/95 backdrop-blur-sm shadow-2xl py-1 z-50"
+                  className="absolute top-full left-0 w-44 rounded-xl border border-zinc-700/80 bg-zinc-800/95 backdrop-blur-sm shadow-2xl py-1 z-50"
                   style={{ direction: "rtl" }}
                   role="menu"
                 >
+                  <Link
+                    to="/business/settings"
+                    role="menuitem"
+                    onClick={() => setUserOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm w-full text-zinc-200 hover:text-white hover:bg-zinc-700/50 transition-colors"
+                  >
+                    <Settings size={14} aria-hidden="true" />
+                    הגדרות
+                  </Link>
+                  <div className="border-t border-zinc-700/60 my-0.5" />
                   <button
                     onClick={handleSignOut}
                     role="menuitem"
@@ -320,13 +330,23 @@ const BusinessNavbar = () => {
                 התחברו / הרשמו
               </Link>
             ) : (
-              <button
-                onClick={() => { handleSignOut(); setMobileOpen(false); }}
-                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-destructive w-full"
-              >
-                <LogOut size={14} aria-hidden="true" />
-                התנתקו
-              </button>
+              <>
+                <Link
+                  to="/business/settings"
+                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-300 hover:text-white"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Settings size={14} aria-hidden="true" />
+                  הגדרות
+                </Link>
+                <button
+                  onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-destructive w-full"
+                >
+                  <LogOut size={14} aria-hidden="true" />
+                  התנתקו
+                </button>
+              </>
             )}
           </div>
         </div>

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
   ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen, Briefcase,
-  UserCircle, ArrowLeftRight, Gift,
+  UserCircle, ArrowLeftRight, Gift, Settings,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
@@ -303,6 +303,12 @@ const Navbar = () => {
                     הזמינו חברים
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to={isBusinessMode ? "/business/settings" : "/settings"} className="flex items-center gap-2 w-full">
+                    <Settings size={14} className="ml-2" aria-hidden="true" />
+                    הגדרות
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut size={14} className="ml-2" aria-hidden="true" />
@@ -382,6 +388,14 @@ const Navbar = () => {
                   <UserCircle size={14} aria-hidden="true" />
                   מצב צרכן
                 </button>
+                <Link
+                  to="/business/settings"
+                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Settings size={14} aria-hidden="true" />
+                  הגדרות
+                </Link>
                 <button
                   onClick={() => { handleSignOut(); setMobileOpen(false); }}
                   className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-destructive w-full"
@@ -488,6 +502,14 @@ const Navbar = () => {
                     >
                       <Gift size={14} aria-hidden="true" />
                       הזמינו חברים
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-muted-foreground hover:text-foreground"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Settings size={14} aria-hidden="true" />
+                      הגדרות
                     </Link>
                     <button
                       onClick={() => { handleSignOut(); setMobileOpen(false); }}

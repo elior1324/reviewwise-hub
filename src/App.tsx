@@ -68,6 +68,10 @@ import WhatsAppReviewPage from "./pages/WhatsAppReviewPage";
 // Evidence submission — token-based, no login required
 import EvidenceUploadPanel from "./components/EvidenceUploadPanel";
 
+// Settings pages
+import UserSettingsPage     from "./pages/UserSettingsPage";
+import BusinessSettingsPage from "./pages/business/BusinessSettingsPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -147,6 +151,12 @@ const App = () => (
             {/* User pages — requires login */}
             <Route element={<AuthProtectedRoute />}>
               <Route path="/user/referrals" element={<UserReferralDashboard />} />
+              <Route path="/settings"        element={<UserSettingsPage />} />
+            </Route>
+
+            {/* Business settings — requires login */}
+            <Route element={<AuthProtectedRoute />}>
+              <Route path="/business/settings" element={<BusinessSettingsPage />} />
             </Route>
 
             {/* Business solution pages — any authenticated user required */}
