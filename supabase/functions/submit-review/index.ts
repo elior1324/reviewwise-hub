@@ -335,6 +335,11 @@ serve(async (req: Request) => {
           : new Date().toISOString(),
         // ✅ FIXED: server-computed status — not the client-supplied value
         verification_status:   serverVerificationStatus,
+        // Review source system (migration 20260316000020)
+        review_source: serverVerifiedPurchase ? "verified_purchase"
+          : serverVerificationStatus === "email_verified" ? "email_verified"
+          : "community",
+        source_label: serverVerifiedPurchase ? "Verified Purchase" : "Community Review",
         // ── Anti-spam fields (Feature 7) ──────────────────────────────
         spam_score:            Math.min(1.0, Math.round(spamScore * 1000) / 1000),
         is_flagged_spam:       isFlaggedSpam,

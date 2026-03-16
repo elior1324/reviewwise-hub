@@ -1067,6 +1067,12 @@ const BusinessDashboard = () => {
                   </svg>
                   ביקורות Google
                 </TabsTrigger>
+                <TabsTrigger value="trust-whatsapp" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+                  <svg width={13} height={13} viewBox="0 0 24 24" className="ml-1" fill="#25D366">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  ביקורות WhatsApp
+                </TabsTrigger>
                 <TabsTrigger value="trust-social" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Video size={13} className="ml-1" /> הוכחה חברתית
                   {isFree && <ProBadge />}
@@ -1901,6 +1907,11 @@ const BusinessDashboard = () => {
               ) : null}
             </div>
           </TabsContent>
+
+          {/* ── WhatsApp Review Collection Tab ───────────────────────────── */}
+          <TabsContent value="trust-whatsapp">
+            <WhatsAppFlowPanel businessId={businessId} isDemo={isDemo} />
+          </TabsContent>
         </Tabs>
       </div>
       <BusinessFooter />
@@ -1915,3 +1926,246 @@ const BusinessDashboard = () => {
 };
 
 export default BusinessDashboard;
+
+// ── WhatsAppFlowPanel ─────────────────────────────────────────────────────────
+// Self-contained component that lives inside the "trust-whatsapp" tab.
+// Responsibilities:
+//   1. Call get_or_create_whatsapp_flow to obtain the flow token
+//   2. Show the shareable review link
+//   3. List pending (not yet approved) WhatsApp reviews for moderation
+// ─────────────────────────────────────────────────────────────────────────────
+
+const WA_BASE_URL = typeof window !== "undefined" ? window.location.origin : "https://reviewshub.info";
+
+const WhatsAppSvg = () => (
+  <svg width={16} height={16} viewBox="0 0 24 24" fill="#25D366">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+);
+
+interface PendingWAReview {
+  id: string;
+  author_name: string | null;
+  rating: number | null;
+  text: string;
+  received_at: string;
+}
+
+const WhatsAppFlowPanel = ({
+  businessId,
+  isDemo,
+}: {
+  businessId: string | null;
+  isDemo: boolean;
+}) => {
+  const [flowToken, setFlowToken]           = useState<string | null>(null);
+  const [linkCopied, setLinkCopied]         = useState(false);
+  const [loadingFlow, setLoadingFlow]       = useState(false);
+  const [pendingReviews, setPendingReviews] = useState<PendingWAReview[]>([]);
+  const [approvingId, setApprovingId]       = useState<string | null>(null);
+  const [rejectingId, setRejectingId]       = useState<string | null>(null);
+
+  // ── Load flow token ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (isDemo || !businessId) return;
+    setLoadingFlow(true);
+    supabase
+      .rpc("get_or_create_whatsapp_flow", { p_business_id: businessId })
+      .then(({ data }) => {
+        if (data && data.length > 0) setFlowToken(data[0].flow_token);
+        setLoadingFlow(false);
+      });
+  }, [businessId, isDemo]);
+
+  // ── Load pending reviews ─────────────────────────────────────────────────
+  useEffect(() => {
+    if (isDemo || !businessId) return;
+    supabase
+      .from("whatsapp_reviews")
+      .select("id, author_name, rating, text, received_at")
+      .eq("business_id", businessId)
+      .eq("is_approved", false)
+      .eq("is_flagged", false)
+      .order("received_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setPendingReviews(data as PendingWAReview[]);
+      });
+  }, [businessId, isDemo]);
+
+  const reviewLink = flowToken ? `${WA_BASE_URL}/wa/${flowToken}` : null;
+
+  const handleCopyLink = () => {
+    if (!reviewLink) return;
+    navigator.clipboard.writeText(reviewLink);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2500);
+  };
+
+  const handleApprove = async (id: string) => {
+    setApprovingId(id);
+    await supabase
+      .from("whatsapp_reviews")
+      .update({ is_approved: true, approved_at: new Date().toISOString() })
+      .eq("id", id);
+    setPendingReviews(prev => prev.filter(r => r.id !== id));
+    setApprovingId(null);
+  };
+
+  const handleReject = async (id: string) => {
+    setRejectingId(id);
+    await supabase
+      .from("whatsapp_reviews")
+      .update({ is_flagged: true, flagged_reason: "rejected_by_owner" })
+      .eq("id", id);
+    setPendingReviews(prev => prev.filter(r => r.id !== id));
+    setRejectingId(null);
+  };
+
+  // ── Demo / not-registered state ──────────────────────────────────────────
+  if (isDemo) {
+    return (
+      <Card className="shadow-card bg-card max-w-xl">
+        <CardContent className="py-8 text-center space-y-2">
+          <WhatsAppSvg />
+          <p className="text-sm font-semibold text-foreground">ביקורות WhatsApp</p>
+          <p className="text-xs text-muted-foreground">
+            אספו ביקורות מלקוחות ישירות דרך WhatsApp — ללא צורך בחשבון ReviewHub מצד הלקוח.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            זמין לעסקים רשומים בלבד.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-2xl" dir="rtl">
+
+      {/* ── Section intro ───────────────────────────────────────────────── */}
+      <Card className="shadow-card bg-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <WhatsAppSvg /> ביקורות WhatsApp
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            שלחו ללקוחות שלכם קישור ייחודי דרך WhatsApp. הם ישאירו ביקורת ללא צורך בהרשמה.
+            הביקורת תוצג בדף הפרופיל שלכם לאחר אישורכם.
+          </p>
+
+          {/* Link display */}
+          {loadingFlow ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock size={14} className="animate-spin" />
+              מייצר קישור...
+            </div>
+          ) : reviewLink ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <code className="flex-1 text-xs bg-muted/60 border border-border/40 rounded-lg px-3 py-2 font-mono text-foreground truncate" dir="ltr">
+                {reviewLink}
+              </code>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 shrink-0"
+                onClick={handleCopyLink}
+              >
+                {linkCopied
+                  ? <><CheckCircle2 size={13} className="text-green-500" /> הועתק</>
+                  : <><ExternalLink size={13} /> העתק קישור</>
+                }
+              </Button>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">לא ניתן ליצור קישור כרגע.</p>
+          )}
+
+          <div className="flex items-start gap-2 text-[11px] text-muted-foreground/70 border border-[#25D366]/15 bg-[#25D366]/5 rounded-lg px-3 py-2.5">
+            <WhatsAppSvg />
+            <span>
+              הקישור ייחודי לעסק שלכם. כל ביקורת שתתקבל תחכה לאישורכם לפני פרסום.
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── Pending reviews moderation ──────────────────────────────────── */}
+      <Card className="shadow-card bg-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Clock size={14} className="text-amber-500" />
+            ביקורות ממתינות לאישור
+            {pendingReviews.length > 0 && (
+              <span className="mr-1 bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">
+                {pendingReviews.length}
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {pendingReviews.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">
+              אין ביקורות ממתינות לאישור.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {pendingReviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="border border-border/40 rounded-xl p-4 space-y-2 bg-card/60"
+                >
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-[#25D366]/15 flex items-center justify-center">
+                        <WhatsAppSvg />
+                      </div>
+                      <span className="text-sm font-medium text-foreground">
+                        {review.author_name || "לקוח אנונימי"}
+                      </span>
+                      {review.rating != null && (
+                        <span className="text-xs text-amber-500 flex items-center gap-0.5">
+                          {"★".repeat(review.rating)}
+                          {"☆".repeat(5 - review.rating)}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(review.received_at).toLocaleDateString("he-IL")}
+                    </span>
+                  </div>
+                  <p className="text-sm text-foreground/80 leading-relaxed">
+                    {review.text}
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-green-600 border-green-200 hover:bg-green-50 dark:hover:bg-green-900/20 text-xs h-7"
+                      disabled={approvingId === review.id}
+                      onClick={() => handleApprove(review.id)}
+                    >
+                      <CheckCircle2 size={12} />
+                      {approvingId === review.id ? "מאשר..." : "אשר ופרסם"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="gap-1.5 text-destructive hover:bg-destructive/10 text-xs h-7"
+                      disabled={rejectingId === review.id}
+                      onClick={() => handleReject(review.id)}
+                    >
+                      <XCircle size={12} />
+                      {rejectingId === review.id ? "דוחה..." : "דחה"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

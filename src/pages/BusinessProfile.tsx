@@ -8,12 +8,15 @@ import BusinessHero from "@/components/BusinessHero";
 import AddReviewForm from "@/components/AddReviewForm";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import GoogleReviewsSection, { type GoogleReview, type GoogleProfileData } from "@/components/GoogleReviewsSection";
+import WhatsAppReviewsSection, { type WhatsAppReview } from "@/components/WhatsAppReviewsSection";
+import FacebookReviewsSection, { type FacebookReview } from "@/components/FacebookReviewsSection";
+import ReviewSourceBreakdown, { type SourceFilterValue } from "@/components/ReviewSourceBreakdown";
 import BusinessTrustStatusBadge, { type BusinessTrustStatus } from "@/components/BusinessTrustStatusBadge";
 import TransparencyScore from "@/components/TransparencyScore";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star } from "lucide-react";
+import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star, ArrowUpDown } from "lucide-react";
 import { PrestigeBadge, computeEligibleBadges, buildBadgeEmbedCode, BADGE_CONFIG } from "@/components/PrestigeBadge";
 import { useState, useEffect, useMemo } from "react";
 import { generateReviewSummary, FREELANCER_CATEGORIES, SAAS_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
@@ -25,6 +28,8 @@ const BusinessProfile = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [filterRating, setFilterRating] = useState<number | null>(null);
+  const [sourceFilter, setSourceFilter] = useState<SourceFilterValue>("all");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "highest" | "lowest">("newest");
   const [business, setBusiness] = useState<Business | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -40,6 +45,12 @@ const BusinessProfile = () => {
   const [googleProfile, setGoogleProfile]   = useState<GoogleProfileData | null>(null);
   const [googleReviews, setGoogleReviews]   = useState<GoogleReview[]>([]);
   const [isOwner, setIsOwner]               = useState(false);
+
+  // WhatsApp + Facebook review state
+  const [whatsappReviews, setWhatsappReviews] = useState<WhatsAppReview[]>([]);
+  const [facebookReviews, setFacebookReviews] = useState<FacebookReview[]>([]);
+  const [facebookPageUrl,  setFacebookPageUrl]  = useState<string | null>(null);
+  const [facebookPageName, setFacebookPageName] = useState<string | null>(null);
 
   // Trust platform state
   const [trustStatus, setTrustStatus]               = useState<BusinessTrustStatus>("normal");
@@ -283,6 +294,31 @@ const BusinessProfile = () => {
         if (gReviews) setGoogleReviews(gReviews as GoogleReview[]);
       }
 
+      // ── 5. Fetch WhatsApp reviews (approved, non-flagged) ────────────────────
+      const { data: waReviews } = await supabase
+        .from("whatsapp_reviews")
+        .select("id, author_name, rating, text, received_at, source_url")
+        .eq("business_id", bizData.id)
+        .eq("is_approved", true)
+        .eq("is_flagged", false)
+        .order("received_at", { ascending: false });
+
+      if (waReviews) setWhatsappReviews(waReviews as WhatsAppReview[]);
+
+      // ── 6. Fetch Facebook reviews ────────────────────────────────────────────
+      const { data: fbReviews } = await supabase
+        .from("facebook_reviews")
+        .select("id, author_name, author_profile_url, author_photo_url, rating, text, published_at, source_url")
+        .eq("business_id", bizData.id)
+        .order("published_at", { ascending: false });
+
+      if (fbReviews && fbReviews.length > 0) {
+        setFacebookReviews(fbReviews as FacebookReview[]);
+        // Try to find a page URL from the first review that has one
+        const pageLink = fbReviews.find((r: any) => r.source_url)?.source_url ?? null;
+        setFacebookPageUrl(pageLink);
+      }
+
       setLoading(false);
     };
 
@@ -296,7 +332,30 @@ const BusinessProfile = () => {
       .then(({ data }) => setIsOwner(!!data));
   }, [user, dbBusinessId]);
 
-  const filteredReviews = filterRating ? reviews.filter(r => r.rating === filterRating) : reviews;
+  // ── Base rating-filter + source-filter applied to native reviews ───────────
+  const ratingFiltered = filterRating ? reviews.filter(r => r.rating === filterRating) : reviews;
+
+  // Source filter for native ReviewHub reviews
+  const nativeReviewsToShow = useMemo(() => {
+    let base = ratingFiltered;
+    if (sourceFilter === "verified_purchase") base = base.filter(r => r.verified);
+    else if (sourceFilter === "community")    base = base.filter(r => !r.verified);
+    else if (sourceFilter !== "all")          base = []; // google/whatsapp/facebook — handled separately
+
+    return [...base].sort((a, b) => {
+      const aMs = new Date(a.purchaseDate || a.date).getTime();
+      const bMs = new Date(b.purchaseDate || b.date).getTime();
+      switch (sortOrder) {
+        case "oldest":  return aMs - bMs;
+        case "highest": return b.rating - a.rating;
+        case "lowest":  return a.rating - b.rating;
+        default:        return bMs - aMs; // newest
+      }
+    });
+  }, [ratingFiltered, sourceFilter, sortOrder]);
+
+  // Keep filteredReviews as alias used by legacy summary/badge logic below
+  const filteredReviews = nativeReviewsToShow;
   const summary = generateReviewSummary(reviews);
 
   // Track referral click and redirect
@@ -323,10 +382,21 @@ const BusinessProfile = () => {
   // ── Hybrid review tiers ────────────────────────────────────────────────────
   // Tier 1: purchase-verified reviews → count toward trust score, shown first
   // Tier 2: open community reviews    → no purchase proof, NOT in trust score
-  const verifiedFiltered = filteredReviews.filter(r => r.verified);
-  const openFiltered     = filteredReviews.filter(r => !r.verified);
+  const verifiedFiltered = nativeReviewsToShow.filter(r => r.verified);
+  const openFiltered     = nativeReviewsToShow.filter(r => !r.verified);
   const totalVerified    = reviews.filter(r => r.verified).length;
   const totalOpen        = reviews.filter(r => !r.verified).length;
+
+  // ── Visibility flags for source-based section rendering ───────────────────
+  const showNativeSection  = sourceFilter === "all" || sourceFilter === "verified_purchase" || sourceFilter === "community";
+  const showGoogleSection  = (sourceFilter === "all" || sourceFilter === "google")   && !!googleProfile;
+  const showWASection      = (sourceFilter === "all" || sourceFilter === "whatsapp") && whatsappReviews.length > 0;
+  const showFBSection      = (sourceFilter === "all" || sourceFilter === "facebook") && facebookReviews.length > 0;
+
+  // ── Smart empty-state logic ───────────────────────────────────────────────
+  const hasAnyContent = reviews.length > 0 || googleReviews.length > 0 || whatsappReviews.length > 0 || facebookReviews.length > 0;
+  const hasOnlyExternal = reviews.length === 0 && (googleReviews.length > 0 || whatsappReviews.length > 0 || facebookReviews.length > 0);
+  const hasWAButNoVerified = (whatsappReviews.length > 0 || facebookReviews.length > 0) && totalVerified === 0;
 
   if (loading) {
     return (
@@ -616,124 +686,270 @@ const BusinessProfile = () => {
           />
         </div>
 
-        {/* Review filters */}
-        <div className="flex items-center gap-2 mb-6 flex-wrap">
-          <span className="text-sm text-muted-foreground ml-2">סינון ביקורות:</span>
-          <Button variant={filterRating === null ? "default" : "outline"} size="sm" onClick={() => setFilterRating(null)}>הכל</Button>
-          {[5, 4, 3, 2, 1].map(r => (
+        {/* ══════════════════════════════════════════════════════════════════
+            REVIEW SOURCE BREAKDOWN — dual-purpose: stats + filter
+            Clicking a source chip filters the sections below.
+        ══════════════════════════════════════════════════════════════════ */}
+        <ReviewSourceBreakdown
+          verifiedCount={totalVerified}
+          communityCount={totalOpen}
+          googleCount={googleReviews.length}
+          whatsappCount={whatsappReviews.length}
+          facebookCount={facebookReviews.length}
+          activeFilter={sourceFilter}
+          onFilterChange={setSourceFilter}
+        />
+
+        {/* ── Filter bar: rating + sort ────────────────────────────────────── */}
+        <div className="flex items-center gap-3 mb-6 flex-wrap justify-between">
+          {/* Rating filter — only shown for native review sources */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-muted-foreground shrink-0">דירוג:</span>
             <Button
-              key={r}
-              variant={filterRating === r ? "default" : "outline"}
+              variant={filterRating === null ? "default" : "outline"}
               size="sm"
-              onClick={() => setFilterRating(filterRating === r ? null : r)}
+              className="h-7 text-xs px-2.5"
+              onClick={() => setFilterRating(null)}
             >
-              {r} ⭐
+              הכל
             </Button>
-          ))}
-        </div>
-
-        {/* Reviews — two-tier: verified purchase first, open community after */}
-        <div className="space-y-6">
-
-          {/* Trust score notice */}
-          {totalVerified > 0 && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-lg px-3 py-2.5">
-              <ShieldCheck size={13} className="text-primary shrink-0" />
-              <span>
-                ציון האמון מחושב מ-<strong className="text-foreground">{totalVerified} ביקורות מאומתות רכישה</strong> בלבד
-                {totalOpen > 0 && ` · ${totalOpen} משובי קהילה מוצגים בנפרד ואינם נספרים`}
-              </span>
-            </div>
-          )}
-
-          {/* ── Platform transparency disclosure ────────────────────────────── */}
-          <div className="flex items-start gap-2 text-[11px] text-muted-foreground/70 border border-border/30 rounded-lg px-3 py-2.5 bg-muted/20">
-            <Info size={11} className="shrink-0 mt-0.5" />
-            <span>
-              חלק מהכותבים עשויים להיות בעלי עסקים הרשומים בפלטפורמה. ReviewHub מאפשרת לבעלי עסקים לדרג עסקים אחרים בתחומים שאינם מתחרים. ביקורת מסוג זה כפופה לאותן דרישות אימות ומדיניות ציות.
-            </span>
+            {[5, 4, 3, 2, 1].map(r => (
+              <Button
+                key={r}
+                variant={filterRating === r ? "default" : "outline"}
+                size="sm"
+                className="h-7 text-xs px-2.5"
+                onClick={() => setFilterRating(filterRating === r ? null : r)}
+              >
+                {r}★
+              </Button>
+            ))}
           </div>
 
-          {/* ── Tier 1: Verified Purchase reviews ─────────────────────────────── */}
-          {verifiedFiltered.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <ShieldCheck size={15} className="text-primary" aria-hidden="true" />
-                <h3 className="font-display font-semibold text-sm text-foreground">ביקורות מאומתות — הוכחת רכישה</h3>
-                <span className="text-xs text-muted-foreground">({verifiedFiltered.length})</span>
-              </div>
-              <div className="space-y-4">
-                {verifiedFiltered.map((review, i) => (
-                  <motion.div
-                    key={review.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.04 }}
-                  >
-                    <ReviewCard {...review} reviewTier="verified" />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── Tier 2: Open Community reviews ────────────────────────────────── */}
-          {openFiltered.length > 0 && (
-            <div className={verifiedFiltered.length > 0 ? "border-t border-border/30 pt-6" : ""}>
-              <div className="flex items-center gap-2 mb-1">
-                <MessageSquare size={14} className="text-muted-foreground" aria-hidden="true" />
-                <h3 className="font-display font-semibold text-sm text-foreground">משוב קהילה</h3>
-                <span className="text-xs text-muted-foreground">({openFiltered.length})</span>
-              </div>
-              <p className="text-xs text-muted-foreground mb-4">
-                משובים אלו לא עברו אימות רכישה ואינם נספרים בציון האמון הדיגיטלי.
-              </p>
-              <div className="space-y-4">
-                {openFiltered.map((review, i) => (
-                  <motion.div
-                    key={review.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.04 }}
-                  >
-                    <ReviewCard {...review} reviewTier="open" />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Empty state */}
-          {filteredReviews.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-14 gap-3 text-center">
-              {reviews.length === 0 ? (
-                <>
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-2xl">⭐</div>
-                  <p className="font-semibold text-foreground">ממתין לביקורות מאומתות</p>
-                  <p className="text-sm text-muted-foreground max-w-xs">
-                    עדיין לא התקבלו ביקורות לעסק זה. היו הראשונים לשתף חוויה אמיתית.
-                  </p>
-                </>
-              ) : (
-                <p className="text-muted-foreground">אין ביקורות עם הסינון הנבחר.</p>
-              )}
+          {/* Sort order — applies to native reviews */}
+          {showNativeSection && (
+            <div className="flex items-center gap-2">
+              <ArrowUpDown size={12} className="text-muted-foreground" />
+              <select
+                value={sortOrder}
+                onChange={e => setSortOrder(e.target.value as typeof sortOrder)}
+                className="text-xs bg-card border border-border/50 rounded-lg px-2.5 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer"
+                dir="rtl"
+              >
+                <option value="newest">חדשות קודם</option>
+                <option value="oldest">ישנות קודם</option>
+                <option value="highest">דירוג גבוה</option>
+                <option value="lowest">דירוג נמוך</option>
+              </select>
             </div>
           )}
         </div>
 
-        {/* ── Tier 3: External Google Reviews ────────────────────────────────────
-            Trust hierarchy: this section is always rendered AFTER ReviewHub reviews.
-            It is visually separated and clearly labeled as external / not verified.
-        ─────────────────────────────────────────────────────────────────────── */}
-        {googleProfile && (
+        {/* ══════════════════════════════════════════════════════════════════
+            REVIEW SECTIONS — visibility controlled by sourceFilter
+        ══════════════════════════════════════════════════════════════════ */}
+
+        {/* ── Native ReviewHub reviews ─────────────────────────────────────── */}
+        {showNativeSection && (
+          <div className="space-y-6">
+
+            {/* Trust score notice */}
+            {totalVerified > 0 && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-lg px-3 py-2.5">
+                <ShieldCheck size={13} className="text-primary shrink-0" />
+                <span>
+                  ציון האמון מחושב מ-<strong className="text-foreground">{totalVerified} ביקורות מאומתות רכישה</strong> בלבד
+                  {totalOpen > 0 && ` · ${totalOpen} משובי קהילה מוצגים בנפרד ואינם נספרים`}
+                </span>
+              </div>
+            )}
+
+            {/* Platform transparency disclosure */}
+            <div className="flex items-start gap-2 text-[11px] text-muted-foreground/70 border border-border/30 rounded-lg px-3 py-2.5 bg-muted/20">
+              <Info size={11} className="shrink-0 mt-0.5" />
+              <span>
+                חלק מהכותבים עשויים להיות בעלי עסקים הרשומים בפלטפורמה. ReviewHub מאפשרת לבעלי עסקים לדרג עסקים אחרים בתחומים שאינם מתחרים. ביקורת מסוג זה כפופה לאותן דרישות אימות ומדיניות ציות.
+              </span>
+            </div>
+
+            {/* ── Tier 1: Verified Purchase reviews ───────────────────────── */}
+            {verifiedFiltered.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <ShieldCheck size={15} className="text-green-600 dark:text-green-400" aria-hidden="true" />
+                  <h3 className="font-display font-semibold text-sm text-foreground">ביקורות מאומתות — הוכחת רכישה</h3>
+                  <span className="text-xs text-muted-foreground">({verifiedFiltered.length})</span>
+                  <span className="text-[9px] bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 rounded-full px-1.5 py-0.5 font-semibold">
+                    T1 · נספר בציון
+                  </span>
+                </div>
+                <div className="space-y-4">
+                  {verifiedFiltered.map((review, i) => (
+                    <motion.div
+                      key={review.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                    >
+                      <ReviewCard {...review} reviewTier="verified" />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Tier 4: Open Community reviews ──────────────────────────── */}
+            {openFiltered.length > 0 && (
+              <div className={verifiedFiltered.length > 0 ? "border-t border-border/30 pt-6" : ""}>
+                <div className="flex items-center gap-2 mb-1">
+                  <MessageSquare size={14} className="text-muted-foreground" aria-hidden="true" />
+                  <h3 className="font-display font-semibold text-sm text-foreground">משוב קהילה</h3>
+                  <span className="text-xs text-muted-foreground">({openFiltered.length})</span>
+                  <span className="text-[9px] bg-muted/60 text-muted-foreground border border-border/40 rounded-full px-1.5 py-0.5 font-semibold">
+                    T4 · לא נספר
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-4">
+                  משובים אלו לא עברו אימות רכישה ואינם נספרים בציון האמון הדיגיטלי.
+                </p>
+                <div className="space-y-4">
+                  {openFiltered.map((review, i) => (
+                    <motion.div
+                      key={review.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                    >
+                      <ReviewCard {...review} reviewTier="open" />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Smart empty states ───────────────────────────────────────── */}
+            {nativeReviewsToShow.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-14 gap-3 text-center">
+                {/* Case 1: No content anywhere */}
+                {!hasAnyContent && (
+                  <>
+                    <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center text-2xl">⭐</div>
+                    <p className="font-semibold text-foreground">ממתין לביקורות ראשונות</p>
+                    <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+                      עדיין לא התקבלו ביקורות לעסק זה. היו הראשונים לשתף חוויה אמיתית.
+                    </p>
+                  </>
+                )}
+
+                {/* Case 2: Only external reviews, no native */}
+                {hasOnlyExternal && sourceFilter === "all" && (
+                  <>
+                    <div className="w-14 h-14 rounded-full bg-primary/8 flex items-center justify-center">
+                      <ExternalLink size={22} className="text-primary" />
+                    </div>
+                    <p className="font-semibold text-foreground">ביקורות חיצוניות זמינות</p>
+                    <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+                      ביקורות מ-Google, WhatsApp או Facebook זמינות למטה.
+                      ביקורות מאומתות רכישה עדיין לא התקבלו.
+                    </p>
+                  </>
+                )}
+
+                {/* Case 3: WhatsApp/FB but no verified purchase */}
+                {hasWAButNoVerified && sourceFilter === "verified_purchase" && (
+                  <>
+                    <div className="w-14 h-14 rounded-full bg-green-500/10 flex items-center justify-center">
+                      <ShieldCheck size={22} className="text-green-600 dark:text-green-400" />
+                    </div>
+                    <p className="font-semibold text-foreground">משוב לקוחות זמין</p>
+                    <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+                      משוב WhatsApp ו-Facebook זמין. ביקורות מאומתות רכישה יוצגו
+                      ברגע שלקוחות יגישו הוכחת רכישה.
+                    </p>
+                  </>
+                )}
+
+                {/* Case 4: Active filter with no results */}
+                {(sourceFilter !== "all" || filterRating !== null) &&
+                  hasAnyContent &&
+                  !hasOnlyExternal &&
+                  !(hasWAButNoVerified && sourceFilter === "verified_purchase") && (
+                  <p className="text-muted-foreground">אין ביקורות עם הסינון הנבחר.</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Tier 3a: External Google Reviews ────────────────────────────────
+            Always shown below native reviews; hidden when another source filter
+            is active (unless Google is selected).
+        ─────────────────────────────────────────────────────────────────── */}
+        {showGoogleSection && (
           <div className="mt-8 border-t border-border/30 pt-8">
+            {/* Tier label */}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-[9px] bg-[#4285F4]/10 text-[#4285F4] border border-[#4285F4]/20 rounded-full px-1.5 py-0.5 font-semibold">
+                T3 · מקור חיצוני
+              </span>
+              <span className="text-xs text-muted-foreground">ביקורות Google אינן חלק מציון האמון של ReviewHub</span>
+            </div>
             <GoogleReviewsSection
               businessId={dbBusinessId!}
               businessSlug={slug!}
-              profile={googleProfile}
+              profile={googleProfile!}
               reviews={googleReviews}
               isOwner={isOwner}
             />
+          </div>
+        )}
+
+        {/* ── Tier 2: WhatsApp Customer Feedback ──────────────────────────────
+            Approved by business owner. T2 in hierarchy.
+        ─────────────────────────────────────────────────────────────────── */}
+        {showWASection && (
+          <div className={showNativeSection || showGoogleSection ? "mt-6 border-t border-border/30 pt-6" : "mt-4"}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[9px] bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/20 rounded-full px-1.5 py-0.5 font-semibold">
+                T2 · אושר על ידי בעל העסק
+              </span>
+            </div>
+            <WhatsAppReviewsSection reviews={whatsappReviews} />
+          </div>
+        )}
+
+        {/* ── Tier 3b: Facebook Reviews ────────────────────────────────────────
+            Imported from Facebook. Treated as T3 (same as Google).
+        ─────────────────────────────────────────────────────────────────── */}
+        {showFBSection && (
+          <div className={showNativeSection || showGoogleSection || showWASection ? "mt-6 border-t border-border/30 pt-6" : "mt-4"}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[9px] bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/20 rounded-full px-1.5 py-0.5 font-semibold">
+                T3 · מקור חיצוני
+              </span>
+              <span className="text-xs text-muted-foreground">ביקורות Facebook אינן חלק מציון האמון של ReviewHub</span>
+            </div>
+            <FacebookReviewsSection
+              reviews={facebookReviews}
+              pageUrl={facebookPageUrl}
+              pageName={facebookPageName}
+            />
+          </div>
+        )}
+
+        {/* ── Empty state when filter shows a source with no data ─────────────── */}
+        {!showNativeSection && !showGoogleSection && !showWASection && !showFBSection && (
+          <div className="flex flex-col items-center justify-center py-14 gap-3 text-center">
+            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+              <MessageSquare size={22} className="text-muted-foreground" />
+            </div>
+            <p className="font-semibold text-foreground">אין ביקורות ממקור זה</p>
+            <p className="text-sm text-muted-foreground max-w-xs">
+              עדיין אין ביקורות מהמקור שנבחר. לחצו "הכל" לצפייה בכל הביקורות.
+            </p>
+            <Button variant="outline" size="sm" onClick={() => setSourceFilter("all")}>
+              הצג הכל
+            </Button>
           </div>
         )}
 

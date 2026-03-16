@@ -60,6 +60,9 @@ import DocsPage from "./pages/business/resources/DocsPage";
 import BlogPage from "./pages/business/resources/BlogPage";
 import ResourcesPage from "./pages/business/resources/ResourcesPage";
 
+// WhatsApp review collection — no login required (customer-facing)
+import WhatsAppReviewPage from "./pages/WhatsAppReviewPage";
+
 // Evidence submission — token-based, no login required
 import EvidenceUploadPanel from "./components/EvidenceUploadPanel";
 
@@ -86,6 +89,9 @@ const App = () => (
             <Route path="/course/:courseId" element={<CoursePage />} />
             <Route path="/go/:courseId" element={<AffiliateRedirect />} />
             <Route path="/giveaway" element={<GiveawayPage />} />
+
+            {/* WhatsApp review collection — customer submits via link from business */}
+            <Route path="/wa/:token" element={<WhatsAppReviewPage />} />
 
             {/* Embeddable widget page — bare iframe, no navbar/footer */}
             <Route path="/widget/:slug" element={<WidgetPage />} />
