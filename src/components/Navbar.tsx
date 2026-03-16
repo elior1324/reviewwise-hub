@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
   ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen, Briefcase,
-  UserCircle, ArrowLeftRight,
+  UserCircle, ArrowLeftRight, Gift,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
@@ -297,6 +297,12 @@ const Navbar = () => {
                   <ArrowLeftRight size={14} className="ml-2" aria-hidden="true" />
                   {isBusinessMode ? "גלישה רגילה" : "פרופיל עסקי"}
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/user/referrals" className="flex items-center gap-2 w-full text-primary font-medium">
+                    <Gift size={14} className="ml-2 text-primary" aria-hidden="true" />
+                    הזמינו חברים
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut size={14} className="ml-2" aria-hidden="true" />
@@ -474,12 +480,22 @@ const Navbar = () => {
                   </Link>
                 )}
                 {user && (
-                  <button
-                    onClick={() => { handleSignOut(); setMobileOpen(false); }}
-                    className="block text-sm py-3 min-h-[44px] flex items-center text-destructive w-full"
-                  >
-                    התנתקו
-                  </button>
+                  <>
+                    <Link
+                      to="/user/referrals"
+                      className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-primary font-medium"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Gift size={14} aria-hidden="true" />
+                      הזמינו חברים
+                    </Link>
+                    <button
+                      onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                      className="block text-sm py-3 min-h-[44px] flex items-center text-destructive w-full"
+                    >
+                      התנתקו
+                    </button>
+                  </>
                 )}
               </div>
             </>

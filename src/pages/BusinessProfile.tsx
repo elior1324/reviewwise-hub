@@ -16,7 +16,7 @@ import TransparencyScore from "@/components/TransparencyScore";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star, ArrowUpDown, TrendingUp, TrendingDown, Minus, AlertTriangle, Brain } from "lucide-react";
+import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star, ArrowUpDown, TrendingUp, TrendingDown, Minus, AlertTriangle, Brain, ShoppingBag } from "lucide-react";
 import { PrestigeBadge, computeEligibleBadges, buildBadgeEmbedCode, BADGE_CONFIG } from "@/components/PrestigeBadge";
 import { useState, useEffect, useMemo } from "react";
 import { generateReviewSummary, FREELANCER_CATEGORIES, SAAS_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
@@ -69,6 +69,10 @@ const BusinessProfile = () => {
   const [aiTrendingScore, setAiTrendingScore]   = useState<number | null>(null);
   const [aiFlags, setAiFlags]               = useState<string[]>([]);
 
+  // Affiliate program
+  const [affiliateMode,         setAffiliateMode]         = useState<"reviewhub_model" | "personal_affiliate" | "none">("none");
+  const [personalAffiliateUrls, setPersonalAffiliateUrls] = useState<string[]>([]);
+
   useEffect(() => {
     if (!slug) return;
 
@@ -82,7 +86,7 @@ const BusinessProfile = () => {
       //   Rating and reviewCount are computed below from the reviews we fetch.
       const { data: bizData } = await supabase
         .from("businesses")
-        .select("id, slug, name, website, email, phone, category, description, verified, collaboration_active, collaboration_method, collaboration_coupon, trust_status, trust_status_reason, transparency_score, response_rate, avg_response_hours, verified_review_ratio, ai_summary, sentiment_score, trending_score, ai_flags")
+        .select("id, slug, name, website, email, phone, category, description, verified, collaboration_active, collaboration_method, collaboration_coupon, trust_status, trust_status_reason, transparency_score, response_rate, avg_response_hours, verified_review_ratio, ai_summary, sentiment_score, trending_score, ai_flags, affiliate_mode, personal_affiliate_url, personal_affiliate_urls")
         .eq("slug", slug)
         .maybeSingle();
 
@@ -108,6 +112,17 @@ const BusinessProfile = () => {
       setAiSentimentScore(bizData.sentiment_score ?? null);
       setAiTrendingScore(bizData.trending_score ?? null);
       setAiFlags(Array.isArray(bizData.ai_flags) ? bizData.ai_flags : []);
+
+      // Affiliate program
+      setAffiliateMode(((bizData as any).affiliate_mode as "reviewhub_model" | "personal_affiliate" | "none") || "none");
+      {
+        const rawUrls  = (bizData as any).personal_affiliate_urls as string[] | null;
+        const singular = (bizData as any).personal_affiliate_url  as string | null;
+        const urls: string[] = Array.isArray(rawUrls) && rawUrls.length > 0
+          ? rawUrls
+          : singular ? [singular] : [];
+        setPersonalAffiliateUrls(urls);
+      }
 
       // Collaboration program state
       setCollabActive(bizData.collaboration_active || false);
@@ -580,6 +595,17 @@ const BusinessProfile = () => {
             sentimentScore={aiSentimentScore}
             trendingScore={aiTrendingScore}
             flags={aiFlags}
+          />
+        )}
+
+        {/* ── Affiliate Purchase Section ───────────────────────────────────── */}
+        {affiliateMode !== "none" && (
+          <AffiliatePurchaseSection
+            mode={affiliateMode}
+            slug={slug!}
+            businessName={business.name}
+            personalUrls={personalAffiliateUrls}
+            dbBusinessId={dbBusinessId}
           />
         )}
 
@@ -1368,6 +1394,182 @@ const FLAG_LABELS: Record<string, string> = {
   sentiment_mismatch:  "אי-התאמת סנטימנט",
   velocity_anomaly:    "אנומליית קצב",
 };
+
+// ── AffiliatePurchaseSection ──────────────────────────────────────────────────
+// Shown on the business profile page when the business has an active affiliate
+// program.  Gives visitors a clear, transparent purchase path:
+//   reviewhub_model    → one-click button → /go/:slug → auto 5% discount
+//   personal_affiliate → button(s) → direct external URLs
+// All routing still passes through /go/:slug so click tracking is consistent.
+
+interface AffiliatePurchaseSectionProps {
+  mode:          "reviewhub_model" | "personal_affiliate" | "none";
+  slug:          string;
+  businessName:  string;
+  personalUrls:  string[];
+  dbBusinessId:  string | null;
+}
+
+function AffiliatePurchaseSection({ mode, slug, businessName, personalUrls, dbBusinessId }: AffiliatePurchaseSectionProps) {
+  if (mode === "none") return null;
+
+  const validUrls = personalUrls.filter(u => u.trim());
+
+  const handleGoLink = async () => {
+    // Record click then open the /go/ redirect page
+    if (dbBusinessId) {
+      await supabase.from("referral_clicks").insert({
+        business_id: dbBusinessId,
+        business_slug: slug,
+        referrer: document.referrer || null,
+      }).catch(() => {/* non-blocking */});
+    }
+    window.open(`/go/${slug}`, "_blank", "noopener,noreferrer");
+  };
+
+  if (mode === "reviewhub_model") {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.05 }}
+        className="mb-8 rounded-xl border border-primary/30 bg-gradient-to-l from-primary/[0.07] via-background to-background overflow-hidden"
+      >
+        <div className="p-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <ShoppingBag size={22} className="text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                <p className="font-display font-bold text-base text-foreground">
+                  קנו עם הנחה דרך ReviewHub
+                </p>
+                <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wide">
+                  5% הנחה אוטומטית
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                הגעתם לפרופיל זה דרך ReviewHub? כשתרכשו דרך הכפתור הזה, קוד{" "}
+                <code className="font-mono font-bold text-primary">RH5</code> יופעל
+                אוטומטית בקופה — 5% הנחה על המחיר המלא.
+              </p>
+            </div>
+            <Button
+              onClick={handleGoLink}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shrink-0"
+            >
+              <ShoppingBag size={15} />
+              לרכישה עם הנחה
+            </Button>
+          </div>
+          <div className="mt-3 flex items-start gap-1.5 text-[11px] text-muted-foreground/70">
+            <Info size={11} className="mt-0.5 shrink-0" />
+            <span>
+              גילוי נאות: רכישות דרך קישור זה עוברות דרך תשתית המעקב של ReviewHub. ReviewHub גובה 5% עמלת פלטפורם לאחר אישור הרכישה. פעולה זו אינה משפיעה על ציון האמון האובייקטיבי של הספק.
+            </span>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // personal_affiliate — one or multiple URLs
+  if (validUrls.length === 0) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.05 }}
+      className="mb-8 rounded-xl border border-border/50 bg-card/60 overflow-hidden"
+    >
+      <div className="p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Link2 size={20} className="text-primary" />
+          </div>
+          <div>
+            <p className="font-display font-bold text-base text-foreground">
+              {validUrls.length === 1 ? "קישור רכישה" : "קישורי רכישה"}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {validUrls.length === 1
+                ? `${businessName} משתמש במערכת שותפים עצמאית`
+                : `${businessName} מציע ${validUrls.length} קישורי רכישה`
+              }
+            </p>
+          </div>
+        </div>
+
+        {validUrls.length === 1 ? (
+          // Single URL — prominent button
+          <Button
+            onClick={handleGoLink}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 w-full sm:w-auto"
+          >
+            <ExternalLink size={15} />
+            לרכישה
+          </Button>
+        ) : (
+          // Multiple URLs — labeled card per link
+          <div className="space-y-2">
+            {validUrls.map((url, index) => {
+              let hostname = url;
+              try { hostname = new URL(url).hostname.replace("www.", ""); } catch { /* keep raw */ }
+              return (
+                <div
+                  key={index}
+                  className="flex items-center gap-3 rounded-lg border border-border/50 bg-background px-3 py-2.5"
+                >
+                  <div className="flex-shrink-0 flex items-center gap-1.5">
+                    {index === 0 ? (
+                      <span className="text-[9px] font-bold text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">
+                        ראשי
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-bold text-muted-foreground bg-muted/60 border border-border/40 px-1.5 py-0.5 rounded">
+                        {index + 1}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-foreground truncate">{hostname}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{url.length > 55 ? url.slice(0, 55) + "…" : url}</p>
+                  </div>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors px-2.5 py-1.5 rounded-lg"
+                    onClick={async () => {
+                      if (dbBusinessId) {
+                        await supabase.from("referral_clicks").insert({
+                          business_id: dbBusinessId, business_slug: slug,
+                          referrer: document.referrer || null,
+                        }).catch(() => {});
+                      }
+                    }}
+                  >
+                    <ExternalLink size={11} />
+                    לרכישה
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="mt-3 flex items-start gap-1.5 text-[11px] text-muted-foreground/70">
+          <Info size={11} className="mt-0.5 shrink-0" />
+          <span>
+            גילוי נאות: הספק משתמש במערכת שותפים עצמאית. ReviewHub אינה גובה עמלה על הפניות אלו ואינה אחראית לתנאי העסקה. הרכישה מתבצעת ישירות אצל הספק.
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 function AiInsightsSection({ summary, sentimentScore, trendingScore, flags }: AiInsightsSectionProps) {
   const trending = trendingInfo(trendingScore);

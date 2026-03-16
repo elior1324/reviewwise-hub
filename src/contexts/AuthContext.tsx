@@ -213,6 +213,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // ── Referral processing helper ─────────────────────────────────────────────
+  // Called once per SIGNED_IN event. If localStorage holds a pending invite
+  // code (set by InviteRedirect.tsx), it is redeemed via the DB function and
+  // then cleared — ensuring the inviter gets 150 pts exactly once.
+
+  const processStoredReferral = useCallback(async (userId: string) => {
+    const code = localStorage.getItem("rh_invite_code");
+    if (!code) return;
+    localStorage.removeItem("rh_invite_code"); // clear immediately to avoid double-processing
+    try {
+      const { error } = await supabase.rpc("process_user_referral", {
+        invite_code: code,
+        new_user_id: userId,
+      });
+      if (error) {
+        devWarn("[Auth] process_user_referral error (non-fatal):", error.message);
+      } else {
+        devLog("[Auth] referral processed for code:", code);
+      }
+    } catch (e) {
+      devErr("[Auth] process_user_referral threw (non-fatal):", e);
+    }
+  }, []);
+
   // ── Auth state listener ────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -228,6 +252,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (newSession?.user) {
           setTimeout(() => checkSubscription(), 0);
+          // Process any pending referral code (stored by InviteRedirect)
+          if (event === "SIGNED_IN") {
+            setTimeout(() => processStoredReferral(newSession.user.id), 0);
+          }
           startSessionTimeout();
         } else {
           setSubscriptionTier("free");
@@ -249,7 +277,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [checkSubscription, startSessionTimeout]);
+  }, [checkSubscription, startSessionTimeout, processStoredReferral]);
 
   // Refresh subscription tier every 60 s while logged in
   useEffect(() => {

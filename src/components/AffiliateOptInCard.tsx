@@ -58,11 +58,11 @@ const SPLIT_ROWS = [
     note:  "הנחה מיידית בקופה עם קוד RH5",
   },
   {
-    icon:  <BadgeDollarSign size={14} className="text-blue-500" />,
+    icon:  <BadgeDollarSign size={14} className="text-primary" />,
     label: "ReviewHub",
     share: "5%",
-    color: "text-blue-600",
-    bg:    "bg-blue-50 border-blue-200",
+    color: "text-primary",
+    bg:    "bg-primary/[0.06] border-primary/20",
     note:  "עמלת פלטפורם — מממנת את תשתית האימות",
   },
   {
@@ -189,7 +189,7 @@ const AffiliateOptInCard = ({
           <div className="space-y-1.5">
             <div className="flex rounded-lg overflow-hidden h-3 mb-2 border border-border/40">
               <div className="bg-emerald-400" style={{ width: "5%" }} title="5% הנחה ללקוח" />
-              <div className="bg-blue-400"    style={{ width: "5%" }} title="5% עמלת ReviewHub" />
+              <div className="bg-primary/70"  style={{ width: "5%" }} title="5% עמלת ReviewHub" />
               <div className="bg-primary flex items-center justify-center text-[8px] font-bold text-white flex-1" title="90% לעסק">90%</div>
             </div>
             {SPLIT_ROWS.map(row => (
@@ -334,10 +334,10 @@ const AffiliateOptInCard = ({
       )}
 
       {mode === "personal_affiliate" && (
-        <div className="border-t border-blue-200/60 bg-blue-50/40 px-5 py-3">
+        <div className="border-t border-border/40 bg-muted/30 px-5 py-3">
           <div className="flex items-center gap-2">
-            <Link2 size={14} className="text-blue-600" />
-            <p className="text-xs font-medium text-blue-700">
+            <Link2 size={14} className="text-primary" />
+            <p className="text-xs font-medium text-foreground">
               {personalAffiliateUrls.some(u => u.trim()) ? "קישורי שותפים אישיים יוגדרו מיד לאחר ההרשמה" : "הזינו לפחות קישור שותפים אחד למעלה"}
             </p>
           </div>

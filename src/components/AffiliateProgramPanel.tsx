@@ -141,9 +141,9 @@ const StatCard = ({
 const SplitGrid = () => (
   <div className="flex justify-center gap-3 flex-wrap">
     {[
-      { label: "לקוח חוסך", value: "5%",  color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" },
-      { label: "ReviewHub", value: "5%",  color: "text-blue-600",    bg: "bg-blue-50 border-blue-200"       },
-      { label: "העסק מקבל", value: "90%", color: "text-primary",    bg: "bg-primary/5 border-primary/20"   },
+      { label: "לקוח חוסך", value: "5%",  color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200"   },
+      { label: "ReviewHub", value: "5%",  color: "text-primary",    bg: "bg-primary/[0.07] border-primary/20" },
+      { label: "העסק מקבל", value: "90%", color: "text-primary",    bg: "bg-primary/5 border-primary/20"     },
     ].map(item => (
       <div key={item.label} className={`rounded-xl border px-4 py-2 text-center ${item.bg}`}>
         <div className={`font-bold text-xl ${item.color}`}>{item.value}</div>
@@ -176,18 +176,18 @@ const AffiliatStatusBanner = ({
     reviewhub_model: {
       label: "מודל עמלה של ReviewHub (5% / 5%)",
       sub:   "לקוחות מקבלים 5% הנחה · ReviewHub גובה 5% עמלה · העסק שומר 90%",
-      color: "text-emerald-700 dark:text-emerald-400",
-      bg:    "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800",
-      dot:   "bg-emerald-500",
+      color: "text-primary",
+      bg:    "bg-primary/[0.07] border-primary/25",
+      dot:   "bg-primary",
     },
     personal_affiliate: {
       label: "קישור שותפים אישי",
       sub:   personalUrl
         ? `מפנה דרך: ${personalUrl.substring(0, 45)}${personalUrl.length > 45 ? "…" : ""}${urlCountLabel}`
         : "טרם הוגדר קישור אישי",
-      color: "text-blue-700 dark:text-blue-400",
-      bg:    "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800",
-      dot:   personalUrl ? "bg-blue-500" : "bg-amber-500",
+      color: "text-foreground",
+      bg:    "bg-muted/40 border-border/60",
+      dot:   personalUrl ? "bg-primary" : "bg-amber-500",
     },
     none: {
       label: "תוכנית שותפים לא פעילה",
@@ -722,16 +722,16 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
       {affiliateMode === "personal_affiliate" && !settingsOpen && (
         <div className="space-y-4">
           {/* Personal URLs card */}
-          <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-950/20 p-4">
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
             <div className="flex items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">
-                <Link2 size={14} className="text-blue-600 dark:text-blue-400" />
-                <p className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                <Link2 size={14} className="text-primary" />
+                <p className="text-xs font-bold text-foreground uppercase tracking-wide">
                   קישורי שותפים אישיים — פעילים
                 </p>
               </div>
               {personalAffiliateUrls.filter(u => u.trim()).length > 0 && (
-                <span className="text-[10px] font-bold text-blue-600 bg-blue-100 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">
                   {personalAffiliateUrls.filter(u => u.trim()).length} קישורים
                 </span>
               )}
@@ -751,7 +751,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
                       </span>
                     )}
                     <div className="flex-1 rounded-lg bg-background border border-border/60 px-3 py-2 overflow-hidden">
-                      <code className="text-xs text-blue-600 dark:text-blue-400 font-mono break-all">{url}</code>
+                      <code className="text-xs text-primary font-mono break-all">{url}</code>
                     </div>
                     <Button
                       size="sm"
@@ -776,7 +776,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
           </div>
 
           {/* ReviewHub referral link — still works as the entry point */}
-          <div className="rounded-xl border border-border/60 bg-card p-4">
+          <div className="rounded-xl border border-primary/20 bg-primary/[0.04] p-4">
             <div className="flex items-center gap-2 mb-2">
               <ExternalLink size={14} className="text-primary" />
               <p className="text-xs font-bold text-primary uppercase tracking-wide">קישור כניסה ב-ReviewHub</p>
@@ -844,7 +844,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
                 </div>
               </div>
               <Button onClick={() => handleToggleReviewhubModel(true)} className="gap-2" variant="outline">
-                <PlayCircle size={14} className="text-emerald-600" />
+                <PlayCircle size={14} className="text-primary" />
                 הפעל שוב
               </Button>
             </div>
@@ -896,7 +896,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
                   <StatCard icon={<MousePointerClick size={13} />} label="קליקים (30 יום)"    value={stats.clicks_30d.toLocaleString("he-IL")}       sub={`סה״כ: ${stats.total_clicks.toLocaleString("he-IL")}`} />
                   <StatCard icon={<ShoppingCart size={13} />}      label="המרות (30 יום)"     value={stats.conversions_30d.toLocaleString("he-IL")}   sub={`סה״כ: ${stats.total_conversions.toLocaleString("he-IL")}`} color="text-emerald-600" />
                   <StatCard icon={<Percent size={13} />}           label="אחוז המרה"           value={`${stats.conversion_rate}%`}                     sub="מקליק לרכישה" color={stats.conversion_rate >= 10 ? "text-emerald-600" : "text-amber-600"} />
-                  <StatCard icon={<BadgeDollarSign size={13} />}   label="עמלות (סה״כ)"        value={formatPrice(stats.platform_commission)}          sub={`הנחות ללקוחות: ${formatPrice(stats.customer_discount)}`} color="text-blue-600" />
+                  <StatCard icon={<BadgeDollarSign size={13} />}   label="עמלות (סה״כ)"        value={formatPrice(stats.platform_commission)}          sub={`הנחות ללקוחות: ${formatPrice(stats.customer_discount)}`} color="text-primary" />
                 </div>
               </div>
 
@@ -906,7 +906,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { icon: <Tag size={14} className="text-emerald-500" />,           label: "חסכון ללקוחות",   value: formatPrice(stats.customer_discount),   sub: `${LEARNER_DISCOUNT_RATE * 100}% הנחה`,           color: "text-emerald-600" },
-                    { icon: <BadgeDollarSign size={14} className="text-blue-500" />,  label: "עמלת ReviewHub",   value: formatPrice(stats.platform_commission), sub: `${PLATFORM_FEE_RATE * 100}% עמלת פלטפורם`,     color: "text-blue-600"    },
+                    { icon: <BadgeDollarSign size={14} className="text-primary" />,    label: "עמלת ReviewHub",   value: formatPrice(stats.platform_commission), sub: `${PLATFORM_FEE_RATE * 100}% עמלת פלטפורם`,     color: "text-primary"     },
                     { icon: <TrendingUp size={14} className="text-primary" />,         label: "הכנסה גולמית",    value: formatPrice(stats.total_revenue),       sub: "לפני ניכוי עמלה",                                color: "text-primary"     },
                   ].map(item => (
                     <div key={item.label} className="text-center rounded-lg bg-muted/30 border border-border/40 p-3">
@@ -931,7 +931,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
                 <StatCard icon={<MousePointerClick size={13} />} label="קליקים סה״כ"       value={stats.total_clicks.toLocaleString("he-IL")} />
                 <StatCard icon={<ShoppingCart size={13} />}      label="המרות סה״כ"         value={stats.total_conversions.toLocaleString("he-IL")} color="text-emerald-600" />
                 <StatCard icon={<Percent size={13} />}           label="אחוז המרה"           value={`${stats.conversion_rate}%`}                color="text-amber-600" />
-                <StatCard icon={<BadgeDollarSign size={13} />}   label="הכנסה גולמית סה״כ"  value={formatPrice(stats.total_revenue)}            color="text-blue-600" />
+                <StatCard icon={<BadgeDollarSign size={13} />}   label="הכנסה גולמית סה״כ"  value={formatPrice(stats.total_revenue)}            color="text-primary" />
               </div>
             </>
           )}
@@ -962,7 +962,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
                           <td className="px-3 py-2.5 text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString("he-IL")}</td>
                           <td className="px-3 py-2.5 text-xs font-medium">{c.transaction_amount ? formatPrice(c.transaction_amount) : "—"}</td>
                           <td className="px-3 py-2.5 text-xs text-emerald-600 font-medium">{c.customer_discount ? `−${formatPrice(c.customer_discount)}` : "—"}</td>
-                          <td className="px-3 py-2.5 text-xs text-blue-600 font-medium">{c.platform_commission ? formatPrice(c.platform_commission) : "—"}</td>
+                          <td className="px-3 py-2.5 text-xs text-primary font-medium">{c.platform_commission ? formatPrice(c.platform_commission) : "—"}</td>
                           <td className="px-3 py-2.5 text-xs text-primary font-bold">{c.business_net ? formatPrice(c.business_net) : "—"}</td>
                           <td className="px-3 py-2.5">{statusBadge(c.status)}</td>
                         </tr>

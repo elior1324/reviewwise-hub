@@ -19,6 +19,8 @@ import BusinessProfile from "./pages/BusinessProfile";
 import CoursePage from "./pages/CoursePage";
 import AffiliateRedirect from "./pages/AffiliateRedirect";
 import GiveawayPage from "./pages/GiveawayPage";
+import InviteRedirect from "./pages/InviteRedirect";
+import UserReferralDashboard from "./pages/UserReferralDashboard";
 
 // Auth + legal
 import AuthPage from "./pages/AuthPage";
@@ -88,6 +90,7 @@ const App = () => (
             <Route path="/biz/:slug" element={<BusinessProfile />} />
             <Route path="/course/:courseId" element={<CoursePage />} />
             <Route path="/go/:courseId" element={<AffiliateRedirect />} />
+            <Route path="/invite/:code" element={<InviteRedirect />} />
             <Route path="/giveaway" element={<GiveawayPage />} />
 
             {/* WhatsApp review collection — customer submits via link from business */}
@@ -140,6 +143,11 @@ const App = () => (
             {/* Partner / widget pages */}
             <Route path="/partners/trust-badge" element={<Navigate to="/partners/prestige-badges?tab=widgets" replace />} />
             <Route path="/partners/prestige-badges" element={<PrestigeBadgesPage />} />
+
+            {/* User pages — requires login */}
+            <Route element={<AuthProtectedRoute />}>
+              <Route path="/user/referrals" element={<UserReferralDashboard />} />
+            </Route>
 
             {/* Business solution pages — any authenticated user required */}
             <Route element={<AuthProtectedRoute />}>
