@@ -6,7 +6,7 @@ import {
   Search, ShieldCheck, Star, TrendingUp, Users,
   UserCheck, BookOpen, HelpCircle, ChevronDown, Cpu
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import BusinessCard from "@/components/BusinessCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -45,6 +45,20 @@ const scaleIn = {
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Scroll to hash anchor after page renders (React Router doesn't do this automatically)
+  useEffect(() => {
+    if (!location.hash) return;
+    const id = location.hash.slice(1);
+    // rAF + small delay ensures framer-motion has painted before scrolling
+    const raf = requestAnimationFrame(() => {
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 80);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [location.hash]);
   const [topFreelancers, setTopFreelancers] = useState<Business[]>([]);
   const [topCourseProviders, setTopCourseProviders] = useState<Business[]>([]);
   const [topSaasTools, setTopSaasTools] = useState<Business[]>([]);
