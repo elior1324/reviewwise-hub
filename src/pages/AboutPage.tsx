@@ -5,9 +5,6 @@ import { ShieldCheck, Target, BookOpen, Users, Award, TrendingUp, CheckCircle, X
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { computeVerifiedPricing, formatPrice, LEARNER_DISCOUNT_RATE, PLATFORM_FEE_RATE, TOTAL_TRUST_CHARGE } from "@/lib/affiliate";
-import { useLanguage } from "@/contexts/LanguageContext";
-import AboutPageEN from "@/pages/i18n/AboutPageEN";
-import AboutPageRU from "@/pages/i18n/AboutPageRU";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -15,24 +12,6 @@ const fadeUp = {
 };
 
 const AboutPage = () => {
-  const { language } = useLanguage();
-
-  if (language === "en") return (
-    <div className="min-h-screen bg-background noise-overlay">
-      <Navbar />
-      <AboutPageEN />
-      <Footer />
-    </div>
-  );
-
-  if (language === "ru") return (
-    <div className="min-h-screen bg-background noise-overlay">
-      <Navbar />
-      <AboutPageRU />
-      <Footer />
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />

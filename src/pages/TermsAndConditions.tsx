@@ -3,9 +3,6 @@ import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Shield, FileText, Users, CreditCard, Lock, AlertTriangle, Scale, Globe, RefreshCw, Mail, Ban, Handshake, BadgeCheck } from "lucide-react";
 import { ReactNode } from "react";
-import { useLanguage } from "@/contexts/LanguageContext";
-import TermsEN from "@/pages/i18n/TermsEN";
-import TermsRU from "@/pages/i18n/TermsRU";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -25,24 +22,6 @@ const Section = ({ icon: Icon, title, children }: { icon: any; title: string; ch
 );
 
 const TermsAndConditions = () => {
-  const { language } = useLanguage();
-
-  if (language === "en") return (
-    <div className="min-h-screen bg-background noise-overlay">
-      <Navbar />
-      <TermsEN />
-      <Footer />
-    </div>
-  );
-
-  if (language === "ru") return (
-    <div className="min-h-screen bg-background noise-overlay">
-      <Navbar />
-      <TermsRU />
-      <Footer />
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
       <Navbar />

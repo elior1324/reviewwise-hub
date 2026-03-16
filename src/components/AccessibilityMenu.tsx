@@ -8,7 +8,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 type AccessibilitySettings = {
   fontSize: number; // 0 = normal, 1 = large, 2 = x-large
@@ -34,16 +33,9 @@ const defaults: AccessibilitySettings = {
   invertColors: false,
 };
 
+const fontSizeLabels = ["רגיל", "גדול", "גדול מאוד"];
+
 const AccessibilityMenu = () => {
-  const { t } = useLanguage();
-
-  // Font size label array — translated
-  const fontSizeLabels = [
-    t("accessibility.fontNormal"),
-    t("accessibility.fontLarge"),
-    t("accessibility.fontXLarge"),
-  ];
-
   const [settings, setSettings] = useState<AccessibilitySettings>(() => {
     try {
       const saved = localStorage.getItem("a11y-settings");
@@ -98,7 +90,7 @@ const AccessibilityMenu = () => {
           variant="ghost"
           size="icon"
           className={`rounded-full border border-border/50 relative ${hasAnyActive ? "text-primary border-primary/50" : ""}`}
-          aria-label={t("accessibility.title")}
+          aria-label="תפריט נגישות"
         >
           <Accessibility size={18} />
           {hasAnyActive && (
@@ -106,59 +98,58 @@ const AccessibilityMenu = () => {
           )}
         </Button>
       </DropdownMenuTrigger>
-      {/* Always render accessibility menu in document direction */}
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuItem onClick={cycleFontSize}>
           <span className="flex items-center justify-between w-full">
-            <span>{t("accessibility.fontSize")}</span>
+            <span>גודל טקסט</span>
             <span className="text-xs text-muted-foreground">{fontSizeLabels[settings.fontSize]}</span>
           </span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggle("highContrast")}>
           <span className="flex items-center justify-between w-full">
-            <span>{t("accessibility.highContrast")}</span>
+            <span>ניגודיות גבוהה</span>
             {isActive("highContrast") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggle("reducedMotion")}>
           <span className="flex items-center justify-between w-full">
-            <span>{t("accessibility.reducedMotion")}</span>
+            <span>הפחתת אנימציות</span>
             {isActive("reducedMotion") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggle("linkHighlight")}>
           <span className="flex items-center justify-between w-full">
-            <span>{t("accessibility.linkHighlight")}</span>
+            <span>הדגשת קישורים</span>
             {isActive("linkHighlight") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggle("readableFont")}>
           <span className="flex items-center justify-between w-full">
-            <span>{t("accessibility.readableFont")}</span>
+            <span>פונט קריא</span>
             {isActive("readableFont") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggle("bigCursor")}>
           <span className="flex items-center justify-between w-full">
-            <span>{t("accessibility.bigCursor")}</span>
+            <span>סמן מוגדל</span>
             {isActive("bigCursor") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggle("grayscale")}>
           <span className="flex items-center justify-between w-full">
-            <span>{t("accessibility.grayscale")}</span>
+            <span>גווני אפור</span>
             {isActive("grayscale") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggle("textSpacing")}>
           <span className="flex items-center justify-between w-full">
-            <span>{t("accessibility.textSpacing")}</span>
+            <span>ריווח טקסט</span>
             {isActive("textSpacing") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggle("invertColors")}>
           <span className="flex items-center justify-between w-full">
-            <span>{t("accessibility.invertColors")}</span>
+            <span>הפיכת צבעים</span>
             {isActive("invertColors") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
@@ -166,7 +157,7 @@ const AccessibilityMenu = () => {
         <DropdownMenuItem onClick={resetAll} className="text-muted-foreground">
           <span className="flex items-center gap-2">
             <RotateCcw size={14} />
-            {t("accessibility.reset")}
+            איפוס הגדרות
           </span>
         </DropdownMenuItem>
       </DropdownMenuContent>

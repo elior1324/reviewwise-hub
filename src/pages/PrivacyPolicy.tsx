@@ -9,9 +9,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield, ChevronDown, Mail } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useLanguage } from "@/contexts/LanguageContext";
-import PrivacyPolicyEN from "@/pages/i18n/PrivacyPolicyEN";
-import PrivacyPolicyRU from "@/pages/i18n/PrivacyPolicyRU";
 
 const META = {
   updated:   "10 במרץ 2026",
@@ -216,24 +213,6 @@ const AccordionItem = ({ section }: { section: typeof SECTIONS[0] }) => {
 };
 
 export default function PrivacyPolicy() {
-  const { language } = useLanguage();
-
-  if (language === "en") return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <PrivacyPolicyEN />
-      <Footer />
-    </div>
-  );
-
-  if (language === "ru") return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <PrivacyPolicyRU />
-      <Footer />
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <Navbar />
