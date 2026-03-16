@@ -1,19 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, SAAS_CATEGORIES } from "@/data/mockData";
 
-export function useCategories(type: "freelancer" | "course") {
-  return useQuery({
-    queryKey: ["categories", type],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("approved_categories" as any)
-        .select("name")
-        .eq("type", type)
-        .order("name");
+type CategoryType = "freelancer" | "course" | "saas";
 
-      if (error) throw error;
-      return (data as any[]).map((c: any) => c.name as string);
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+const STATIC_CATEGORIES: Record<CategoryType, string[]> = {
+  freelancer: FREELANCER_CATEGORIES,
+  course:     COURSE_CATEGORIES,
+  saas:       SAAS_CATEGORIES,
+};
+
+/**
+ * Returns the category list for a given business type.
+ * Uses static arrays from mockData.ts (source of truth for categories).
+ * Returns a stable object with the same shape as a useQuery result for
+ * backwards compatibility with existing consumers.
+ */
+export function useCategories(type: CategoryType) {
+  const data = STATIC_CATEGORIES[type] ?? [];
+  return {
+    data,
+    isLoading: false,
+    isError: false,
+    error: null,
+  } as const;
 }

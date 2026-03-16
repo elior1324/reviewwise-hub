@@ -323,99 +323,6 @@ const BusinessLanding = () => {
         </div>
       </section>
 
-      {/* ── 5/5 Verified Deal Economics Section ──────────────────────────── */}
-      <section className="border-y border-primary/20 bg-primary/5">
-        <div className="container py-16">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-primary/15 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-              <Tag size={14} /> מודל 5 / 5 — Verified Deal
-            </div>
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">
-              Win-Win-Win — לומד, יוצר, ופלטפורמה
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              10% מהמחיר הרשמי — מחולק שווה בשווה. הלומד חוסך, ReviewHub מרוויחה, והיוצר מקבל ביקורות מאומתות.
-            </p>
-          </div>
-
-          {/* Economics table — live example */}
-          <div className="max-w-2xl mx-auto">
-            {/* Live price calculator example */}
-            {(() => {
-              const example = computeVerifiedPricing(1000);
-              return (
-                <div className="rounded-xl border border-primary/30 bg-card/80 overflow-hidden">
-                  <div className="bg-primary/10 px-5 py-3 flex items-center gap-2">
-                    <BadgePercent size={16} className="text-primary" />
-                    <span className="font-display font-semibold text-sm text-foreground">דוגמה: קורס במחיר {formatPrice(example.listPrice)}</span>
-                  </div>
-                  <div className="divide-y divide-border/40">
-                    <div className="flex items-center justify-between px-5 py-3 text-sm">
-                      <span className="text-muted-foreground">מחיר שוק (מחיר רשמי)</span>
-                      <span className="font-semibold text-foreground">{formatPrice(example.listPrice)}</span>
-                    </div>
-                    <div className="flex items-center justify-between px-5 py-3 text-sm bg-primary/5">
-                      <span className="text-primary font-medium">הנחת לומד ({example.learnerDiscountPct}%) — מיידית בקופה</span>
-                      <span className="text-primary font-bold">−{formatPrice(example.learnerDiscount)}</span>
-                    </div>
-                    <div className="flex items-center justify-between px-5 py-3 text-sm">
-                      <span className="text-muted-foreground">לומד משלם בפועל</span>
-                      <span className="font-bold text-foreground">{formatPrice(example.verifiedPrice)}</span>
-                    </div>
-                    <div className="flex items-center justify-between px-5 py-3 text-sm">
-                      <span className="text-muted-foreground">עמלת ReviewHub ({example.platformFeePct}%) — מבוסס הצלחה</span>
-                      <span className="text-muted-foreground">−{formatPrice(example.platformFee)}</span>
-                    </div>
-                    <div className="flex items-center justify-between px-5 py-3 font-bold bg-card/60">
-                      <span className="text-foreground">יוצר מקבל</span>
-                      <span className="text-primary text-lg">{formatPrice(example.creatorNet)}</span>
-                    </div>
-                  </div>
-                  <div className="px-5 py-3 bg-muted/30 text-xs text-muted-foreground text-right leading-relaxed">
-                    עמלת ReviewHub ({example.platformFeePct}%) היא עמלת CAC קבועה ומבוססת הצלחה בלבד — אתם משלמים רק על עסקאות שהושלמו. ציון האמון מחושב באופן עצמאי ואינו מושפע מהעמלה.
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* 3-column benefit summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              {[
-                {
-                  who:    "הלומד",
-                  benefit:`${LEARNER_DISCOUNT_RATE * 100}% הנחה מיידית`,
-                  sub:    "+ סטטוס קונה מאומת + ביקורת מאומתת (×1.0)",
-                  color:  "border-blue-500/30 bg-blue-500/5 text-blue-600 dark:text-blue-400",
-                },
-                {
-                  who:    "ReviewHub",
-                  benefit:`${PLATFORM_FEE_RATE * 100}% עמלת תפעול`,
-                  sub:    "מממנת תשתית אימות עצמאית — לא משפיעה על ציון",
-                  color:  "border-primary/30 bg-primary/5 text-primary",
-                },
-                {
-                  who:    "היוצר",
-                  benefit:`CAC קבועה — ${TOTAL_TRUST_CHARGE * 100}% מבוסס הצלחה`,
-                  sub:    "ביקורות מאומתות → ציון אמון גבוה → גידול אורגני",
-                  color:  "border-emerald-500/30 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400",
-                },
-              ].map(({ who, benefit, sub, color }) => (
-                <div key={who} className={`rounded-xl border p-4 ${color}`}>
-                  <p className="font-bold text-sm mb-1">{who}</p>
-                  <p className="font-display font-semibold text-base leading-snug">{benefit}</p>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{sub}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Trust firewall note */}
-            <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-muted-foreground text-right leading-relaxed">
-              <strong className="text-foreground">חומת אמון:</strong> כל עסקה מסחרית (עמלה, מנוי, שדרוג) מבוצעת במערכת נפרדת לחלוטין ממנגנון חישוב ציון האמון. הספרה הכלכלית לא נוגעת בספרת האמון — זה תנאי יסוד לעצמאות הפלטפורמה.
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Free Features */}
       <section className="border-y border-border/50">
         <div className="container py-20">
@@ -716,6 +623,99 @@ const BusinessLanding = () => {
           </div>
         </section>
       )}
+
+      {/* ── 5/5 Verified Deal Economics Section ──────────────────────────── */}
+      <section className="border-y border-primary/20 bg-primary/5">
+        <div className="container py-16">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 bg-primary/15 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+              <Tag size={14} /> מודל 5 / 5 — Verified Deal
+            </div>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">
+              Win-Win-Win — לומד, יוצר, ופלטפורמה
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              10% מהמחיר הרשמי — מחולק שווה בשווה. הלומד חוסך, ReviewHub מרוויחה, והיוצר מקבל ביקורות מאומתות.
+            </p>
+          </div>
+
+          {/* Economics table — live example */}
+          <div className="max-w-2xl mx-auto">
+            {/* Live price calculator example */}
+            {(() => {
+              const example = computeVerifiedPricing(1000);
+              return (
+                <div className="rounded-xl border border-primary/30 bg-card/80 overflow-hidden">
+                  <div className="bg-primary/10 px-5 py-3 flex items-center gap-2">
+                    <BadgePercent size={16} className="text-primary" />
+                    <span className="font-display font-semibold text-sm text-foreground">דוגמה: קורס במחיר {formatPrice(example.listPrice)}</span>
+                  </div>
+                  <div className="divide-y divide-border/40">
+                    <div className="flex items-center justify-between px-5 py-3 text-sm">
+                      <span className="text-muted-foreground">מחיר שוק (מחיר רשמי)</span>
+                      <span className="font-semibold text-foreground">{formatPrice(example.listPrice)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-5 py-3 text-sm bg-primary/5">
+                      <span className="text-primary font-medium">הנחת לומד ({example.learnerDiscountPct}%) — מיידית בקופה</span>
+                      <span className="text-primary font-bold">−{formatPrice(example.learnerDiscount)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-5 py-3 text-sm">
+                      <span className="text-muted-foreground">לומד משלם בפועל</span>
+                      <span className="font-bold text-foreground">{formatPrice(example.verifiedPrice)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-5 py-3 text-sm">
+                      <span className="text-muted-foreground">עמלת ReviewHub ({example.platformFeePct}%) — מבוסס הצלחה</span>
+                      <span className="text-muted-foreground">−{formatPrice(example.platformFee)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-5 py-3 font-bold bg-card/60">
+                      <span className="text-foreground">יוצר מקבל</span>
+                      <span className="text-primary text-lg">{formatPrice(example.creatorNet)}</span>
+                    </div>
+                  </div>
+                  <div className="px-5 py-3 bg-muted/30 text-xs text-muted-foreground text-right leading-relaxed">
+                    עמלת ReviewHub ({example.platformFeePct}%) היא עמלת CAC קבועה ומבוססת הצלחה בלבד — אתם משלמים רק על עסקאות שהושלמו. ציון האמון מחושב באופן עצמאי ואינו מושפע מהעמלה.
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 3-column benefit summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              {[
+                {
+                  who:    "הלומד",
+                  benefit:`${LEARNER_DISCOUNT_RATE * 100}% הנחה מיידית`,
+                  sub:    "+ סטטוס קונה מאומת + ביקורת מאומתת (×1.0)",
+                  color:  "border-blue-500/30 bg-blue-500/5 text-blue-600 dark:text-blue-400",
+                },
+                {
+                  who:    "ReviewHub",
+                  benefit:`${PLATFORM_FEE_RATE * 100}% עמלת תפעול`,
+                  sub:    "מממנת תשתית אימות עצמאית — לא משפיעה על ציון",
+                  color:  "border-primary/30 bg-primary/5 text-primary",
+                },
+                {
+                  who:    "היוצר",
+                  benefit:`CAC קבועה — ${TOTAL_TRUST_CHARGE * 100}% מבוסס הצלחה`,
+                  sub:    "ביקורות מאומתות → ציון אמון גבוה → גידול אורגני",
+                  color:  "border-emerald-500/30 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400",
+                },
+              ].map(({ who, benefit, sub, color }) => (
+                <div key={who} className={`rounded-xl border p-4 ${color}`}>
+                  <p className="font-bold text-sm mb-1">{who}</p>
+                  <p className="font-display font-semibold text-base leading-snug">{benefit}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{sub}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Trust firewall note */}
+            <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-muted-foreground text-right leading-relaxed">
+              <strong className="text-foreground">חומת אמון:</strong> כל עסקה מסחרית (עמלה, מנוי, שדרוג) מבוצעת במערכת נפרדת לחלוטין ממנגנון חישוב ציון האמון. הספרה הכלכלית לא נוגעת בספרת האמון — זה תנאי יסוד לעצמאות הפלטפורמה.
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* FAQ Section */}
       <section className="border-t border-border/50" id="faq">

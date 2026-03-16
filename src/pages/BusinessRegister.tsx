@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, ShieldCheck, Sparkles, Link2, TrendingUp } from "lucide-react";
+import { Building2, ShieldCheck, Sparkles, Link2, TrendingUp, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -19,20 +19,32 @@ import PrivacyConsentCheckbox from "@/components/PrivacyConsentCheckbox";
 import FormPrivacyNotice from "@/components/FormPrivacyNotice";
 import { sanitizeText, sanitizeUrl } from "@/lib/sanitize";
 import AffiliateOptInCard from "@/components/AffiliateOptInCard";
+import { type PricingModel, PRICING_MODEL_LABELS } from "@/data/mockData";
 
 const OTHER_VALUE = "__other__";
 
 // ── Field length limits ────────────────────────────────────────────────────────
-const BUSINESS_NAME_MAX  = 100;
-const DESCRIPTION_MAX    = 2000;
+const BUSINESS_NAME_MAX   = 100;
+const DESCRIPTION_MAX     = 2000;
 const CUSTOM_CATEGORY_MAX = 100;
+const FOUNDER_NAME_MAX    = 100;
+
+type BusinessType = "freelancer" | "course-provider" | "saas";
+
+// Map form business type → useCategories key
+const TYPE_TO_CATEGORY_KEY: Record<BusinessType, "freelancer" | "course" | "saas"> = {
+  "freelancer":      "freelancer",
+  "course-provider": "course",
+  "saas":            "saas",
+};
 
 const BusinessRegister = () => {
   const { toast } = useToast();
   const { user, subscriptionTier } = useAuth();
   const navigate = useNavigate();
-  const { data: freelancerCats = [], isLoading: catsLoading } = useCategories("freelancer");
-  const { data: courseCats = [] } = useCategories("course");
+  const { data: freelancerCats = [] } = useCategories("freelancer");
+  const { data: courseCats = [] }     = useCategories("course");
+  const { data: saasCats = [] }       = useCategories("saas");
 
   const [form, setForm] = useState({
     businessName: "",
@@ -41,8 +53,10 @@ const BusinessRegister = () => {
     phone: "",
     category: "",
     customCategory: "",
-    businessType: "freelancer" as "freelancer" | "course-provider",
+    businessType: "freelancer" as BusinessType,
     description: "",
+    founderName: "",
+    pricingModel: "" as PricingModel | "",
   });
 
   const [socialLinks, setSocialLinks] = useState<SocialLinksData>({});
@@ -65,9 +79,16 @@ const BusinessRegister = () => {
       });
   }, [user, navigate]);
 
-  const categories = form.businessType === "freelancer" ? freelancerCats : courseCats;
-  const filteredCategories = categories.filter(c => c !== "אחר");
+  // Derive category list from selected business type
+  const allCatsForType: string[] = (() => {
+    if (form.businessType === "freelancer")      return freelancerCats;
+    if (form.businessType === "course-provider") return courseCats;
+    return saasCats;
+  })();
+  const filteredCategories = allCatsForType.filter(c => c !== "אחר");
+
   const canEditSocials = subscriptionTier === "pro" || subscriptionTier === "enterprise";
+  const isSaas = form.businessType === "saas";
 
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
   const updateSocial = (key: keyof SocialLinksData, value: string) => setSocialLinks(prev => ({ ...prev, [key]: value }));
@@ -95,13 +116,15 @@ const BusinessRegister = () => {
     const websiteInput = canEditSocials ? (socialLinks.website || form.website) : form.website;
     if (websiteInput && !sanitizeUrl(websiteInput)) {
       toast({ title: "כתובת האתר אינה תקינה", description: "יש להזין כתובת http:// או https:// בלבד", variant: "destructive" });
+      setSubmitting(false);
       return;
     }
 
     // ── Sanitize freeform text fields ──────────────────────────────────────────
-    const cleanBusinessName  = sanitizeText(form.businessName,  BUSINESS_NAME_MAX);
-    const cleanDescription   = sanitizeText(form.description,   DESCRIPTION_MAX);
+    const cleanBusinessName   = sanitizeText(form.businessName,  BUSINESS_NAME_MAX);
+    const cleanDescription    = sanitizeText(form.description,   DESCRIPTION_MAX);
     const cleanCustomCategory = sanitizeText(form.customCategory, CUSTOM_CATEGORY_MAX);
+    const cleanFounderName    = sanitizeText(form.founderName,   FOUNDER_NAME_MAX);
 
     const isCustomCategory = form.category === OTHER_VALUE && cleanCustomCategory.trim();
     const finalCategory = isCustomCategory ? "אחר" : form.category;
@@ -130,6 +153,8 @@ const BusinessRegister = () => {
           website: sanitizeUrl(canEditSocials ? (socialLinks.website || form.website) : form.website) || null,
           description: cleanDescription || null,
           social_links: socialLinksJson,
+          founder_name: cleanFounderName || null,
+          pricing_model: isSaas && form.pricingModel ? form.pricingModel : null,
           // Affiliate program opt-in (status persisted even on decline so dashboard can re-prompt)
           affiliate_enrolled:        affiliateEnrolled,
           affiliate_enrolled_at:     affiliateEnrolled ? new Date().toISOString() : null,
@@ -142,18 +167,17 @@ const BusinessRegister = () => {
 
       // If custom category, call evaluate-category edge function
       if (isCustomCategory && biz) {
+        const evalType = TYPE_TO_CATEGORY_KEY[form.businessType];
         const { data: evalData, error: evalError } = await supabase.functions.invoke("evaluate-category", {
           body: {
             suggested_name: cleanCustomCategory.trim(),
-            type: form.businessType === "course-provider" ? "course" : "freelancer",
+            type: evalType,
             business_id: biz.id,
           },
         });
 
         if (!evalError && evalData) {
-          if (evalData.status === "already_exists") {
-            await supabase.from("businesses").update({ category: evalData.category }).eq("id", biz.id);
-          } else if (evalData.status === "approved" || evalData.status === "mapped_to_existing") {
+          if (evalData.status === "already_exists" || evalData.status === "approved" || evalData.status === "mapped_to_existing") {
             await supabase.from("businesses").update({ category: evalData.category }).eq("id", biz.id);
           }
         }
@@ -204,6 +228,7 @@ const BusinessRegister = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Business Name */}
                 <div>
                   <Label className="mb-2 block">שם העסק *</Label>
                   <Input
@@ -215,24 +240,27 @@ const BusinessRegister = () => {
                   />
                 </div>
 
+                {/* Business Type */}
                 <div>
                   <Label className="mb-2 block">סוג העסק *</Label>
-                  <Select value={form.businessType} onValueChange={v => { update("businessType", v); update("category", ""); }}>
+                  <Select value={form.businessType} onValueChange={v => { update("businessType", v); update("category", ""); update("pricingModel", ""); }}>
                     <SelectTrigger className="glass border-border/50">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="freelancer">בעל מקצוע / פרילנסר</SelectItem>
                       <SelectItem value="course-provider">ספק קורסים / מוסד לימודים</SelectItem>
+                      <SelectItem value="saas">SaaS / כלי דיגיטלי</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
+                {/* Category */}
                 <div>
                   <Label className="mb-2 block">קטגוריה *</Label>
                   <Select value={form.category} onValueChange={v => update("category", v)}>
                     <SelectTrigger className="glass border-border/50">
-                      <SelectValue placeholder={catsLoading ? "טוען קטגוריות..." : "בחרו קטגוריה"} />
+                      <SelectValue placeholder="בחרו קטגוריה" />
                     </SelectTrigger>
                     <SelectContent>
                       {filteredCategories.map(cat => (
@@ -248,6 +276,7 @@ const BusinessRegister = () => {
                   </Select>
                 </div>
 
+                {/* Custom category input */}
                 {form.category === OTHER_VALUE && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
                     <Label className="mb-2 block">שם הקטגוריה החדשה *</Label>
@@ -265,10 +294,45 @@ const BusinessRegister = () => {
                   </motion.div>
                 )}
 
+                {/* Founder Name */}
+                <div>
+                  <Label className="mb-2 block flex items-center gap-1.5">
+                    <User size={14} className="text-muted-foreground" />
+                    שם המייסד / איש הקשר
+                  </Label>
+                  <Input
+                    placeholder="לדוגמה: ישראל ישראלי"
+                    value={form.founderName}
+                    onChange={e => { if (e.target.value.length <= FOUNDER_NAME_MAX) update("founderName", e.target.value); }}
+                    maxLength={FOUNDER_NAME_MAX}
+                    className="glass border-border/50"
+                  />
+                </div>
+
+                {/* Pricing Model — SaaS only */}
+                {isSaas && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
+                    <Label className="mb-2 block">מודל תמחור</Label>
+                    <Select value={form.pricingModel} onValueChange={v => update("pricingModel", v)}>
+                      <SelectTrigger className="glass border-border/50">
+                        <SelectValue placeholder="בחרו מודל תמחור" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(Object.entries(PRICING_MODEL_LABELS) as [PricingModel, string][]).map(([key, label]) => (
+                          <SelectItem key={key} value={key}>{label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                )}
+
+                {/* Email */}
                 <div>
                   <Label className="mb-2 block">אימייל *</Label>
                   <Input type="email" placeholder="info@yourbusiness.co.il" value={form.email} onChange={e => update("email", e.target.value)} className="glass border-border/50" />
                 </div>
+
+                {/* Phone */}
                 <div>
                   <Label className="mb-2 block">טלפון</Label>
                   <Input placeholder="03-1234567" value={form.phone} onChange={e => update("phone", e.target.value)} className="glass border-border/50" />
@@ -282,10 +346,11 @@ const BusinessRegister = () => {
                   </div>
                 )}
 
+                {/* Description */}
                 <div>
                   <Label className="mb-2 block">תיאור העסק</Label>
                   <Textarea
-                    placeholder="ספרו על העסק, הקורסים והשירותים שלכם..."
+                    placeholder={isSaas ? "ספרו על הכלי, מה הוא עושה ולמי הוא מיועד..." : "ספרו על העסק, הקורסים והשירותים שלכם..."}
                     value={form.description}
                     onChange={e => { if (e.target.value.length <= DESCRIPTION_MAX) update("description", e.target.value); }}
                     maxLength={DESCRIPTION_MAX}
