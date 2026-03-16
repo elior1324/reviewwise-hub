@@ -1,14 +1,16 @@
 /**
  * UserReferralDashboard
  *
- * Consumer-facing "Invite Friends" page at /user/referrals.
+ * Consumer-facing "Invite Friends & Earn Points" page at /user/referrals.
  *
  * Shows:
  *   - The user's personal invite link (reviewhub.com/invite/<code>)
  *   - Copy-to-clipboard + share buttons
  *   - Referral stats: total invites, confirmed, points earned
- *   - Tier progress bar (150 / 300 / 600 point thresholds)
- *   - Reward catalog with Redeem buttons
+ *   - Reward milestone progress (every 600 pts = 20% discount on courses up to ₪6,000)
+ *   - Tier progress (Explorer / Influencer / Ambassador — unchanged thresholds)
+ *   - Reward catalog with cumulative Redeem buttons
+ *   - All ways to earn points
  *
  * Requires login — protected by AuthProtectedRoute in App.tsx.
  */
@@ -18,7 +20,7 @@ import {
   Gift, Copy, Check, Users, Star, Trophy,
   Zap, BadgeDollarSign, TrendingUp, ExternalLink,
   BarChart3, Sparkles, ChevronRight, ShieldCheck,
-  ThumbsUp, MessageSquare,
+  ThumbsUp, AlertCircle, Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,13 +50,21 @@ interface RewardItem {
   active:          boolean;
 }
 
-// ── Tier config ───────────────────────────────────────────────────────────────
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+/** Points needed to unlock each reward (base threshold — do not change) */
+const REWARD_THRESHOLD = 600;
+
+/** Max course price the 20% discount applies to */
+const COURSE_CAP_ILS = 6_000;
+
+// ── Tier config (thresholds unchanged) ────────────────────────────────────────
 
 const TIERS = [
-  { label: "Starter",      min: 0,   max: 149,  color: "text-muted-foreground", bg: "bg-muted/40",        border: "border-border/40"       },
-  { label: "Explorer",     min: 150, max: 299,  color: "text-primary",          bg: "bg-primary/10",      border: "border-primary/30"      },
-  { label: "Influencer",   min: 300, max: 599,  color: "text-emerald-600",      bg: "bg-emerald-500/10",  border: "border-emerald-500/30"  },
-  { label: "Ambassador",   min: 600, max: Infinity, color: "text-amber-600",    bg: "bg-amber-500/10",    border: "border-amber-500/30"    },
+  { label: "Starter",    min: 0,   max: 149,      color: "text-muted-foreground", bg: "bg-muted/40",        border: "border-border/40"       },
+  { label: "Explorer",   min: 150, max: 299,      color: "text-primary",          bg: "bg-primary/10",      border: "border-primary/30"      },
+  { label: "Influencer", min: 300, max: 599,      color: "text-emerald-600",      bg: "bg-emerald-500/10",  border: "border-emerald-500/30"  },
+  { label: "Ambassador", min: 600, max: Infinity,  color: "text-amber-600",        bg: "bg-amber-500/10",    border: "border-amber-500/30"    },
 ];
 
 function getTier(points: number) {
@@ -66,16 +76,25 @@ function nextTierPoints(points: number): number | null {
   return thresholds.find((t) => t > points) ?? null;
 }
 
-// ── All ways to earn points ───────────────────────────────────────────────────
+// ── All ways to earn (ordered by value — highest first) ───────────────────────
 
 const EARNING_METHODS = [
+  {
+    icon: ShieldCheck,
+    color:  "text-emerald-600",
+    bg:     "bg-emerald-500/10",
+    label:  "ביקורת מאומתת",
+    desc:   "אימות הרכישה עם הוכחה — הדרך המהירה ביותר לצבור נקודות",
+    points: "+40 נקודות",
+    badge:  "הכי משתלם",
+  },
   {
     icon: Gift,
     color:  "text-primary",
     bg:     "bg-primary/10",
     label:  "הזמנת חבר",
     desc:   "כל חבר שנרשם לפלטפורמה דרך הקישור האישי שלכם",
-    points: "+150 נקודות",
+    points: "+30 נקודות",
     badge:  null,
   },
   {
@@ -83,36 +102,18 @@ const EARNING_METHODS = [
     color:  "text-amber-500",
     bg:     "bg-amber-500/10",
     label:  "כתיבת ביקורת",
-    desc:   "כל ביקורת שמפורסמת בפלטפורמה מזכה בנקודות",
-    points: "+100 נקודות",
+    desc:   "כל ביקורת שמפורסמת בפלטפורמה",
+    points: "+10 נקודות",
     badge:  null,
-  },
-  {
-    icon: ShieldCheck,
-    color:  "text-emerald-600",
-    bg:     "bg-emerald-500/10",
-    label:  "ביקורת מאומתת",
-    desc:   "אימות הרכישה עם הוכחה — מספקת תוצאה כפולה",
-    points: "2X נקודות",
-    badge:  "בונוס",
   },
   {
     icon: ThumbsUp,
     color:  "text-blue-500",
     bg:     "bg-blue-500/10",
     label:  "לייקים על הביקורת",
-    desc:   "כל 10 לייקים שביקורתכם מקבלת מוסיפים 2x נוספים — עד 10x מקסימום",
-    points: "×2 לכל 10 לייקים",
+    desc:   "כל 10 לייקים שביקורתכם מקבלת מוסיפים 5 נקודות נוספות",
+    points: "+5 לכל 10 לייקים",
     badge:  "מכפיל",
-  },
-  {
-    icon: MessageSquare,
-    color:  "text-violet-500",
-    bg:     "bg-violet-500/10",
-    label:  "תגובה מועילה",
-    desc:   "כשבעל העסק מגיב על הביקורת שלכם והגולשים מסמנים אותה כמועילה",
-    points: "+20 נקודות",
-    badge:  null,
   },
   {
     icon: Zap,
@@ -120,7 +121,7 @@ const EARNING_METHODS = [
     bg:     "bg-orange-500/10",
     label:  "ביקורת ראשונה על עסק",
     desc:   "אחד מ-5 הביקורות הראשונות שנכתבות על עסק חדש בפלטפורמה",
-    points: "1.5X נקודות",
+    points: "+5 נקודות",
     badge:  "בונוס",
   },
 ] as const;
@@ -139,20 +140,26 @@ const REWARD_ICONS: Record<string, React.ReactNode> = {
 const UserReferralDashboard = () => {
   const { user } = useAuth();
 
-  const [stats,        setStats]        = useState<ReferralStats | null>(null);
-  const [rewards,      setRewards]      = useState<RewardItem[]>([]);
-  const [loading,      setLoading]      = useState(true);
-  const [copied,       setCopied]       = useState(false);
-  const [redeeming,    setRedeeming]    = useState<string | null>(null);
+  const [stats,         setStats]         = useState<ReferralStats | null>(null);
+  const [rewards,       setRewards]       = useState<RewardItem[]>([]);
+  const [redeemedCount, setRedeemedCount] = useState(0);
+  const [loading,       setLoading]       = useState(true);
+  const [copied,        setCopied]        = useState(false);
+  const [redeeming,     setRedeeming]     = useState<string | null>(null);
 
   // ── Load data ──────────────────────────────────────────────────────────────
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [statsRes, rewardsRes] = await Promise.all([
+      const [statsRes, rewardsRes, redemptionsRes] = await Promise.all([
         supabase.rpc("get_my_referral_stats"),
         supabase.from("reward_catalog").select("*").eq("active", true).order("points_required"),
+        // Count how many rewards this user has already redeemed (graceful fallback if table missing)
+        supabase
+          .from("reward_redemptions")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user?.id ?? ""),
       ]);
 
       if (statsRes.data && Array.isArray(statsRes.data) && statsRes.data.length > 0) {
@@ -161,10 +168,11 @@ const UserReferralDashboard = () => {
         setStats(statsRes.data as unknown as ReferralStats);
       }
       if (rewardsRes.data) setRewards(rewardsRes.data as RewardItem[]);
+      if (redemptionsRes.count !== null) setRedeemedCount(redemptionsRes.count);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -199,11 +207,11 @@ const UserReferralDashboard = () => {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  // ── Redeem reward ──────────────────────────────────────────────────────────
+  // ── Redeem reward (cumulative — points are never reset) ────────────────────
 
-  const handleRedeem = async (rewardId: string, pointsRequired: number) => {
-    if (!stats || stats.total_points < pointsRequired) {
-      toast.error("אין מספיק נקודות למימוש פרס זה");
+  const handleRedeem = async (rewardId: string) => {
+    if (rewardsAvailable <= 0) {
+      toast.error("אין מספיק נקודות למימוש פרס כרגע");
       return;
     }
     setRedeeming(rewardId);
@@ -222,12 +230,20 @@ const UserReferralDashboard = () => {
 
   // ── Derived values ─────────────────────────────────────────────────────────
 
-  const points   = stats?.total_points ?? 0;
-  const tier     = getTier(points);
-  const nextPts  = nextTierPoints(points);
-  const tierPct  = nextPts
-    ? Math.min(100, ((points - tier.min) / (nextPts - tier.min)) * 100)
+  const points           = stats?.total_points ?? 0;
+  const tier             = getTier(points);
+  const nextTierPts      = nextTierPoints(points);
+  const tierPct          = nextTierPts
+    ? Math.min(100, ((points - tier.min) / (nextTierPts - tier.min)) * 100)
     : 100;
+
+  // Cumulative reward milestones (points are never reset)
+  const rewardsEarned      = Math.floor(points / REWARD_THRESHOLD);
+  const rewardsAvailable   = Math.max(0, rewardsEarned - redeemedCount);
+  const progressInCycle    = points % REWARD_THRESHOLD;
+  const pointsToNextReward = REWARD_THRESHOLD - progressInCycle;
+  const rewardCyclePct     = Math.round((progressInCycle / REWARD_THRESHOLD) * 100);
+  const nextMilestone      = (rewardsEarned + 1) * REWARD_THRESHOLD;
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -235,7 +251,7 @@ const UserReferralDashboard = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      <main className="flex-1 container max-w-3xl mx-auto px-4 py-28 space-y-8">
+      <main className="flex-1 container max-w-3xl mx-auto px-4 py-28 space-y-8" dir="rtl">
 
         {/* Page title */}
         <div className="flex items-center gap-3">
@@ -279,7 +295,7 @@ const UserReferralDashboard = () => {
 
               <p className="text-xs text-muted-foreground">
                 שתפו את הקישור עם חברים — כל הרשמה מוצלחת תעניק לכם{" "}
-                <span className="font-bold text-primary">150 נקודות</span>.
+                <span className="font-bold text-primary">30 נקודות</span>.
               </p>
             </div>
 
@@ -299,6 +315,80 @@ const UserReferralDashboard = () => {
               ))}
             </div>
 
+            {/* ── Reward milestone progress (cumulative) ───────────────────── */}
+            <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 space-y-4">
+              {/* Header row */}
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <Gift size={16} className="text-primary" />
+                  <span className="font-bold text-sm text-foreground">מסלול הפרסים</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {rewardsAvailable > 0 && (
+                    <Badge className="bg-primary text-primary-foreground text-[11px] px-2 py-0.5 animate-pulse">
+                      {rewardsAvailable === 1 ? "פרס זמין למימוש!" : `${rewardsAvailable} פרסים זמינים!`}
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className="text-[11px] text-primary border-primary/30">
+                    {points} / {nextMilestone} נק׳
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Progress bar toward next reward */}
+              <div className="space-y-1.5">
+                <div className="h-3 rounded-full bg-background/60 border border-border/40 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-700"
+                    style={{ width: `${rewardCyclePct}%` }}
+                  />
+                </div>
+                {rewardsAvailable > 0 ? (
+                  <p className="text-xs text-primary font-semibold">
+                    יש לכם {rewardsAvailable === 1 ? "פרס" : `${rewardsAvailable} פרסים`} מוכן{rewardsAvailable > 1 ? "ים" : ""} למימוש ↓
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    עוד{" "}
+                    <span className="font-bold text-foreground">{pointsToNextReward}</span>{" "}
+                    נקודות לפרס הבא
+                  </p>
+                )}
+              </div>
+
+              {/* Summary row */}
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="rounded-lg bg-background/60 border border-border/30 p-2 space-y-0.5">
+                  <p className="font-bold text-lg text-foreground">{rewardsEarned}</p>
+                  <p className="text-muted-foreground">פרסים שנצברו</p>
+                </div>
+                <div className="rounded-lg bg-background/60 border border-border/30 p-2 space-y-0.5">
+                  <p className="font-bold text-lg text-foreground">{redeemedCount}</p>
+                  <p className="text-muted-foreground">מומשו</p>
+                </div>
+                <div className={`rounded-lg border p-2 space-y-0.5 ${rewardsAvailable > 0 ? "bg-primary/10 border-primary/30" : "bg-background/60 border-border/30"}`}>
+                  <p className={`font-bold text-lg ${rewardsAvailable > 0 ? "text-primary" : "text-foreground"}`}>{rewardsAvailable}</p>
+                  <p className="text-muted-foreground">זמינים</p>
+                </div>
+              </div>
+
+              {/* Reward rule note */}
+              <div className="flex items-start gap-2 rounded-lg bg-background/40 border border-border/30 p-3 text-xs text-muted-foreground">
+                <AlertCircle size={13} className="text-primary shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p>
+                    <strong className="text-foreground">כל 600 נקודות = הנחה 20% על קורס לבחירתכם</strong>
+                  </p>
+                  <p>הנקודות <strong className="text-foreground">לא מתאפסות</strong> לאחר מימוש — כל 600 נקודות נוספות מזכות בפרס נוסף.</p>
+                  <p className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                    <Lock size={10} />
+                    ההנחה חלה על קורסים עד{" "}
+                    <span className="font-bold">₪{COURSE_CAP_ILS.toLocaleString("he-IL")}</span> בלבד.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* ── Tier progress ────────────────────────────────────────────── */}
             <div className={`rounded-2xl border-2 ${tier.border} ${tier.bg} p-5 space-y-4`}>
               <div className="flex items-center justify-between">
@@ -311,17 +401,17 @@ const UserReferralDashboard = () => {
                 </Badge>
               </div>
 
-              {/* Progress bar */}
+              {/* Tier progress bar */}
               <div className="space-y-1.5">
-                <div className="h-2.5 rounded-full bg-background/60 border border-border/40 overflow-hidden">
+                <div className="h-2 rounded-full bg-background/60 border border-border/40 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-primary transition-all duration-700"
                     style={{ width: `${tierPct}%` }}
                   />
                 </div>
-                {nextPts ? (
-                  <p className="text-xs text-muted-foreground text-left">
-                    עוד <span className="font-bold text-foreground">{nextPts - points}</span> נקודות לרמה הבאה
+                {nextTierPts ? (
+                  <p className="text-xs text-muted-foreground">
+                    עוד <span className="font-bold text-foreground">{nextTierPts - points}</span> נקודות לרמה הבאה
                   </p>
                 ) : (
                   <p className="text-xs text-muted-foreground">השגתם את הרמה הגבוהה ביותר! 🎉</p>
@@ -350,79 +440,88 @@ const UserReferralDashboard = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Trophy size={16} className="text-primary" />
-                <h2 className="font-bold text-base text-foreground">פרסים לפידיון</h2>
+                <h2 className="font-bold text-base text-foreground">קטלוג פרסים</h2>
               </div>
 
               {rewards.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  אין פרסים זמינים כרגע
-                </p>
+                <p className="text-sm text-muted-foreground text-center py-8">אין פרסים זמינים כרגע</p>
               ) : (
                 <div className="space-y-2">
                   {rewards.map((reward) => {
-                    const canRedeem    = points >= reward.points_required;
-                    const isRedeeming  = redeeming === reward.id;
+                    const canRedeem   = rewardsAvailable > 0;
+                    const isRedeeming = redeeming === reward.id;
 
                     return (
                       <div
                         key={reward.id}
-                        className={`flex items-center gap-4 rounded-xl border p-4 transition-all ${
+                        className={`rounded-xl border p-4 transition-all ${
                           canRedeem
                             ? "border-primary/30 bg-primary/3 hover:border-primary/50"
                             : "border-border/40 bg-card opacity-70"
                         }`}
                       >
-                        {/* Icon */}
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                          canRedeem ? "bg-primary/10" : "bg-muted/50"
-                        }`}>
-                          {REWARD_ICONS[reward.reward_type] ?? <Gift size={18} className="text-muted-foreground" />}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-bold text-foreground">{reward.name}</span>
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] px-1.5 py-0 ${
-                                canRedeem
-                                  ? "border-primary/40 text-primary bg-primary/5"
-                                  : "border-border/50 text-muted-foreground"
-                              }`}
-                            >
-                              {reward.points_required} נקודות
-                            </Badge>
+                        <div className="flex items-start gap-4">
+                          {/* Icon */}
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                            canRedeem ? "bg-primary/10" : "bg-muted/50"
+                          }`}>
+                            {REWARD_ICONS[reward.reward_type] ?? <Gift size={18} className="text-muted-foreground" />}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                            {reward.description}
-                          </p>
-                        </div>
 
-                        {/* Redeem */}
-                        <Button
-                          size="sm"
-                          variant={canRedeem ? "default" : "outline"}
-                          disabled={!canRedeem || isRedeeming}
-                          onClick={() => handleRedeem(reward.id, reward.points_required)}
-                          className="shrink-0 text-xs"
-                        >
-                          {isRedeeming ? (
-                            <span className="flex items-center gap-1">
-                              <div className="w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                              ממש...
-                            </span>
-                          ) : canRedeem ? (
-                            <span className="flex items-center gap-1">
-                              מממש
-                              <ChevronRight size={12} />
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">
-                              חסרות {reward.points_required - points} נקודות
-                            </span>
-                          )}
-                        </Button>
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <span className="text-sm font-bold text-foreground">{reward.name}</span>
+                              <Badge
+                                variant="outline"
+                                className={`text-[10px] px-1.5 py-0 ${
+                                  canRedeem
+                                    ? "border-primary/40 text-primary bg-primary/5"
+                                    : "border-border/50 text-muted-foreground"
+                                }`}
+                              >
+                                {reward.points_required} נק׳
+                              </Badge>
+                              {rewardsAvailable > 1 && (
+                                <Badge className="text-[10px] px-1.5 py-0 bg-primary text-primary-foreground">
+                                  ×{rewardsAvailable} זמינים
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{reward.description}</p>
+
+                            {/* Course cap notice */}
+                            <p className="mt-1.5 flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                              <Lock size={9} />
+                              ההנחה חלה על קורסים עד ₪{COURSE_CAP_ILS.toLocaleString("he-IL")} בלבד
+                            </p>
+                          </div>
+
+                          {/* Redeem button */}
+                          <Button
+                            size="sm"
+                            variant={canRedeem ? "default" : "outline"}
+                            disabled={!canRedeem || !!isRedeeming}
+                            onClick={() => handleRedeem(reward.id)}
+                            className="shrink-0 text-xs"
+                          >
+                            {isRedeeming ? (
+                              <span className="flex items-center gap-1">
+                                <div className="w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                                ממש...
+                              </span>
+                            ) : canRedeem ? (
+                              <span className="flex items-center gap-1">
+                                מממש
+                                <ChevronRight size={12} />
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">
+                                עוד {pointsToNextReward} נק׳
+                              </span>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}
@@ -437,31 +536,26 @@ const UserReferralDashboard = () => {
                 כל הדרכים לצבור נקודות
               </h3>
               <div className="space-y-2">
-                {EARNING_METHODS.map(({ icon: Icon, color, bg, label, desc, points, badge }) => (
+                {EARNING_METHODS.map(({ icon: Icon, color, bg, label, desc, points: pts, badge }) => (
                   <div
                     key={label}
                     className="flex items-center gap-4 rounded-xl border border-border/40 bg-card p-4"
                   >
-                    {/* Icon */}
                     <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
                       <Icon size={18} className={color} />
                     </div>
-
-                    {/* Text */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-0.5">
                         <span className="text-sm font-semibold text-foreground">{label}</span>
                         {badge && (
-                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${color} ${bg} border-current/30`}>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${color} ${bg}`}>
                             {badge}
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
                     </div>
-
-                    {/* Points */}
-                    <div className={`text-sm font-bold shrink-0 ${color}`}>{points}</div>
+                    <div className={`text-sm font-bold shrink-0 ${color}`}>{pts}</div>
                   </div>
                 ))}
               </div>
@@ -477,9 +571,9 @@ const UserReferralDashboard = () => {
                 {[
                   "שתפו את קישור ההזמנה האישי שלכם עם חברים",
                   "החבר לוחץ על הקישור ונרשם לחשבון חדש",
-                  "לאחר אישור ההרשמה — מתווספות לכם 150 נקודות אוטומטית",
-                  "אין הגבלה על מספר ההזמנות — כל הזמנה = 150 נקודות",
-                  "מממשים נקודות לפרסים מהקטלוג למעלה",
+                  "לאחר אישור ההרשמה — מתווספות לכם 30 נקודות אוטומטית",
+                  "אין הגבלה על מספר ההזמנות — כל הזמנה = 30 נקודות",
+                  "מממשים נקודות לפרסים מהקטלוג למעלה — כל 600 נקודות = פרס נוסף",
                 ].map((step, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">

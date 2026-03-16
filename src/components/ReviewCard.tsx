@@ -228,7 +228,6 @@ const ReviewCard = ({
     if (helpfulMarked) return;
     setHelpfulMarked(true);
     onHelpfulReply?.();
-    toast.success("+20 נקודות!", { description: "הביקורת שלכם זכתה בבונוס על תגובה מועילה." });
   };
 
   const handleDelete = async () => {
@@ -323,7 +322,7 @@ const ReviewCard = ({
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="text-xs max-w-[200px]">
-                    אחד מ-5 הביקורות הראשונות על העסק! בונוס 1.5x אוטומטי לנקודות.
+                    אחד מ-5 הביקורות הראשונות על העסק! +5 נקודות בונוס על ביקורת ראשונה לעסק.
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -505,8 +504,7 @@ const ReviewCard = ({
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="text-xs max-w-[240px]">
                   <p className="font-semibold mb-1">איך המכפיל עובד?</p>
-                  <p>כל 10 לייקים מכפילים את הנקודות ב-2x נוספים.</p>
-                  <p className="mt-1">10 לייקים = 2x • 20 = 4x • 30 = 6x • עד 10x מקסימום</p>
+                  <p>כל 10 לייקים שהביקורת שלכם מקבלת = +5 נקודות נוספות.</p>
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -523,7 +521,7 @@ const ReviewCard = ({
                   className="mt-1.5 text-xs text-muted-foreground hover:text-primary gap-1"
                 >
                   <ThumbsUp size={12} />
-                  תגובה מועילה (+20 נק׳ לכותב)
+                  תגובה מועילה
                 </Button>
               ) : (
                 <span className="text-xs text-primary mt-1.5 inline-block">✓ סומן כמועיל</span>
