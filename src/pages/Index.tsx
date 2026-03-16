@@ -8,14 +8,13 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import BusinessCard from "@/components/BusinessCard";
-import ReviewCard from "@/components/ReviewCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { TestimonialsSection } from "@/components/blocks/testimonials-with-marquee";
 import { FeaturesGrid } from "@/components/blocks/features-grid";
 import { useState, useRef, useEffect } from "react";
-import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, SAAS_CATEGORIES, type Business, type Review } from "@/data/mockData";
+import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, SAAS_CATEGORIES, type Business } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -49,7 +48,6 @@ const Index = () => {
   const [topFreelancers, setTopFreelancers] = useState<Business[]>([]);
   const [topCourseProviders, setTopCourseProviders] = useState<Business[]>([]);
   const [topSaasTools, setTopSaasTools] = useState<Business[]>([]);
-  const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [marqueeReviews, setMarqueeReviews] = useState<Array<{ author: { name: string; handle: string; avatar: string }; text: string; href?: string }>>([]);
   const [freelancerCatCounts, setFreelancerCatCounts] = useState<Record<string, number>>({});
   const [courseCatCounts, setCourseCatCounts] = useState<Record<string, number>>({});
@@ -152,33 +150,6 @@ const Index = () => {
         });
         const earlyBirdIds = new Set(Object.values(businessFirsts).flat());
 
-        // ── Recent Reviews (bottom grid, 3 cards) ─────────────────────────────
-        const mapped: Review[] = data.slice(0, 3).map((r: any) => ({
-          id: r.id,
-          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
-          rating: r.rating,
-          text: r.text,
-          courseName: r.courses?.name || r.businesses?.name || "",
-          courseId: r.course_id,
-          businessSlug: r.businesses?.slug || "",
-          date: new Date(r.created_at).toLocaleDateString("he-IL"),
-          purchaseDate: r.created_at,
-          verified: r.verified || r.is_purchase_verified || false,
-          anonymous: r.anonymous || false,
-          updatedAt: r.updated_at !== r.created_at ? new Date(r.updated_at).toLocaleDateString("he-IL") : undefined,
-          flagged: r.flagged || false,
-          flagReason: r.flag_reason || undefined,
-          likeCount: r.like_count || 0,
-          isEarlyBird: earlyBirdIds.has(r.id),
-          isExpert: (expertCounts[r.user_id] || 0) >= 3,
-          reviewSource: r.review_source || undefined,
-          ownerResponse: r.business_responses?.[0] ? {
-            text: r.business_responses[0].text,
-            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
-          } : undefined,
-        }));
-        setRecentReviews(mapped);
-
         // ── Marquee / Community Voices (scrolling strip, up to 8 cards) ───────
         const AVATAR_COLORS = ["b6e3f4", "c0aede", "d1f4e0", "ffd5dc", "ffdfbf", "e8d5f4"];
         const marqueeMapped = data.slice(0, 8).map((r: any, i: number) => {
@@ -220,7 +191,6 @@ const Index = () => {
         });
         setMarqueeReviews(marqueeMapped);
       } else {
-        setRecentReviews([]);
         setMarqueeReviews([]);
       }
     };
@@ -632,25 +602,6 @@ const Index = () => {
           </a>
         </section>
       )}
-
-      {/* Recent Reviews */}
-      <section className="container py-20">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}>
-          <motion.h2 variants={fadeUp} custom={0} className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">מה הקהילה אומרת עכשיו</motion.h2>
-          <motion.p variants={fadeUp} custom={1} className="text-muted-foreground mb-10">ביקורות מאומתות רכישה שנוספו לאחרונה — הקהילה מכוונת, אתם מחליטים</motion.p>
-        </motion.div>
-        {recentReviews.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {recentReviews.map((review, i) => (
-              <motion.div key={review.id} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={fadeUp} custom={i}>
-                <ReviewCard {...review} />
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-muted-foreground py-10">עדיין אין ביקורות. היו הראשונים לכתוב!</p>
-        )}
-      </section>
 
       {/* How Verification Works — institutional methodology section */}
       <section id="how-it-works" className="container py-20">
