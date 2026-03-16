@@ -8,7 +8,8 @@
  */
 
 import { motion } from "framer-motion";
-import { Trophy, Sparkles, Info, BadgeCheck } from "lucide-react";
+import { Trophy, Info, Gift } from "lucide-react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeasonLeaderboard from "@/components/SeasonLeaderboard";
@@ -55,52 +56,26 @@ export default function LeaderboardPage() {
         </div>
       </main>
 
-      {/* How it works */}
-      <section className="bg-muted/30 border-t border-border py-10 px-4">
+      {/* Earn CTA — points explained in referrals page */}
+      <section className="bg-muted/30 border-t border-border py-8 px-4">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-lg font-bold text-foreground mb-6 flex items-center justify-center gap-2">
-            <Sparkles size={18} className="text-primary" aria-hidden="true" />
-            איך לצבור נקודות קהילה?
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              {
-                step: "1",
-                title: "כתבו ביקורת",
-                desc: "ביקורת רגילה מעניקה 100 נקודות אמון.",
-                color: "bg-primary/10 text-primary",
-              },
-              {
-                step: "2",
-                title: "אמתו רכישה",
-                desc: "ביקורת מאומתת מעניקה סה\"כ 200 נקודות אמון.",
-                color: "bg-emerald-500/10 text-emerald-600",
-              },
-              {
-                step: "3",
-                title: "קבלו תג",
-                desc: "איספו תג Verified Reviewer ודרגות מומחיות בקהילה.",
-                color: "bg-amber-500/10 text-amber-600",
-              },
-            ].map((item) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: Number(item.step) * 0.08 }}
-                className="rounded-xl border border-border/50 bg-card/40 p-5 text-right"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${item.color}`}>{item.step}</span>
-                  <BadgeCheck size={16} className="text-primary" aria-hidden="true" />
-                </div>
-                <p className="font-display font-bold text-foreground mb-1">{item.title}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex flex-col sm:flex-row items-center gap-3"
+          >
+            <p className="text-sm text-muted-foreground">
+              רוצים לראות כיצד לצבור נקודות ולממש פרסים?
+            </p>
+            <Link
+              to="/user/referrals"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+            >
+              <Gift size={14} aria-hidden="true" />
+              כל הדרכים לצבור נקודות
+            </Link>
+          </motion.div>
         </div>
       </section>
 

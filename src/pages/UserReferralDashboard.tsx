@@ -17,7 +17,8 @@ import { useEffect, useState, useCallback } from "react";
 import {
   Gift, Copy, Check, Users, Star, Trophy,
   Zap, BadgeDollarSign, TrendingUp, ExternalLink,
-  BarChart3, Sparkles, ChevronRight,
+  BarChart3, Sparkles, ChevronRight, ShieldCheck,
+  ThumbsUp, MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +65,65 @@ function nextTierPoints(points: number): number | null {
   const thresholds = [150, 300, 600];
   return thresholds.find((t) => t > points) ?? null;
 }
+
+// ── All ways to earn points ───────────────────────────────────────────────────
+
+const EARNING_METHODS = [
+  {
+    icon: Gift,
+    color:  "text-primary",
+    bg:     "bg-primary/10",
+    label:  "הזמנת חבר",
+    desc:   "כל חבר שנרשם לפלטפורמה דרך הקישור האישי שלכם",
+    points: "+150 נקודות",
+    badge:  null,
+  },
+  {
+    icon: Star,
+    color:  "text-amber-500",
+    bg:     "bg-amber-500/10",
+    label:  "כתיבת ביקורת",
+    desc:   "כל ביקורת שמפורסמת בפלטפורמה מזכה בנקודות",
+    points: "+100 נקודות",
+    badge:  null,
+  },
+  {
+    icon: ShieldCheck,
+    color:  "text-emerald-600",
+    bg:     "bg-emerald-500/10",
+    label:  "ביקורת מאומתת",
+    desc:   "אימות הרכישה עם הוכחה — מספקת תוצאה כפולה",
+    points: "2X נקודות",
+    badge:  "בונוס",
+  },
+  {
+    icon: ThumbsUp,
+    color:  "text-blue-500",
+    bg:     "bg-blue-500/10",
+    label:  "לייקים על הביקורת",
+    desc:   "כל 10 לייקים שביקורתכם מקבלת מוסיפים 2x נוספים — עד 10x מקסימום",
+    points: "×2 לכל 10 לייקים",
+    badge:  "מכפיל",
+  },
+  {
+    icon: MessageSquare,
+    color:  "text-violet-500",
+    bg:     "bg-violet-500/10",
+    label:  "תגובה מועילה",
+    desc:   "כשבעל העסק מגיב על הביקורת שלכם והגולשים מסמנים אותה כמועילה",
+    points: "+20 נקודות",
+    badge:  null,
+  },
+  {
+    icon: Zap,
+    color:  "text-orange-500",
+    bg:     "bg-orange-500/10",
+    label:  "ביקורת ראשונה על עסק",
+    desc:   "אחד מ-5 הביקורות הראשונות שנכתבות על עסק חדש בפלטפורמה",
+    points: "1.5X נקודות",
+    badge:  "בונוס",
+  },
+] as const;
 
 // ── Reward icon by type ───────────────────────────────────────────────────────
 
@@ -184,7 +244,7 @@ const UserReferralDashboard = () => {
           </div>
           <div>
             <h1 className="font-display font-bold text-2xl text-foreground">הזמינו חברים</h1>
-            <p className="text-sm text-muted-foreground">צברו נקודות על כל הרשמה מוצלחת</p>
+            <p className="text-sm text-muted-foreground">צברו נקודות דרך הזמנות, ביקורות, ומעורבות בקהילה</p>
           </div>
         </div>
 
@@ -370,11 +430,48 @@ const UserReferralDashboard = () => {
               )}
             </div>
 
-            {/* ── How it works ─────────────────────────────────────────────── */}
-            <div className="rounded-2xl border border-border/50 bg-card p-5 space-y-3">
+            {/* ── All earning methods ───────────────────────────────────────── */}
+            <div className="space-y-3">
               <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
                 <Sparkles size={14} className="text-primary" />
-                איך זה עובד?
+                כל הדרכים לצבור נקודות
+              </h3>
+              <div className="space-y-2">
+                {EARNING_METHODS.map(({ icon: Icon, color, bg, label, desc, points, badge }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-4 rounded-xl border border-border/40 bg-card p-4"
+                  >
+                    {/* Icon */}
+                    <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
+                      <Icon size={18} className={color} />
+                    </div>
+
+                    {/* Text */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <span className="text-sm font-semibold text-foreground">{label}</span>
+                        {badge && (
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${color} ${bg} border-current/30`}>
+                            {badge}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                    </div>
+
+                    {/* Points */}
+                    <div className={`text-sm font-bold shrink-0 ${color}`}>{points}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── How invites work ─────────────────────────────────────────── */}
+            <div className="rounded-2xl border border-border/50 bg-card p-5 space-y-3">
+              <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
+                <Gift size={14} className="text-primary" />
+                איך מזמינים חברים?
               </h3>
               <ol className="space-y-2 text-sm text-muted-foreground list-none">
                 {[
