@@ -705,9 +705,19 @@ const BusinessProfile = () => {
 
           {/* Empty state */}
           {filteredReviews.length === 0 && (
-            <p className="text-center text-muted-foreground py-10">
-              {reviews.length === 0 ? "עדיין אין ביקורות לעסק זה." : "אין ביקורות עם הסינון הנבחר."}
-            </p>
+            <div className="flex flex-col items-center justify-center py-14 gap-3 text-center">
+              {reviews.length === 0 ? (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-2xl">⭐</div>
+                  <p className="font-semibold text-foreground">ממתין לביקורות מאומתות</p>
+                  <p className="text-sm text-muted-foreground max-w-xs">
+                    עדיין לא התקבלו ביקורות לעסק זה. היו הראשונים לשתף חוויה אמיתית.
+                  </p>
+                </>
+              ) : (
+                <p className="text-muted-foreground">אין ביקורות עם הסינון הנבחר.</p>
+              )}
+            </div>
           )}
         </div>
 

@@ -31,12 +31,12 @@ const CSP = [
   "default-src 'self'",
   // Scripts: only from self + Cloudflare Turnstile + Stripe.js
   "script-src 'self' https://challenges.cloudflare.com https://js.stripe.com",
-  // Styles: self + inline styles needed by Tailwind/shadcn
-  "style-src 'self' 'unsafe-inline'",
-  // Images: self + Supabase storage + data URIs for avatars
-  "img-src 'self' data: blob: https://*.supabase.co https://supabase.co",
-  // Fonts: self only (Tailwind uses system fonts)
-  "font-src 'self'",
+  // Styles: self + inline (Tailwind) + Google Fonts CSS
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  // Images: self + Supabase storage + YouTube thumbnails + data URIs
+  "img-src 'self' data: blob: https://*.supabase.co https://supabase.co https://img.youtube.com https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev",
+  // Fonts: self + Google Fonts (Heebo + Space Grotesk)
+  "font-src 'self' https://fonts.gstatic.com",
   // Frames: only Stripe and Turnstile iframes
   "frame-src https://challenges.cloudflare.com https://js.stripe.com",
   // Fetch/XHR: Supabase API + Stripe + Cloudflare

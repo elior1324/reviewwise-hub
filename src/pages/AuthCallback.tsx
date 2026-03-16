@@ -67,7 +67,6 @@ const AuthCallback = () => {
         .eq("owner_id", userId)
         .maybeSingle();
 
-      console.log("[AuthCallback] Session established for user:", userId, "hasBusiness:", !!business);
       if (business) {
         navigate("/business/dashboard", { replace: true });
       } else {
