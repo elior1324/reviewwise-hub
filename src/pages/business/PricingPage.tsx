@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Input }  from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PricingComponent, REVIEWHUB_PLANS, type BillingCycle } from "@/components/ui/pricing-card";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
-import { Zap, MessageSquare, ArrowLeft, BarChart3, TrendingUp, Bell, LineChart, Target, Eye } from "lucide-react";
+import { Zap, MessageSquare, ArrowLeft, BarChart3, TrendingUp, Bell, LineChart, Target, Eye,
+         Tag, ChevronDown, ChevronUp, Loader2, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ── Analytics features (merged from AnalyticsSolution) ────────────────────────
 const ANALYTICS_FEATURES = [
@@ -23,6 +27,45 @@ const PricingPage = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("");
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // ── Coupon state (inside the popup) ───────────────────────────────────────
+  const [couponOpen,    setCouponOpen]    = useState(false);
+  const [couponCode,    setCouponCode]    = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError,   setCouponError]   = useState<string | null>(null);
+  const [couponSuccess, setCouponSuccess] = useState<{
+    message: string;
+    billingStartsAt: string;
+    durationMonths: number;
+  } | null>(null);
+
+  const handleCouponApply = async () => {
+    const trimmed = couponCode.trim().toUpperCase();
+    if (!trimmed) { setCouponError("נא להזין קוד קופון"); return; }
+    if (!user) { navigate("/auth"); return; }
+    setCouponLoading(true);
+    setCouponError(null);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("apply-coupon", {
+        body: { code: trimmed },
+      });
+      if (fnError || !data?.success) {
+        setCouponError(data?.error ?? "שגיאה בהפעלת הקופון. נסה שנית.");
+        return;
+      }
+      setCouponSuccess({
+        message:         data.message,
+        billingStartsAt: data.billing_starts_at,
+        durationMonths:  data.duration_months,
+      });
+      setCouponCode("");
+    } catch {
+      setCouponError("שגיאת רשת. נסה שנית.");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
 
   const handlePlanSelect = (planId: string) => {
     if (planId === "free") {
@@ -30,6 +73,11 @@ const PricingPage = () => {
       return;
     }
     setSelectedPlan(planId === "pro" ? "מקצועי" : "אנטרפרייז");
+    // Reset coupon state when opening popup
+    setCouponOpen(false);
+    setCouponCode("");
+    setCouponError(null);
+    setCouponSuccess(null);
     setShowPopup(true);
   };
 
@@ -156,36 +204,126 @@ const PricingPage = () => {
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="relative max-w-sm w-full mx-4 rounded-2xl border border-primary/20 bg-card p-8 shadow-2xl text-center"
             onClick={(e) => e.stopPropagation()}
+            dir="rtl"
           >
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Zap size={24} className="text-primary" aria-hidden="true" />
-            </div>
-            <h2 id="upgrade-dialog-title" className="font-display font-bold text-lg text-foreground mb-2">
-              מערכת התשלומים בקרוב! 🚀
-            </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              אינטגרציית התשלומים בשלבי פיתוח אחרונים.<br />
-              כדי לשדרג לתוכנית <strong className="text-foreground">{selectedPlan}</strong>, צרו קשר עם צוות התמיכה שלנו.
-            </p>
-            <div className="space-y-2">
-              <Button
-                onClick={() =>
-                  window.open(
-                    `mailto:support@reviewshub.info?subject=שדרוג לתוכנית ${selectedPlan}`,
-                    "_blank"
-                  )
-                }
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 gap-2"
-              >
-                <MessageSquare size={14} aria-hidden="true" /> צרו קשר לשדרוג
-              </Button>
-              <button
-                onClick={() => setShowPopup(false)}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                אולי מאוחר יותר
-              </button>
-            </div>
+            {couponSuccess ? (
+              /* ── Coupon success screen ── */
+              <div className="space-y-4">
+                <CheckCircle2 size={40} className="text-green-400 mx-auto" />
+                <h2 className="font-display font-bold text-lg text-foreground">הקופון הופעל!</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {couponSuccess.message}
+                </p>
+                <div className="rounded-xl border border-green-700/40 bg-green-950/20 p-4 text-right space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">תקופת חינם</span>
+                    <span className="font-semibold text-green-400">{couponSuccess.durationMonths} חודשים</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">תחילת חיוב</span>
+                    <span className="font-semibold text-foreground">
+                      {new Date(couponSuccess.billingStartsAt).toLocaleDateString("he-IL", {
+                        day: "numeric", month: "long", year: "numeric"
+                      })}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">אימייל אישור נשלח לתיבת הדואר שלך.</p>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={() => navigate("/business/dashboard")}
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    עבור ללוח הבקרה
+                  </Button>
+                  <button
+                    onClick={() => setShowPopup(false)}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    סגור
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* ── Default: contact to upgrade + coupon toggle ── */
+              <>
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Zap size={24} className="text-primary" aria-hidden="true" />
+                </div>
+                <h2 id="upgrade-dialog-title" className="font-display font-bold text-lg text-foreground mb-2">
+                  מערכת התשלומים בקרוב! 🚀
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                  אינטגרציית התשלומים בשלבי פיתוח אחרונים.<br />
+                  כדי לשדרג לתוכנית <strong className="text-foreground">{selectedPlan}</strong>, צרו קשר עם צוות התמיכה שלנו.
+                </p>
+                <div className="space-y-2 mb-4">
+                  <Button
+                    onClick={() =>
+                      window.open(
+                        `mailto:support@reviewshub.info?subject=שדרוג לתוכנית ${selectedPlan}`,
+                        "_blank"
+                      )
+                    }
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 gap-2"
+                  >
+                    <MessageSquare size={14} aria-hidden="true" /> צרו קשר לשדרוג
+                  </Button>
+                  <button
+                    onClick={() => setShowPopup(false)}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    אולי מאוחר יותר
+                  </button>
+                </div>
+
+                {/* ── Coupon accordion ── */}
+                <div className="rounded-xl border border-border/40 overflow-hidden text-right">
+                  <button
+                    type="button"
+                    onClick={() => { setCouponOpen(o => !o); setCouponError(null); }}
+                    className="w-full flex items-center justify-between px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Tag size={14} className="text-green-500" />
+                      יש לך קוד קופון?
+                    </span>
+                    {couponOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </button>
+
+                  {couponOpen && (
+                    <div className="px-4 pb-4 pt-1 bg-muted/10 space-y-2">
+                      <div className="flex gap-2" dir="ltr">
+                        <Input
+                          value={couponCode}
+                          onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponError(null); }}
+                          onKeyDown={e => e.key === "Enter" && handleCouponApply()}
+                          placeholder="RH-XXXX-XXXX"
+                          className="font-mono tracking-widest uppercase bg-background border-border/60"
+                          maxLength={12}
+                          disabled={couponLoading}
+                        />
+                        <Button
+                          onClick={handleCouponApply}
+                          disabled={couponLoading || !couponCode.trim()}
+                          className="bg-green-700 hover:bg-green-600 text-white shrink-0"
+                        >
+                          {couponLoading
+                            ? <Loader2 size={15} className="animate-spin" />
+                            : "הפעל"}
+                        </Button>
+                      </div>
+                      {couponError && (
+                        <p className="text-red-400 text-xs text-right">{couponError}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground text-right">
+                        קוד קופון מעניק גישה חינמית ל-3 חודשים — ללא כרטיס אשראי.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </motion.div>
         </motion.div>
       )}
