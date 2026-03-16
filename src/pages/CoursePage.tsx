@@ -18,6 +18,10 @@ import {
   buildVerifiedPurchaseUrl,
   setAffiliateCookie,
   formatPrice,
+  REWARD_DISCOUNT_CAP_ILS,
+  REWARD_MIN_PURCHASE_ILS,
+  REWARD_DISCOUNT_RATE,
+  isBusinessEligibleForReward,
 } from "@/lib/affiliate";
 
 interface CourseData {
@@ -25,13 +29,15 @@ interface CourseData {
   name: string;
   description: string;
   price: number;
-  rating: number;           // computed from reviews
-  reviewCount: number;      // computed from reviews
+  rating: number;            // computed from reviews
+  reviewCount: number;       // computed from reviews
   verifiedPurchases: number; // computed from reviews
   affiliateUrl: string;
   businessSlug: string;
   businessName: string;
   businessId: string;
+  /** 'reviewhub_model' | 'personal_affiliate' | 'none' — drives reward eligibility */
+  businessAffiliateMode: string;
 }
 
 const CoursePage = () => {
@@ -61,7 +67,7 @@ const CoursePage = () => {
       // NOTE: courses.name, rating, review_count, verified_purchases do NOT exist.
       const { data: courseData } = await supabase
         .from("courses")
-        .select("id, business_id, name, description, price, affiliate_url, businesses(slug, name)")
+        .select("id, business_id, name, description, price, affiliate_url, businesses(slug, name, affiliate_mode)")
         .eq("id", courseId)
         .maybeSingle();
 
@@ -103,6 +109,7 @@ const CoursePage = () => {
         businessSlug: (courseData.businesses as any)?.slug || "",
         businessName: (courseData.businesses as any)?.name || "",
         businessId: courseData.business_id,
+        businessAffiliateMode: (courseData.businesses as any)?.affiliate_mode ?? "none",
       });
 
       if (reviewData) {
@@ -281,6 +288,40 @@ const CoursePage = () => {
                           מעקב 30 יום — הנחה תחול גם אם תרכשו מאוחר יותר
                         </li>
                       </ul>
+
+                      {/* ── Reward eligibility notice ──────────────────────── */}
+                      {(() => {
+                        const eligible = isBusinessEligibleForReward(course.businessAffiliateMode);
+                        const discountPct = Math.round(REWARD_DISCOUNT_RATE * 100);
+                        return eligible ? (
+                          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 space-y-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <Gift size={12} className="text-emerald-600 shrink-0" />
+                              <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+                                הפרס שלכם חל כאן
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                              עד ₪{REWARD_DISCOUNT_CAP_ILS} הנחה ({discountPct}% מסכום הרכישה) ·{" "}
+                              מינ׳ רכישה ₪{REWARD_MIN_PURCHASE_ILS.toLocaleString("he-IL")}
+                            </p>
+                            <Link
+                              to="/user/referrals"
+                              className="text-[10px] font-semibold text-emerald-600 hover:underline inline-flex items-center gap-1"
+                            >
+                              <Gift size={10} />
+                              מממשים ב"הזמינו חברים" ←
+                            </Link>
+                          </div>
+                        ) : (
+                          <div className="rounded-lg border border-border/30 bg-muted/30 p-2.5">
+                            <p className="text-[10px] text-muted-foreground/70 flex items-center gap-1">
+                              <Info size={9} className="shrink-0" />
+                              עסק זה אינו משתתף בתוכנית הפרסים — הפרס אינו ניתן למימוש כאן
+                            </p>
+                          </div>
+                        );
+                      })()}
 
                       {/* Trust firewall disclosure */}
                       <p className="text-[9px] text-muted-foreground/60 leading-relaxed border-t border-border/30 pt-2">

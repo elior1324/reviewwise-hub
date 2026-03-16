@@ -20,8 +20,13 @@ import {
   Gift, Copy, Check, Users, Star, Trophy,
   Zap, BadgeDollarSign, TrendingUp, ExternalLink,
   BarChart3, Sparkles, ChevronRight, ShieldCheck,
-  ThumbsUp, AlertCircle, Lock,
+  ThumbsUp, AlertCircle, Lock, Info,
 } from "lucide-react";
+import {
+  REWARD_DISCOUNT_CAP_ILS,
+  REWARD_MIN_PURCHASE_ILS,
+  REWARD_DISCOUNT_RATE,
+} from "@/lib/affiliate";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -55,8 +60,11 @@ interface RewardItem {
 /** Points needed to unlock each reward (base threshold — do not change) */
 const REWARD_THRESHOLD = 600;
 
-/** Max course price the 20% discount applies to */
-const COURSE_CAP_ILS = 6_000;
+/**
+ * Human-readable % for display (10%). Derived from the shared constant
+ * so the UI always stays in sync with the computation in affiliate.ts.
+ */
+const REWARD_DISCOUNT_PCT = Math.round(REWARD_DISCOUNT_RATE * 100); // 10
 
 // ── Tier config (thresholds unchanged) ────────────────────────────────────────
 
@@ -220,7 +228,10 @@ const UserReferralDashboard = () => {
       if (error) {
         toast.error(error.message ?? "שגיאה במימוש הפרס");
       } else {
-        toast.success("הפרס נמחש בהצלחה! נציגנו יצרו אתכם קשר.");
+        toast.success("הפרס נמחש! ניתן להחיל אותו בקנייה הבאה", {
+          description: `עד ₪${REWARD_DISCOUNT_CAP_ILS} הנחה (${REWARD_DISCOUNT_PCT}% מהרכישה) · מינ׳ ₪${REWARD_MIN_PURCHASE_ILS.toLocaleString("he-IL")} · רק דרך הפלטפורמה · רק לעסקים משתתפים`,
+          duration: 7000,
+        });
         await loadData();
       }
     } finally {
@@ -375,16 +386,28 @@ const UserReferralDashboard = () => {
               {/* Reward rule note */}
               <div className="flex items-start gap-2 rounded-lg bg-background/40 border border-border/30 p-3 text-xs text-muted-foreground">
                 <AlertCircle size={13} className="text-primary shrink-0 mt-0.5" />
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                   <p>
-                    <strong className="text-foreground">כל 600 נקודות = הנחה 20% על קורס לבחירתכם</strong>
+                    <strong className="text-foreground">
+                      כל 600 נקודות = עד ₪{REWARD_DISCOUNT_CAP_ILS.toLocaleString("he-IL")} הנחה
+                      ({REWARD_DISCOUNT_PCT}% מסכום הרכישה)
+                    </strong>
                   </p>
                   <p>הנקודות <strong className="text-foreground">לא מתאפסות</strong> לאחר מימוש — כל 600 נקודות נוספות מזכות בפרס נוסף.</p>
-                  <p className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
-                    <Lock size={10} />
-                    ההנחה חלה על קורסים עד{" "}
-                    <span className="font-bold">₪{COURSE_CAP_ILS.toLocaleString("he-IL")}</span> בלבד.
-                  </p>
+                  <ul className="mt-1 space-y-0.5">
+                    <li className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                      <Lock size={9} />
+                      מינימום רכישה: ₪{REWARD_MIN_PURCHASE_ILS.toLocaleString("he-IL")}
+                    </li>
+                    <li className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                      <Lock size={9} />
+                      תקף רק לרכישות דרך הפלטפורמה (מעקב שותפים פעיל)
+                    </li>
+                    <li className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                      <Lock size={9} />
+                      תקף רק לעסקים המשתתפים בתוכנית השותפים
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -490,11 +513,17 @@ const UserReferralDashboard = () => {
                             </div>
                             <p className="text-xs text-muted-foreground leading-relaxed">{reward.description}</p>
 
-                            {/* Course cap notice */}
-                            <p className="mt-1.5 flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
-                              <Lock size={9} />
-                              ההנחה חלה על קורסים עד ₪{COURSE_CAP_ILS.toLocaleString("he-IL")} בלבד
-                            </p>
+                            {/* Reward terms notice */}
+                            <div className="mt-1.5 space-y-0.5">
+                              <p className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                                <Lock size={9} />
+                                עד ₪{REWARD_DISCOUNT_CAP_ILS} הנחה ({REWARD_DISCOUNT_PCT}% מהרכישה) · מינ׳ ₪{REWARD_MIN_PURCHASE_ILS.toLocaleString("he-IL")}
+                              </p>
+                              <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <Info size={9} />
+                                תקף לרכישות דרך הפלטפורמה בעסקים משתתפים בלבד
+                              </p>
+                            </div>
                           </div>
 
                           {/* Redeem button */}
@@ -573,7 +602,7 @@ const UserReferralDashboard = () => {
                   "החבר לוחץ על הקישור ונרשם לחשבון חדש",
                   "לאחר אישור ההרשמה — מתווספות לכם 30 נקודות אוטומטית",
                   "אין הגבלה על מספר ההזמנות — כל הזמנה = 30 נקודות",
-                  "מממשים נקודות לפרסים מהקטלוג למעלה — כל 600 נקודות = פרס נוסף",
+                  `מממשים נקודות לפרסים מהקטלוג למעלה — כל 600 נקודות = עד ₪${REWARD_DISCOUNT_CAP_ILS} הנחה בקנייה הבאה`,
                 ].map((step, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">

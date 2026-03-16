@@ -116,3 +116,51 @@ export function clearAffiliateCookie(): void {
 export function formatPrice(amount: number): string {
   return `₪${amount.toLocaleString("he-IL")}`;
 }
+
+// ── Reward Discount Model ──────────────────────────────────────────────────────
+//
+//  At every 600-point milestone, users unlock one reward:
+//    discount = min(REWARD_DISCOUNT_CAP_ILS, purchaseAmount × REWARD_DISCOUNT_RATE)
+//
+//  Eligibility rules (ALL must hold):
+//    1. Purchase made through the ReviewHub platform (affiliate tracking active)
+//    2. Business participates in affiliate program (mode ≠ 'none')
+//    3. Purchase amount ≥ REWARD_MIN_PURCHASE_ILS
+//    4. User has at least one unredeemed reward available
+//
+//  Points are NEVER reset after redemption — every 600 additional points = +1 reward.
+
+/** Discount rate applied to the purchase price (10%) */
+export const REWARD_DISCOUNT_RATE     = 0.10;
+
+/** Hard cap on the reward discount in ILS */
+export const REWARD_DISCOUNT_CAP_ILS  = 400;
+
+/** Minimum purchase amount (ILS) required to apply the reward */
+export const REWARD_MIN_PURCHASE_ILS  = 1_500;
+
+/**
+ * Compute the reward discount amount for a given purchase price.
+ *
+ *   discount = min(400₪, purchaseAmount × 10%)
+ *
+ * Returns 0 if `purchaseAmount` is below the minimum threshold.
+ * The caller must also verify the user has rewardsAvailable > 0 and
+ * that the business is eligible (`isBusinessEligibleForReward`).
+ */
+export function computeRewardDiscount(purchaseAmount: number): number {
+  if (purchaseAmount < REWARD_MIN_PURCHASE_ILS) return 0;
+  return Math.min(
+    REWARD_DISCOUNT_CAP_ILS,
+    Math.round(purchaseAmount * REWARD_DISCOUNT_RATE),
+  );
+}
+
+/**
+ * Returns true when a business may have reward discounts applied to its
+ * purchases.  Both the ReviewHub affiliate model and a custom personal
+ * affiliate link qualify.  'none' means no affiliate tracking → ineligible.
+ */
+export function isBusinessEligibleForReward(affiliateMode: string): boolean {
+  return affiliateMode === "reviewhub_model" || affiliateMode === "personal_affiliate";
+}
