@@ -4,6 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── i18n: RTL / LTR direction management ────────────────────────────────────
+   When the document language switches to English or Russian (dir="ltr"), we
+   override any hardcoded dir="rtl" attributes on nested elements so the full
+   document flows left-to-right.  Hebrew keeps its native RTL layout unchanged.
+   The `.force-rtl` escape-hatch lets specific elements opt out of the override
+   (e.g., Hebrew content rendered inside an LTR document).               */
+
+html[dir="ltr"] [dir="rtl"]:not(.force-rtl) {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* Inline-style overrides (React style={{ direction: "rtl" }}) are handled via
+   the lang-aware `dir` variable passed from LanguageContext into components.  */
+
 /* Accessibility overrides */
 .a11y-high-contrast {
   --foreground: 0 0% 100% !important;

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ModeProvider } from "@/contexts/ModeContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import AuthProtectedRoute from "./components/AuthProtectedRoute";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import ScrollToTopButton from "@/components/ui/scroll-to-top";
@@ -72,6 +73,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <LanguageProvider>
     <AuthProvider>
       <ModeProvider>
       <TooltipProvider>
@@ -173,6 +175,7 @@ const App = () => (
       </TooltipProvider>
       </ModeProvider>
     </AuthProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 
