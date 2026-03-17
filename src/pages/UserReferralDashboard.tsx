@@ -119,9 +119,9 @@ const EARNING_METHODS = [
     color:  "text-blue-500",
     bg:     "bg-blue-500/10",
     label:  "לייקים על הביקורת",
-    desc:   "כל 10 לייקים שביקורתכם מקבלת מוסיפים 5 נקודות נוספות",
-    points: "+5 לכל 10 לייקים",
-    badge:  "מכפיל",
+    desc:   "כל לייק שביקורתכם מקבלת מוסיף נקודה אחת",
+    points: "+1 לכל לייק",
+    badge:  null,
   },
   {
     icon: Zap,

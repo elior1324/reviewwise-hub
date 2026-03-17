@@ -165,10 +165,6 @@ const ReviewCard = ({
     return () => { cancelled = true; };
   }, [user, id]);
 
-  const currentMultiplier = Math.max(1, Math.min(Math.floor(likeCount / 10) * 2, 10));
-  const nextMultiplierAt = (Math.floor(likeCount / 10) + 1) * 10;
-  const likesToNext = nextMultiplierAt - likeCount;
-
   const handleLike = async () => {
     if (!user) {
       toast.error("יש להתחבר", { description: "התחברו כדי לסמן ביקורות כמועילות" });
@@ -493,18 +489,17 @@ const ReviewCard = ({
             </Tooltip>
           )}
 
-          {/* Multiplier tooltip */}
+          {/* Like-to-points info */}
           {likeCount > 0 && (
             <div className="mt-2">
               <Tooltip>
                 <TooltipTrigger>
                   <span className="text-[10px] text-primary/70 cursor-help border-b border-dashed border-primary/30">
-                    מכפיל: {currentMultiplier}x {currentMultiplier < 10 && `• עוד ${likesToNext} לייקים ל-${Math.min(currentMultiplier + 2, 10)}x`}
+                    {likeCount} לייק{likeCount !== 1 ? "ים" : ""} = {likeCount} נקודות
                   </span>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs max-w-[240px]">
-                  <p className="font-semibold mb-1">איך המכפיל עובד?</p>
-                  <p>כל 10 לייקים שהביקורת שלכם מקבלת = +5 נקודות נוספות.</p>
+                <TooltipContent side="bottom" className="text-xs max-w-[220px]">
+                  <p>כל לייק = +1 נקודה לכותב הביקורת.</p>
                 </TooltipContent>
               </Tooltip>
             </div>
