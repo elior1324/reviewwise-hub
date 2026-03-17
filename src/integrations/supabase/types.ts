@@ -1165,6 +1165,277 @@ export type Database = {
         }
         Relationships: []
       }
+      // ── Tables added by ReviewHub migrations (post-codegen) ─────────────────
+      merchant_verif_queue: {
+        Row: {
+          id: string
+          business_id: string
+          review_id: string
+          user_id: string
+          invoice_hash: string
+          invoice_amount: number | null
+          invoice_number: string | null
+          invoice_date: string | null
+          status: string
+          expires_at: string
+          created_at: string
+          confirm_token: string
+          reject_token: string | null
+          merchant_note: string | null
+          decided_at: string | null
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          review_id: string
+          user_id: string
+          invoice_hash: string
+          invoice_amount?: number | null
+          invoice_number?: string | null
+          invoice_date?: string | null
+          status?: string
+          expires_at?: string
+          created_at?: string
+          confirm_token?: string
+          reject_token?: string | null
+          merchant_note?: string | null
+          decided_at?: string | null
+        }
+        Update: {
+          id?: string
+          business_id?: string
+          review_id?: string
+          user_id?: string
+          invoice_hash?: string
+          invoice_amount?: number | null
+          invoice_number?: string | null
+          invoice_date?: string | null
+          status?: string
+          expires_at?: string
+          created_at?: string
+          confirm_token?: string
+          reject_token?: string | null
+          merchant_note?: string | null
+          decided_at?: string | null
+        }
+        Relationships: []
+      }
+      review_proofs: {
+        Row: {
+          id: string
+          review_id: string
+          user_id: string
+          proof_type: string
+          proof_status: string
+          storage_path: string | null
+          storage_bucket: string
+          file_size_bytes: number | null
+          file_mime: string | null
+          location_lat: number | null
+          location_lng: number | null
+          location_accuracy_m: number | null
+          location_captured_at: string | null
+          distance_from_business_m: number | null
+          booking_reference: string | null
+          multiplier_granted: number
+          verified_at: string | null
+          verified_by: string | null
+          rejection_reason: string | null
+          rejection_code: string | null
+          expires_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          review_id: string
+          user_id: string
+          proof_type: string
+          proof_status?: string
+          storage_path?: string | null
+          storage_bucket?: string
+          file_size_bytes?: number | null
+          file_mime?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_accuracy_m?: number | null
+          location_captured_at?: string | null
+          distance_from_business_m?: number | null
+          booking_reference?: string | null
+          multiplier_granted?: number
+          verified_at?: string | null
+          verified_by?: string | null
+          rejection_reason?: string | null
+          rejection_code?: string | null
+          expires_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          review_id?: string
+          user_id?: string
+          proof_type?: string
+          proof_status?: string
+          storage_path?: string | null
+          storage_bucket?: string
+          file_size_bytes?: number | null
+          file_mime?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_accuracy_m?: number | null
+          location_captured_at?: string | null
+          distance_from_business_m?: number | null
+          booking_reference?: string | null
+          multiplier_granted?: number
+          verified_at?: string | null
+          verified_by?: string | null
+          rejection_reason?: string | null
+          rejection_code?: string | null
+          expires_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      point_transactions: {
+        Row: {
+          id: string
+          user_id: string
+          review_id: string | null
+          transaction_type: string
+          points: number
+          status: string
+          locked_until: string | null
+          description: string | null
+          month_year: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          review_id?: string | null
+          transaction_type: string
+          points: number
+          status?: string
+          locked_until?: string | null
+          description?: string | null
+          month_year?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          review_id?: string | null
+          transaction_type?: string
+          points?: number
+          status?: string
+          locked_until?: string | null
+          description?: string | null
+          month_year?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      community_vault: {
+        Row: {
+          id: string
+          month_year: string
+          category: string | null
+          total_pool_ils: number
+          reviewer_share_pct: number
+          status: string
+          distributed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          month_year: string
+          category?: string | null
+          total_pool_ils?: number
+          reviewer_share_pct?: number
+          status?: string
+          distributed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          month_year?: string
+          category?: string | null
+          total_pool_ils?: number
+          reviewer_share_pct?: number
+          status?: string
+          distributed_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      reviewer_metrics: {
+        Row: {
+          user_id: string
+          trust_score: number
+          review_count: number
+          verified_count: number
+          dispute_count: number
+          last_calculated_at: string
+        }
+        Insert: {
+          user_id: string
+          trust_score?: number
+          review_count?: number
+          verified_count?: number
+          dispute_count?: number
+          last_calculated_at?: string
+        }
+        Update: {
+          user_id?: string
+          trust_score?: number
+          review_count?: number
+          verified_count?: number
+          dispute_count?: number
+          last_calculated_at?: string
+        }
+        Relationships: []
+      }
+      user_trust_edges: {
+        Row: {
+          id: string
+          from_user_id: string
+          to_user_id: string
+          weight: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          from_user_id: string
+          to_user_id: string
+          weight?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          from_user_id?: string
+          to_user_id?: string
+          weight?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      ranking_refresh_queue: {
+        Row: {
+          business_id: string
+          queued_at: string
+          reason: string | null
+        }
+        Insert: {
+          business_id: string
+          queued_at?: string
+          reason?: string | null
+        }
+        Update: {
+          business_id?: string
+          queued_at?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1184,6 +1455,83 @@ export type Database = {
       increment_review_likes: {
         Args: { review_id: string }
         Returns: undefined
+      }
+      // ── RPC functions added by ReviewHub migrations (post-codegen) ───────────
+      fn_get_ranked_reviews: {
+        Args: {
+          p_business_id: string
+          p_limit?: number
+          p_offset?: number
+          p_min_rating?: number
+          p_proof_only?: boolean
+          p_use_cache?: boolean
+          p_min_rank_score?: number
+        }
+        Returns: {
+          review_id: string
+          business_id: string
+          reviewer_id: string
+          reviewer_name: string | null
+          reviewer_avatar: string | null
+          reviewer_trust_score: number
+          rating: number
+          body: string
+          proof_types: string[]
+          proof_count: number
+          verification_status: string | null
+          dispute_status: string | null
+          like_count: number
+          computed_points: number
+          created_at: string
+          trust_signal: number
+          proof_signal: number
+          likes_signal: number
+          recency_signal: number
+          rank_score: number
+        }[]
+      }
+      fn_attach_proof: {
+        Args: {
+          p_review_id: string
+          p_user_id: string
+          p_proof_type: string
+          p_storage_path?: string | null
+          p_file_hash?: string | null
+          p_file_size_bytes?: number | null
+          p_file_mime?: string | null
+          p_location_lat?: number | null
+          p_location_lng?: number | null
+          p_location_accuracy_m?: number | null
+          p_location_captured_at?: string | null
+          p_booking_reference?: string | null
+        }
+        Returns: string
+      }
+      calculate_reviewer_payout: {
+        Args: {
+          p_month_year: string
+          p_category?: string | null
+        }
+        Returns: {
+          reviewer_id: string
+          display_name: string | null
+          total_points: number
+          global_points: number
+          share_pct: number
+          estimated_payout_ils: number
+        }[]
+      }
+      fn_toggle_trust: {
+        Args: { p_from_user_id: string; p_to_user_id: string; p_weight?: number }
+        Returns: boolean
+      }
+      fn_calculate_trust_score: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      fn_get_trusted_feed: {
+        Args: { p_user_id: string; p_limit?: number; p_offset?: number }
+        Returns: { review_id: string; trust_boost: number }[]
       }
     }
     Enums: {

@@ -53,16 +53,21 @@ const DOC_SECTIONS = [
 - **סרגל אמון** — תג "עסק מאומת" שמוצג בקוד ה-HTML של הדף
 
 **הטמעה בסיסית**
-העתיקו את קוד ה-Script מלוח הבקרה (לשונית "וידג׳טים") והדביקו אותו לפני תגית \`</body>\` בדפי האתר שלכם:
+העתיקו את קוד ה-Script מלוח הבקרה (לשונית "וידג׳טים") והדביקו אותו לפני תגית `</body>` בדפי האתר שלכם:
 
-\`<script src="https://cdn.reviewhub.co.il/widget.js" data-business="YOUR_BUSINESS_SLUG" data-theme="dark"></script>\`
+```html
+<script src="https://cdn.reviewhub.co.il/widget.js"
+  data-business="YOUR_BUSINESS_SLUG"
+  data-theme="dark">
+</script>
+```
 
 **התאמה אישית**
 ניתן להוסיף פרמטרים לקוד:
-- \`data-theme="dark|light|auto"\` — ערכת צבעים
-- \`data-limit="5"\` — מספר ביקורות לתצוגה
-- \`data-lang="he|en"\` — שפת הממשק
-- \`data-show-rating="true|false"\` — הצגת דירוג מסכם
+- `data-theme="dark|light|auto"` — ערכת צבעים
+- `data-limit="5"` — מספר ביקורות לתצוגה
+- `data-lang="he|en"` — שפת הממשק
+- `data-show-rating="true|false"` — הצגת דירוג מסכם
 
 **אבטחה**
 הוידג׳ט מחובר בצורה מאובטחת דרך HTTPS בלבד. אין צורך לחשוף מפתח API בצד הלקוח.
@@ -133,20 +138,36 @@ ReviewHub מאמת שכל ביקורת נכתבת על ידי מישהו שרכ�
     content: `
 **אימות API**
 כל הקריאות ל-API דורשות מפתח API בכותרת:
-\`Authorization: Bearer YOUR_API_KEY\`
+```
+Authorization: Bearer YOUR_API_KEY
+```
 מפתח ה-API נמצא בלוח הבקרה תחת "אינטגרציות → API".
 
 **נקודות קצה עיקריות**
 
-\`GET /api/v1/reviews\` — קבלת כל הביקורות
+`GET /api/v1/reviews` — קבלת כל הביקורות
+```json
+{
+  "reviews": [...],
+  "total": 124,
+  "page": 1
+}
+```
 
-\`POST /api/v1/review-requests\` — שליחת בקשת ביקורת
+`POST /api/v1/review-requests` — שליחת בקשת ביקורת
+```json
+{
+  "customer_email": "customer@example.com",
+  "course_id": "course_abc123",
+  "purchase_date": "2026-03-01"
+}
+```
 
 **Webhooks**
 הגדירו Webhook URL בלוח הבקרה לקבלת עדכונים בזמן אמת:
-- \`review.created\` — ביקורת חדשה הוגשה
-- \`review.verified\` — ביקורת אומתה
-- \`review.flagged\` — ביקורת סומנה לבדיקה
+- `review.created` — ביקורת חדשה הוגשה
+- `review.verified` — ביקורת אומתה
+- `review.flagged` — ביקורת סומנה לבדיקה
 
 **אבטחת Webhooks**
 כל בקשת Webhook חתומה עם HMAC-SHA256. אמתו את החתימה בצד השרת שלכם לפני עיבוד הנתונים.
