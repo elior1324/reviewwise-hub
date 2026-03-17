@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { PricingComponent, REVIEWHUB_PLANS, type BillingCycle } from "@/components/ui/pricing-card";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
-import { Zap, MessageSquare, ArrowLeft, BarChart3, TrendingUp, Bell, LineChart, Target, Eye,
+import { Zap, ArrowLeft, BarChart3, TrendingUp, Bell, LineChart, Target, Eye,
          Tag, ChevronDown, ChevronUp, Loader2, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,11 @@ const PricingPage = () => {
     durationMonths: number;
   } | null>(null);
 
+  // ── Checkout state ─────────────────────────────────────────────────────────
+  const [selectedPlanId,  setSelectedPlanId]  = useState<string>(""); // "pro" | "enterprise"
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError,   setCheckoutError]   = useState<string | null>(null);
+
   const handleCouponApply = async () => {
     const trimmed = couponCode.trim().toUpperCase();
     if (!trimmed) { setCouponError("נא להזין קוד קופון"); return; }
@@ -67,17 +72,45 @@ const PricingPage = () => {
     }
   };
 
+  // ── Redirect to hyp payment page ──────────────────────────────────────────
+  const handleCheckout = async () => {
+    if (!user) {
+      navigate("/business/login", { state: { from: "/business/pricing" } });
+      return;
+    }
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+    try {
+      // priceId format: plan_{tier}_{billingCycle}
+      const priceId = `plan_${selectedPlanId}_${billingCycle}`;
+      const { data, error: fnError } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId },
+      });
+      if (fnError) throw new Error(fnError.message ?? "שגיאת שרת");
+      if (!data?.url) throw new Error("לא התקבלה כתובת תשלום. נסו שנית.");
+      // Redirect browser to hyp hosted payment page
+      window.location.href = data.url;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setCheckoutError(msg || "שגיאה בהפניה לתשלום. נסו שנית.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
   const handlePlanSelect = (planId: string) => {
     if (planId === "free") {
       navigate("/business/dashboard");
       return;
     }
     setSelectedPlan(planId === "pro" ? "מקצועי" : "אנטרפרייז");
-    // Reset coupon state when opening popup
+    setSelectedPlanId(planId); // "pro" | "enterprise"
+    // Reset popup state when opening
     setCouponOpen(false);
     setCouponCode("");
     setCouponError(null);
     setCouponSuccess(null);
+    setCheckoutError(null);
     setShowPopup(true);
   };
 
@@ -245,14 +278,17 @@ const PricingPage = () => {
                 </div>
               </div>
             ) : (
-              /* ── Default: contact to upgrade + coupon toggle ── */
+              /* ── Checkout: plan summary + proceed to payment ── */
               <>
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Zap size={24} className="text-primary" aria-hidden="true" />
                 </div>
-                <h2 id="upgrade-dialog-title" className="font-display font-bold text-lg text-foreground mb-2">
-                  מערכת התשלומים בקרוב! 🚀
+                <h2 id="upgrade-dialog-title" className="font-display font-bold text-lg text-foreground mb-1">
+                  שדרוג לתוכנית {selectedPlan}
                 </h2>
+                <p className="text-xs text-muted-foreground mb-4">
+                  חיוב {billingCycle === "annual" ? "שנתי" : "חודשי"} — ניתן לבטל בכל עת
+                </p>
 
                 {/* Free first month — universal, no coupon needed */}
                 <div className="rounded-xl border border-emerald-700/40 bg-emerald-950/20 px-4 py-3 mb-4 text-sm text-emerald-400 font-semibold flex items-center gap-2">
@@ -260,25 +296,28 @@ const PricingPage = () => {
                   חודש ראשון חינם — אחרי זה תשלום רגיל
                 </div>
 
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  אינטגרציית התשלומים בשלבי פיתוח אחרונים.<br />
-                  כדי לשדרג לתוכנית <strong className="text-foreground">{selectedPlan}</strong>, צרו קשר עם צוות התמיכה שלנו.
-                </p>
+                {/* Checkout error */}
+                {checkoutError && (
+                  <div className="rounded-lg border border-red-700/40 bg-red-950/20 px-4 py-2 mb-3 text-xs text-red-400 text-right">
+                    {checkoutError}
+                  </div>
+                )}
+
                 <div className="space-y-2 mb-4">
                   <Button
-                    onClick={() =>
-                      window.open(
-                        `mailto:support@reviewshub.info?subject=שדרוג לתוכנית ${selectedPlan}`,
-                        "_blank"
-                      )
-                    }
+                    onClick={handleCheckout}
+                    disabled={checkoutLoading}
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 gap-2"
                   >
-                    <MessageSquare size={14} aria-hidden="true" /> צרו קשר לשדרוג
+                    {checkoutLoading
+                      ? <><Loader2 size={15} className="animate-spin" /> מעביר לתשלום...</>
+                      : <><Zap size={14} aria-hidden="true" /> המשך לתשלום מאובטח ₪</>
+                    }
                   </Button>
                   <button
                     onClick={() => setShowPopup(false)}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    disabled={checkoutLoading}
                   >
                     אולי מאוחר יותר
                   </button>

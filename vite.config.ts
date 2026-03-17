@@ -39,8 +39,8 @@ const CSP = [
   "font-src 'self' https://fonts.gstatic.com",
   // Frames: Turnstile iframes only
   "frame-src https://challenges.cloudflare.com",
-  // Fetch/XHR: Supabase API + hyp (YaadPay) + Cloudflare
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://icom.yaad.net https://challenges.cloudflare.com",
+  // Fetch/XHR: Supabase API + PayPlus + Cloudflare
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://restapi.payplus.co.il https://challenges.cloudflare.com",
   // Objects: block Flash / Java plugins
   "object-src 'none'",
   // Allow framing from self + Lovable preview panel (*.lovable.app).
