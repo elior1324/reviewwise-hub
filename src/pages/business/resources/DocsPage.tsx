@@ -133,36 +133,20 @@ ReviewHub מאמת שכל ביקורת נכתבת על ידי מישהו שרכ�
     content: `
 **אימות API**
 כל הקריאות ל-API דורשות מפתח API בכותרת:
-```
-Authorization: Bearer YOUR_API_KEY
-```
+\`Authorization: Bearer YOUR_API_KEY\`
 מפתח ה-API נמצא בלוח הבקרה תחת "אינטגרציות → API".
 
 **נקודות קצה עיקריות**
 
-`GET /api/v1/reviews` — קבלת כל הביקורות
-```json
-{
-  "reviews": [...],
-  "total": 124,
-  "page": 1
-}
-```
+\`GET /api/v1/reviews\` — קבלת כל הביקורות
 
-`POST /api/v1/review-requests` — שליחת בקשת ביקורת
-```json
-{
-  "customer_email": "customer@example.com",
-  "course_id": "course_abc123",
-  "purchase_date": "2026-03-01"
-}
-```
+\`POST /api/v1/review-requests\` — שליחת בקשת ביקורת
 
 **Webhooks**
 הגדירו Webhook URL בלוח הבקרה לקבלת עדכונים בזמן אמת:
-- `review.created` — ביקורת חדשה הוגשה
-- `review.verified` — ביקורת אומתה
-- `review.flagged` — ביקורת סומנה לבדיקה
+- \`review.created\` — ביקורת חדשה הוגשה
+- \`review.verified\` — ביקורת אומתה
+- \`review.flagged\` — ביקורת סומנה לבדיקה
 
 **אבטחת Webhooks**
 כל בקשת Webhook חתומה עם HMAC-SHA256. אמתו את החתימה בצד השרת שלכם לפני עיבוד הנתונים.
