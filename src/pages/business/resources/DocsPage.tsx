@@ -53,21 +53,16 @@ const DOC_SECTIONS = [
 - **סרגל אמון** — תג "עסק מאומת" שמוצג בקוד ה-HTML של הדף
 
 **הטמעה בסיסית**
-העתיקו את קוד ה-Script מלוח הבקרה (לשונית "וידג׳טים") והדביקו אותו לפני תגית `</body>` בדפי האתר שלכם:
+העתיקו את קוד ה-Script מלוח הבקרה (לשונית "וידג׳טים") והדביקו אותו לפני תגית \`</body>\` בדפי האתר שלכם:
 
-```html
-<script src="https://cdn.reviewhub.co.il/widget.js"
-  data-business="YOUR_BUSINESS_SLUG"
-  data-theme="dark">
-</script>
-```
+\`<script src="https://cdn.reviewhub.co.il/widget.js" data-business="YOUR_BUSINESS_SLUG" data-theme="dark"></script>\`
 
 **התאמה אישית**
 ניתן להוסיף פרמטרים לקוד:
-- `data-theme="dark|light|auto"` — ערכת צבעים
-- `data-limit="5"` — מספר ביקורות לתצוגה
-- `data-lang="he|en"` — שפת הממשק
-- `data-show-rating="true|false"` — הצגת דירוג מסכם
+- \`data-theme="dark|light|auto"\` — ערכת צבעים
+- \`data-limit="5"\` — מספר ביקורות לתצוגה
+- \`data-lang="he|en"\` — שפת הממשק
+- \`data-show-rating="true|false"\` — הצגת דירוג מסכם
 
 **אבטחה**
 הוידג׳ט מחובר בצורה מאובטחת דרך HTTPS בלבד. אין צורך לחשוף מפתח API בצד הלקוח.
