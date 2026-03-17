@@ -7,11 +7,11 @@
  * POST body: { code: string, business_id?: string }
  *
  * NOTE: The free first month is now a Stripe trial built into ALL plans.
- * The coupon only adds the phase-2 discount (70% off months 2–3).
+ * The coupon only adds the phase-2 discount (90% off months 2–3).
  *
  * Coupon structure (Beta coupons):
  *   Phase 1 — Month 1:    FREE for everyone (Stripe trial, regardless of coupon)
- *   Phase 2 — Months 2–3: 70% off (coupon holders only)
+ *   Phase 2 — Months 2–3: 90% off (coupon holders only)
  *   Phase 3 — Month 4+:   full price
  *
  * Flow:

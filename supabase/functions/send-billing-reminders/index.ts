@@ -10,8 +10,8 @@
  *    De-duped via `businesses.trial_reminder_sent_at`.
  *
  *  TYPE 2 — "Discount ending" (30 days before discounted_until):
- *    Sent only to coupon holders whose 70%-off period ends in ~30 days.
- *    "Your 70% discount ends on X. Full price starts after that."
+ *    Sent only to coupon holders whose 90%-off period ends in ~30 days.
+ *    "Your 90% discount ends on X. Full price starts after that."
  *    De-duped via `coupon_redemptions.phase2_reminder_sent_at`.
  *
  *  TYPE 3 — Legacy flat-coupon reminder (kept for backward compat):
@@ -342,7 +342,7 @@ serve(async (req: Request) => {
         if (!email) { errors.push(`No email for user ${r.user_id}`); continue; }
 
         // deno-lint-ignore no-explicit-any
-        const discountPct  = (r as any).coupons?.phase2_discount_percent as number ?? 70;
+        const discountPct  = (r as any).coupons?.phase2_discount_percent as number ?? 90;
         // deno-lint-ignore no-explicit-any
         const businessName = (r as any).businesses?.name ?? "העסק שלך";
         const fullPrice    = new Date(r.discounted_until!);

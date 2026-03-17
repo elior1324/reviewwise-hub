@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, X } from "lucide-react";
+import { Check, X, Gift } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // 1. TypeScript Interfaces
@@ -197,6 +197,11 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                         בשנה
                       </p>
                     )}
+                    {/* Free first month — shown on all paid plans */}
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-2 flex items-center gap-1">
+                      <Gift size={11} aria-hidden="true" />
+                      חודש ראשון חינם — אחרי זה מחיר רגיל
+                    </p>
                   </>
                 )}
               </div>

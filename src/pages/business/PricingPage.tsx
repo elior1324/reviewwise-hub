@@ -253,6 +253,13 @@ const PricingPage = () => {
                 <h2 id="upgrade-dialog-title" className="font-display font-bold text-lg text-foreground mb-2">
                   מערכת התשלומים בקרוב! 🚀
                 </h2>
+
+                {/* Free first month — universal, no coupon needed */}
+                <div className="rounded-xl border border-emerald-700/40 bg-emerald-950/20 px-4 py-3 mb-4 text-sm text-emerald-400 font-semibold flex items-center gap-2">
+                  <CheckCircle2 size={15} className="shrink-0" aria-hidden="true" />
+                  חודש ראשון חינם — אחרי זה תשלום רגיל
+                </div>
+
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6">
                   אינטגרציית התשלומים בשלבי פיתוח אחרונים.<br />
                   כדי לשדרג לתוכנית <strong className="text-foreground">{selectedPlan}</strong>, צרו קשר עם צוות התמיכה שלנו.
@@ -317,7 +324,7 @@ const PricingPage = () => {
                         <p className="text-red-400 text-xs text-right">{couponError}</p>
                       )}
                       <p className="text-xs text-muted-foreground text-right">
-                        קוד קופון מעניק גישה חינמית ל-3 חודשים — ללא כרטיס אשראי.
+                        קופון מעניק 2 חודשים ב-90% הנחה (בנוסף לחודש הניסיון החינמי לכולם).
                       </p>
                     </div>
                   )}

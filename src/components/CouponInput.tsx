@@ -71,7 +71,7 @@ export default function CouponInput({ businessId, onSuccess }: CouponInputProps)
       <CardContent className="py-4 px-5">
         <p className="text-sm text-zinc-400 mb-3 flex items-center gap-2">
           <Tag size={15} className="text-green-500" />
-          יש לך קוד קופון? הזן כאן לקבלת 3 חודשים חינם
+          יש לך קוד קופון? הזן כאן לקבלת חודש חינם + 2 חודשים ב-90% הנחה
         </p>
 
         <div className="flex gap-2 dir-ltr" dir="ltr">

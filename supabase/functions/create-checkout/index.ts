@@ -5,7 +5,7 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 
 // Every paid subscription gets a 30-day free trial, regardless of coupons.
 // Users who have redeemed a coupon additionally get the phase-2 discount
-// (e.g. 70% off for 2 months) applied after the trial via a Stripe coupon.
+// (e.g. 90% off for 2 months) applied after the trial via a Stripe coupon.
 const TRIAL_PERIOD_DAYS = 30;
 
 serve(async (req) => {
@@ -55,7 +55,7 @@ serve(async (req) => {
     // ── Check if user has a phase-2 coupon discount ──────────────────────────
     // Applies when the user has redeemed a coupon that grants a discount after trial.
     // The stripe_phase2_coupon_id must be configured in the Stripe Dashboard:
-    //   e.g. 70% off, repeating for 2 months — then stored on the coupon row.
+    //   e.g. 90% off, repeating for 2 months — then stored on the coupon row.
     const { data: activeDiscount } = await adminClient
       .from("coupon_redemptions")
       .select("discounted_until, coupons ( stripe_phase2_coupon_id, phase2_discount_percent )")
@@ -89,7 +89,7 @@ serve(async (req) => {
       cancel_url:  `${req.headers.get("origin")}/business/pricing?checkout=cancelled`,
     };
 
-    // ✅ Coupon holders get 70% off for months 2–3 (phase-2 Stripe coupon)
+    // ✅ Coupon holders get 90% off for months 2–3 (phase-2 Stripe coupon)
     // The Stripe coupon is applied AFTER the trial and repeats for phase2_duration_months.
     if (stripePhase2CouponId) {
       sessionParams.discounts = [{ coupon: stripePhase2CouponId }];
