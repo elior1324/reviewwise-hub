@@ -30,7 +30,7 @@
   # ── Content Security Policy ─────────────────────────────────────────────
   # Blocks XSS by whitelisting every resource origin.
   # Must stay in sync with the CSP in vite.config.ts.
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.supabase.co https://supabase.co https://img.youtube.com https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev; font-src 'self' https://fonts.gstatic.com; frame-src https://challenges.cloudflare.com https://js.stripe.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://challenges.cloudflare.com; object-src 'none'; frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev https://lovable.dev; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.supabase.co https://supabase.co https://img.youtube.com https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev; font-src 'self' https://fonts.gstatic.com; frame-src https://challenges.cloudflare.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://icom.yaad.net https://challenges.cloudflare.com; object-src 'none'; frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev https://lovable.dev; upgrade-insecure-requests
 
   # ── MIME-type sniffing protection ───────────────────────────────────────
   # Prevents browsers from guessing file types (e.g. treating a PNG as JS).
@@ -60,7 +60,7 @@
 
   # ── Cross-Origin policies ───────────────────────────────────────────────
   # COEP + COOP harden against Spectre-style side-channel attacks.
-  # Note: COEP "require-corp" can break third-party iframes (Stripe, Turnstile).
+  # Note: COEP "require-corp" can break third-party iframes (Cloudflare Turnstile, hyp).
   # Use "unsafe-none" if Stripe/Cloudflare iframes stop loading.
   Cross-Origin-Embedder-Policy: unsafe-none
   Cross-Origin-Opener-Policy: same-origin

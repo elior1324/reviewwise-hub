@@ -2,10 +2,10 @@
  * send-billing-reminders — Edge Function
  *
  * Runs daily (via pg_cron or Supabase scheduled invocation).
- * Sends three types of Hebrew reminder emails:
+ * Sends two types of Hebrew reminder emails:
  *
  *  TYPE 1 — "Trial ending" (7 days before billing starts):
- *    Sent to ALL businesses whose Stripe trial ends in 6–8 days.
+ *    Sent to businesses whose trial_ends_at falls in 6–8 days (DB-based, no Stripe).
  *    "Your free month ends in one week. Billing starts on X."
  *    De-duped via `businesses.trial_reminder_sent_at`.
  *
@@ -14,16 +14,11 @@
  *    "Your 90% discount ends on X. Full price starts after that."
  *    De-duped via `coupon_redemptions.phase2_reminder_sent_at`.
  *
- *  TYPE 3 — Legacy flat-coupon reminder (kept for backward compat):
- *    Businesses with old single-phase coupons and no Stripe trial.
- *    De-duped via `coupon_redemptions.reminder_sent_at`.
- *
  * Authentication: CRON_SECRET token required in Authorization header.
  */
 
 import { serve }        from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Stripe           from "https://esm.sh/stripe@18.5.0";
 
 const FROM_ADDRESS = "ReviewHub <noreply@reviewshub.info>";
 const RESEND_API   = "https://api.resend.com/emails";
@@ -194,7 +189,6 @@ serve(async (req: Request) => {
   const SUPABASE_URL              = Deno.env.get("SUPABASE_URL")!;
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const RESEND_API_KEY            = Deno.env.get("RESEND_API_KEY");
-  const STRIPE_SECRET_KEY         = Deno.env.get("STRIPE_SECRET_KEY");
 
   if (!RESEND_API_KEY) {
     return new Response(JSON.stringify({ error: "Email service not configured" }), { status: 500 });
@@ -206,65 +200,30 @@ serve(async (req: Request) => {
   const errors: string[] = [];
 
   // ─────────────────────────────────────────────────────────────────────────
-  // TYPE 1 — 7-day trial-ending reminder (for ALL businesses with Stripe trial)
-  // Query Stripe for subscriptions in trialing status whose trial ends in 6–8 days.
+  // TYPE 1 — 7-day trial-ending reminder (DB-based, no external payment API)
+  // Query businesses whose trial_ends_at falls 6–8 days from now and have not
+  // yet received the reminder (trial_reminder_sent_at IS NULL).
   // ─────────────────────────────────────────────────────────────────────────
-  if (STRIPE_SECRET_KEY) {
-    try {
-      const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
+  {
+    const trialWindowStart = new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000);
+    const trialWindowEnd   = new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000);
 
-      // Trial ends in 6–8 days from now
-      const trialWindowStart = Math.floor(now.getTime() / 1000) + 6 * 24 * 3600;
-      const trialWindowEnd   = Math.floor(now.getTime() / 1000) + 8 * 24 * 3600;
+    const { data: trialDue, error: e1 } = await supabase
+      .from("businesses")
+      .select("id, name, owner_id, trial_ends_at")
+      .gte("trial_ends_at", trialWindowStart.toISOString())
+      .lte("trial_ends_at", trialWindowEnd.toISOString())
+      .is("trial_reminder_sent_at", null);
 
-      // Fetch trialing subscriptions from Stripe
-      const subscriptions = await stripe.subscriptions.list({
-        status:  "trialing",
-        limit:   100,
-        expand:  ["data.customer"],
-      });
+    if (e1) {
+      errors.push(`Trial fetch error: ${e1.message}`);
+    } else if (trialDue && trialDue.length > 0) {
+      for (const business of trialDue) {
+        const { data: userData } = await supabase.auth.admin.getUserById(business.owner_id);
+        const email = userData?.user?.email;
+        if (!email) { errors.push(`No email for user ${business.owner_id}`); continue; }
 
-      const trialingSoon = subscriptions.data.filter(
-        (sub) => sub.trial_end && sub.trial_end >= trialWindowStart && sub.trial_end <= trialWindowEnd
-      );
-
-      for (const sub of trialingSoon) {
-        const customerEmail = typeof sub.customer === "object"
-          ? (sub.customer as Stripe.Customer).email
-          : null;
-        if (!customerEmail) continue;
-
-        const trialEndDate = new Date((sub.trial_end as number) * 1000);
-
-        // Look up business + check if reminder already sent
-        const { data: biz } = await supabase
-          .from("businesses")
-          .select("id, name, owner_id, trial_reminder_sent_at")
-          .eq("stripe_customer_id", sub.customer as string)
-          .maybeSingle();
-
-        // Also try lookup by owner email if stripe_customer_id not cached yet
-        let business = biz;
-        if (!business) {
-          const { data: userData } = await supabase.auth.admin.getUserByEmail(customerEmail);
-          if (userData?.user) {
-            const { data: bizByOwner } = await supabase
-              .from("businesses")
-              .select("id, name, owner_id, trial_reminder_sent_at")
-              .eq("owner_id", userData.user.id)
-              .maybeSingle();
-            business = bizByOwner;
-          }
-        }
-
-        if (!business) {
-          console.warn(`[send-billing-reminders] no business for customer ${sub.customer}`);
-          continue;
-        }
-        if (business.trial_reminder_sent_at) {
-          // Already sent — skip
-          continue;
-        }
+        const trialEndDate = new Date(business.trial_ends_at!);
 
         // Check if this business has a coupon discount for months 2–3
         const { data: couponRed } = await supabase
@@ -289,7 +248,7 @@ serve(async (req: Request) => {
         });
 
         const ok = await sendEmail({
-          to:           customerEmail,
+          to:           email,
           subject:      `ReviewHub — החיוב מתחיל בעוד שבוע (${formatHebrewDate(trialEndDate)}) ⏰`,
           html,
           resendApiKey: RESEND_API_KEY,
@@ -301,17 +260,12 @@ serve(async (req: Request) => {
             .update({ trial_reminder_sent_at: now.toISOString() })
             .eq("id", business.id);
           sentCount++;
-          console.log(`[send-billing-reminders] ✓ Trial reminder → ${customerEmail} (${business.name})`);
+          console.log(`[send-billing-reminders] ✓ Trial reminder → ${email} (${business.name})`);
         } else {
-          errors.push(`Trial reminder failed for ${customerEmail}`);
+          errors.push(`Trial reminder failed for ${email}`);
         }
       }
-    } catch (stripeErr: unknown) {
-      console.error("[send-billing-reminders] Stripe query error:", (stripeErr as Error).message);
-      errors.push(`Stripe error: ${(stripeErr as Error).message}`);
     }
-  } else {
-    console.warn("[send-billing-reminders] STRIPE_SECRET_KEY not set — skipping trial reminders");
   }
 
   // ─────────────────────────────────────────────────────────────────────────

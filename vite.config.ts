@@ -29,18 +29,18 @@ import { componentTagger } from "lovable-tagger";
 // Adjust src allowlists as new third-party services are added.
 const CSP = [
   "default-src 'self'",
-  // Scripts: only from self + Cloudflare Turnstile + Stripe.js
-  "script-src 'self' https://challenges.cloudflare.com https://js.stripe.com",
+  // Scripts: only from self + Cloudflare Turnstile
+  "script-src 'self' https://challenges.cloudflare.com",
   // Styles: self + inline (Tailwind) + Google Fonts CSS
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   // Images: self + Supabase storage + YouTube thumbnails + data URIs
   "img-src 'self' data: blob: https://*.supabase.co https://supabase.co https://img.youtube.com https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev",
   // Fonts: self + Google Fonts (Heebo + Space Grotesk)
   "font-src 'self' https://fonts.gstatic.com",
-  // Frames: only Stripe and Turnstile iframes
-  "frame-src https://challenges.cloudflare.com https://js.stripe.com",
-  // Fetch/XHR: Supabase API + Stripe + Cloudflare
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://challenges.cloudflare.com",
+  // Frames: Turnstile iframes only
+  "frame-src https://challenges.cloudflare.com",
+  // Fetch/XHR: Supabase API + hyp (YaadPay) + Cloudflare
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://icom.yaad.net https://challenges.cloudflare.com",
   // Objects: block Flash / Java plugins
   "object-src 'none'",
   // Allow framing from self + Lovable preview panel (*.lovable.app).

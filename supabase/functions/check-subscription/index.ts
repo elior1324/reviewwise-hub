@@ -1,11 +1,24 @@
+/**
+ * check-subscription — Edge Function
+ *
+ * Checks whether the authenticated user has an active paid subscription.
+ * Backed entirely by the Supabase DB — no external payment API calls needed.
+ *
+ * Subscription state is maintained by the hyp-webhook IPN handler:
+ *   • Successful payment  → subscription_expires_at is extended
+ *   • J4 tokenisation     → trial_ends_at is set (30-day free trial)
+ *
+ * Response shape:
+ *   { subscribed, tier, subscription_end, in_trial }
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
-const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+const logStep = (step: string, details?: unknown) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
@@ -24,9 +37,6 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
 
@@ -34,64 +44,48 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated");
-    logStep("User authenticated", { email: user.email });
+    if (!user) throw new Error("User not authenticated");
+    logStep("User authenticated", { id: user.id });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    // ── Look up business subscription state directly from DB ──────────────────
+    const { data: biz, error: bizError } = await supabaseClient
+      .from("businesses")
+      .select("subscription_tier, subscription_expires_at, trial_ends_at")
+      .eq("owner_id", user.id)
+      .maybeSingle();
 
-    if (customers.data.length === 0) {
-      logStep("No Stripe customer found");
-      return new Response(JSON.stringify({ subscribed: false }), {
-        headers: { ...cors, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
+    if (bizError) throw new Error(`Business lookup error: ${bizError.message}`);
 
-    const customerId = customers.data[0].id;
-    logStep("Found customer", { customerId });
+    const now         = new Date();
+    const tier        = biz?.subscription_tier ?? "free";
+    const expiresAt   = biz?.subscription_expires_at ? new Date(biz.subscription_expires_at) : null;
+    const trialEndsAt = biz?.trial_ends_at ? new Date(biz.trial_ends_at) : null;
 
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
+    const inTrial     = trialEndsAt !== null && trialEndsAt > now;
+    const hasActiveSub = tier !== "free" && (inTrial || (expiresAt !== null && expiresAt > now));
+
+    logStep("Subscription state", {
+      tier, inTrial, hasActiveSub,
+      expiresAt: expiresAt?.toISOString(),
+      trialEndsAt: trialEndsAt?.toISOString(),
     });
 
-    const hasActiveSub = subscriptions.data.length > 0;
-    let productId = null;
-    let subscriptionEnd = null;
-
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      productId = subscription.items.data[0].price.product;
-      logStep("Active subscription found", { productId, subscriptionEnd });
-    }
-
-    // Also sync the business subscription_tier in database
-    if (hasActiveSub && productId) {
-      const tierMap: Record<string, string> = {
-        "prod_U6q0bcJeR70YPv": "pro",
-        "prod_U6q1CwTI9xXEeK": "enterprise",
-      };
-      const newTier = tierMap[productId as string] || "pro";
-      await supabaseClient
-        .from("businesses")
-        .update({ subscription_tier: newTier })
-        .eq("owner_id", user.id);
-      logStep("Synced business tier", { newTier });
-    } else if (!hasActiveSub) {
+    // ── Auto-downgrade to free if subscription has lapsed ────────────────────
+    if (tier !== "free" && !inTrial && (expiresAt === null || expiresAt <= now)) {
       await supabaseClient
         .from("businesses")
         .update({ subscription_tier: "free" })
         .eq("owner_id", user.id);
-      logStep("Reset business tier to free");
+      logStep("Reset business tier to free (subscription lapsed)");
     }
 
     return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
-      product_id: productId,
-      subscription_end: subscriptionEnd,
+      subscribed:       hasActiveSub,
+      tier:             hasActiveSub ? tier : "free",
+      subscription_end: inTrial
+        ? trialEndsAt!.toISOString()
+        : (expiresAt?.toISOString() ?? null),
+      in_trial: inTrial,
     }), {
       headers: { ...cors, "Content-Type": "application/json" },
       status: 200,
