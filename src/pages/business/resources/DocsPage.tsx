@@ -141,13 +141,8 @@ ReviewHub מאמת שכל ביקורת נכתבת על ידי מישהו שרכ�
 \`GET /api/v1/reviews\` — קבלת כל הביקורות
 \`{ "reviews": [...], "total": 124, "page": 1 }\`
 
-`POST /api/v1/review-requests` — שליחת בקשת ביקורת
-```json
-{
-  "customer_email": "customer@example.com",
-  "course_id": "course_abc123",
-  "purchase_date": "2026-03-01"
-}
+\`POST /api/v1/review-requests\` — שליחת בקשת ביקורת
+\`{ "customer_email": "customer@example.com", "course_id": "course_abc123", "purchase_date": "2026-03-01" }\`
 ```
 
 **Webhooks**

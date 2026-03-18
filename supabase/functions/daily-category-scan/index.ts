@@ -24,20 +24,20 @@ serve(async (req) => {
   // The Supabase pg_cron trigger must send:
   //   Authorization: Bearer <CRON_SECRET>
   const CRON_SECRET = Deno.env.get("CRON_SECRET");
-  if (CRON_SECRET) {
-    const authHeader = req.headers.get("Authorization") ?? "";
-    if (authHeader !== `Bearer ${CRON_SECRET}`) {
-      console.warn("[daily-category-scan] Unauthorized request — invalid or missing CRON_SECRET");
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-  } else {
-    // If CRON_SECRET is not configured, log a warning.
-    // In production CRON_SECRET must always be set — remove this fallback
-    // once the secret is confirmed in the Supabase dashboard.
-    console.warn("[daily-category-scan] CRON_SECRET is not set — running without auth guard. Set CRON_SECRET in Edge Function secrets.");
+  if (!CRON_SECRET) {
+    console.error("[daily-category-scan] CRON_SECRET not configured — refusing all requests");
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+  const authHeader = req.headers.get("Authorization") ?? "";
+  if (authHeader !== `Bearer ${CRON_SECRET}`) {
+    console.warn("[daily-category-scan] Unauthorized request — invalid CRON_SECRET");
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   }
 
   try {

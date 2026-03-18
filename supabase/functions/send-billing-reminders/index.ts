@@ -176,14 +176,14 @@ serve(async (req: Request) => {
   }
 
   const CRON_SECRET = Deno.env.get("CRON_SECRET");
-  if (CRON_SECRET) {
-    const authHeader = req.headers.get("Authorization") ?? "";
-    if (authHeader !== `Bearer ${CRON_SECRET}`) {
-      console.warn("[send-billing-reminders] Unauthorized");
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-    }
-  } else {
-    console.warn("[send-billing-reminders] CRON_SECRET not set — running without auth guard");
+  if (!CRON_SECRET) {
+    console.error("[send-billing-reminders] CRON_SECRET not configured — refusing all requests");
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+  const authHeader = req.headers.get("Authorization") ?? "";
+  if (authHeader !== `Bearer ${CRON_SECRET}`) {
+    console.warn("[send-billing-reminders] Unauthorized — invalid CRON_SECRET");
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
   const SUPABASE_URL              = Deno.env.get("SUPABASE_URL")!;
