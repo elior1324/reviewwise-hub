@@ -133,21 +133,13 @@ ReviewHub מאמת שכל ביקורת נכתבת על ידי מישהו שרכ�
     content: `
 **אימות API**
 כל הקריאות ל-API דורשות מפתח API בכותרת:
-```
-Authorization: Bearer YOUR_API_KEY
-```
+\`Authorization: Bearer YOUR_API_KEY\`
 מפתח ה-API נמצא בלוח הבקרה תחת "אינטגרציות → API".
 
 **נקודות קצה עיקריות**
 
-`GET /api/v1/reviews` — קבלת כל הביקורות
-```json
-{
-  "reviews": [...],
-  "total": 124,
-  "page": 1
-}
-```
+\`GET /api/v1/reviews\` — קבלת כל הביקורות
+\`{ "reviews": [...], "total": 124, "page": 1 }\`
 
 `POST /api/v1/review-requests` — שליחת בקשת ביקורת
 ```json
