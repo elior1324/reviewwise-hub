@@ -42,6 +42,12 @@ function isLocalDev(origin: string): boolean {
          /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin);
 }
 
+/** Allow Lovable preview URLs (preview--*.lovable.app / *.lovable.dev) */
+function isLovablePreview(origin: string): boolean {
+  return /^https:\/\/[a-zA-Z0-9-]+\.lovable\.app$/.test(origin) ||
+         /^https:\/\/[a-zA-Z0-9-]+\.lovable\.dev$/.test(origin);
+}
+
 /**
  * Returns CORS headers that echo the request Origin only if it is allowed.
  * Sends a restrictive "null" origin for all other callers.
@@ -52,7 +58,8 @@ export function getCorsHeaders(req: Request): Record<string, string> {
 
   const isAllowed =
     ALLOWED_ORIGINS.includes(origin) ||
-    (isDev && isLocalDev(origin));
+    (isDev && isLocalDev(origin)) ||
+    isLovablePreview(origin);
 
   return {
     "Access-Control-Allow-Origin":  isAllowed ? origin : ALLOWED_ORIGINS[0],
