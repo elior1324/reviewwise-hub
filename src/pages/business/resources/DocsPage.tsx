@@ -53,14 +53,9 @@ const DOC_SECTIONS = [
 - **סרגל אמון** — תג "עסק מאומת" שמוצג בקוד ה-HTML של הדף
 
 **הטמעה בסיסית**
-העתיקו את קוד ה-Script מלוח הבקרה (לשונית "וידג׳טים") והדביקו אותו לפני תגית `</body>` בדפי האתר שלכם:
+העתיקו את קוד ה-Script מלוח הבקרה (לשונית "וידג׳טים") והדביקו אותו לפני תגית \`</body>\` בדפי האתר שלכם:
 
-```html
-<script src="https://cdn.reviewhub.co.il/widget.js"
-  data-business="YOUR_BUSINESS_SLUG"
-  data-theme="dark">
-</script>
-```
+\`<script src="https://cdn.reviewhub.co.il/widget.js" data-business="YOUR_BUSINESS_SLUG" data-theme="dark"></script>\`
 
 **התאמה אישית**
 ניתן להוסיף פרמטרים לקוד:
