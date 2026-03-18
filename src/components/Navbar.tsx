@@ -23,9 +23,8 @@ import {
 // Gateway for business owners who land on the public site.
 // Pricing is appended conditionally based on auth status.
 const PRODUCT_LINKS = [
-  { to: "/business",                     icon: ShieldCheck,     label: "כל הפתרונות לעסקים" },
-  { to: "/business/solutions/reviews",   icon: BarChart3,       label: "אימות ביקורות"      },
-  { to: "/business/solutions/analytics", icon: LayoutDashboard, label: "לוח בקרה ונתונים"   },
+  { to: "/business",                   icon: ShieldCheck, label: "כל הפתרונות לעסקים" },
+  { to: "/business/solutions/reviews", icon: BarChart3,   label: "אימות ביקורות"      },
 ] as const;
 
 const Navbar = () => {

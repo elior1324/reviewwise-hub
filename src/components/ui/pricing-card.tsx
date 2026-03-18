@@ -99,7 +99,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
 
   // ── Billing cycle toggle ──────────────────────────────────────────────────
   const CycleToggle = (
-    <div className="flex justify-center mb-10 mt-2" dir="rtl">
+    <div className="flex flex-col items-center mb-10 mt-2 gap-2" dir="rtl">
       <ToggleGroup
         type="single"
         value={billingCycle}
@@ -121,14 +121,19 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
         <ToggleGroupItem
           value="annually"
           aria-label="חיוב שנתי"
-          className="px-6 py-1.5 text-sm font-medium data-[state=on]:bg-background data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:ring-1 data-[state=on]:ring-ring/20 rounded-md transition-colors relative"
+          className="px-6 py-1.5 text-sm font-medium data-[state=on]:bg-background data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:ring-1 data-[state=on]:ring-ring/20 rounded-md transition-colors"
         >
           שנתי
-          <span className="absolute -top-3 left-0 text-xs font-semibold text-primary/80 bg-primary/10 px-1.5 rounded-full whitespace-nowrap">
+          <span className="mr-2 text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full whitespace-nowrap">
             חסכו {ANNUAL_DISCOUNT_PCT}%
           </span>
         </ToggleGroupItem>
       </ToggleGroup>
+      {billingCycle === "annually" && (
+        <p className="text-xs text-primary font-semibold animate-in fade-in duration-200">
+          ✓ תשלום שנתי אחד — חוסכים 2 חודשים מחיר
+        </p>
+      )}
     </div>
   );
 
