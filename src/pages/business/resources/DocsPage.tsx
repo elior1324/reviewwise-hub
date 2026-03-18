@@ -59,10 +59,10 @@ const DOC_SECTIONS = [
 
 **התאמה אישית**
 ניתן להוסיף פרמטרים לקוד:
-- `data-theme="dark|light|auto"` — ערכת צבעים
-- `data-limit="5"` — מספר ביקורות לתצוגה
-- `data-lang="he|en"` — שפת הממשק
-- `data-show-rating="true|false"` — הצגת דירוג מסכם
+- data-theme="dark|light|auto" — ערכת צבעים
+- data-limit="5" — מספר ביקורות לתצוגה
+- data-lang="he|en" — שפת הממשק
+- data-show-rating="true|false" — הצגת דירוג מסכם
 
 **אבטחה**
 הוידג׳ט מחובר בצורה מאובטחת דרך HTTPS בלבד. אין צורך לחשוף מפתח API בצד הלקוח.
