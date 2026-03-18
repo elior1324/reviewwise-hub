@@ -17,9 +17,17 @@
 //   --card / --border         – card surface & outline
 //   --card-shadow / --card-shadow-hover
 
-import { Star, ShieldCheck } from "lucide-react";
+import { Star, ShieldCheck, MessageCircle, Facebook, Globe } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+
+const SOURCE_TAG_CONFIG = {
+  verified_purchase: { label: "רכישה מאומתת", className: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40", Icon: ShieldCheck },
+  whatsapp:          { label: "WhatsApp", className: "text-green-500 bg-green-50 dark:bg-green-950/30", Icon: MessageCircle },
+  facebook:          { label: "Facebook", className: "text-blue-500 bg-blue-50 dark:bg-blue-950/30", Icon: Facebook },
+  website:           { label: "אתר ReviewHub", className: "text-muted-foreground bg-muted/50", Icon: Globe },
+} as const;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -34,6 +42,10 @@ export interface ReviewTestimonial {
   verified?: boolean;
   date?: string;
   business?: string;
+  /** If provided, business name becomes a clickable link to the profile */
+  businessSlug?: string;
+  /** Source platform tag shown below business name */
+  sourceTag?: "verified_purchase" | "whatsapp" | "facebook" | "website";
 }
 
 interface ReviewsMarqueeProps {
@@ -45,167 +57,131 @@ interface ReviewsMarqueeProps {
   className?: string;
 }
 
-// ─── Default sample data (Hebrew, realistic, diverse) ─────────────────────────
+// ─── Default showcase data — all reviews reference the real demo business ─────
 
 const DEFAULT_REVIEWS: ReviewTestimonial[] = [
-  // Row 1 — 6 cards
+  // Row 1
   {
-    author: {
-      name: "דנה לוי",
-      handle: "@dana_levy",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80",
-    },
+    author: { name: "רונן ב.", handle: "@ronenb", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" },
     rating: 5,
-    text: "הקורס של יורם שינה לי את הדרך שאני חושבת על שיווק. תוצאות אמיתיות תוך שלושה שבועות בלבד — ממש לא ציפיתי לזה.",
+    text: "עבדתי עם מיטב דיגיטל על קמפיין Meta Ads לחנות האונליין שלי. תוך חודש ראשון הכפלנו את המכירות. הצוות מקצועי, זמין ומסביר כל שלב.",
     verified: true,
-    date: "מרץ 2025",
-    business: "קורסי שיווק דיגיטלי",
+    date: "נובמבר 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "verified_purchase",
   },
   {
-    author: {
-      name: "יובל כהן",
-      handle: "@yuval_cohen",
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80",
-    },
+    author: { name: "שירה מ.", handle: "@shira_m", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" },
     rating: 5,
-    text: "עבדתי עם מאיה על עיצוב האתר שלי — מקצועית, מדויקת, ועומדת בזמנים. פשוט תענוג לעבוד איתה.",
+    text: "הכינו לנו אסטרטגיית SEO מאפס — בתוך 3 חודשים עלינו לעמוד ראשון בגוגל על 4 ביטויים מרכזיים. שירות ברמה גבוהה מאוד.",
     verified: true,
-    date: "פברואר 2025",
-    business: "עיצוב UX/UI",
+    date: "ספטמבר 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "verified_purchase",
   },
   {
-    author: {
-      name: "שיר מזרחי",
-      handle: "@shir_m",
-      avatar:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80",
-    },
+    author: { name: "ג׳ולי א.", handle: "@julieA", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" },
     rating: 5,
-    text: "הכי טוב היה שהמנטור לא רק לימד — הוא ממש ישב איתי על הפרויקט. קיבלתי ידע ומיומנויות שמשתמשת בהן כל יום.",
+    text: "שלחתי הודעה בשעה 11 בלילה עם שאלה, קיבלתי תשובה מלאה תוך 20 דקות 😮 שירות כזה לא פגשתי בשום מקום!",
     verified: true,
-    date: "ינואר 2025",
-    business: "מנטורינג Python",
+    date: "דצמבר 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "whatsapp",
   },
   {
-    author: {
-      name: "אורי גרין",
-      handle: "@uri_green",
-      avatar:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80",
-    },
+    author: { name: "נדב כ.", handle: "@nadavk", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" },
     rating: 5,
-    text: "סוף סוף מצאתי פרילנסרית שכתבה תוכן שיווקי בדיוק לפי קול המותג שלנו. ממליץ בחום לכל עסק קטן.",
+    text: "ניהול הסושיאל שלנו השתפר דרמטית. העמוד שלנו צמח מ-500 עוקבים ל-4,200 תוך 5 חודשים. כל הקרדיט למיטב דיגיטל.",
     verified: true,
-    date: "מרץ 2025",
-    business: "כתיבת תוכן שיווקי",
+    date: "ספטמבר 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "verified_purchase",
   },
   {
-    author: {
-      name: "נועה בן-דוד",
-      handle: "@noa_bd",
-      avatar:
-        "https://images.unsplash.com/photo-1520813819077-7f2ee9e60aae?w=80&h=80&fit=crop&q=80",
-    },
+    author: { name: "דנה פ.", handle: "@dana_p", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&h=80&fit=crop&q=80" },
     rating: 5,
-    text: "קורס הנתונים שלו הוא הכי פרקטי שמצאתי ברשת. כל שיעור מסתיים בפרויקט מיני אמיתי — ממש לא עוד קורס תיאורטי.",
+    text: "שיתוף פעולה מעולה! מיטב דיגיטל הצליחו לתרגם את החזון שלנו לשפה שגוגל מבינה. המכירות עלו ב-60% תוך רבעון.",
     verified: true,
-    date: "פברואר 2025",
-    business: "Data Science & ML",
+    date: "דצמבר 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "facebook",
   },
   {
-    author: {
-      name: "תמר אלון",
-      handle: "@tamar_alon",
-      avatar:
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&h=80&fit=crop&q=80",
-    },
-    rating: 4,
-    text: "סדנת פיתוח ה-Full Stack הייתה אינטנסיבית, אבל שווה כל שקל. תוך חודשיים השגתי את הג'וב הראשון שלי כמפתחת.",
-    verified: true,
-    date: "ינואר 2025",
-    business: "Full Stack Bootcamp",
+    author: { name: "מיכל ר.", handle: "@michalr", avatar: "https://images.unsplash.com/photo-1520813819077-7f2ee9e60aae?w=80&h=80&fit=crop&q=80" },
+    rating: 5,
+    text: "פגשתי את הצוות בכנס שיווקי ועברתי אליהם. הם מבינים את העסק שלי כאילו הם חלק ממנו. מאוד שמחה שעברתי.",
+    verified: false,
+    date: "יוני 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "website",
   },
 
-  // Row 2 — 6 different cards
+  // Row 2
   {
-    author: {
-      name: "גיל שפירא",
-      handle: "@gil_shapira",
-      avatar:
-        "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80",
-    },
+    author: { name: "אמיר ד.", handle: "@amird", avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" },
     rating: 5,
-    text: "המעצבת הבינה בדיוק את הוויזיה שלי וסיפקה עיצוב שהתאים בול לפרסומות. אין מה לומר — פנטסטי.",
+    text: "בנינו יחד את כל הנוכחות הדיגיטלית של העסק — אתר, גוגל, רשתות חברתיות. הכל עובד כמו מכונה.",
     verified: true,
-    date: "מרץ 2025",
-    business: "עיצוב גרפי ומיתוג",
+    date: "יולי 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "verified_purchase",
   },
   {
-    author: {
-      name: "מיה רוזן",
-      handle: "@mia_rosen",
-      avatar:
-        "https://images.unsplash.com/photo-1517365830279-8d4dead2e554?w=80&h=80&fit=crop&q=80",
-    },
+    author: { name: "בועז ט.", handle: "@boazT", avatar: "https://images.unsplash.com/photo-1570295999897-c9c4c55e7839?w=80&h=80&fit=crop&q=80" },
     rating: 5,
-    text: "הייתה לי שאלה שנה אחרי שסיימתי את הקורס — המרצה ענה תוך 24 שעות. שירות כזה לא מוצאים בשום מקום אחר.",
+    text: "הם לא רק מבצעים — הם חושבים יחד איתך. כל פגישה מסתיימת עם תוכנית ברורה וצעדים מדויקים. כבר שנה שעובד איתם.",
     verified: true,
-    date: "פברואר 2025",
-    business: "קורסי Next.js",
+    date: "נובמבר 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "whatsapp",
   },
   {
-    author: {
-      name: "אריה שמש",
-      handle: "@arie_shemesh",
-      avatar:
-        "https://images.unsplash.com/photo-1570295999897-c9c4c55e7839?w=80&h=80&fit=crop&q=80",
-    },
-    rating: 5,
-    text: "עריכת הוידאו שקיבלתי מהעורכת הייתה ברמה של פרודקשן מקצועי לחלוטין. ההסבר שלה לכל שינוי גם הלמיד אותי.",
-    verified: true,
-    date: "מרץ 2025",
-    business: "עריכת וידאו",
-  },
-  {
-    author: {
-      name: "רונית כץ",
-      handle: "@ronit_katz",
-      avatar:
-        "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=80&h=80&fit=crop&q=80",
-    },
-    rating: 5,
-    text: "הצלחתי להגדיל את הכנסות הפרילנס שלי ב-40% אחרי הקורס. לא מאמינה שחיכיתי כל כך הרבה זמן לפני שנרשמתי.",
-    verified: true,
-    date: "ינואר 2025",
-    business: "Freelance Growth",
-  },
-  {
-    author: {
-      name: "עמיר ברק",
-      handle: "@amir_barak",
-      avatar:
-        "https://images.unsplash.com/photo-1504257426329-14daa0f0a5e7?w=80&h=80&fit=crop&q=80",
-    },
+    author: { name: "יעל ש.", handle: "@yaelsh", avatar: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=80&h=80&fit=crop&q=80" },
     rating: 4,
-    text: "חסכתי חצי שנה של לימוד עצמי. הקורס בנוי חכם — מתחיל מאפס ומגיע לדברים מורכבים בצעדים הגיוניים.",
+    text: "קיבלנו תוצאות טובות בקמפיינים הממומנים, הצוות מגיב מהר ומסביר בצורה ברורה. בסה\"כ ממליצה.",
     verified: true,
-    date: "פברואר 2025",
-    business: "React & TypeScript",
+    date: "אוקטובר 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "verified_purchase",
   },
   {
-    author: {
-      name: "לירן אזולאי",
-      handle: "@liran_azulay",
-      avatar:
-        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&q=80",
-    },
+    author: { name: "אורי ג.", handle: "@urig", avatar: "https://images.unsplash.com/photo-1504257426329-14daa0f0a5e7?w=80&h=80&fit=crop&q=80" },
     rating: 5,
-    text: "הביקורות באתר הן אמיתיות לחלוטין — פגשתי בדיוק את מה שהובטח. ReviewHub היא הפלטפורמה הראשונה שאני סומך עליה.",
+    text: "פשוט הכי טובים בעניין. הכי שקופים, הכי ישרים ועם הכי הרבה ידע. מחכה לפרויקט הבא.",
     verified: true,
-    date: "מרץ 2025",
-    business: "ReviewHub",
+    date: "נובמבר 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "facebook",
+  },
+  {
+    author: { name: "לינוי ה.", handle: "@linoyh", avatar: "https://images.unsplash.com/photo-1517365830279-8d4dead2e554?w=80&h=80&fit=crop&q=80" },
+    rating: 4,
+    text: "הצוות של מיטב עזר לי להוציא את הקמפיין הראשון שלי בפייסבוק. הכל הסתדר מהר ובלי כאב ראש.",
+    verified: true,
+    date: "אוקטובר 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "whatsapp",
+  },
+  {
+    author: { name: "ורד ל.", handle: "@verdl", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&q=80" },
+    rating: 4,
+    text: "שירות טוב מאוד, אנשים נחמדים ומקצועיים. לוקח קצת זמן עד שהתוצאות מגיעות אבל שווה להמתין.",
+    verified: false,
+    date: "מאי 2025",
+    business: "מיטב דיגיטל",
+    businessSlug: "mitav-digital",
+    sourceTag: "website",
   },
 ];
 
@@ -258,11 +234,30 @@ function TestimonialCard({ review }: { review: ReviewTestimonial }) {
         {review.text}
       </p>
 
-      {/* Optional business tag */}
+      {/* Business tag — clickable link if businessSlug is provided */}
       {review.business && (
-        <p className="text-[11px] text-primary/70 font-medium mb-3 truncate">
-          ★ {review.business}
-        </p>
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          {review.businessSlug ? (
+            <Link
+              to={`/business/${review.businessSlug}`}
+              className="text-[11px] text-primary/80 font-semibold hover:text-primary transition-colors truncate"
+              onClick={(e) => e.stopPropagation()}
+            >
+              ★ {review.business}
+            </Link>
+          ) : (
+            <p className="text-[11px] text-primary/70 font-medium truncate">★ {review.business}</p>
+          )}
+          {review.sourceTag && (() => {
+            const cfg = SOURCE_TAG_CONFIG[review.sourceTag];
+            return (
+              <span className={`flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${cfg.className}`}>
+                <cfg.Icon size={9} />
+                {cfg.label}
+              </span>
+            );
+          })()}
+        </div>
       )}
 
       {/* Divider */}

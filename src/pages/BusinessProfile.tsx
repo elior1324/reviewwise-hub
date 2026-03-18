@@ -86,7 +86,7 @@ const BusinessProfile = () => {
       //   Rating and reviewCount are computed below from the reviews we fetch.
       const { data: bizData } = await supabase
         .from("businesses")
-        .select("id, slug, name, website, email, phone, category, description, verified, collaboration_active, collaboration_method, collaboration_coupon, trust_status, trust_status_reason, transparency_score, response_rate, avg_response_hours, verified_review_ratio, ai_summary, sentiment_score, trending_score, ai_flags, affiliate_mode, personal_affiliate_url, personal_affiliate_urls")
+        .select("id, slug, name, website, email, phone, category, description, verified, logo_url, social_links, created_at, founder_name, collaboration_active, collaboration_method, collaboration_coupon, trust_status, trust_status_reason, transparency_score, response_rate, avg_response_hours, verified_review_ratio, ai_summary, sentiment_score, trending_score, ai_flags, affiliate_mode, personal_affiliate_url, personal_affiliate_urls")
         .eq("slug", slug)
         .maybeSingle();
 
@@ -289,11 +289,13 @@ const BusinessProfile = () => {
           rating: 0,
           reviewCount: 0,
           description: bizData.description || "",
-          logo: undefined,
+          logo: bizData.logo_url || undefined,
           website: bizData.website || undefined,
           email: bizData.email || undefined,
           phone: bizData.phone || undefined,
-          socialLinks: undefined,
+          founderName: (bizData as any).founder_name || undefined,
+          socialLinks: (bizData as any).social_links || undefined,
+          createdAt: bizData.created_at || undefined,
         };
         setBusiness(mappedBiz);
       }

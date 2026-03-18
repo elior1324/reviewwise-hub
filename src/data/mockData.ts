@@ -55,6 +55,8 @@ export interface Business {
   verifiedRatio?: number;
   /** Trust tier computed from verifiedRatio + verifiedReviewCount */
   trustTier?: "elite" | "highly_trusted" | "trusted" | "emerging" | "unrated";
+  /** ISO timestamp — when the business joined the platform */
+  createdAt?: string;
 }
 
 export interface Review {

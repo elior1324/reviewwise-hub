@@ -148,7 +148,7 @@ const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
               <motion.h1 initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="font-display font-bold text-2xl md:text-3xl text-foreground">
                 {business.name}
               </motion.h1>
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }} className="flex items-center gap-2">
+              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }} className="flex items-center gap-2 flex-wrap">
                 <Badge className="bg-trust-green-light text-trust-green border-0 gap-1">
                   <ShieldCheck size={14} /> מאומת
                 </Badge>
@@ -157,6 +157,19 @@ const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
                     <Cpu size={11} /> מוצר דיגיטלי
                   </Badge>
                 )}
+                {/* ── Tenure badge — shown when the business has been on the platform 1+ year ── */}
+                {(() => {
+                  if (!business.createdAt) return null;
+                  const joined = new Date(business.createdAt);
+                  const now = new Date();
+                  const years = Math.floor((now.getTime() - joined.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+                  if (years < 1) return null;
+                  return (
+                    <Badge variant="outline" className="gap-1 border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 text-[10px]">
+                      ★ פעיל {years}+ שנים
+                    </Badge>
+                  );
+                })()}
               </motion.div>
             </div>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-3 mb-3 flex-wrap">
