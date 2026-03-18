@@ -28,6 +28,10 @@
 const ALLOWED_ORIGINS: string[] = [
   Deno.env.get("FRONTEND_URL") || "https://reviewhub.co.il",
   "https://www.reviewhub.co.il",
+  "https://reviewhub.info",
+  "https://www.reviewhub.info",
+  "https://reviewshub.info",
+  "https://www.reviewshub.info",
   // Add staging / preview URLs here as needed:
   // "https://staging.reviewhub.co.il",
 ];
