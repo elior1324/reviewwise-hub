@@ -458,7 +458,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     devLog("[Auth] signInWithGoogle called (Lovable managed auth)");
     const { lovable } = await import("@/integrations/lovable/index");
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: redirectTo ?? window.location.origin,
+      redirect_uri: redirectTo ?? `${window.location.origin}/auth/callback`,
     });
     const error = result?.error ?? null;
     if (error) devErr("[Auth] signInWithGoogle error:", error);
@@ -468,10 +468,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ── signInWithApple ────────────────────────────────────────────────────────
 
   const signInWithApple = async () => {
-    devLog("[Auth] signInWithApple called");
+    devLog("[Auth] signInWithApple called (Lovable managed auth)");
     const { lovable } = await import("@/integrations/lovable/index");
     const result = await lovable.auth.signInWithOAuth("apple", {
-      redirect_uri: window.location.origin,
+      redirect_uri: `${window.location.origin}/auth/callback`,
     });
     const error = result?.error ?? null;
     if (error) devErr("[Auth] signInWithApple error:", error);
