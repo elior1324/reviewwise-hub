@@ -78,10 +78,14 @@ interface PlanMeta {
 }
 
 const PLAN_META: Record<string, PlanMeta> = {
+  // Full format (preferred)
   "plan_pro_monthly":        { tier: "pro",        billingCycle: "monthly" },
   "plan_pro_annual":         { tier: "pro",        billingCycle: "annual"  },
   "plan_enterprise_monthly": { tier: "enterprise", billingCycle: "monthly" },
   "plan_enterprise_annual":  { tier: "enterprise", billingCycle: "annual"  },
+  // Short format (sent by Make scenario — defaults to monthly)
+  "pro":                     { tier: "pro",        billingCycle: "monthly" },
+  "enterprise":              { tier: "enterprise", billingCycle: "monthly" },
 };
 
 const MONTHLY_DAYS = 31;
