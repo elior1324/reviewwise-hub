@@ -47,9 +47,12 @@ serve(async (req) => {
         active: intg.active,
         updated_at: intg.updated_at,
         config: {
-          webhook_url: intg.config?.webhook_url || "",
-          has_api_key: !!intg.config?.api_key,
-          // Never return the actual api_key
+          webhook_url:   intg.config?.webhook_url || "",
+          has_api_key:   !!intg.config?.api_key,
+          has_access_token: !!intg.config?.access_token,
+          instance_url:  intg.config?.instance_url || "",
+          board_id:      intg.config?.board_id || "",
+          // Never return the actual api_key / access_token values
         },
       }));
 
@@ -68,6 +71,17 @@ serve(async (req) => {
       }
       if (integration_type === "hubspot" && config?.api_key) {
         safeConfig.api_key = config.api_key;
+      }
+      if (integration_type === "salesforce") {
+        if (config?.access_token) safeConfig.access_token = config.access_token;
+        if (config?.instance_url) {
+          try { new URL(config.instance_url); safeConfig.instance_url = config.instance_url; }
+          catch { throw new Error("Invalid Salesforce instance URL"); }
+        }
+      }
+      if (integration_type === "monday") {
+        if (config?.api_key) safeConfig.api_key = config.api_key;
+        if (config?.board_id) safeConfig.board_id = String(parseInt(config.board_id, 10) || 0);
       }
 
       const { error } = await adminClient

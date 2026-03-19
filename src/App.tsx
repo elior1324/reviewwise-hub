@@ -48,6 +48,7 @@ import BusinessLanding from "./pages/business/BusinessLanding";
 import BusinessDashboard from "./pages/business/BusinessDashboard";
 import BusinessAuth from "./pages/business/BusinessAuth";
 import PricingPage from "./pages/business/PricingPage";
+import OAuthCallbackPage from "./pages/business/OAuthCallbackPage";
 
 // Partners / widgets
 import PrestigeBadgesPage from "./pages/partners/PrestigeBadgesPage";
@@ -135,6 +136,7 @@ const App = () => (
             <Route path="/business/signup" element={<BusinessAuth mode="signup" />} />
             <Route path="/business/dashboard" element={<BusinessDashboard />} />
             <Route path="/business/pricing" element={<PricingPage />} />
+            <Route path="/business/integrations/oauth/callback" element={<OAuthCallbackPage />} />
 
             {/* Legacy redirects */}
             <Route path="/dashboard" element={<Navigate to="/business/dashboard" replace />} />

@@ -119,38 +119,48 @@ serve(async (req) => {
       });
     }
 
-    const userSupabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await userSupabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
-    const userId = claimsData.claims.sub;
+    // ── Internal call path (from other Edge Functions using service role key) ──
+    // When submit-review or another Edge Function dispatches webhooks after an
+    // event, it passes the service role key as the Bearer token. In this mode
+    // we skip the user JWT claims check and business ownership verification
+    // since the caller is already a trusted server-side process.
+    const isInternalCall = token === SUPABASE_SERVICE_ROLE_KEY;
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { business_id, event, payload } = await req.json();
 
     if (!business_id || !event) throw new Error("business_id and event are required");
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    // Verify business ownership
-    const { data: business, error: bizError } = await supabase
-      .from("businesses")
-      .select("id, owner_id")
-      .eq("id", business_id)
-      .single();
-
-    if (bizError || !business || business.owner_id !== userId) {
-      return new Response(JSON.stringify({ error: "Forbidden: you do not own this business" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (!isInternalCall) {
+      // External caller: validate JWT and verify business ownership
+      const userSupabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: { headers: { Authorization: authHeader } },
       });
+
+      const { data: claimsData, error: claimsError } = await userSupabase.auth.getClaims(token);
+      if (claimsError || !claimsData?.claims) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const userId = claimsData.claims.sub;
+
+      const { data: business, error: bizError } = await supabase
+        .from("businesses")
+        .select("id, owner_id")
+        .eq("id", business_id)
+        .single();
+
+      if (bizError || !business || business.owner_id !== userId) {
+        return new Response(JSON.stringify({ error: "Forbidden: you do not own this business" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Get active webhooks for this business and event
@@ -283,6 +293,66 @@ serve(async (req) => {
               .eq("id", intg.id);
 
             return { integration: "hubspot", status: res.status };
+          }
+
+          if (intg.integration_type === "salesforce" && intg.config?.access_token && intg.config?.instance_url) {
+            // Upsert reviewer as a Salesforce Lead
+            const email    = sanitiseString(payload?.reviewer_email || payload?.customer_email);
+            const firstname = sanitiseString(payload?.reviewer_name || payload?.customer_name);
+            const company   = sanitiseString(payload?.business_name || "ReviewHub Lead");
+
+            if (!email) return { integration: "salesforce", status: "skipped_no_email" };
+
+            const sfRes = await fetch(`${intg.config.instance_url}/services/data/v59.0/sobjects/Lead`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${intg.config.access_token}`,
+              },
+              body: JSON.stringify({
+                FirstName: firstname || "Unknown",
+                LastName: "Reviewer",
+                Email: email,
+                Company: company,
+                LeadSource: "ReviewHub",
+                Description: sanitiseString(payload?.review_text, 1000),
+              }),
+              signal: AbortSignal.timeout(10_000),
+            });
+
+            await supabase.from("business_integrations")
+              .update({ updated_at: new Date().toISOString() })
+              .eq("id", intg.id);
+
+            return { integration: "salesforce", status: sfRes.status };
+          }
+
+          if (intg.integration_type === "monday" && intg.config?.api_key && intg.config?.board_id) {
+            // Create a Monday.com item for the new review/lead
+            const name = sanitiseString(payload?.reviewer_name || payload?.customer_email || "New Reviewer");
+            const query = `mutation {
+              create_item(
+                board_id: ${intg.config.board_id},
+                item_name: "${name}",
+                column_values: "{\\"email\\":{\\"email\\":\\"${sanitiseString(payload?.reviewer_email || "")}\\"}}",
+              ) { id }
+            }`;
+
+            const mondayRes = await fetch("https://api.monday.com/v2", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": intg.config.api_key,
+              },
+              body: JSON.stringify({ query }),
+              signal: AbortSignal.timeout(10_000),
+            });
+
+            await supabase.from("business_integrations")
+              .update({ updated_at: new Date().toISOString() })
+              .eq("id", intg.id);
+
+            return { integration: "monday", status: mondayRes.status };
           }
 
           return { integration: intg.integration_type, status: "unknown_type" };

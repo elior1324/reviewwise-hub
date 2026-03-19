@@ -7,7 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
   Lock, Webhook, Link2, Key, CheckCircle2, Loader2, ExternalLink,
-  Crown, Zap, MessageSquare, Mail, HardDrive, LayoutGrid, ArrowRight, Sparkles, CircleDot
+  Crown, Zap, MessageSquare, Mail, HardDrive, LayoutGrid, ArrowRight, Sparkles, CircleDot,
+  Download, Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -81,6 +82,14 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
   const [hubspotSaved, setHubspotSaved] = useState(false);
   const [hubspotConnected, setHubspotConnected] = useState(false);
 
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [googleConnecting, setGoogleConnecting] = useState(false);
+  const [googleImporting, setGoogleImporting] = useState(false);
+
+  const [facebookConnected, setFacebookConnected] = useState(false);
+  const [facebookConnecting, setFacebookConnecting] = useState(false);
+  const [facebookImporting, setFacebookImporting] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
@@ -110,6 +119,10 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
           setHubspotSaved(true);
           setHubspotConnected(hubspot.config?.has_api_key && hubspot.active);
         }
+        const google = result.data.find((d: any) => d.integration_type === "google");
+        if (google?.active) setGoogleConnected(true);
+        const facebook = result.data.find((d: any) => d.integration_type === "facebook");
+        if (facebook?.active) setFacebookConnected(true);
       }
       setLoading(false);
     };
@@ -167,6 +180,53 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
       toast({ title: "מחובר!", description: "HubSpot מחובר בהצלחה. לידים חדשים ייווצרו אוטומטית." });
     }
     setHubspotSaving(false);
+  };
+
+  const handleOAuthConnect = async (provider: "google" | "facebook") => {
+    if (isDemo) {
+      toast({ title: "מצב דמו", description: "הירשמו כדי לחבר חשבון." });
+      return;
+    }
+    provider === "google" ? setGoogleConnecting(true) : setFacebookConnecting(true);
+    try {
+      const { data: result, error } = await supabase.functions.invoke("get-oauth-connect-url", {
+        body: { provider, business_id: businessId },
+      });
+      if (error || result?.error) {
+        const msg = result?.error ?? error?.message ?? "שגיאה";
+        toast({ title: "שגיאה", description: msg, variant: "destructive" });
+        return;
+      }
+      window.location.href = result.url;
+    } finally {
+      provider === "google" ? setGoogleConnecting(false) : setFacebookConnecting(false);
+    }
+  };
+
+  const handleImportReviews = async (provider: "google" | "facebook") => {
+    if (isDemo) {
+      toast({ title: "מצב דמו", description: "הירשמו כדי לייבא ביקורות." });
+      return;
+    }
+    provider === "google" ? setGoogleImporting(true) : setFacebookImporting(true);
+    try {
+      const fnName = provider === "google" ? "import-google-reviews" : "import-facebook-reviews";
+      const { data: result, error } = await supabase.functions.invoke(fnName, {
+        body: { business_id: businessId },
+      });
+      if (error || result?.error) {
+        const msg = result?.error ?? error?.message ?? "שגיאה בייבוא";
+        toast({ title: "שגיאה", description: msg, variant: "destructive" });
+        return;
+      }
+      const { imported = 0, skipped = 0 } = result ?? {};
+      toast({
+        title: `יובאו ${imported} ביקורות`,
+        description: skipped > 0 ? `${skipped} ביקורות דולגו (ללא טקסט)` : "כל הביקורות יובאו בהצלחה",
+      });
+    } finally {
+      provider === "google" ? setGoogleImporting(false) : setFacebookImporting(false);
+    }
   };
 
   const handleLockedClick = () => {
@@ -498,11 +558,164 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
         </Card>
       </motion.div>
 
-      {/* ── How It Works ── */}
+      {/* ── Google Business Reviews ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.15 }}
+      >
+        <Card className="shadow-card bg-card overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#4285F4]/3 via-transparent to-transparent pointer-events-none" />
+          <CardHeader className="relative">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#4285F4]/10 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-base font-display font-bold flex items-center gap-2 flex-wrap">
+                  Google Business Reviews
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  ייבאו ביקורות Google ישירות לפלטפורמה
+                </p>
+              </div>
+              <div className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border ${
+                googleConnected
+                  ? "bg-primary/10 border-primary/20 text-primary"
+                  : "bg-muted/50 border-border/40 text-muted-foreground"
+              }`}>
+                <CircleDot size={10} className={googleConnected ? "text-primary" : "text-muted-foreground/40"} />
+                {googleConnected ? "מחובר" : "לא מחובר"}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="relative space-y-4">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              חברו את חשבון Google Business Profile שלכם כדי לייבא ביקורות קיימות ולהציג אותן לצד ביקורות ReviewHub.
+            </p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                onClick={() => handleOAuthConnect("google")}
+                disabled={googleConnecting || loading}
+                variant={googleConnected ? "outline" : "default"}
+                className={`gap-2 ${googleConnected ? "" : "bg-[#4285F4] hover:bg-[#3367D6] text-white"}`}
+              >
+                {googleConnecting ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : googleConnected ? (
+                  <CheckCircle2 size={14} />
+                ) : (
+                  <Link2 size={14} />
+                )}
+                {googleConnected ? "חבר מחדש" : "חבר Google Business"}
+              </Button>
+              {googleConnected && (
+                <Button
+                  onClick={() => handleImportReviews("google")}
+                  disabled={googleImporting || loading}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  {googleImporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                  ייבא ביקורות
+                </Button>
+              )}
+            </div>
+            <div className="pt-2 border-t border-border/20 flex items-start gap-2">
+              <Star size={12} className="text-muted-foreground mt-0.5 shrink-0" />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                הביקורות יסומנו כ-"Google Business" ויוצגו בפרופיל העסק בנפרד מביקורות מאומתות ReviewHub.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* ── Facebook Page Reviews ── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
+      >
+        <Card className="shadow-card bg-card overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1877F2]/3 via-transparent to-transparent pointer-events-none" />
+          <CardHeader className="relative">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#1877F2]/10 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" className="w-6 h-6" fill="#1877F2">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-base font-display font-bold flex items-center gap-2 flex-wrap">
+                  Facebook Page Reviews
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  ייבאו דירוגים מהעמוד שלכם בפייסבוק
+                </p>
+              </div>
+              <div className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border ${
+                facebookConnected
+                  ? "bg-primary/10 border-primary/20 text-primary"
+                  : "bg-muted/50 border-border/40 text-muted-foreground"
+              }`}>
+                <CircleDot size={10} className={facebookConnected ? "text-primary" : "text-muted-foreground/40"} />
+                {facebookConnected ? "מחובר" : "לא מחובר"}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="relative space-y-4">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              חברו את עמוד הפייסבוק שלכם כדי לייבא ביקורות ודירוגים ולהציגם בפרופיל העסק שלכם ב-ReviewHub.
+            </p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                onClick={() => handleOAuthConnect("facebook")}
+                disabled={facebookConnecting || loading}
+                variant={facebookConnected ? "outline" : "default"}
+                className={`gap-2 ${facebookConnected ? "" : "bg-[#1877F2] hover:bg-[#166FE5] text-white"}`}
+              >
+                {facebookConnecting ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : facebookConnected ? (
+                  <CheckCircle2 size={14} />
+                ) : (
+                  <Link2 size={14} />
+                )}
+                {facebookConnected ? "חבר מחדש" : "חבר Facebook Page"}
+              </Button>
+              {facebookConnected && (
+                <Button
+                  onClick={() => handleImportReviews("facebook")}
+                  disabled={facebookImporting || loading}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  {facebookImporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                  ייבא ביקורות
+                </Button>
+              )}
+            </div>
+            <div className="pt-2 border-t border-border/20 flex items-start gap-2">
+              <Star size={12} className="text-muted-foreground mt-0.5 shrink-0" />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                נדרשת הרשאת pages_read_user_content. ביקורות ללא טקסט (דירוג בלבד) יסוננו אוטומטית.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* ── How It Works ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25 }}
       >
         <Card className="shadow-card bg-card border-dashed border-border/40">
           <CardContent className="py-6">

@@ -31,3 +31,13 @@ project_id = "pujsopidbejeuqteormi"
     verify_jwt = false
   [functions.send-review-request]
     verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = false
+  [functions.import-google-reviews]
+    verify_jwt = false
+  [functions.import-facebook-reviews]
+    verify_jwt = false
+  [functions.exchange-oauth-token]
+    verify_jwt = false
+  [functions.get-oauth-connect-url]
+    verify_jwt = false

@@ -421,6 +421,35 @@ serve(async (req: Request) => {
       });
     }
 
+    // ── Fire webhooks (fire-and-forget) ──────────────────────────────────────
+    // Dispatch the new_review event to all configured webhooks and CRM
+    // integrations (HubSpot, Salesforce, Monday.com, Google Sheets, Zapier/Make).
+    // This is intentionally non-blocking — a webhook failure must never prevent
+    // a review from being saved.
+    if (insertedReview?.id) {
+      fetch(`${SUPABASE_URL}/functions/v1/fire-webhooks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Internal call: use service role key so fire-webhooks skips user auth.
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({
+          business_id: businessId,
+          event: "new_review",
+          payload: {
+            review_id:        insertedReview.id,
+            rating,
+            reviewer_email:   user.email ?? "",
+            reviewer_name:    cleanReviewerName,
+            review_text:      cleanReviewText,
+            verified_purchase: serverVerifiedPurchase,
+          },
+        }),
+        signal: AbortSignal.timeout(30_000),
+      }).catch((e) => console.warn("[submit-review] webhook dispatch failed:", e));
+    }
+
     return jsonResp({
       success:          true,
       reviewId:         insertedReview?.id ?? null,

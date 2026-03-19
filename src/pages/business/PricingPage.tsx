@@ -9,6 +9,7 @@ import { Zap, ArrowLeft, BarChart3, TrendingUp, Bell, LineChart, Target, Eye,
          Loader2, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 // ── Analytics features (merged from AnalyticsSolution) ────────────────────────
 const ANALYTICS_FEATURES = [
@@ -29,12 +30,46 @@ const PricingPage = () => {
 
   // ── Checkout state ─────────────────────────────────────────────────────────
   const [selectedPlanId,  setSelectedPlanId]  = useState<string>(""); // "pro" | "enterprise"
-  const checkoutLoading = false;
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError,   setCheckoutError]   = useState<string | null>(null);
 
-  // ── Payment unavailable (payment provider being migrated) ─────────────
-  const handleCheckout = () => {
-    setCheckoutError("מערכת התשלומים בשדרוג. אנא צרו קשר ישירות לשדרוג ידני.");
+  const handleCheckout = async () => {
+    if (!user) {
+      setCheckoutError("יש להתחבר כדי להמשיך לתשלום");
+      return;
+    }
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error("לא נמצאה הפעלה פעילה — אנא התחברו מחדש");
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            plan: selectedPlanId,
+            billing_cycle: billingCycle,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "שגיאה ביצירת עמוד תשלום");
+
+      // Redirect to hyp's hosted payment page
+      window.location.href = data.checkoutUrl;
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : "שגיאה בחיבור לשרת התשלומים");
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
   const handlePlanSelect = (planId: string) => {
