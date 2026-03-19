@@ -41,3 +41,5 @@ project_id = "pujsopidbejeuqteormi"
     verify_jwt = false
   [functions.get-oauth-connect-url]
     verify_jwt = false
+  [functions.receive-instagram-dm-review]
+    verify_jwt = false

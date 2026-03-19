@@ -9,6 +9,7 @@ import AddReviewForm from "@/components/AddReviewForm";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import GoogleReviewsSection, { type GoogleReview, type GoogleProfileData } from "@/components/GoogleReviewsSection";
 import WhatsAppReviewsSection, { type WhatsAppReview } from "@/components/WhatsAppReviewsSection";
+import InstagramDMReviewsSection, { type InstagramDMReview } from "@/components/InstagramDMReviewsSection";
 import FacebookReviewsSection, { type FacebookReview } from "@/components/FacebookReviewsSection";
 import ReviewSourceBreakdown, { type SourceFilterValue } from "@/components/ReviewSourceBreakdown";
 import BusinessTrustStatusBadge, { type BusinessTrustStatus } from "@/components/BusinessTrustStatusBadge";
@@ -46,9 +47,10 @@ const BusinessProfile = () => {
   const [googleReviews, setGoogleReviews]   = useState<GoogleReview[]>([]);
   const [isOwner, setIsOwner]               = useState(false);
 
-  // WhatsApp + Facebook review state
-  const [whatsappReviews, setWhatsappReviews] = useState<WhatsAppReview[]>([]);
-  const [facebookReviews, setFacebookReviews] = useState<FacebookReview[]>([]);
+  // WhatsApp + Instagram DM + Facebook review state
+  const [whatsappReviews, setWhatsappReviews]   = useState<WhatsAppReview[]>([]);
+  const [instagramReviews, setInstagramReviews] = useState<InstagramDMReview[]>([]);
+  const [facebookReviews, setFacebookReviews]   = useState<FacebookReview[]>([]);
   const [facebookPageUrl,  setFacebookPageUrl]  = useState<string | null>(null);
   const [facebookPageName, setFacebookPageName] = useState<string | null>(null);
 
@@ -335,6 +337,17 @@ const BusinessProfile = () => {
 
       if (waReviews) setWhatsappReviews(waReviews as WhatsAppReview[]);
 
+      // ── 5b. Fetch Instagram DM reviews (approved, non-flagged) ───────────────
+      const { data: igReviews } = await supabase
+        .from("instagram_dm_reviews")
+        .select("id, author_name, rating, text, received_at")
+        .eq("business_id", bizData.id)
+        .eq("is_approved", true)
+        .eq("is_flagged", false)
+        .order("received_at", { ascending: false });
+
+      if (igReviews) setInstagramReviews(igReviews as InstagramDMReview[]);
+
       // ── 6. Fetch Facebook reviews ────────────────────────────────────────────
       const { data: fbReviews } = await supabase
         .from("facebook_reviews")
@@ -419,14 +432,15 @@ const BusinessProfile = () => {
 
   // ── Visibility flags for source-based section rendering ───────────────────
   const showNativeSection  = sourceFilter === "all" || sourceFilter === "verified_purchase" || sourceFilter === "community";
-  const showGoogleSection  = (sourceFilter === "all" || sourceFilter === "google")   && !!googleProfile;
-  const showWASection      = (sourceFilter === "all" || sourceFilter === "whatsapp") && whatsappReviews.length > 0;
-  const showFBSection      = (sourceFilter === "all" || sourceFilter === "facebook") && facebookReviews.length > 0;
+  const showGoogleSection  = (sourceFilter === "all" || sourceFilter === "google")        && !!googleProfile;
+  const showWASection      = (sourceFilter === "all" || sourceFilter === "whatsapp")      && whatsappReviews.length > 0;
+  const showIGSection      = (sourceFilter === "all" || sourceFilter === "instagram_dm")  && instagramReviews.length > 0;
+  const showFBSection      = (sourceFilter === "all" || sourceFilter === "facebook")      && facebookReviews.length > 0;
 
   // ── Smart empty-state logic ───────────────────────────────────────────────
-  const hasAnyContent = reviews.length > 0 || googleReviews.length > 0 || whatsappReviews.length > 0 || facebookReviews.length > 0;
-  const hasOnlyExternal = reviews.length === 0 && (googleReviews.length > 0 || whatsappReviews.length > 0 || facebookReviews.length > 0);
-  const hasWAButNoVerified = (whatsappReviews.length > 0 || facebookReviews.length > 0) && totalVerified === 0;
+  const hasAnyContent = reviews.length > 0 || googleReviews.length > 0 || whatsappReviews.length > 0 || instagramReviews.length > 0 || facebookReviews.length > 0;
+  const hasOnlyExternal = reviews.length === 0 && (googleReviews.length > 0 || whatsappReviews.length > 0 || instagramReviews.length > 0 || facebookReviews.length > 0);
+  const hasWAButNoVerified = (whatsappReviews.length > 0 || instagramReviews.length > 0 || facebookReviews.length > 0) && totalVerified === 0;
 
   if (loading) {
     return (
@@ -748,6 +762,7 @@ const BusinessProfile = () => {
           communityCount={totalOpen}
           googleCount={googleReviews.length}
           whatsappCount={whatsappReviews.length}
+          instagramCount={instagramReviews.length}
           facebookCount={facebookReviews.length}
           activeFilter={sourceFilter}
           onFilterChange={setSourceFilter}
@@ -971,11 +986,25 @@ const BusinessProfile = () => {
           </div>
         )}
 
+        {/* ── Tier 2b: Instagram DM Feedback ───────────────────────────────────
+            Approved by business owner. Same tier as WhatsApp.
+        ─────────────────────────────────────────────────────────────────── */}
+        {showIGSection && (
+          <div className={showNativeSection || showGoogleSection || showWASection ? "mt-6 border-t border-border/30 pt-6" : "mt-4"}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[9px] bg-[#E1306C]/10 text-[#E1306C] border border-[#E1306C]/20 rounded-full px-1.5 py-0.5 font-semibold">
+                T2 · אושר על ידי בעל העסק
+              </span>
+            </div>
+            <InstagramDMReviewsSection reviews={instagramReviews} />
+          </div>
+        )}
+
         {/* ── Tier 3b: Facebook Reviews ────────────────────────────────────────
             Imported from Facebook. Treated as T3 (same as Google).
         ─────────────────────────────────────────────────────────────────── */}
         {showFBSection && (
-          <div className={showNativeSection || showGoogleSection || showWASection ? "mt-6 border-t border-border/30 pt-6" : "mt-4"}>
+          <div className={showNativeSection || showGoogleSection || showWASection || showIGSection ? "mt-6 border-t border-border/30 pt-6" : "mt-4"}>
             <div className="flex items-center gap-2 mb-3">
               <span className="text-[9px] bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/20 rounded-full px-1.5 py-0.5 font-semibold">
                 T3 · מקור חיצוני
@@ -991,7 +1020,7 @@ const BusinessProfile = () => {
         )}
 
         {/* ── Empty state when filter shows a source with no data ─────────────── */}
-        {!showNativeSection && !showGoogleSection && !showWASection && !showFBSection && (
+        {!showNativeSection && !showGoogleSection && !showWASection && !showIGSection && !showFBSection && (
           <div className="flex flex-col items-center justify-center py-14 gap-3 text-center">
             <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
               <MessageSquare size={22} className="text-muted-foreground" />
