@@ -228,7 +228,7 @@ const Navbar = () => {
                 עמוד הבית
               </Link>
               <Link to="/search" className={navLinkCls("/search")}>
-                ספריית האמון
+                מאגר האמון
               </Link>
               {/* ── קהילה dropdown — Leaderboard + Referrals ── */}
               <DropdownMenu open={communityOpen} onOpenChange={setCommunityOpen}>
@@ -456,7 +456,7 @@ const Navbar = () => {
                 className="block text-sm py-3 min-h-[44px] flex items-center"
                 onClick={() => setMobileOpen(false)}
               >
-                ספריית האמון
+                מאגר האמון
               </Link>
 
               {/* Business sub-links */}

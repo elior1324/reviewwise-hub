@@ -110,7 +110,7 @@ const Footer = () => {
               to="/search"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              חיפוש ובדיקה
+              מאגר האמון
             </Link>
             <Link
               to="/compare"

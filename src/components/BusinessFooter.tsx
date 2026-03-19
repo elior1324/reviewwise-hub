@@ -64,7 +64,7 @@ const BusinessFooter = () => (
           <h4 className="font-display font-semibold mb-3 text-sm text-foreground">משאבים</h4>
           <div className="space-y-2">
             <Link to="/business/resources" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">תיעוד ובלוג</Link>
-            <Link to="/business#faq" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">שאלות נפוצות</Link>
+            <Link to="/#faq" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">שאלות נפוצות</Link>
           </div>
         </div>
         <div>
