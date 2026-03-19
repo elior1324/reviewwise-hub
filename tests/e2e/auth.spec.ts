@@ -230,13 +230,13 @@ test.describe("Session persistence", () => {
     await auth.completeTurnstile();
     await auth.submitBtn.click();
 
-    await page.waitForURL(/\/(?!auth)/, { timeout: 10_000 });
+    await page.waitForURL(url => !url.pathname.startsWith("/auth"), { timeout: 10_000 });
 
     // Hard reload — use domcontentloaded to avoid hanging on persistent
     // Supabase realtime / polling connections that block networkidle forever.
     await page.reload({ waitUntil: "domcontentloaded" });
     // Wait for React to restore the session from sessionStorage and settle.
-    await page.waitForURL(/\/(?!auth)/, { timeout: 10_000 });
+    await page.waitForURL(url => !url.pathname.startsWith("/auth"), { timeout: 10_000 });
 
     // Should still be on the authenticated URL (not redirected back to /auth)
     await expect(page).not.toHaveURL(/\/auth/);
