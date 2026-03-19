@@ -169,6 +169,7 @@ const BusinessProfile = () => {
         .from("reviews")
         .select("*, is_purchase_verified, review_source, is_flagged_spam, courses(name), business_responses(text, created_at)")
         .eq("business_id", bizData.id)
+        .eq("moderation_status", "approved")
         .order("created_at", { ascending: false });
 
       // ── AI Summary metadata ──────────────────────────────────────────────────

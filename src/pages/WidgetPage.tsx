@@ -98,6 +98,7 @@ export default function WidgetPage() {
         .from("reviews")
         .select("id, reviewer_name, rating, review_text, anonymous, verified, created_at, courses(course_name)")
         .eq("business_id", biz.id)
+        .eq("moderation_status", "approved")
         .gte("rating", 4)
         .order("created_at", { ascending: false })
         .limit(20);

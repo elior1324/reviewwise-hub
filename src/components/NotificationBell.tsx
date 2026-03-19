@@ -12,57 +12,6 @@ export interface Notification {
   read: boolean;
 }
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: "n1",
-    type: "deal",
-    title: "🔥 מבצע חדש!",
-    description: "אקדמיית שיווק דיגיטלי הוציאו 30% הנחה על קורס SEO",
-    time: "לפני 5 דקות",
-    read: false,
-  },
-  {
-    id: "n2",
-    type: "response",
-    title: "💬 תגובה חדשה",
-    description: 'בעל העסק הגיב לביקורת שלכם על "בוטקמפ Full-Stack"',
-    time: "לפני 20 דקות",
-    read: false,
-  },
-  {
-    id: "n3",
-    type: "like",
-    title: "👍 לייק חדש",
-    description: '3 אנשים אהבו את התגובה שלכם על "יסודות עיצוב UI/UX"',
-    time: "לפני שעה",
-    read: false,
-  },
-  {
-    id: "n4",
-    type: "update",
-    title: "📢 עדכון קורס",
-    description: 'Code Masters IL עדכנו את תוכן הקורס "React מתקדם"',
-    time: "לפני 3 שעות",
-    read: true,
-  },
-  {
-    id: "n5",
-    type: "review",
-    title: "⭐ ביקורת חדשה",
-    description: 'ביקורת חדשה התפרסמה על "Python למדעי נתונים"',
-    time: "לפני 5 שעות",
-    read: true,
-  },
-  {
-    id: "n6",
-    type: "deal",
-    title: "💰 הנחה מיוחדת",
-    description: "מרכז מדעי הנתונים — 20% הנחה על למידת מכונה מתקדמת",
-    time: "אתמול",
-    read: true,
-  },
-];
-
 const typeColors: Record<string, string> = {
   deal: "bg-accent/20 text-accent",
   response: "bg-primary/20 text-primary",
@@ -73,7 +22,7 @@ const typeColors: Record<string, string> = {
 
 const NotificationBell = () => {
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const ref = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -129,6 +78,11 @@ const NotificationBell = () => {
               )}
             </div>
             <div className="max-h-[380px] overflow-y-auto">
+              {notifications.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8 px-4">
+                  אין התראות כרגע
+                </p>
+              )}
               {notifications.map((n) => (
                 <div
                   key={n.id}

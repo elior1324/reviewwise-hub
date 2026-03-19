@@ -141,6 +141,7 @@ const Index = () => {
       const { data } = await supabase
         .from("reviews")
         .select("*, courses(name), businesses(name, slug), business_responses(text, created_at)")
+        .eq("moderation_status", "approved")
         .order("created_at", { ascending: false })
         .limit(12);
 
@@ -213,7 +214,8 @@ const Index = () => {
     const fetchTotalReviews = async () => {
       const { count } = await supabase
         .from("reviews")
-        .select("*", { count: "exact", head: true });
+        .select("*", { count: "exact", head: true })
+        .eq("moderation_status", "approved");
       if (count !== null) setStats(prev => ({ ...prev, reviews: count }));
     };
 

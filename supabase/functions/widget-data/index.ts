@@ -116,47 +116,34 @@ serve(async (req) => {
 
     if (includeReview) {
       // Fetch one high-quality review to feature in the expanded badge
-      const { data: reviews } = await supabaseClient
-        .from("reviews")
-        .select("id, rating, content, reviewer_name, is_anonymous, is_verified_purchase")
-        .eq("business_id_via_slug", slug)            // handled below via subquery fallback
-        .eq("status", "approved")
-        .gte("rating", 4)
-        .not("content", "is", null)
-        .order("rating", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle()
-        // The above uses a column that may not exist; fall back with a join
-        .then(async (r) => {
-          if (r.data) return r;
-          // Fallback: look up the business id first
-          const { data: bizRow } = await supabaseClient
-            .from("businesses")
-            .select("id")
-            .eq("slug", slug)
-            .single();
-          if (!bizRow) return { data: null };
-          return supabaseClient
+      // Look up the business id first, then fetch one high-quality approved review.
+      // The previous implementation used .eq("business_id_via_slug", slug) which
+      // references a non-existent column — replaced with the explicit id lookup.
+      const { data: bizRow } = await supabaseClient
+        .from("businesses")
+        .select("id")
+        .eq("slug", slug)
+        .single();
+      const reviews = bizRow
+        ? await supabaseClient
             .from("reviews")
-            .select("id, rating, content, reviewer_name, is_anonymous, is_verified_purchase")
+            .select("id, rating, text, anonymous, created_at")
             .eq("business_id", bizRow.id)
-            .eq("status", "approved")
+            .eq("moderation_status", "approved")
             .gte("rating", 4)
-            .not("content", "is", null)
+            .not("text", "is", null)
             .order("rating", { ascending: false })
             .order("created_at", { ascending: false })
             .limit(1)
-            .maybeSingle();
-        });
+            .maybeSingle()
+        : { data: null };
 
-      if (reviews && reviews.content && reviews.content.length >= 40) {
+      const rev = reviews?.data;
+      if (rev && rev.text && rev.text.length >= 40) {
         featuredReview = {
-          rating: reviews.rating,
-          content: reviews.content,
-          reviewer_name: reviews.reviewer_name,
-          is_anonymous: reviews.is_anonymous,
-          is_verified_purchase: reviews.is_verified_purchase,
+          rating: rev.rating,
+          content: rev.text,
+          is_anonymous: rev.anonymous ?? false,
         };
       }
     }

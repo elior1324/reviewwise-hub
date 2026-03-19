@@ -57,134 +57,6 @@ interface ReviewsMarqueeProps {
   className?: string;
 }
 
-// ─── Default showcase data — all reviews reference the real demo business ─────
-
-const DEFAULT_REVIEWS: ReviewTestimonial[] = [
-  // Row 1
-  {
-    author: { name: "רונן ב.", handle: "@ronenb", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80" },
-    rating: 5,
-    text: "עבדתי עם מיטב דיגיטל על קמפיין Meta Ads לחנות האונליין שלי. תוך חודש ראשון הכפלנו את המכירות. הצוות מקצועי, זמין ומסביר כל שלב.",
-    verified: true,
-    date: "נובמבר 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "verified_purchase",
-  },
-  {
-    author: { name: "שירה מ.", handle: "@shira_m", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&q=80" },
-    rating: 5,
-    text: "הכינו לנו אסטרטגיית SEO מאפס — בתוך 3 חודשים עלינו לעמוד ראשון בגוגל על 4 ביטויים מרכזיים. שירות ברמה גבוהה מאוד.",
-    verified: true,
-    date: "ספטמבר 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "verified_purchase",
-  },
-  {
-    author: { name: "ג׳ולי א.", handle: "@julieA", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80" },
-    rating: 5,
-    text: "שלחתי הודעה בשעה 11 בלילה עם שאלה, קיבלתי תשובה מלאה תוך 20 דקות 😮 שירות כזה לא פגשתי בשום מקום!",
-    verified: true,
-    date: "דצמבר 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "whatsapp",
-  },
-  {
-    author: { name: "נדב כ.", handle: "@nadavk", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80" },
-    rating: 5,
-    text: "ניהול הסושיאל שלנו השתפר דרמטית. העמוד שלנו צמח מ-500 עוקבים ל-4,200 תוך 5 חודשים. כל הקרדיט למיטב דיגיטל.",
-    verified: true,
-    date: "ספטמבר 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "verified_purchase",
-  },
-  {
-    author: { name: "דנה פ.", handle: "@dana_p", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&h=80&fit=crop&q=80" },
-    rating: 5,
-    text: "שיתוף פעולה מעולה! מיטב דיגיטל הצליחו לתרגם את החזון שלנו לשפה שגוגל מבינה. המכירות עלו ב-60% תוך רבעון.",
-    verified: true,
-    date: "דצמבר 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "facebook",
-  },
-  {
-    author: { name: "מיכל ר.", handle: "@michalr", avatar: "https://images.unsplash.com/photo-1520813819077-7f2ee9e60aae?w=80&h=80&fit=crop&q=80" },
-    rating: 5,
-    text: "פגשתי את הצוות בכנס שיווקי ועברתי אליהם. הם מבינים את העסק שלי כאילו הם חלק ממנו. מאוד שמחה שעברתי.",
-    verified: false,
-    date: "יוני 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "website",
-  },
-
-  // Row 2
-  {
-    author: { name: "אמיר ד.", handle: "@amird", avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&q=80" },
-    rating: 5,
-    text: "בנינו יחד את כל הנוכחות הדיגיטלית של העסק — אתר, גוגל, רשתות חברתיות. הכל עובד כמו מכונה.",
-    verified: true,
-    date: "יולי 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "verified_purchase",
-  },
-  {
-    author: { name: "בועז ט.", handle: "@boazT", avatar: "https://images.unsplash.com/photo-1570295999897-c9c4c55e7839?w=80&h=80&fit=crop&q=80" },
-    rating: 5,
-    text: "הם לא רק מבצעים — הם חושבים יחד איתך. כל פגישה מסתיימת עם תוכנית ברורה וצעדים מדויקים. כבר שנה שעובד איתם.",
-    verified: true,
-    date: "נובמבר 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "whatsapp",
-  },
-  {
-    author: { name: "יעל ש.", handle: "@yaelsh", avatar: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=80&h=80&fit=crop&q=80" },
-    rating: 4,
-    text: "קיבלנו תוצאות טובות בקמפיינים הממומנים, הצוות מגיב מהר ומסביר בצורה ברורה. בסה\"כ ממליצה.",
-    verified: true,
-    date: "אוקטובר 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "verified_purchase",
-  },
-  {
-    author: { name: "אורי ג.", handle: "@urig", avatar: "https://images.unsplash.com/photo-1504257426329-14daa0f0a5e7?w=80&h=80&fit=crop&q=80" },
-    rating: 5,
-    text: "פשוט הכי טובים בעניין. הכי שקופים, הכי ישרים ועם הכי הרבה ידע. מחכה לפרויקט הבא.",
-    verified: true,
-    date: "נובמבר 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "facebook",
-  },
-  {
-    author: { name: "לינוי ה.", handle: "@linoyh", avatar: "https://images.unsplash.com/photo-1517365830279-8d4dead2e554?w=80&h=80&fit=crop&q=80" },
-    rating: 4,
-    text: "הצוות של מיטב עזר לי להוציא את הקמפיין הראשון שלי בפייסבוק. הכל הסתדר מהר ובלי כאב ראש.",
-    verified: true,
-    date: "אוקטובר 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "whatsapp",
-  },
-  {
-    author: { name: "ורד ל.", handle: "@verdl", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&q=80" },
-    rating: 4,
-    text: "שירות טוב מאוד, אנשים נחמדים ומקצועיים. לוקח קצת זמן עד שהתוצאות מגיעות אבל שווה להמתין.",
-    verified: false,
-    date: "מאי 2025",
-    business: "מיטב דיגיטל",
-    businessSlug: "mitav-digital",
-    sourceTag: "website",
-  },
-];
-
 // ─── Star rating sub-component ────────────────────────────────────────────────
 
 function StarRating({ rating }: { rating: number }) {
@@ -354,7 +226,7 @@ export function ReviewsMarquee({
   speed = "normal",
   className,
 }: ReviewsMarqueeProps) {
-  const allReviews = reviews ?? DEFAULT_REVIEWS;
+  const allReviews = reviews ?? [];
 
   // Split into two rows of equal size; if odd total, first row gets extra
   const mid = Math.ceil(allReviews.length / 2);

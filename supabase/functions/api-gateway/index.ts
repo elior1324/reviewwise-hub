@@ -56,7 +56,7 @@ serve(async (req) => {
           .from("reviews")
           .select("id, rating, text, verified, anonymous, created_at, courses(name)")
           .eq("business_id", businessId)
-          .eq("flagged", false)
+          .eq("moderation_status", "approved")
           .order("created_at", { ascending: false })
           .limit(100);
         return new Response(JSON.stringify({ data: reviews }), {

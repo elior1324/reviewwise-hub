@@ -27,76 +27,15 @@ import type { TrustWidgetProps } from "@/components/TrustWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWidgetData } from "@/hooks/useWidgetData";
 
-// ─── Demo data (shown when no real data is available / for preview) ────────────
+// ─── Widget preview props — no fake data, shows the widget in its empty state ──
 
 const DEMO_PROPS: Omit<TrustWidgetProps, "variant"> = {
-  businessName: "אקדמיה לשיווק דיגיטלי",
-  slug: "demo",
-  rating: 4.8,
-  reviewCount: 318,
+  businessName: "שם העסק שלך",
+  slug: "your-business-slug",
+  rating: 0,
+  reviewCount: 0,
   profileUrl: "#",
-  reviews: [
-    {
-      id: "d1",
-      rating: 5,
-      text: "הקורס שינה לי את הדרך שבה אני מסתכל על שיווק. כלים מעשיים שאני משתמש בהם כבר ביום הראשון.",
-      reviewerName: "שרה ל.",
-      anonymous: false,
-      verified: true,
-      courseName: "שיווק דיגיטלי מאסטרקלאס",
-      date: "5 במרץ 2026",
-    },
-    {
-      id: "d2",
-      rating: 5,
-      text: "המרצה מסביר בצורה ברורה ומעניינת, הדוגמאות מהעולם האמיתי עוזרות להבין כל מושג.",
-      reviewerName: "דני א.",
-      anonymous: false,
-      verified: true,
-      courseName: "יסודות SEO",
-      date: "28 בפברואר 2026",
-    },
-    {
-      id: "d3",
-      rating: 5,
-      text: "ממליץ בחום! קורס מקצועי ומקיף. שווה כל שקל.",
-      reviewerName: "מיכל כ.",
-      anonymous: false,
-      verified: true,
-      courseName: "Google Ads מוסמך",
-      date: "20 בפברואר 2026",
-    },
-    {
-      id: "d4",
-      rating: 4,
-      text: "תוכן מעולה ועדכני. קצת קשה להתחיל למתחילים אבל ברגע שנכנסים לקצב זה מדהים.",
-      reviewerName: "יוסי מ.",
-      anonymous: false,
-      verified: false,
-      courseName: "אנליטיקס מתקדם",
-      date: "14 בפברואר 2026",
-    },
-    {
-      id: "d5",
-      rating: 5,
-      text: "לא ציפיתי שאלמד כל כך הרבה. כבר הרגשתי את ההבדל אחרי השיעור הראשון.",
-      reviewerName: "נועה ב.",
-      anonymous: false,
-      verified: true,
-      courseName: "TikTok לעסקים",
-      date: "8 בפברואר 2026",
-    },
-    {
-      id: "d6",
-      rating: 5,
-      text: "קורס מצוין, שינה את הדרך שאני מנהל את הקמפיינים שלי. תודה!",
-      reviewerName: "אנונימי",
-      anonymous: true,
-      verified: true,
-      courseName: "שיווק דיגיטלי מאסטרקלאס",
-      date: "1 בפברואר 2026",
-    },
-  ],
+  reviews: [],
 };
 
 // ─── Variants config ──────────────────────────────────────────────────────────
