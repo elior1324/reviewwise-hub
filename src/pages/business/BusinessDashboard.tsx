@@ -32,61 +32,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 // ─── Demo sample data (shown to visitors) ────────────────
-const DEMO_BUSINESS = { name: "העסק שלכם", email: "you@example.com" };
-
-const DEMO_STATS = [
-  { icon: Star, label: "דירוג ממוצע", value: "4.8", change: "+0.2", up: true, tooltip: "הציון הממוצע שלקוחות נתנו לכל הקורסים שלכם." },
-  { icon: MessageSquare, label: "סה״כ ביקורות", value: "124", change: "+12", up: true, tooltip: "מספר הביקורות שנכתבו על הקורסים שלכם." },
-  { icon: MousePointerClick, label: "קליקים לאתר", value: "94", change: "+23%", up: true, tooltip: "כמה אנשים לחצו על הקישור לאתר שלכם." },
-  { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: "₪48,850", change: "+18%", up: true, tooltip: "סך ההכנסות מרכישות שהגיעו דרך קישורי האפיליאט." },
+// ── Empty fallback data (no fake content — just structural placeholders) ─────
+const EMPTY_BUSINESS = { name: "", email: "" };
+const EMPTY_STATS: { icon: any; label: string; value: string; change: string; up: boolean; tooltip: string }[] = [
+  { icon: Star, label: "דירוג ממוצע", value: "—", change: "", up: false, tooltip: "טרם התקבלו ביקורות." },
+  { icon: MessageSquare, label: "סה״כ ביקורות", value: "0", change: "", up: false, tooltip: "" },
+  { icon: MousePointerClick, label: "קליקים לאתר", value: "0", change: "", up: false, tooltip: "" },
+  { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: "₪0", change: "", up: false, tooltip: "" },
 ];
-
-const DEMO_REVIEWS: Review[] = [
-  { id: "d1", reviewerName: "שרה ל.", rating: 5, text: "קורס מעולה! למדתי המון דברים חדשים שיישמתי מיד בעבודה.", courseName: "שיווק דיגיטלי מאסטרקלאס", courseId: "dc1", businessSlug: "demo", date: "היום", purchaseDate: "2026-01-01", verified: true, anonymous: false },
-  { id: "d2", reviewerName: "דני א.", rating: 4, text: "תוכן מצוין, היה נהדר אם היו יותר תרגולים מעשיים.", courseName: "יסודות SEO", courseId: "dc2", businessSlug: "demo", date: "אתמול", purchaseDate: "2026-02-01", verified: true, anonymous: false },
-  { id: "d3", reviewerName: "מיכל כ.", rating: 5, text: "המרצה מעולה, הסברים ברורים ודוגמאות מהעולם האמיתי.", courseName: "הסמכת Google Ads", courseId: "dc3", businessSlug: "demo", date: "לפני 3 ימים", purchaseDate: "2026-01-15", verified: true, anonymous: false },
-  { id: "d4", reviewerName: "יוסי מ.", rating: 3, text: "הקורס טוב אבל הקצב מהיר מדי למתחילים.", courseName: "אנליטיקס מתקדם", courseId: "dc4", businessSlug: "demo", date: "לפני שבוע", purchaseDate: "2025-12-01", verified: false, anonymous: false },
-];
-
-const DEMO_COURSES: Course[] = [
-  { id: "dc1", businessSlug: "demo", name: "שיווק דיגיטלי מאסטרקלאס", price: 2490, description: "", affiliateUrl: "", category: "", rating: 4.9, reviewCount: 67, verifiedPurchases: 234 },
-  { id: "dc2", businessSlug: "demo", name: "יסודות SEO", price: 990, description: "", affiliateUrl: "", category: "", rating: 4.6, reviewCount: 34, verifiedPurchases: 156 },
-  { id: "dc3", businessSlug: "demo", name: "הסמכת Google Ads", price: 1790, description: "", affiliateUrl: "", category: "", rating: 4.8, reviewCount: 23, verifiedPurchases: 89 },
-];
-
-const DEMO_CLICKS = [
-  { course: "שיווק דיגיטלי מאסטרקלאס", clicks: 45, conversions: 12, revenue: 29880 },
-  { course: "יסודות SEO", clicks: 23, conversions: 5, revenue: 4950 },
-  { course: "הסמכת Google Ads", clicks: 18, conversions: 7, revenue: 12530 },
-  { course: "אנליטיקס מתקדם", clicks: 8, conversions: 1, revenue: 1490 },
-];
-
-const DEMO_NOTIFICATIONS = [
-  { id: 1, type: "review", text: "שרה ל. השאירה ביקורת של 5 כוכבים על שיווק דיגיטלי מאסטרקלאס", time: "לפני שעתיים" },
-  { id: 2, type: "review", text: "ביקורת חדשה של 3 כוכבים על אנליטיקס מתקדם מחכה לתגובתכם", time: "לפני 5 שעות" },
-  { id: 3, type: "conversion", text: "רכישה חדשה דרך קישור אפיליאט — הכנסה של ₪2,490", time: "אתמול" },
-  { id: 4, type: "alert", text: "מערכת ה-AI זיהתה ביקורת חשודה על יסודות SEO", time: "אתמול" },
-  { id: 5, type: "report", text: "דוח ה-AI השבועי מוכן לצפייה", time: "לפני יומיים" },
-];
-
-const DEMO_AI_REPORT = {
-  date: "1-7 במרץ 2026",
-  strengths: [
-    "שביעות רצון הלקוחות עלתה ב-12% השבוע",
-    "זמן התגובה לביקורות השתפר — ממוצע 4 שעות",
-    "הקורס ״שיווק דיגיטלי מאסטרקלאס״ קיבל 5 ביקורות חדשות של 5 כוכבים",
-  ],
-  weaknesses: [
-    "הקורס ״אנליטיקס מתקדם״ ראה ירידה של 15% בהרשמות",
-    "2 ביקורות שליליות מציינות שהקצב מהיר מדי למתחילים",
-    "אחוז הקליקים באפיליאט ירד ב-8% לעומת השבוע הקודם",
-  ],
-  recommendations: [
-    "שקלו להוסיף מסלול למתחילים בקורס האנליטיקס",
-    "הגיבו ל-2 הביקורות השליליות הממתינות תוך 24 שעות",
-    "עדכנו את דף הנחיתה של האפיליאט — אחוז הנטישה הנוכחי הוא 45%",
-  ],
-};
 
 type DemoTier = "free" | "pro" | "enterprise";
 
@@ -375,9 +328,9 @@ const BusinessDashboard = () => {
   const [businessInfo, setBusinessInfo] = useState<{ name: string; email: string } | null>(null);
   const [realReviews, setRealReviews] = useState<Review[]>([]);
   const [realCourses, setRealCourses] = useState<Course[]>([]);
-  const [realStats, setRealStats] = useState<typeof DEMO_STATS | null>(null);
-  const [realClicks, setRealClicks] = useState<typeof DEMO_CLICKS>([]);
-  const [realNotifications, setRealNotifications] = useState<typeof DEMO_NOTIFICATIONS>([]);
+  const [realStats, setRealStats] = useState<typeof EMPTY_STATS | null>(null);
+  const [realClicks, setRealClicks] = useState<{ course: string; clicks: number; conversions: number; revenue: number }[]>([]);
+  const [realNotifications, setRealNotifications] = useState<{ id: number; type: string; text: string; time: string }[]>([]);
   const [realLeads, setRealLeads] = useState<any[]>([]);
   const [realWebhooks, setRealWebhooks] = useState<any[]>([]);
   const [realApiKeys, setRealApiKeys] = useState<any[]>([]);
@@ -645,14 +598,14 @@ const BusinessDashboard = () => {
     fetchBusinessData();
   }, [user]);
 
-  // Choose data source
-  const displayBusiness = isDemo ? DEMO_BUSINESS : (businessInfo || DEMO_BUSINESS);
-  const displayReviews = isDemo ? DEMO_REVIEWS : realReviews;
-  const displayCourses = isDemo ? DEMO_COURSES : realCourses;
-  const displayStats = isDemo ? DEMO_STATS : (realStats || DEMO_STATS);
-  const displayClicks = isDemo ? DEMO_CLICKS : realClicks;
-  const displayNotifications = isDemo ? DEMO_NOTIFICATIONS : realNotifications;
-  const aiReport = DEMO_AI_REPORT;
+  // Choose data source — no fake data, only real or empty
+  const displayBusiness = isDemo ? EMPTY_BUSINESS : (businessInfo || EMPTY_BUSINESS);
+  const displayReviews = isDemo ? [] : realReviews;
+  const displayCourses = isDemo ? [] : realCourses;
+  const displayStats = isDemo ? EMPTY_STATS : (realStats || EMPTY_STATS);
+  const displayClicks = isDemo ? [] : realClicks;
+  const displayNotifications = isDemo ? [] : realNotifications;
+  const aiReport = null;
 
   // Generate real AI report
   const handleGenerateReport = async (type: "weekly" | "daily") => {
@@ -760,16 +713,16 @@ const BusinessDashboard = () => {
       <BusinessNavbar />
       <div className="container pt-20 pb-10">
 
-        {/* Demo Banner */}
+        {/* No business registered — prompt to register */}
         {isDemo && (
-          <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 px-5 py-4">
-            <div className="flex items-center gap-3 mb-2">
-              <Eye size={20} className="text-primary" />
-              <p className="font-display font-semibold text-foreground">🎯 מצב דמו — כך ייראה לוח הבקרה שלכם אחרי ההרשמה</p>
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">כל הנתונים כאן הם לדוגמה בלבד. הירשמו כדי לראות את הנתונים האמיתיים שלכם.</p>
-            <Button onClick={() => navigate("/business/signup")} className="bg-primary text-primary-foreground hover:bg-primary/90">
-              הירשמו עכשיו — חינם
+          <div className="mb-6 rounded-xl border border-border/60 bg-card px-6 py-8 text-center">
+            <ShieldCheck size={36} className="text-primary mx-auto mb-4" />
+            <h2 className="font-display font-bold text-xl text-foreground mb-2">אין עסק רשום עדיין</h2>
+            <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
+              רשמו את העסק שלכם כדי לקבל גישה ללוח בקרה, ניהול ביקורות, כלי AI ועוד.
+            </p>
+            <Button onClick={() => navigate("/register")} className="bg-primary text-primary-foreground hover:bg-primary/90">
+              רשמו את העסק שלכם
             </Button>
           </div>
         )}
@@ -908,49 +861,7 @@ const BusinessDashboard = () => {
           </div>
         )}
 
-        {/* Demo Tier Selector */}
-        {isDemo && (
-          <div className="mb-6 rounded-xl border border-border/50 bg-muted/30 p-4">
-            <p className="text-xs text-muted-foreground font-medium mb-3 text-center">🎯 סימולציית חבילה — בחרו חבילה לצפייה בפיצ׳רים</p>
-            <div className="grid grid-cols-3 gap-2">
-              {([
-                { id: "free", label: "סטארטר", sublabel: "חינם", icon: null, desc: "פיצ׳רים בסיסיים" },
-                { id: "pro", label: "מקצועי", sublabel: "Pro", icon: Sparkles, desc: "כלים מתקדמים" },
-                { id: "enterprise", label: "אנטרפרייז", sublabel: "Enterprise", icon: Crown, desc: "גישה מלאה" },
-              ] as { id: DemoTier; label: string; sublabel: string; icon: any; desc: string }[]).map(({ id, label, sublabel, icon: Icon, desc }) => (
-                <button
-                  key={id}
-                  onClick={() => setDemoTier(id)}
-                  className={`relative flex flex-col items-center gap-1 rounded-lg border px-3 py-3 text-center transition-all ${
-                    demoTier === id
-                      ? id === "enterprise"
-                        ? "border-primary bg-primary/10 shadow-sm"
-                        : id === "pro"
-                        ? "border-accent bg-accent/10 shadow-sm"
-                        : "border-border bg-secondary shadow-sm"
-                      : "border-border/30 hover:border-border hover:bg-muted/50"
-                  }`}
-                >
-                  {Icon && <Icon size={14} className={demoTier === id ? (id === "enterprise" ? "text-primary" : "text-accent") : "text-muted-foreground"} />}
-                  <span className={`text-xs font-bold ${demoTier === id ? (id === "enterprise" ? "text-primary" : id === "pro" ? "text-accent" : "text-foreground") : "text-muted-foreground"}`}>
-                    {label}
-                  </span>
-                  <span className={`text-[10px] ${demoTier === id ? "text-muted-foreground" : "text-muted-foreground/60"}`}>{desc}</span>
-                </button>
-              ))}
-            </div>
-            {/* Shortcut to full pricing page */}
-            <div className="mt-3 text-center">
-              <button
-                onClick={() => navigate("/business/pricing")}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary/80 hover:text-primary transition-colors"
-              >
-                <Tag size={12} aria-hidden="true" />
-                ראו את כל החבילות והמחירים ←
-              </button>
-            </div>
-          </div>
-        )}
+        {/* No demo tier selector — removed all fake data */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
@@ -1644,14 +1555,11 @@ const BusinessDashboard = () => {
                   <Code2 size={15} className="text-accent" /> ווידג׳ט להטמעה
                 </h3>
                 <TrustBadgeDashboard
-                  businessSlug={isDemo ? "demo-business" : (businessId ? businessSlug : "demo-business")}
-                  businessName={isDemo ? "העסק שלכם" : displayBusiness.name}
-                  rating={isDemo ? 4.8 : (Number(displayStats[0]?.value) || 0)}
-                  reviewCount={isDemo ? 124 : (Number(displayStats[1]?.value) || 0)}
-                  reviews={isDemo ? DEMO_REVIEWS.map(r => ({
-                    id: r.id, rating: r.rating, text: r.text, reviewerName: r.reviewerName,
-                    anonymous: r.anonymous, verified: r.verified, courseName: r.courseName, date: r.date,
-                  })) : realReviews.map(r => ({
+                  businessSlug={businessId ? businessSlug : ""}
+                  businessName={displayBusiness.name}
+                  rating={Number(displayStats[0]?.value) || 0}
+                  reviewCount={Number(displayStats[1]?.value) || 0}
+                  reviews={realReviews.map(r => ({
                     id: r.id, rating: r.rating, text: r.text, reviewerName: r.reviewerName,
                     anonymous: r.anonymous, verified: r.verified, courseName: r.courseName, date: r.date,
                   }))}

@@ -97,25 +97,12 @@ interface Props {
   onEnrolledChange?: (enrolled: boolean, status: AffiliateProgramStatus) => void;
 }
 
-// ── Demo data ─────────────────────────────────────────────────────────────────
+// ── Empty fallback data (no fake content) ─────────────────────────────────────
 
-const DEMO_STATS: AffiliateStats = {
-  total_clicks:        248,
-  clicks_30d:          73,
-  total_conversions:   31,
-  conversions_30d:     9,
-  total_revenue:       62000,
-  platform_commission: 3100,
-  customer_discount:   3100,
-  conversion_rate:     12.5,
+const EMPTY_AFFILIATE_STATS: AffiliateStats = {
+  total_clicks: 0, clicks_30d: 0, total_conversions: 0, conversions_30d: 0,
+  total_revenue: 0, platform_commission: 0, customer_discount: 0, conversion_rate: 0,
 };
-
-const DEMO_CONVERSIONS: Conversion[] = [
-  { id: "d1", transaction_amount: 2490, customer_discount: 124, platform_commission: 124, business_net: 2242, coupon_code: "RH5", status: "confirmed", created_at: new Date(Date.now() - 86400000 * 1).toISOString() },
-  { id: "d2", transaction_amount: 990,  customer_discount:  49, platform_commission:  49, business_net:  892, coupon_code: "RH5", status: "confirmed", created_at: new Date(Date.now() - 86400000 * 2).toISOString() },
-  { id: "d3", transaction_amount: 1790, customer_discount:  89, platform_commission:  89, business_net: 1612, coupon_code: "RH5", status: "confirmed", created_at: new Date(Date.now() - 86400000 * 3).toISOString() },
-  { id: "d4", transaction_amount: 490,  customer_discount:  24, platform_commission:  24, business_net:  442, coupon_code: "RH5", status: "pending",   created_at: new Date(Date.now() - 86400000 * 4).toISOString() },
-];
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
@@ -298,8 +285,8 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
       setAffiliateMode("reviewhub_model");
       setEnrolled(true);
       setProgramStatus("enrolled");
-      setStats(DEMO_STATS);
-      setConversions(DEMO_CONVERSIONS);
+      setStats(EMPTY_AFFILIATE_STATS);
+      setConversions([]);
       setLoading(false);
       return;
     }

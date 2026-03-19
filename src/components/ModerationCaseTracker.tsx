@@ -262,51 +262,6 @@ interface ModerationCaseTrackerProps {
   isDemo?: boolean;
 }
 
-const DEMO_CASES: ModerationCase[] = [
-  {
-    id: "demo-001-0000-0000-000000000001",
-    review_id: "rev-001",
-    status: "under_review",
-    report_reason: "טענה לפרסום מידע שגוי לגבי מדיניות ההחזרים",
-    report_category: "fake",
-    source: "user_report",
-    decision: null,
-    decision_reason: null,
-    decided_at: null,
-    proof_deadline: null,
-    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
-    reviews: { review_text: "החברה מסרבת להחזיר כסף ואומרת שאין להם מדיניות החזרים", reviewer_name: "ד. לוי" },
-  },
-  {
-    id: "demo-002-0000-0000-000000000002",
-    review_id: "rev-002",
-    status: "proof_requested",
-    report_reason: "ספאם — נראה כמו ביקורת מכנית שנשלחה בכמות גדולה",
-    report_category: "spam",
-    source: "ai_flag",
-    decision: null,
-    decision_reason: null,
-    decided_at: null,
-    proof_deadline: new Date(Date.now() + 18 * 3600000).toISOString(),
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-    reviews: { review_text: "מוצר נהדר ממש אהבתי את הכל ממליץ בחום על הכל", reviewer_name: "י. כהן" },
-  },
-  {
-    id: "demo-003-0000-0000-000000000003",
-    review_id: "rev-003",
-    status: "decision_issued",
-    report_reason: "תוכן פוגעני המכיל שפה לא הולמת",
-    report_category: "harmful",
-    source: "user_report",
-    decision: "remove",
-    decision_reason: "הביקורת הכילה שפה פוגענית המנוגדת למדיניות הפלטפורמה.",
-    decided_at: new Date(Date.now() - 3600000).toISOString(),
-    proof_deadline: null,
-    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-    reviews: { review_text: "תוכן שהוסר בשל הפרת מדיניות", reviewer_name: "אנונימי" },
-  },
-];
-
 const ModerationCaseTracker = ({ businessId, isDemo = false }: ModerationCaseTrackerProps) => {
   const [cases, setCases] = useState<ModerationCase[]>([]);
   const [loading, setLoading] = useState(!isDemo);
@@ -314,7 +269,7 @@ const ModerationCaseTracker = ({ businessId, isDemo = false }: ModerationCaseTra
 
   useEffect(() => {
     if (isDemo) {
-      setCases(DEMO_CASES);
+      setCases([]);
       return;
     }
     const fetchCases = async () => {
