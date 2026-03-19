@@ -455,26 +455,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ── signInWithGoogle ───────────────────────────────────────────────────────
 
   const signInWithGoogle = async (redirectTo?: string) => {
-    devLog("[Auth] signInWithGoogle called (Lovable managed auth)");
-    const { lovable } = await import("@/integrations/lovable/index");
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: redirectTo ?? `${window.location.origin}/auth/callback`,
+    // Lovable managed auth only works in iframe (popup flow).
+    // On production custom domains (non-iframe), the redirect flow has no
+    // callback handler in the SDK, so we use Supabase native OAuth instead.
+    let isInIframe = false;
+    try { isInIframe = window.self !== window.top; } catch { isInIframe = true; }
+
+    if (isInIframe) {
+      devLog("[Auth] signInWithGoogle — Lovable popup (iframe)");
+      const { lovable } = await import("@/integrations/lovable/index");
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: redirectTo ?? `${window.location.origin}/auth/callback`,
+      });
+      const error = result?.error ?? null;
+      if (error) devErr("[Auth] signInWithGoogle Lovable error:", error);
+      return { error };
+    }
+
+    devLog("[Auth] signInWithGoogle — Supabase native OAuth (production)");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: redirectTo ?? `${window.location.origin}/auth/callback`,
+      },
     });
-    const error = result?.error ?? null;
-    if (error) devErr("[Auth] signInWithGoogle error:", error);
+    if (error) devErr("[Auth] signInWithGoogle Supabase error:", error);
     return { error };
   };
 
   // ── signInWithApple ────────────────────────────────────────────────────────
 
   const signInWithApple = async () => {
-    devLog("[Auth] signInWithApple called (Lovable managed auth)");
-    const { lovable } = await import("@/integrations/lovable/index");
-    const result = await lovable.auth.signInWithOAuth("apple", {
-      redirect_uri: `${window.location.origin}/auth/callback`,
+    let isInIframe = false;
+    try { isInIframe = window.self !== window.top; } catch { isInIframe = true; }
+
+    if (isInIframe) {
+      devLog("[Auth] signInWithApple — Lovable popup (iframe)");
+      const { lovable } = await import("@/integrations/lovable/index");
+      const result = await lovable.auth.signInWithOAuth("apple", {
+        redirect_uri: `${window.location.origin}/auth/callback`,
+      });
+      const error = result?.error ?? null;
+      if (error) devErr("[Auth] signInWithApple Lovable error:", error);
+      return { error };
+    }
+
+    devLog("[Auth] signInWithApple — Supabase native OAuth (production)");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
-    const error = result?.error ?? null;
-    if (error) devErr("[Auth] signInWithApple error:", error);
+    if (error) devErr("[Auth] signInWithApple Supabase error:", error);
     return { error };
   };
 
