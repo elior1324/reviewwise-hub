@@ -61,6 +61,14 @@ test.describe("Email login flow", () => {
     const auth = new AuthPagePO(page);
     await auth.goto();
 
+    // Detect dev bypass: TurnstileWidget renders a visible Hebrew notice when
+    // VITE_TURNSTILE_SITE_KEY is not set, and immediately calls onSuccess("dev-bypass-token")
+    // on mount — making the submit button intentionally enabled without user interaction.
+    // This is documented behaviour in TurnstileWidget.tsx (DEV_BYPASS_CAPTCHA flag).
+    // The gate being tested only applies when a real Turnstile key is configured.
+    const turnstileBypassed = await page.getByText("מצב פיתוח").isVisible();
+    test.skip(turnstileBypassed, "Turnstile is intentionally auto-bypassed in dev mode (no VITE_TURNSTILE_SITE_KEY) — submit button is enabled by design");
+
     await auth.fillLoginForm(TEST_EMAIL, TEST_PASSWORD);
     // Do NOT complete Turnstile
     await expect(auth.submitBtn).toBeDisabled();
@@ -102,6 +110,7 @@ test.describe("Email signup flow", () => {
 
     await auth.nameInput.fill(TEST_NAME);
     await auth.fillLoginForm(SIGNUP_EMAIL, "Secure77!");
+    await auth.confirmPasswordInput.fill("Secure77!");
     await auth.completeTurnstile();
 
     // Check privacy consent checkbox
@@ -203,8 +212,11 @@ test.describe("Session persistence", () => {
     await page.waitForURL(/\/(?!auth)/, { timeout: 10_000 });
     const urlAfterLogin = page.url();
 
-    // Hard reload
-    await page.reload({ waitUntil: "networkidle" });
+    // Hard reload — use domcontentloaded to avoid hanging on persistent
+    // Supabase realtime / polling connections that block networkidle forever.
+    await page.reload({ waitUntil: "domcontentloaded" });
+    // Wait for React to restore the session from sessionStorage and settle.
+    await page.waitForURL(/\/(?!auth)/, { timeout: 10_000 });
 
     // Should still be on the authenticated URL (not redirected back to /auth)
     await expect(page).not.toHaveURL(/\/auth/);

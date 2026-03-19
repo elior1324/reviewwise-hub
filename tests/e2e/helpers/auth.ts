@@ -33,11 +33,12 @@ export class AuthPagePO {
   get strengthBar()   { return this.page.locator(".h-1\\.5.w-full"); }
   get strengthLabel() { return this.page.locator("text=/חוזק הסיסמה/"); }
   get turnstile()     { return this.page.locator("[data-testid='cf-turnstile'], iframe[src*='challenges.cloudflare']"); }
-  get nameInput()     { return this.page.getByLabel("שם תצוגה"); }
-  get privacyChk()    { return this.page.getByRole("checkbox"); }
+  get nameInput()            { return this.page.getByLabel("שם תצוגה"); }
+  get confirmPasswordInput() { return this.page.getByLabel("אימות סיסמה"); }
+  get privacyChk()           { return this.page.getByRole("checkbox"); }
 
   async switchToSignup() {
-    await this.page.locator('button').filter({ hasText: 'הרשמו' }).click();
+    await this.page.locator('button').filter({ hasText: 'הרשמו כאן' }).click();
     await expect(this.nameInput).toBeVisible();
   }
 
