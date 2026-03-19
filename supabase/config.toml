@@ -11,10 +11,6 @@ project_id = "pujsopidbejeuqteormi"
     verify_jwt = false
   [functions.compare-items]
     verify_jwt = false
-  [functions.create-checkout]
-    verify_jwt = false
-  [functions.customer-portal]
-    verify_jwt = false
   [functions.evaluate-category]
     verify_jwt = false
   [functions.fire-webhooks]

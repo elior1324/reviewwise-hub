@@ -265,14 +265,14 @@ Deno.serve(async (req) => {
   const result  = await sendViaResend({ apiKey: resendApiKey, to: email, subject, html, text })
 
   if (result.error) {
-    console.error('[auth-email-hook] Resend API error:', result.error, '| to:', email)
+    console.error('[auth-email-hook] Resend API error:', result.error, '| to:', email.replace(/(?<=.).(?=[^@]*@)/g, '*'))
     return new Response(
       JSON.stringify({ error: `Email send failed: ${result.error}` }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 
-  console.log('[auth-email-hook] Email sent successfully:', { message_id: result.message_id, actionType, to: email })
+  console.log('[auth-email-hook] Email sent successfully:', { message_id: result.message_id, actionType, to: email.replace(/(?<=.).(?=[^@]*@)/g, '*') })
   return new Response(
     JSON.stringify({ success: true, message_id: result.message_id }),
     { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

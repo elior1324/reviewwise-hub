@@ -254,8 +254,16 @@ serve(async (req: Request) => {
     const { count: recentCount } = await adminClient
       .from("reviews").select("id", { count: "exact", head: true })
       .eq("user_id", user.id).gte("created_at", windowStart24h);
-    if ((recentCount ?? 0) >= 5) { spamScore += 0.5; spamFlags.push("burst_5plus_24h"); }
-    else if ((recentCount ?? 0) >= 3) { spamScore += 0.25; spamFlags.push("burst_3plus_24h"); }
+    // Hard rate limit: unconditional cap, independent of content quality
+    if ((recentCount ?? 0) >= 5) {
+      console.warn(`[submit-review] Rate limit hit uid=${user.id} count=${recentCount} window=24h`);
+      return jsonResp(
+        { error: "rate_limited", message: "ניתן לשלוח עד 5 ביקורות ביממה. נסו שוב מחר." },
+        429,
+        cors,
+      );
+    }
+    if ((recentCount ?? 0) >= 3) { spamScore += 0.25; spamFlags.push("burst_3plus_24h"); }
 
     // 5d. Business-level burst check (fire-and-forget burst flag)
     const windowStart1h = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -276,6 +284,18 @@ serve(async (req: Request) => {
     }
 
     const isFlaggedSpam = Math.min(1.0, spamScore) >= 0.6;
+
+    // ── Hard rate-limit: reject obvious spam before touching the DB ──────
+    // spamScore >= 0.7 means high-confidence spam (duplicate content + burst
+    // + pattern match). Return 429 immediately — do NOT insert the row.
+    if (Math.min(1.0, spamScore) >= 0.7) {
+      console.warn(`[submit-review] Hard spam block uid=${user.id} score=${spamScore.toFixed(3)} flags=${spamFlags.join(",")}`);
+      return jsonResp(
+        { error: "rate_limited", message: "ביקורות רבות מדי נשלחו בזמן קצר. נסו שוב מאוחר יותר." },
+        429,
+        cors,
+      );
+    }
 
     // ── Step 6: Insert review via service role ────────────────────────────
     // Using service-role key here ensures the insert cannot be blocked by

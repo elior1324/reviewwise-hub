@@ -18,6 +18,24 @@
  *   even a future server-rendered or email-forwarded path stays clean.
  */
 
+import DOMPurify from "dompurify";
+
+// ── sanitizeSvg ────────────────────────────────────────────────────────────────
+
+/**
+ * Sanitizes an SVG string for safe injection via dangerouslySetInnerHTML.
+ * Allows SVG elements/attributes only — strips all scripts, event handlers,
+ * and foreign-content blocks (foreignObject, use[href], etc.).
+ *
+ * Use this for any SVG that originates outside your own code (API responses,
+ * user-provided QR codes, etc.).
+ */
+export function sanitizeSvg(svg: string): string {
+  return DOMPurify.sanitize(svg, {
+    USE_PROFILES: { svg: true, svgFilters: true },
+  });
+}
+
 // ── sanitizeUrl ────────────────────────────────────────────────────────────────
 
 /**

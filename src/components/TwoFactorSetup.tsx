@@ -35,6 +35,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ShieldCheck, ShieldOff, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import { sanitizeSvg } from "@/lib/sanitize";
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -252,7 +253,7 @@ const TwoFactorSetup = () => {
           <div className="flex justify-center">
             <div
               className="w-44 h-44 bg-white rounded-xl p-2 flex items-center justify-center shadow-sm"
-              dangerouslySetInnerHTML={{ __html: qrCode }}
+              dangerouslySetInnerHTML={{ __html: sanitizeSvg(qrCode) }}
             />
           </div>
         )}

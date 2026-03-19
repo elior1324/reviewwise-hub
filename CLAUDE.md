@@ -9,7 +9,7 @@
 **Global state:** Context API only — `AuthContext` (auth + MFA + rate limiting + subscription) and `ModeContext` (user/business toggle)
 **Forms:** React Hook Form + Zod — no exceptions
 **Backend:** Supabase (PostgreSQL + RLS + Auth + 39 Edge Functions in Deno TypeScript)
-**Payments:** PayPlus REST API (Israel)
+**Payments:** Payment provider integration pending (PayPlus removed — not in use)
 **Hosting:** Lovable/Netlify CDN
 **UI language:** Hebrew-first, full RTL (`lang="he"`, `dir="rtl"`)
 
@@ -42,10 +42,10 @@
   - Do not loosen CSP headers in `vite.config.ts` or `public/_headers`
   - Do not change token storage from `sessionStorage` to `localStorage`
   - Do not remove session timeout logic (30-minute idle, 25-minute warning)
-- Never hardcode secrets, API keys, or credentials anywhere. Frontend uses `import.meta.env.VITE_*`. Edge Functions use `Deno.env.get()`. Server-side secrets (`RESEND_API_KEY`, `PAYPLUS_SECRET_KEY`, `TURNSTILE_SECRET_KEY`, etc.) must never appear in the frontend bundle.
+- Never hardcode secrets, API keys, or credentials anywhere. Frontend uses `import.meta.env.VITE_*`. Edge Functions use `Deno.env.get()`. Server-side secrets (`RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, etc.) must never appear in the frontend bundle.
 - Never use the Supabase service role key in frontend code. It belongs only in Edge Functions for privileged operations.
 - Never bypass RLS by switching to the service role client from frontend components.
-- Never remove HMAC verification from PayPlus webhook handlers.
+- When integrating any future payment provider, always verify webhook HMAC signatures before processing.
 
 ### Trust Score Isolation — Critical Architectural Rule
 
@@ -138,15 +138,12 @@ These phrases indicate incomplete work and require verification before closing a
 | `VITE_SUPABASE_URL` | Frontend | Supabase project URL |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Frontend | Supabase anon/publishable key |
 | `RESEND_API_KEY` | Edge Functions only | Transactional email |
-| `PAYPLUS_API_KEY` | Edge Functions only | PayPlus payment gateway |
-| `PAYPLUS_SECRET_KEY` | Edge Functions only | PayPlus webhook HMAC |
-| `PAYPLUS_PAGE_UID` | Edge Functions only | PayPlus payment page UID |
 | `TURNSTILE_SECRET_KEY` | Edge Functions only | Cloudflare Turnstile verification |
 | `CRON_SECRET` | Edge Functions only | Cron job auth header |
 | `GROW_MAKE_SECRET` | Edge Functions only | Make.com webhook auth |
 | `FRONTEND_URL` | Edge Functions only | Public app URL for links/redirects |
 
-Frontend code cannot and must not access `RESEND_API_KEY`, `PAYPLUS_SECRET_KEY`, `TURNSTILE_SECRET_KEY`, or any other server-side secret.
+Frontend code cannot and must not access `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, or any other server-side secret.
 
 ---
 

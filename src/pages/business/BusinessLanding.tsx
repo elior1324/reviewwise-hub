@@ -13,7 +13,7 @@ import {
   UserCheck, Globe, ChevronDown, HelpCircle, Eye, Tag, BadgePercent
 } from "lucide-react";
 import { LEARNER_DISCOUNT_RATE, PLATFORM_FEE_RATE, TOTAL_TRUST_CHARGE, computeVerifiedPricing, formatPrice } from "@/lib/affiliate";
-import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -150,7 +150,7 @@ const SmoothCollapse = ({ isOpen, preview, title }: { isOpen: boolean; preview?:
 const BusinessLanding = () => {
   const { user, subscriptionTier } = useAuth();
   const { toast } = useToast();
-  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const checkoutLoading: string | null = null;
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
   const [trustedCompanies, setTrustedCompanies] = useState<{ name: string; initials: string }[]>([]);
 
@@ -177,23 +177,12 @@ const BusinessLanding = () => {
     setExpandedFeature(prev => prev === title ? null : title);
   };
 
-  const handleCheckout = async (tier: "pro" | "enterprise") => {
-    if (!user) {
-      toast({ title: "יש להתחבר תחילה", variant: "destructive" });
-      return;
-    }
-    setCheckoutLoading(tier);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId: STRIPE_TIERS[tier].price_id },
-      });
-      if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
-    } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
-    } finally {
-      setCheckoutLoading(null);
-    }
+  const handleCheckout = (_tier: "pro" | "enterprise") => {
+    toast({
+      title: "מערכת תשלומים בשדרוג",
+      description: "אנו עובדים על שיפור מערכת התשלומים. אנא צרו קשר לשדרוג ידני.",
+      variant: "destructive",
+    });
   };
 
   return (

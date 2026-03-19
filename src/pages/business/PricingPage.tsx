@@ -8,7 +8,6 @@ import BusinessFooter from "@/components/BusinessFooter";
 import { Zap, ArrowLeft, BarChart3, TrendingUp, Bell, LineChart, Target, Eye,
          Loader2, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 // ── Analytics features (merged from AnalyticsSolution) ────────────────────────
@@ -30,33 +29,12 @@ const PricingPage = () => {
 
   // ── Checkout state ─────────────────────────────────────────────────────────
   const [selectedPlanId,  setSelectedPlanId]  = useState<string>(""); // "pro" | "enterprise"
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const checkoutLoading = false;
   const [checkoutError,   setCheckoutError]   = useState<string | null>(null);
 
-  // ── Redirect to payment page ────────────────────────────────────────────
-  const handleCheckout = async () => {
-    if (!user) {
-      navigate("/business/login", { state: { from: "/business/pricing" } });
-      return;
-    }
-    setCheckoutLoading(true);
-    setCheckoutError(null);
-    try {
-      // priceId format: plan_{tier}_{billingCycle}
-      const priceId = `plan_${selectedPlanId}_${billingCycle}`;
-      const { data, error: fnError } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
-      });
-      if (fnError) throw new Error(fnError.message ?? "שגיאת שרת");
-      if (!data?.url) throw new Error("לא התקבלה כתובת תשלום. נסו שנית.");
-      // Redirect browser to hyp hosted payment page
-      window.location.href = data.url;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setCheckoutError(msg || "שגיאה בהפניה לתשלום. נסו שנית.");
-    } finally {
-      setCheckoutLoading(false);
-    }
+  // ── Payment unavailable (payment provider being migrated) ─────────────
+  const handleCheckout = () => {
+    setCheckoutError("מערכת התשלומים בשדרוג. אנא צרו קשר ישירות לשדרוג ידני.");
   };
 
   const handlePlanSelect = (planId: string) => {

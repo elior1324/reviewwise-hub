@@ -41,11 +41,10 @@ This directory contains the database layer: SQL migration history, Deno TypeScri
 - Do not add new routes that bypass the key hash verification.
 - Routes: `/reviews`, `/stats`, `/leads`, `/reports` — scoped to the authenticated business's data only.
 
-### Payment Functions (`create-checkout/`, `customer-portal/`)
+### Payment Functions
 
-- PayPlus webhook handlers verify HMAC signatures using `PAYPLUS_SECRET_KEY`. **Never remove this verification step.**
-- Charge methods: test (0), charge (1), credit (4), token (5). Understand which you are using before changing.
-- Trial mode charges ₪1 to tokenize the card. Do not change the amount or remove the trial flow without understanding the subscription activation logic that follows.
+- PayPlus has been fully removed from this codebase. `create-checkout/` and `payplus-webhook/` Edge Functions no longer exist.
+- When a payment provider is integrated in the future, always verify webhook HMAC signatures before processing any payment event.
 
 ### Cron Functions
 

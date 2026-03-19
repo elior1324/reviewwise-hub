@@ -29,6 +29,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const FROM_ADDRESS = "ReviewHub <noreply@reviewshub.info>";
 const RESEND_API   = "https://api.resend.com/emails";
 
+/** Mask email for safe logging: j**n@example.com */
+const maskEmail = (e: string) => e.replace(/(?<=.).(?=[^@]*@)/g, "*");
+
 const ALLOWED_ORIGINS = [
   Deno.env.get("FRONTEND_URL") || "https://reviewhub.co.il",
   "https://www.reviewhub.co.il",
@@ -199,7 +202,7 @@ async function sendConfirmationEmail(opts: {
       const errBody = await res.text();
       console.error(`[apply-coupon] Resend error ${res.status}: ${errBody}`);
     } else {
-      console.log(`[apply-coupon] Confirmation email sent to ${to}`);
+      console.log(`[apply-coupon] Confirmation email sent to ${maskEmail(to)}`);
     }
   } catch (err) {
     console.error("[apply-coupon] Email send failed:", err);

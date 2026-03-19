@@ -1,10 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Crown, Sparkles, Zap } from "lucide-react";
-import { useAuth, STRIPE_TIERS } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -50,27 +47,14 @@ const PLANS = [
 ];
 
 const UpgradeModal = ({ open, onOpenChange, requiredTier = "pro", featureName }: UpgradeModalProps) => {
-  const { user } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState<string | null>(null);
 
-  const handleCheckout = async (tier: "pro" | "enterprise") => {
-    if (!user) {
-      toast({ title: "יש להתחבר תחילה", variant: "destructive" });
-      return;
-    }
-    setLoading(tier);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId: STRIPE_TIERS[tier].price_id },
-      });
-      if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
-    } catch (err: any) {
-      toast({ title: "שגיאה", description: err.message, variant: "destructive" });
-    } finally {
-      setLoading(null);
-    }
+  const handleCheckout = (_tier: "pro" | "enterprise") => {
+    toast({
+      title: "מערכת תשלומים בשדרוג",
+      description: "אנו עובדים על שיפור מערכת התשלומים. אנא צרו קשר לשדרוג ידני.",
+      variant: "destructive",
+    });
   };
 
   return (
@@ -128,9 +112,8 @@ const UpgradeModal = ({ open, onOpenChange, requiredTier = "pro", featureName }:
                       : "bg-accent text-accent-foreground hover:bg-accent/90"
                   }`}
                   onClick={() => handleCheckout(plan.tier)}
-                  disabled={!!loading}
                 >
-                  {loading === plan.tier ? "טוען..." : `שדרגו ל${plan.name}`}
+                  {`שדרגו ל${plan.name}`}
                 </Button>
               </div>
             );

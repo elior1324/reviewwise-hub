@@ -23,6 +23,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const FROM_ADDRESS = "ReviewHub <noreply@reviewshub.info>";
 const RESEND_API   = "https://api.resend.com/emails";
 
+/** Mask email for safe logging: j**n@example.com */
+const maskEmail = (e: string) => e.replace(/(?<=.).(?=[^@]*@)/g, "*");
+
 function formatHebrewDate(d: Date): string {
   return d.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" });
 }
@@ -260,9 +263,9 @@ serve(async (req: Request) => {
             .update({ trial_reminder_sent_at: now.toISOString() })
             .eq("id", business.id);
           sentCount++;
-          console.log(`[send-billing-reminders] ✓ Trial reminder → ${email} (${business.name})`);
+          console.log(`[send-billing-reminders] ✓ Trial reminder → ${maskEmail(email)} (${business.name})`);
         } else {
-          errors.push(`Trial reminder failed for ${email}`);
+          errors.push(`Trial reminder failed for ${maskEmail(email)}`);
         }
       }
     }
@@ -315,9 +318,9 @@ serve(async (req: Request) => {
             .update({ phase2_reminder_sent_at: now.toISOString() })
             .eq("id", r.id);
           sentCount++;
-          console.log(`[send-billing-reminders] ✓ Discount-end reminder → ${email}`);
+          console.log(`[send-billing-reminders] ✓ Discount-end reminder → ${maskEmail(email)}`);
         } else {
-          errors.push(`Discount-end reminder failed for ${email}`);
+          errors.push(`Discount-end reminder failed for ${maskEmail(email)}`);
         }
       }
     }

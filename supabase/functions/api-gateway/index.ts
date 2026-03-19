@@ -1,13 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-api-key",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS") return new Response(null, { headers: getCorsHeaders(req) });
 
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -18,7 +14,7 @@ serve(async (req) => {
     const apiKey = req.headers.get("x-api-key");
     if (!apiKey) {
       return new Response(JSON.stringify({ error: "Missing x-api-key header" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
       });
     }
 
@@ -38,7 +34,7 @@ serve(async (req) => {
 
     if (keyError || !keyRecord || !keyRecord.active) {
       return new Response(JSON.stringify({ error: "Invalid or inactive API key" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 403, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
       });
     }
 
@@ -60,7 +56,7 @@ serve(async (req) => {
           .order("created_at", { ascending: false })
           .limit(100);
         return new Response(JSON.stringify({ data: reviews }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
         });
       }
 
@@ -75,7 +71,7 @@ serve(async (req) => {
           .select("id, name, rating, review_count")
           .eq("business_id", businessId);
         return new Response(JSON.stringify({ business: biz, courses }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
         });
       }
 
@@ -87,7 +83,7 @@ serve(async (req) => {
           .order("created_at", { ascending: false })
           .limit(100);
         return new Response(JSON.stringify({ data: leads }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
         });
       }
 
@@ -99,7 +95,7 @@ serve(async (req) => {
           .order("created_at", { ascending: false })
           .limit(10);
         return new Response(JSON.stringify({ data: reports }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
         });
       }
 
@@ -108,13 +104,13 @@ serve(async (req) => {
           error: "Unknown endpoint",
           available: ["reviews", "stats", "leads", "reports"],
         }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
         });
     }
   } catch (e) {
     console.error("api-gateway error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
     });
   }
 });
