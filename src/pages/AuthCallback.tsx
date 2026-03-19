@@ -1,11 +1,11 @@
 /**
  * AuthCallback.tsx
  *
- * Landing page for Supabase OAuth redirects (Google, etc.).
+ * Landing page for OAuth redirects (Google, Apple, etc.).
  *
- * Flow (PKCE):
+ * Flow (Lovable managed auth):
  *   1. User clicks "Sign in with Google" on AuthPage / BusinessAuth.
- *   2. supabase.auth.signInWithOAuth redirects to Google.
+ *   2. lovable.auth.signInWithOAuth redirects to Google via Lovable Cloud.
  *   3. Google redirects back to this page with ?code=xxx&state=yyy in the URL.
  *   4. The Supabase client (detectSessionInUrl: true, flowType: "pkce") detects
  *      the code in the URL and begins the async token exchange.

@@ -455,13 +455,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ── signInWithGoogle ───────────────────────────────────────────────────────
 
   const signInWithGoogle = async (redirectTo?: string) => {
-    devLog("[Auth] signInWithGoogle called");
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: redirectTo ?? `${window.location.origin}/auth/callback`,
-      },
+    devLog("[Auth] signInWithGoogle called (Lovable managed auth)");
+    const { lovable } = await import("@/integrations/lovable/index");
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: redirectTo ?? window.location.origin,
     });
+    const error = result?.error ?? null;
     if (error) devErr("[Auth] signInWithGoogle error:", error);
     return { error };
   };
