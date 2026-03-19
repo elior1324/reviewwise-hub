@@ -279,30 +279,30 @@ const ReviewCard = ({
             </p>
           </div>
         )}
-        <CardContent className={`p-6 ${isDisputed ? "blur-[2px] pointer-events-none select-none" : ""}`}>
+        <CardContent className={`p-4 ${isDisputed ? "blur-[2px] pointer-events-none select-none" : ""}`}>
           {/* Tier badge — top left */}
           {reviewTier === "verified" && verified && (
-            <div className="absolute top-3 left-3">
+            <div className="absolute top-2 left-2">
               <VerifiedBadge showBoost />
             </div>
           )}
           {reviewTier === "open" && (
-            <div className="absolute top-3 left-3">
-              <div className="inline-flex items-center gap-1 bg-muted/60 border border-border/50 rounded-full px-2 py-0.5 text-[10px] text-muted-foreground font-medium">
-                <MessageSquare size={9} aria-hidden="true" />
-                משוב קהילה
+            <div className="absolute top-2 left-2">
+              <div className="inline-flex items-center gap-0.5 bg-muted/60 border border-border/50 rounded-full px-1.5 py-0.5 text-[9px] text-muted-foreground font-medium">
+                <MessageSquare size={8} aria-hidden="true" />
+                קהילה
               </div>
             </div>
           )}
 
           {/* Expert & Early Bird badges — top right */}
           {(isExpert || isEarlyBird) && (
-            <div className="absolute top-3 right-3 flex items-center gap-1.5">
+            <div className="absolute top-2 right-2 flex items-center gap-1">
               {isExpert && (
                 <Tooltip>
                   <TooltipTrigger>
-                    <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5 px-1.5 py-0.5">
-                      <Shield size={10} /> מומחה
+                    <Badge className="bg-accent/15 text-accent border-0 text-[9px] gap-0.5 px-1 py-0">
+                      <Shield size={9} /> מומחה
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="text-xs max-w-[200px]">
@@ -313,107 +313,99 @@ const ReviewCard = ({
               {isEarlyBird && (
                 <Tooltip>
                   <TooltipTrigger>
-                    <Badge className="bg-accent/15 text-accent border-0 text-[10px] gap-0.5 px-1.5 py-0.5">
-                      <Zap size={10} /> Early Bird
+                    <Badge className="bg-accent/15 text-accent border-0 text-[9px] gap-0.5 px-1 py-0">
+                      <Zap size={9} /> Early Bird
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="text-xs max-w-[200px]">
-                    אחד מ-5 הביקורות הראשונות על העסק! +5 נקודות בונוס על ביקורת ראשונה לעסק.
+                    אחד מ-5 הביקורות הראשונות על העסק! +5 נקודות בונוס.
                   </TooltipContent>
                 </Tooltip>
               )}
             </div>
           )}
 
-          <div className="flex items-start gap-3 mb-3 mt-6">
-            <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 font-display font-semibold text-sm text-primary select-none">
-              {anonymous ? <User size={16} className="text-primary/60" /> : reviewerName.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-2 mb-2 mt-4">
+            <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 font-display font-semibold text-xs text-primary select-none">
+              {anonymous ? <User size={12} className="text-primary/60" /> : reviewerName.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-display font-semibold text-sm text-foreground">
+              <p className="font-display font-semibold text-xs text-foreground truncate">
                 {anonymous ? "אנונימי" : reviewerName}
               </p>
-              <p className="text-xs text-muted-foreground">{date}</p>
-              {/* ── Review Provenance Badge ───────────────────────────────── */}
-              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                <ReviewProvenanceBadge source={derivedSource} />
-                {/* Active moderation case indicator */}
-                {activeCaseStatus && activeCaseStatus !== "closed_no_action" && activeCaseStatus !== "decision_issued" && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="inline-flex items-center gap-1 text-[10px] font-medium
-                        text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30
-                        rounded-full px-2 py-0.5 cursor-help">
-                        <Eye size={9} />
-                        תיק ציות פעיל
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[240px] text-xs">
-                      ביקורת זו נמצאת כעת תחת בחינת ציות על ידי צוות ReviewHub.
-                      התוצאה תוצג לאחר סיום הבדיקה.
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                {/* Spam flag indicator */}
-                {isSpamFlagged && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="inline-flex items-center gap-1 text-[10px] font-medium
-                        text-orange-600 dark:text-orange-400 bg-orange-500/10 border border-orange-500/30
-                        rounded-full px-2 py-0.5 cursor-help">
-                        <AlertTriangle size={9} />
-                        נבדקת
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[240px] text-xs">
-                      מסנן האיכות זיהה תבניות חשודות בביקורת זו.
-                      היא מוצגת בזמן שמערכת הציות בוחנת אותה.
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
+              <p className="text-[10px] text-muted-foreground">{date}</p>
             </div>
           </div>
-          <StarRating rating={rating} size={16} />
+
+          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+            <StarRating rating={rating} size={13} />
+            <ReviewProvenanceBadge source={derivedSource} />
+            {activeCaseStatus && activeCaseStatus !== "closed_no_action" && activeCaseStatus !== "decision_issued" && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="inline-flex items-center gap-0.5 text-[9px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-full px-1.5 py-0.5 cursor-help">
+                    <Eye size={8} /> ציות
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[240px] text-xs">
+                  ביקורת זו נמצאת תחת בחינת ציות על ידי צוות ReviewHub.
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {isSpamFlagged && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="inline-flex items-center gap-0.5 text-[9px] font-medium text-orange-600 dark:text-orange-400 bg-orange-500/10 border border-orange-500/30 rounded-full px-1.5 py-0.5 cursor-help">
+                    <AlertTriangle size={8} /> נבדקת
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[240px] text-xs">
+                  מסנן האיכות זיהה תבניות חשודות בביקורת זו.
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
 
           {purchaseDate && (
-            <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-              <Clock size={12} />
+            <div className="flex items-center gap-1 mb-1 text-[10px] text-muted-foreground">
+              <Clock size={10} />
               <span>{getTimeSincePurchase(purchaseDate)}</span>
             </div>
           )}
 
           {/* Review text or edit mode */}
           {isEditing ? (
-            <div className="mt-3 space-y-2">
+            <div className="mt-2 space-y-2">
               <Textarea
                 value={editText}
                 onChange={e => setEditText(e.target.value)}
                 rows={3}
-                className="text-sm resize-none"
+                className="text-xs resize-none"
               />
               <div className="flex items-center gap-2">
-                <Button size="sm" onClick={handleEditSave} disabled={editSaving} className="gap-1 text-xs">
-                  {editSaving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                <Button size="sm" onClick={handleEditSave} disabled={editSaving} className="gap-1 text-xs h-7">
+                  {editSaving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
                   {editSaving ? "שומר..." : "שמירה"}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => { setIsEditing(false); setEditText(displayText); }} className="gap-1 text-xs">
-                  <X size={12} /> ביטול
+                <Button size="sm" variant="ghost" onClick={() => { setIsEditing(false); setEditText(displayText); }} className="gap-1 text-xs h-7">
+                  <X size={11} /> ביטול
                 </Button>
               </div>
             </div>
           ) : (
             <>
-              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">{displayText}</p>
+              <p className="mt-1.5 text-xs text-foreground/80 leading-relaxed line-clamp-4">{displayText}</p>
               {wasEdited && (
-                <span className="text-[10px] text-muted-foreground mt-1 inline-flex items-center gap-0.5">
-                  <Pencil size={9} /> ערוכה
+                <span className="text-[9px] text-muted-foreground mt-0.5 inline-flex items-center gap-0.5">
+                  <Pencil size={8} /> ערוכה
                 </span>
               )}
             </>
           )}
 
-          <p className="mt-3 text-xs text-muted-foreground">קורס: {courseName}</p>
+          {courseName && (
+            <p className="mt-1.5 text-[10px] text-muted-foreground truncate">קורס: {courseName}</p>
+          )}
 
           {flagged && flagReason && (
             <div className="mt-2 text-xs text-destructive bg-destructive/10 rounded px-2 py-1 inline-block">

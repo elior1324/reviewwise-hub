@@ -6,6 +6,7 @@ import type { Business } from "@/data/mockData";
 import { PRICING_MODEL_LABELS } from "@/data/mockData";
 import { useRef } from "react";
 import { sanitizeUrl } from "@/lib/sanitize";
+import { PrestigeBadge, computeEligibleBadges } from "./PrestigeBadge";
 
 // ── Trust Grade computation ──────────────────────────────────────────────────
 // A lightweight display grade derived from rating + verifiedReviewCount.
@@ -65,6 +66,23 @@ const SOCIAL_ICONS = [
 const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", affiliateSlug, personalAffiliateUrls = [] }: BusinessHeroProps) => {
   const verifiedCount = verifiedReviewCount ?? business.verifiedReviewCount ?? 0;
   const trust = computeTrustGrade(business.rating, verifiedCount);
+
+  const grade = (() => {
+    const r = business.rating, vc = verifiedCount;
+    if (r >= 4.7 && vc >= 10) return "A+";
+    if (r >= 4.3 && vc >= 5)  return "A";
+    if (r >= 3.8 && vc >= 3)  return "B";
+    if (r >= 3.2)              return "C";
+    if (r >= 2.5)              return "D";
+    return vc > 0 ? "F" : "—";
+  })();
+
+  const eligibleBadges = computeEligibleBadges({
+    rating: business.rating,
+    verifiedCount,
+    type: business.type || "",
+    category: business.category || "",
+  });
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -288,6 +306,28 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
               </motion.div>
             )}
           </div>
+
+          {/* ── Prestige badges — left column (desktop) / bottom strip (mobile) ── */}
+          {eligibleBadges.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.55, duration: 0.4 }}
+              className="flex flex-row flex-wrap md:flex-col gap-2 md:shrink-0 md:self-center"
+            >
+              {eligibleBadges.map(badgeType => (
+                <PrestigeBadge
+                  key={badgeType}
+                  type={badgeType}
+                  slug={business.slug}
+                  name={business.name}
+                  grade={grade}
+                  rating={business.rating}
+                  size="sm"
+                />
+              ))}
+            </motion.div>
+          )}
         </div>
 
         {/* ── Trust stats strip ─────────────────────────────────────────────── */}
