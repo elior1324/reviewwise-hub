@@ -9,7 +9,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, LayoutDashboard,
-  ArrowLeftRight, Home, Tag, BookOpen, Settings,
+  ArrowLeftRight, Home, Tag, BookOpen, Settings, Layout,
 } from "lucide-react";
 import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
@@ -84,6 +84,12 @@ const BusinessNavbar = () => {
               לוח הבקרה
             </Link>
           )}
+
+          {/* וידג'טים — always visible */}
+          <Link to="/partners/prestige-badges?tab=widgets" className={navLink(isActive("/partners/prestige-badges"))}>
+            <Layout size={14} aria-hidden="true" />
+            וידג׳טים
+          </Link>
 
           {/* מחירון — always visible, highlighted */}
           <Link
@@ -216,6 +222,15 @@ const BusinessNavbar = () => {
               <LayoutDashboard size={14} aria-hidden="true" /> לוח הבקרה
             </Link>
           )}
+
+          {/* וידג'טים — always visible */}
+          <Link
+            to="/partners/prestige-badges?tab=widgets"
+            className={`flex items-center gap-2 text-sm py-3 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive("/partners/prestige-badges") ? "text-white border-white font-medium" : "text-zinc-300 border-transparent hover:text-white"}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            <Layout size={14} aria-hidden="true" /> וידג׳טים
+          </Link>
 
           {/* מחירון — always visible */}
           <Link

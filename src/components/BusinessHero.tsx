@@ -1,8 +1,7 @@
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import StarRating from "./StarRating";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Globe, Mail, Phone, Youtube, Instagram, Linkedin, Twitter, Facebook, MessageCircle, TrendingUp, BarChart2, Cpu, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ShieldCheck, Globe, Mail, Phone, Youtube, Instagram, Linkedin, Twitter, Facebook, MessageCircle, BarChart2, Cpu, User, ExternalLink, Tag } from "lucide-react";
 import type { Business } from "@/data/mockData";
 import { PRICING_MODEL_LABELS } from "@/data/mockData";
 import { useRef } from "react";
@@ -47,6 +46,9 @@ const WhatsAppIcon = ({ size = 14 }: { size?: number }) => (
 interface BusinessHeroProps {
   business: Business;
   verifiedReviewCount?: number;
+  affiliateMode?: "reviewhub_model" | "personal_affiliate" | "none";
+  affiliateSlug?: string;
+  personalAffiliateUrls?: string[];
 }
 
 const SOCIAL_ICONS = [
@@ -60,7 +62,7 @@ const SOCIAL_ICONS = [
   { key: "tiktok" as const, Icon: TikTokIcon, label: "TikTok" },
 ];
 
-const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
+const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", affiliateSlug, personalAffiliateUrls = [] }: BusinessHeroProps) => {
   const verifiedCount = verifiedReviewCount ?? business.verifiedReviewCount ?? 0;
   const trust = computeTrustGrade(business.rating, verifiedCount);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -149,6 +151,16 @@ const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
                 {business.name}
               </motion.h1>
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }} className="flex items-center gap-2 flex-wrap">
+                {/* Trust grade badge — inline with business name */}
+                {(() => {
+                  const t = computeTrustGrade(business.rating, verifiedCount);
+                  if (t.grade === "—") return null;
+                  return (
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border text-sm font-bold ${t.bgColor} ${t.color}`}>
+                      ציון {t.grade}
+                    </span>
+                  );
+                })()}
                 <Badge className="bg-trust-green-light text-trust-green border-0 gap-1">
                   <ShieldCheck size={14} /> מאומת
                 </Badge>
@@ -208,6 +220,51 @@ const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
               )}
             </motion.div>
 
+            {/* ── Affiliate / purchase strip ─────────────────────────────── */}
+            {affiliateMode !== "none" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.55 }}
+                className="flex items-center gap-3 flex-wrap mt-1 mb-1"
+              >
+                {affiliateMode === "reviewhub_model" && affiliateSlug && (
+                  <>
+                    <a
+                      href={`/go/${affiliateSlug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary border border-primary/40 bg-primary/8 hover:bg-primary/15 rounded-lg px-3 py-1.5 transition-colors"
+                    >
+                      <ExternalLink size={13} />
+                      כניסה לאתר
+                    </a>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-amber-50 dark:bg-amber-950/30 border border-amber-400/40 text-amber-700 dark:text-amber-400 rounded-lg px-2.5 py-1.5">
+                      <Tag size={11} />
+                      קוד: <code className="font-mono font-bold tracking-wider">RH5</code>
+                      <span className="text-amber-600/70 dark:text-amber-400/60">· 5% הנחה</span>
+                    </span>
+                  </>
+                )}
+                {affiliateMode === "personal_affiliate" && personalAffiliateUrls.map((raw, i) => {
+                  const safe = sanitizeUrl(raw);
+                  if (!safe) return null;
+                  return (
+                    <a
+                      key={i}
+                      href={safe}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary border border-primary/40 bg-primary/8 hover:bg-primary/15 rounded-lg px-3 py-1.5 transition-colors"
+                    >
+                      <ExternalLink size={13} />
+                      {personalAffiliateUrls.length > 1 ? `כניסה לאתר ${i + 1}` : "כניסה לאתר"}
+                    </a>
+                  );
+                })}
+              </motion.div>
+            )}
+
             {/* Social links */}
             {hasSocials && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="flex gap-2 flex-wrap">
@@ -233,78 +290,34 @@ const BusinessHero = ({ business, verifiedReviewCount }: BusinessHeroProps) => {
           </div>
         </div>
 
-        {/* ── Trust Signal Panel ───────────────────────────────────────────── */}
+        {/* ── Trust stats strip ─────────────────────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="mt-6 pt-5 border-t border-border/40 relative z-10"
+          transition={{ delay: 0.6, duration: 0.4 }}
+          className="mt-5 pt-4 border-t border-border/40 relative z-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
         >
-          <div className="flex flex-wrap items-start gap-3">
-
-            {/* Trust Grade */}
-            <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl ${trust.bgColor} border border-border/30`}>
-              <span className={`font-display font-bold text-2xl leading-none ${trust.color}`} aria-label={`ציון אמון ${trust.grade}`}>
-                {trust.grade}
-              </span>
-              <div>
-                <p className={`text-[10px] font-semibold uppercase tracking-wide ${trust.color}`}>ציון אמון</p>
-                <p className="text-[11px] text-muted-foreground">{trust.label}</p>
-              </div>
-            </div>
-
-            {/* Verified Reviews */}
-            <div className="flex items-center gap-2 bg-primary/5 border border-primary/15 rounded-xl px-3 py-2">
-              <ShieldCheck size={14} className="text-primary shrink-0" aria-hidden="true" />
-              <div>
-                <p className="text-[10px] font-semibold text-primary uppercase tracking-wide">ביקורות מאומתות</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {verifiedCount > 0 ? `${verifiedCount} רכישות מאומתות` : "אין עדיין"}
-                </p>
-              </div>
-            </div>
-
-            {/* Review Coverage */}
-            <div className="flex items-center gap-2 bg-muted/40 border border-border/30 rounded-xl px-3 py-2">
-              <BarChart2 size={14} className="text-muted-foreground shrink-0" aria-hidden="true" />
-              <div>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">סך ביקורות</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {business.reviewCount > 0 ? `${business.reviewCount} ביקורות` : "אין עדיין"}
-                  {business.reviewCount > 0 && verifiedCount > 0 && (
-                    <> · {Math.round((verifiedCount / business.reviewCount) * 100)}% מאומת</>
-                  )}
-                </p>
-              </div>
-            </div>
-
-            {/* SaaS: Pricing model signal */}
-            {business.pricingModel && (
-              <div className="flex items-center gap-2 bg-muted/40 border border-border/30 rounded-xl px-3 py-2">
-                <Cpu size={14} className="text-primary shrink-0" aria-hidden="true" />
-                <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">מודל מחיר</p>
-                  <p className="text-[11px] text-muted-foreground">{PRICING_MODEL_LABELS[business.pricingModel]}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Methodology Link */}
-            <div className="flex items-center gap-1.5 mr-auto self-end">
-              <Link
-                to="/#how-it-works"
-                className="text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-                aria-label="כיצד מחושב ציון האמון?"
-              >
-                <TrendingUp size={11} aria-hidden="true" />
-                כיצד מחושב הציון?
-              </Link>
-            </div>
-
-          </div>
-          <p className="text-[10px] text-muted-foreground/60 mt-2">
-            ציון האמון מחושב מביקורות מאומתות רכישה בלבד — ביקורות קהילה אינן נספרות.
-          </p>
+          <span className="flex items-center gap-1.5">
+            <ShieldCheck size={13} className="text-primary" />
+            <strong className="text-foreground">{verifiedCount}</strong> ביקורות מאומתות
+          </span>
+          {business.reviewCount > 0 && (
+            <span className="flex items-center gap-1.5">
+              <BarChart2 size={13} className="text-muted-foreground" />
+              <strong className="text-foreground">{business.reviewCount}</strong> סך הכל
+              {verifiedCount > 0 && (
+                <span className="text-xs text-primary">
+                  · {Math.round((verifiedCount / business.reviewCount) * 100)}% מאומת
+                </span>
+              )}
+            </span>
+          )}
+          {business.pricingModel && (
+            <span className="flex items-center gap-1.5">
+              <Cpu size={13} className="text-primary" />
+              {PRICING_MODEL_LABELS[business.pricingModel]}
+            </span>
+          )}
         </motion.div>
 
       </motion.div>

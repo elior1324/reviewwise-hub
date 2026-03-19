@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import {
   BookOpen, Code, Zap, ShieldCheck, BarChart3, Webhook,
   ArrowLeft, ExternalLink, TrendingUp, Star, Clock,
+  Bell, LineChart, Target, Award, Eye,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -122,7 +123,46 @@ const BLOG_POSTS = [
   },
 ];
 
-type Tab = "docs" | "blog";
+/* ── Analytics data ─────────────────────────────────────────────────────── */
+const ANALYTICS_FEATURES = [
+  {
+    icon: BarChart3,
+    title: "דאשבורד בזמן אמת",
+    desc: "עקבו אחר דירוגים, ביקורות חדשות, אחוזי מענה ומגמות — הכל במקום אחד.",
+  },
+  {
+    icon: TrendingUp,
+    title: "ניתוח מגמות",
+    desc: "ראו כיצד הדירוג שלכם משתנה לאורך זמן וזהו נקודות שיפור ונקודות חוזק.",
+  },
+  {
+    icon: Bell,
+    title: "התרעות חכמות",
+    desc: "קבלו עדכון מיידי על ביקורת שלילית חדשה כדי לטפל בה לפני שתתפשט.",
+  },
+  {
+    icon: LineChart,
+    title: "דוחות שבועיים",
+    desc: "דוח שבועי אוטומטי עם סיכום ביצועים, ביקורות בולטות ותובנות AI.",
+  },
+  {
+    icon: Target,
+    title: "השוואה לתחום",
+    desc: "ראו כיצד הדירוג שלכם ביחס לעסקים דומים בתחום שלכם.",
+  },
+  {
+    icon: Eye,
+    title: "ניתוח ביקורות",
+    desc: "זהו מילות מפתח חוזרות, נושאים בולטים ותחומים שדורשים שיפור.",
+  },
+  {
+    icon: Award,
+    title: "דוח ביצועים חודשי",
+    desc: "סיכום חודשי אוטומטי עם הישגים, מגמות ופעולות מומלצות לחודש הבא.",
+  },
+];
+
+type Tab = "docs" | "blog" | "analytics";
 
 const ResourcesPage = () => {
   const [activeTab, setActiveTab] = useState<Tab>("docs");
@@ -187,6 +227,17 @@ const ResourcesPage = () => {
             >
               <TrendingUp size={15} />
               בלוג
+            </button>
+            <button
+              onClick={() => setActiveTab("analytics")}
+              className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold border-b-2 transition-colors ${
+                activeTab === "analytics"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <BarChart3 size={15} />
+              אנליטיקס
             </button>
           </div>
         </div>
@@ -321,6 +372,77 @@ const ResourcesPage = () => {
                 <a href="mailto:support@reviewshub.info?subject=הצטרפות לניוזלטר">
                   <Button className="bg-primary text-primary-foreground hover:bg-primary/90">הרשמו לניוזלטר</Button>
                 </a>
+                <Link to="/business">
+                  <Button variant="outline" className="border-border/50">
+                    <ArrowLeft size={16} className="ml-1" /> חזרה לעמוד הראשי
+                  </Button>
+                </Link>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Analytics panel ──────────────────────────────────────────────── */}
+      {activeTab === "analytics" && (
+        <section className="container py-20">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }}>
+            <motion.h2
+              variants={fadeUp}
+              custom={0}
+              className="font-display font-bold text-2xl md:text-3xl text-foreground text-center mb-4"
+            >
+              אנליטיקס ולוח בקרה
+            </motion.h2>
+            <motion.p
+              variants={fadeUp}
+              custom={1}
+              className="text-muted-foreground text-center max-w-xl mx-auto mb-12"
+            >
+              כלים לניתוח ביצועים, מעקב מגמות ותובנות חכמות — כדי שתדעו בדיוק איפה לשפר.
+            </motion.p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {ANALYTICS_FEATURES.map((feature, i) => (
+                <motion.div
+                  key={feature.title}
+                  variants={fadeUp}
+                  custom={i + 2}
+                  className="glass rounded-2xl p-6 border border-border/50 hover:border-primary/30 transition-colors group"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                      <feature.icon size={20} className="text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-semibold text-foreground mb-1">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          <div className="border-t border-border/50 mt-16 pt-14">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="max-w-2xl mx-auto text-center"
+            >
+              <motion.h2 variants={fadeUp} custom={0} className="font-display font-bold text-xl text-foreground mb-3">
+                רוצים לנסות את האנליטיקס?
+              </motion.h2>
+              <motion.p variants={fadeUp} custom={1} className="text-muted-foreground mb-6">
+                כנסו ללוח הבקרה שלכם ותגלו תובנות שחיכו לכם.
+              </motion.p>
+              <motion.div variants={fadeUp} custom={2} className="flex gap-3 justify-center flex-wrap">
+                <Link to="/business/dashboard">
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    <BarChart3 size={15} className="ml-1.5" />
+                    פתחו את לוח הבקרה
+                  </Button>
+                </Link>
                 <Link to="/business">
                   <Button variant="outline" className="border-border/50">
                     <ArrowLeft size={16} className="ml-1" /> חזרה לעמוד הראשי

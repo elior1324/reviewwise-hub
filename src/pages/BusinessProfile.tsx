@@ -13,11 +13,10 @@ import InstagramDMReviewsSection, { type InstagramDMReview } from "@/components/
 import FacebookReviewsSection, { type FacebookReview } from "@/components/FacebookReviewsSection";
 import ReviewSourceBreakdown, { type SourceFilterValue } from "@/components/ReviewSourceBreakdown";
 import BusinessTrustStatusBadge, { type BusinessTrustStatus } from "@/components/BusinessTrustStatusBadge";
-import TransparencyScore from "@/components/TransparencyScore";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star, ArrowUpDown, TrendingUp, TrendingDown, Minus, AlertTriangle, Brain, ShoppingBag } from "lucide-react";
+import { ShieldCheck, MessageSquare, Award, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star, ArrowUpDown, TrendingUp, TrendingDown, Minus, AlertTriangle, Brain } from "lucide-react";
 import { PrestigeBadge, computeEligibleBadges, buildBadgeEmbedCode, BADGE_CONFIG } from "@/components/PrestigeBadge";
 import { useState, useEffect, useMemo } from "react";
 import { generateReviewSummary, FREELANCER_CATEGORIES, SAAS_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
@@ -57,10 +56,6 @@ const BusinessProfile = () => {
   // Trust platform state
   const [trustStatus, setTrustStatus]               = useState<BusinessTrustStatus>("normal");
   const [trustStatusReason, setTrustStatusReason]   = useState<string | null>(null);
-  const [transparencyScore, setTransparencyScore]   = useState<number | null>(null);
-  const [responseRate, setResponseRate]             = useState<number | null>(null);
-  const [avgResponseHours, setAvgResponseHours]     = useState<number | null>(null);
-  const [verifiedReviewRatio, setVerifiedReviewRatio] = useState<number | null>(null);
   const [aiSummaryMeta, setAiSummaryMeta]           = useState<{
     reviewCount: number; periodLabel: string; generatedAt: string;
   } | null>(null);
@@ -549,7 +544,13 @@ const BusinessProfile = () => {
             → חזרה
           </Button>
         </div>
-        <BusinessHero business={business} verifiedReviewCount={totalVerified} />
+        <BusinessHero
+          business={business}
+          verifiedReviewCount={totalVerified}
+          affiliateMode={affiliateMode}
+          affiliateSlug={slug}
+          personalAffiliateUrls={personalAffiliateUrls}
+        />
 
         {/* ── Business Trust Status Banner (Feature 4) ─────────────────────
             Rendered immediately below the hero — only visible when status is
@@ -562,46 +563,6 @@ const BusinessProfile = () => {
           className="mb-4"
         />
 
-        {/* Audit record strip — institutional framing */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-border/40 bg-card/40 rounded-xl px-4 py-3 mb-8 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck size={12} className="text-primary shrink-0" />
-            <span>
-              <strong className="text-foreground">רשומת אמון — כלכלה דיגיטלית</strong> — נתונים מאומתים מהוכחות רכישה ממשיות
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <MessageSquare size={12} className="text-muted-foreground shrink-0" />
-            <span>
-              {totalVerified} ביקורות מאומתות · {totalOpen} משובי קהילה
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 mr-auto">
-            <span className="text-muted-foreground/60">ציון האמון מחושב מביקורות מאומתות בלבד</span>
-          </div>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════════
-            TRUST HUB (Feature 5) — full trust-center panel
-            Shows: verification stats, contact info, moderation status chip,
-            response rate, and trust tier.  Collapsed by default on mobile.
-        ══════════════════════════════════════════════════════════════════ */}
-        <TrustHub
-          business={business}
-          trustStatus={trustStatus}
-          trustStatusReason={trustStatusReason}
-          totalVerified={totalVerified}
-          totalOpen={totalOpen}
-          isOwner={isOwner}
-        />
-
-        {/* ── Transparency Score (Feature 9) ───────────────────────────────── */}
-        <TransparencyScore
-          transparencyScore={transparencyScore}
-          verifiedReviewRatio={verifiedReviewRatio}
-          responseRate={responseRate}
-          avgResponseHours={avgResponseHours}
-        />
 
         {/* ── AI Intelligence Insights ──────────────────────────────────────
             Shown only when the daily-ai-scan pipeline has data for this profile.
@@ -612,17 +573,6 @@ const BusinessProfile = () => {
             sentimentScore={aiSentimentScore}
             trendingScore={aiTrendingScore}
             flags={aiFlags}
-          />
-        )}
-
-        {/* ── Affiliate Purchase Section ───────────────────────────────────── */}
-        {affiliateMode !== "none" && (
-          <AffiliatePurchaseSection
-            mode={affiliateMode}
-            slug={slug!}
-            businessName={business.name}
-            personalUrls={personalAffiliateUrls}
-            dbBusinessId={dbBusinessId}
           />
         )}
 
@@ -1043,211 +993,6 @@ const BusinessProfile = () => {
 
 export default BusinessProfile;
 
-// ── TrustHub ──────────────────────────────────────────────────────────────────
-// Full trust-center panel rendered on every business profile page.
-// Provides: verification statistics, business contact info, moderation
-// status (when relevant), and a trust-tier legend — the canonical single
-// source of truth for how trustworthy a business is on ReviewHub.
-
-interface TrustHubProps {
-  business: Business;
-  trustStatus: BusinessTrustStatus;
-  trustStatusReason: string | null;
-  totalVerified: number;
-  totalOpen: number;
-  isOwner: boolean;
-}
-
-function TrustHub({
-  business,
-  trustStatus,
-  trustStatusReason,
-  totalVerified,
-  totalOpen,
-  isOwner,
-}: TrustHubProps) {
-  const [expanded, setExpanded] = useState(false);
-
-  const totalReviews = totalVerified + totalOpen;
-  const verifiedPct = totalReviews > 0
-    ? Math.round((totalVerified / totalReviews) * 100)
-    : 0;
-
-  // Derive tier label + colour from rating + verified count
-  const tier: { label: string; color: string; bg: string } = (() => {
-    const { rating, verifiedReviewCount } = business;
-    const vc = verifiedReviewCount ?? totalVerified;
-    if (rating >= 4.5 && vc >= 10) return { label: "Elite",         color: "text-amber-600",  bg: "bg-amber-50 border-amber-200" };
-    if (rating >= 4.0 && vc >= 5)  return { label: "Highly Trusted", color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" };
-    if (rating >= 3.5 && vc >= 3)  return { label: "Trusted",        color: "text-blue-600",   bg: "bg-blue-50 border-blue-200" };
-    if (vc > 0)                    return { label: "Emerging",       color: "text-orange-600", bg: "bg-orange-50 border-orange-200" };
-    return                               { label: "Unrated",         color: "text-muted-foreground", bg: "bg-muted/30 border-border/40" };
-  })();
-
-  const hasContact = !!(business.website || business.email || business.phone);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="mb-8 rounded-xl border border-border/40 bg-card/50 overflow-hidden"
-    >
-      {/* ── Header ─────────────────────────────────────────────────── */}
-      <button
-        type="button"
-        onClick={() => setExpanded(e => !e)}
-        className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/20 transition-colors"
-        aria-expanded={expanded}
-      >
-        <div className="flex items-center gap-2.5">
-          <ShieldCheck size={16} className="text-primary shrink-0" />
-          <span className="font-display font-semibold text-sm text-foreground">
-            מרכז האמון
-          </span>
-          {/* Inline trust tier chip */}
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${tier.bg} ${tier.color}`}>
-            {tier.label}
-          </span>
-          {/* Moderation status chip — shown always when non-normal */}
-          <BusinessTrustStatusBadge status={trustStatus} variant="badge" />
-        </div>
-        <span className="text-xs text-muted-foreground/70 flex items-center gap-1">
-          {expanded ? "הסתר" : "הצג פרטים"}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="12" height="12" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" strokeWidth="2"
-            className={`transition-transform ${expanded ? "rotate-180" : ""}`}
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </span>
-      </button>
-
-      {/* ── Stats strip — always visible ───────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/30 border-t border-border/30">
-        {[
-          { label: "ביקורות מאומתות", value: String(totalVerified), icon: <CheckCircle2 size={13} className="text-primary" /> },
-          { label: "משובי קהילה",     value: String(totalOpen),    icon: <MessageSquare size={13} className="text-muted-foreground" /> },
-          { label: "אחוז אימות",       value: `${verifiedPct}%`,     icon: <BarChart3 size={13} className="text-primary" /> },
-          { label: "דירוג ממוצע",      value: business.rating > 0 ? business.rating.toFixed(1) : "—", icon: <Star size={13} className="text-amber-500" /> },
-        ].map(stat => (
-          <div key={stat.label} className="flex flex-col items-center justify-center gap-1 bg-card/40 py-3 px-2">
-            <div className="flex items-center gap-1">
-              {stat.icon}
-              <span className="font-display font-bold text-base text-foreground">{stat.value}</span>
-            </div>
-            <span className="text-[10px] text-muted-foreground text-center">{stat.label}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Expanded content ───────────────────────────────────────── */}
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            key="trusthub-expanded"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden"
-          >
-            <div className="px-5 py-4 space-y-4 border-t border-border/30">
-
-              {/* Business Info */}
-              {hasContact && (
-                <div>
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                    פרטי התקשרות
-                  </p>
-                  <div className="flex flex-wrap gap-3">
-                    {business.website && (
-                      <a
-                        href={business.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
-                      >
-                        <ExternalLink size={11} />
-                        {business.website.replace(/^https?:\/\//, "")}
-                      </a>
-                    )}
-                    {business.email && (
-                      <a
-                        href={`mailto:${business.email}`}
-                        className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
-                      >
-                        <MessageSquare size={11} />
-                        {business.email}
-                      </a>
-                    )}
-                    {business.phone && (
-                      <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Clock size={11} />
-                        {business.phone}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Verification explanation */}
-              <div>
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                  כיצד מחושב ציון האמון?
-                </p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  ציון האמון של ReviewHub מחושב אך ורק על סמך <strong className="text-foreground">ביקורות מאומתות רכישה</strong> — ביקורות שנכתבו לאחר הגשת הוכחת רכישה ממשית.
-                  משובי קהילה (ללא הוכחת רכישה) מוצגים בנפרד ואינם נכללים בחישוב.
-                  ככל שאחוז האימות גבוה יותר, כך הציון אמין יותר.
-                </p>
-              </div>
-
-              {/* Moderation status — extended detail when non-normal */}
-              {trustStatus !== "normal" && (
-                <div>
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                    סטטוס מודרציה
-                  </p>
-                  <BusinessTrustStatusBadge
-                    status={trustStatus}
-                    reason={trustStatusReason ?? undefined}
-                    variant="banner"
-                    isOwner={isOwner}
-                  />
-                </div>
-              )}
-
-              {/* Owner response rate */}
-              <div>
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                  מדיניות תגובות בעל העסק
-                </p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  בעל העסק רשאי להגיב לכל ביקורת. תגובות מוצגות מתחת לביקורת המקורית
-                  ומסומנות "תגובת בעל העסק" כדי לשמור על שקיפות מלאה.
-                </p>
-              </div>
-
-              {/* Report abuse link */}
-              <div className="pt-1 border-t border-border/20">
-                <p className="text-[10px] text-muted-foreground/60 leading-snug">
-                  מצאתם ביקורת חשודה?{" "}
-                  <a href="mailto:trust@reviewhub.co.il" className="text-primary hover:underline">
-                    דווחו לצוות האמון
-                  </a>{" "}
-                  — כל דוח נבחן ידנית תוך 48 שעות.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-}
 
 // ── EarnedBadgesSection ────────────────────────────────────────────────────────
 // Shown on the profile page when the business qualifies for ≥1 prestige badge.
@@ -1427,181 +1172,6 @@ const FLAG_LABELS: Record<string, string> = {
   velocity_anomaly:    "אנומליית קצב",
 };
 
-// ── AffiliatePurchaseSection ──────────────────────────────────────────────────
-// Shown on the business profile page when the business has an active affiliate
-// program.  Gives visitors a clear, transparent purchase path:
-//   reviewhub_model    → one-click button → /go/:slug → auto 5% discount
-//   personal_affiliate → button(s) → direct external URLs
-// All routing still passes through /go/:slug so click tracking is consistent.
-
-interface AffiliatePurchaseSectionProps {
-  mode:          "reviewhub_model" | "personal_affiliate" | "none";
-  slug:          string;
-  businessName:  string;
-  personalUrls:  string[];
-  dbBusinessId:  string | null;
-}
-
-function AffiliatePurchaseSection({ mode, slug, businessName, personalUrls, dbBusinessId }: AffiliatePurchaseSectionProps) {
-  if (mode === "none") return null;
-
-  const validUrls = personalUrls.filter(u => u.trim());
-
-  const handleGoLink = async () => {
-    // Record click then open the /go/ redirect page
-    if (dbBusinessId) {
-      await supabase.from("referral_clicks").insert({
-        business_id: dbBusinessId,
-        business_slug: slug,
-        referrer: document.referrer || null,
-      }).catch(() => {/* non-blocking */});
-    }
-    window.open(`/go/${slug}`, "_blank", "noopener,noreferrer");
-  };
-
-  if (mode === "reviewhub_model") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: -6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.05 }}
-        className="mb-8 rounded-xl border border-primary/30 bg-gradient-to-l from-primary/[0.07] via-background to-background overflow-hidden"
-      >
-        <div className="p-5">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <ShoppingBag size={22} className="text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                <p className="font-display font-bold text-base text-foreground">
-                  קנו עם הנחה דרך ReviewHub
-                </p>
-                <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wide">
-                  5% הנחה אוטומטית
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                הגעתם לפרופיל זה דרך ReviewHub? כשתרכשו דרך הכפתור הזה, קוד{" "}
-                <code className="font-mono font-bold text-primary">RH5</code> יופעל
-                אוטומטית בקופה — 5% הנחה על המחיר המלא.
-              </p>
-            </div>
-            <Button
-              onClick={handleGoLink}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shrink-0"
-            >
-              <ShoppingBag size={15} />
-              לרכישה עם הנחה
-            </Button>
-          </div>
-          <div className="mt-3 flex items-start gap-1.5 text-[11px] text-muted-foreground/70">
-            <Info size={11} className="mt-0.5 shrink-0" />
-            <span>
-              גילוי נאות: רכישות דרך קישור זה עוברות דרך תשתית המעקב של ReviewHub. ReviewHub גובה 5% עמלת פלטפורם לאחר אישור הרכישה. פעולה זו אינה משפיעה על ציון האמון האובייקטיבי של הספק.
-            </span>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // personal_affiliate — one or multiple URLs
-  if (validUrls.length === 0) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.05 }}
-      className="mb-8 rounded-xl border border-border/50 bg-card/60 overflow-hidden"
-    >
-      <div className="p-5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <Link2 size={20} className="text-primary" />
-          </div>
-          <div>
-            <p className="font-display font-bold text-base text-foreground">
-              {validUrls.length === 1 ? "קישור רכישה" : "קישורי רכישה"}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {validUrls.length === 1
-                ? `${businessName} משתמש במערכת שותפים עצמאית`
-                : `${businessName} מציע ${validUrls.length} קישורי רכישה`
-              }
-            </p>
-          </div>
-        </div>
-
-        {validUrls.length === 1 ? (
-          // Single URL — prominent button
-          <Button
-            onClick={handleGoLink}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 w-full sm:w-auto"
-          >
-            <ExternalLink size={15} />
-            לרכישה
-          </Button>
-        ) : (
-          // Multiple URLs — labeled card per link
-          <div className="space-y-2">
-            {validUrls.map((url, index) => {
-              let hostname = url;
-              try { hostname = new URL(url).hostname.replace("www.", ""); } catch { /* keep raw */ }
-              return (
-                <div
-                  key={index}
-                  className="flex items-center gap-3 rounded-lg border border-border/50 bg-background px-3 py-2.5"
-                >
-                  <div className="flex-shrink-0 flex items-center gap-1.5">
-                    {index === 0 ? (
-                      <span className="text-[9px] font-bold text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">
-                        ראשי
-                      </span>
-                    ) : (
-                      <span className="text-[9px] font-bold text-muted-foreground bg-muted/60 border border-border/40 px-1.5 py-0.5 rounded">
-                        {index + 1}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-foreground truncate">{hostname}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{url.length > 55 ? url.slice(0, 55) + "…" : url}</p>
-                  </div>
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shrink-0 flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors px-2.5 py-1.5 rounded-lg"
-                    onClick={async () => {
-                      if (dbBusinessId) {
-                        await supabase.from("referral_clicks").insert({
-                          business_id: dbBusinessId, business_slug: slug,
-                          referrer: document.referrer || null,
-                        }).catch(() => {});
-                      }
-                    }}
-                  >
-                    <ExternalLink size={11} />
-                    לרכישה
-                  </a>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        <div className="mt-3 flex items-start gap-1.5 text-[11px] text-muted-foreground/70">
-          <Info size={11} className="mt-0.5 shrink-0" />
-          <span>
-            גילוי נאות: הספק משתמש במערכת שותפים עצמאית. ReviewHub אינה גובה עמלה על הפניות אלו ואינה אחראית לתנאי העסקה. הרכישה מתבצעת ישירות אצל הספק.
-          </span>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
 function AiInsightsSection({ summary, sentimentScore, trendingScore, flags }: AiInsightsSectionProps) {
   const trending = trendingInfo(trendingScore);
