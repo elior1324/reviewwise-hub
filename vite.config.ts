@@ -25,12 +25,23 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// ── CSP Policy ────────────────────────────────────────────────────────────────
-// Adjust src allowlists as new third-party services are added.
+// ── CSP Policy (dev server only) ──────────────────────────────────────────────
+// This CSP applies ONLY to the Vite development server (http://localhost:8080).
+// Production CSP lives in public/_headers and is enforced by Netlify at the CDN edge.
+//
+// Two deliberate dev-only relaxations vs production:
+//   1. 'unsafe-inline' in script-src — required for @vitejs/plugin-react-swc to inject
+//      its Fast Refresh preamble (<script type="module"> inline). Without it, the preamble
+//      is blocked, window.__vite_plugin_react_preamble_installed__ is never set, and every
+//      React module throws at load time, producing a blank white screen.
+//   2. No 'upgrade-insecure-requests' — this directive tells the browser to rewrite
+//      http:// subresource URLs to https://. The dev server has no TLS certificate, so
+//      /@vite/client and /src/main.tsx would fail the SSL handshake and never load,
+//      producing a blank white screen.
 const CSP = [
   "default-src 'self'",
-  // Scripts: only from self + Cloudflare Turnstile
-  "script-src 'self' https://challenges.cloudflare.com",
+  // Scripts: self + Cloudflare Turnstile + 'unsafe-inline' for Vite Fast Refresh preamble
+  "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
   // Styles: self + inline (Tailwind) + Google Fonts CSS
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   // Images: self + Supabase storage + YouTube thumbnails + data URIs
@@ -44,11 +55,11 @@ const CSP = [
   // Objects: block Flash / Java plugins
   "object-src 'none'",
   // Allow framing from self + Lovable preview panel (*.lovable.app).
-  // X-Frame-Options is omitted in server.headers because it cannot whitelist
-  // specific external origins — CSP frame-ancestors handles this instead.
   "frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev https://lovable.dev",
-  // Upgrade insecure requests in production
-  "upgrade-insecure-requests",
+  // NOTE: 'upgrade-insecure-requests' is intentionally omitted here.
+  // It belongs only in production (public/_headers). On an HTTP dev server it would
+  // cause the browser to upgrade /@vite/client and /src/main.tsx to HTTPS, failing
+  // with an SSL error since the dev server has no certificate.
 ].join("; ");
 
 // https://vitejs.dev/config/

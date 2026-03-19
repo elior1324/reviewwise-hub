@@ -110,9 +110,9 @@ test.describe("Email signup flow", () => {
 
     await auth.submitBtn.click();
 
-    // Should show success toast about checking email
+    // Should show the email confirmation screen (no toast — the UI transitions to a full screen)
     await expect(
-      page.locator("[data-sonner-toast]").filter({ hasText: /נרשמתם|מייל|אימות/ })
+      page.getByRole("heading", { name: "בדקו את תיבת האימייל שלכם" })
     ).toBeVisible({ timeout: 8_000 });
   });
 

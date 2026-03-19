@@ -1,3 +1,4 @@
+/// <reference types="node" />
 /**
  * tests/e2e/helpers/auth.ts
  *
@@ -18,12 +19,14 @@ export class AuthPagePO {
 
   async goto() {
     await this.page.goto("/auth");
-    await this.page.waitForLoadState("networkidle");
+    await expect(this.page).toHaveURL(/\/auth/);
+    await expect(this.emailInput).toBeVisible();
+    await expect(this.passwordInput).toBeVisible();
   }
 
-  get submitBtn()     { return this.page.getByRole("button", { name: /התחברו$|הרשמו$/ }); }
-  get emailInput()    { return this.page.getByLabel("אימייל"); }
-  get passwordInput() { return this.page.getByLabel("סיסמה"); }
+  get submitBtn()     { return this.page.locator("button[type='submit']"); }
+  get emailInput()    { return this.page.locator('input[type="email"]'); }
+  get passwordInput() { return this.page.locator('input[type="password"]'); }
   get googleBtn()     { return this.page.getByRole("button", { name: /Google/i }); }
   get showPassBtn()   { return this.page.getByRole("button", { name: /הצג סיסמה|הסתר סיסמה/i }); }
   get toggleMode()    { return this.page.getByRole("button", { name: /הרשמו כאן|התחברו/i }); }
@@ -34,7 +37,7 @@ export class AuthPagePO {
   get privacyChk()    { return this.page.getByRole("checkbox"); }
 
   async switchToSignup() {
-    await this.page.getByRole("button", { name: /הרשמו כאן/i }).click();
+    await this.page.locator('button').filter({ hasText: 'הרשמו' }).click();
     await expect(this.nameInput).toBeVisible();
   }
 
@@ -47,7 +50,7 @@ export class AuthPagePO {
     // In test environments Turnstile may be in demo mode — just wait for it
     // If using a test site key (1x0000000000000000000000000000000AA), it auto-passes
     try {
-      const frame = this.page.frameLocator("iframe[src*='challenges.cloudflare']").first();
+      const frame = this.page.frameLocator("iframe[src*='challenges.cloudflare']");
       await frame.locator("input[type='checkbox']").click({ timeout: 5_000 });
     } catch {
       // Turnstile not present (test env / headless) — skip
