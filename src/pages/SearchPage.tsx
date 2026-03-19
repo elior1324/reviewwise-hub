@@ -83,7 +83,7 @@ function sortBusinesses(list: Business[], sort: SortOption): Business[] {
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
-  const defaultTab = searchParams.get("tab") || "courses";
+  const defaultTab = searchParams.get("tab") || "freelancers";
   const [selectedFreelancerCat, setSelectedFreelancerCat] = useState("הכל");
   const [selectedSubcat, setSelectedSubcat] = useState<string | null>(null);
   const [selectedCourseCat, setSelectedCourseCat] = useState("הכל");
@@ -97,12 +97,14 @@ const SearchPage = () => {
 
   const [allBusinesses, setAllBusinesses] = useState<Business[]>([]);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
   const [dbTop5, setDbTop5] = useState<any[] | null>(null);
   const [top5Month, setTop5Month] = useState("");
 
   // Fetch businesses from DB
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const { data: bizData } = await supabase
         .from("businesses")
         .select("*")
@@ -155,6 +157,7 @@ const SearchPage = () => {
         }));
         setAllCourses(mapped);
       }
+      setLoading(false);
     };
     fetchData();
   }, []);
@@ -271,12 +274,21 @@ const SearchPage = () => {
     <div className="min-h-screen bg-background noise-overlay">
       <Navbar />
       <div className="container pt-24 pb-16">
-        <h1 className="font-display font-bold text-3xl mb-2">מאגר האמון — קורסים דיגיטליים מאומתים</h1>
+        <h1 className="font-display font-bold text-3xl mb-2">מאגר האמון</h1>
         <p className="text-muted-foreground text-sm mb-6 max-w-xl">
-          אמתו קורסים דיגיטליים לפני שבוטחים. ציון האמון מחושב מביקורות מאומתות רכישה בלבד.
+          מצאו מומחים דיגיטליים, קורסים וכלי SaaS מאומתים. ציון האמון מחושב מביקורות מאומתות בלבד.
         </p>
 
-        {/* Search */}
+        {loading && (
+          <div className="flex items-center justify-center py-24">
+            <div className="flex flex-col items-center gap-3 text-muted-foreground">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm">טוען נתונים...</span>
+            </div>
+          </div>
+        )}
+
+        {!loading && <>{/* Search */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1 max-w-xl">
             <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" aria-hidden="true" />
@@ -642,6 +654,7 @@ const SearchPage = () => {
             )}
           </TabsContent>
         </Tabs>
+      </>}
       </div>
       <Footer />
     </div>
