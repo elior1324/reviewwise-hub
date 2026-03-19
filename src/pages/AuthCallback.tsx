@@ -1,22 +1,22 @@
 /**
  * AuthCallback.tsx
  *
- * Landing page for OAuth redirects (Google, Apple, etc.).
+ * Landing page for OAuth redirects (Google, Apple, email magic-link).
  *
- * Three token-delivery mechanisms are tried in order:
+ * Token delivery mechanisms (tried in parallel):
  *
- *   1. Supabase auto-detect  — detectSessionInUrl may have already
- *      processed hash-fragment tokens before React mounts. We check
- *      getSession() first.
+ *   A) Supabase auto-detect — detectSessionInUrl processes hash-fragment
+ *      tokens (#access_token=…) asynchronously during client init.
+ *      We listen for the resulting SIGNED_IN event via onAuthStateChange.
  *
- *   2. Lovable tokens in URL — access_token + refresh_token in hash
- *      fragment or query string. We extract and call setSession().
+ *   B) Manual extraction — if tokens are in the URL (hash or query) and
+ *      Supabase hasn't auto-detected them within 1s, we extract them
+ *      manually and call setSession().
  *
- *   3. Supabase PKCE         — ?code= param exchanged via
- *      exchangeCodeForSession (email magic-link, etc.)
+ *   C) PKCE exchange — if ?code= is present, we call
+ *      exchangeCodeForSession() (email magic-link, Supabase native OAuth).
  *
- *   4. Lovable SDK re-invoke — as a last resort, call signInWithOAuth
- *      on the callback page so the SDK can complete any pending flow.
+ * A 8-second timeout prevents the spinner from hanging forever.
  */
 
 import { useEffect, useRef } from "react";
@@ -24,35 +24,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// ── Diagnostic logger (temporary — safe to remove after debugging) ───────────
-function diagLog(label: string, data?: unknown) {
-  console.log(`%c[AuthCallback] ${label}`, "color:#6366f1;font-weight:bold", data ?? "");
-}
+const TIMEOUT_MS = 8000;
+const MANUAL_EXTRACTION_DELAY_MS = 1200;
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Extract Lovable tokens from EVERY possible URL location. */
-function extractTokensFromUrl(): { access_token: string; refresh_token: string } | null {
-  const sources = [
-    { name: "hash",  raw: window.location.hash.substring(1) },
-    { name: "search", raw: window.location.search.substring(1) },
-  ];
-
-  for (const { name, raw } of sources) {
-    if (!raw) continue;
-    const p = new URLSearchParams(raw);
-    const access_token = p.get("access_token");
-    const refresh_token = p.get("refresh_token");
-    diagLog(`Checking ${name} params`, {
-      access_token: access_token ? `${access_token.substring(0, 20)}…` : null,
-      refresh_token: refresh_token ? `${refresh_token.substring(0, 20)}…` : null,
-      allKeys: [...p.keys()],
-    });
-    if (access_token && refresh_token) {
-      return { access_token, refresh_token };
-    }
-  }
-  return null;
+function log(msg: string, data?: unknown) {
+  console.log(`%c[AuthCallback] ${msg}`, "color:#6366f1;font-weight:bold", data ?? "");
 }
 
 const AuthCallback = () => {
@@ -63,47 +39,40 @@ const AuthCallback = () => {
     if (ranRef.current) return;
     ranRef.current = true;
 
-    // ── Full URL diagnostic dump ──────────────────────────────────────────
-    diagLog("=== CALLBACK START ===");
-    diagLog("Full URL", window.location.href);
-    diagLog("Origin", window.location.origin);
-    diagLog("Pathname", window.location.pathname);
-    diagLog("Search", window.location.search);
-    diagLog("Hash", window.location.hash);
-    diagLog("Search params", Object.fromEntries(new URLSearchParams(window.location.search)));
-    diagLog("Hash params", Object.fromEntries(new URLSearchParams(window.location.hash.substring(1))));
+    // ── Parse URL ──────────────────────────────────────────────────────────
+    const search = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.substring(1));
 
-    const params = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    log("URL", window.location.href);
+    log("search keys", [...search.keys()]);
+    log("hash keys", [...hash.keys()]);
 
-    // ── Check for an error param ──────────────────────────────────────────
-    const urlError = params.get("error") || hashParams.get("error");
     const isBusinessIntent =
-      params.get("intent") === "business" || hashParams.get("intent") === "business";
+      search.get("intent") === "business" || hash.get("intent") === "business";
 
-    const fail = (reason: string) => {
-      console.error("[AuthCallback] FAILED:", reason);
-      console.error("[AuthCallback] URL at failure:", window.location.href);
+    // ── Error in URL ───────────────────────────────────────────────────────
+    const urlError = search.get("error") || hash.get("error");
+    if (urlError) {
+      const desc = search.get("error_description") || hash.get("error_description") || "";
+      log("URL contains error", { urlError, desc });
       toast.error("ההתחברות עם Google נכשלה. נסו שוב.");
       navigate(isBusinessIntent ? "/business/login" : "/auth", { replace: true });
-    };
-
-    if (urlError) {
-      const desc = params.get("error_description") || hashParams.get("error_description") || "";
-      fail(`URL error: ${urlError} — ${desc}`);
       return;
     }
 
-    // ── Redirect helper ───────────────────────────────────────────────────
-    const redirectForUser = async (userId: string) => {
-      diagLog("redirectForUser", { userId, isBusinessIntent });
-      const { data: business } = await supabase
+    // ── Success handler — runs once we have a session ──────────────────────
+    let settled = false;
+    const succeed = async (userId: string, via: string) => {
+      if (settled) return;
+      settled = true;
+      log(`SUCCESS via ${via}`, { userId });
+      const { data: biz } = await supabase
         .from("businesses")
         .select("id")
         .eq("owner_id", userId)
         .maybeSingle();
 
-      if (business) {
+      if (biz) {
         navigate("/business/dashboard", { replace: true });
       } else if (isBusinessIntent) {
         navigate("/register", { replace: true });
@@ -112,110 +81,100 @@ const AuthCallback = () => {
       }
     };
 
-    // ── Main exchange logic ───────────────────────────────────────────────
-    (async () => {
-      try {
-        // ── Step 0: Maybe Supabase already auto-detected tokens ─────────
-        // (detectSessionInUrl: true may have processed the hash before React mounted)
-        diagLog("Step 0: Checking if Supabase already has a session");
-        const { data: existingSession } = await supabase.auth.getSession();
-        if (existingSession.session) {
-          diagLog("Step 0: Session already exists ✓", existingSession.session.user.email);
-          await redirectForUser(existingSession.session.user.id);
+    const fail = (reason: string) => {
+      if (settled) return;
+      settled = true;
+      console.error("[AuthCallback] FAILED:", reason);
+      console.error("[AuthCallback] URL:", window.location.href);
+      toast.error("ההתחברות עם Google נכשלה. נסו שוב.");
+      navigate(isBusinessIntent ? "/business/login" : "/auth", { replace: true });
+    };
+
+    // ── A) Listen for onAuthStateChange (catches Supabase auto-detect) ────
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        log("onAuthStateChange", { event, hasSession: !!session });
+        if (event === "SIGNED_IN" && session) {
+          succeed(session.user.id, "onAuthStateChange/SIGNED_IN");
+        }
+      }
+    );
+
+    // ── B) Manual token extraction + C) PKCE — with a small delay ─────────
+    // Give Supabase's detectSessionInUrl a moment to process hash tokens
+    // before we try manual extraction (avoids double-processing).
+    const manualTimer = setTimeout(async () => {
+      if (settled) return;
+
+      // B-1: Check if a session appeared while we waited
+      const { data: { session: existing } } = await supabase.auth.getSession();
+      if (existing) {
+        succeed(existing.user.id, "getSession (delayed)");
+        return;
+      }
+
+      // B-2: Extract tokens from hash or query string
+      const accessToken =
+        hash.get("access_token") || search.get("access_token");
+      const refreshToken =
+        hash.get("refresh_token") || search.get("refresh_token");
+
+      log("Manual extraction", {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        hasCode: search.has("code"),
+      });
+
+      if (accessToken && refreshToken) {
+        log("Calling setSession with extracted tokens");
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        log("setSession result", {
+          hasSession: !!data?.session,
+          error: error?.message ?? null,
+        });
+        if (data?.session) {
+          succeed(data.session.user.id, "manual setSession");
           return;
         }
-        diagLog("Step 0: No existing session");
-
-        // ── Step 1: Look for Lovable tokens in URL ──────────────────────
-        diagLog("Step 1: Extracting tokens from URL");
-        const lovableTokens = extractTokensFromUrl();
-        if (lovableTokens) {
-          diagLog("Step 1: Tokens found, calling setSession");
-          const { data: setData, error: setError } = await supabase.auth.setSession({
-            access_token: lovableTokens.access_token,
-            refresh_token: lovableTokens.refresh_token,
-          });
-          diagLog("Step 1: setSession result", {
-            hasSession: !!setData?.session,
-            user: setData?.session?.user?.email ?? null,
-            error: setError?.message ?? null,
-          });
-          if (setError) {
-            fail(`setSession failed: ${setError.message}`);
-            return;
-          }
-          if (setData?.session) {
-            diagLog("Step 1: SUCCESS ✓");
-            await redirectForUser(setData.session.user.id);
-            return;
-          }
-          diagLog("Step 1: setSession returned no error but also no session");
-        } else {
-          diagLog("Step 1: No tokens in URL");
+        if (error) {
+          fail(`setSession failed: ${error.message}`);
+          return;
         }
-
-        // ── Step 2: Supabase PKCE exchange ──────────────────────────────
-        const hasCode = params.has("code");
-        diagLog("Step 2: PKCE exchange", { hasCode });
-        if (hasCode) {
-          const { data: exchangeData, error: exchangeError } =
-            await supabase.auth.exchangeCodeForSession(window.location.href);
-          diagLog("Step 2: exchangeCodeForSession result", {
-            hasSession: !!exchangeData?.session,
-            error: exchangeError?.message ?? null,
-          });
-          if (exchangeData?.session) {
-            diagLog("Step 2: SUCCESS ✓");
-            await redirectForUser(exchangeData.session.user.id);
-            return;
-          }
-          if (exchangeError) {
-            fail(`PKCE exchange failed: ${exchangeError.message}`);
-            return;
-          }
-        }
-
-        // ── Step 3: Try Lovable SDK re-invoke ───────────────────────────
-        // The SDK may detect callback state and complete the flow
-        diagLog("Step 3: Trying Lovable SDK signInWithOAuth on callback page");
-        try {
-          const { lovable } = await import("@/integrations/lovable/index");
-          const result = await lovable.auth.signInWithOAuth("google", {
-            redirect_uri: `${window.location.origin}/auth/callback`,
-          });
-          diagLog("Step 3: Lovable SDK result", {
-            redirected: result?.redirected,
-            hasError: !!result?.error,
-            errorMsg: result?.error?.message,
-            hasTokens: !!result?.tokens,
-          });
-          // If it didn't redirect and didn't error, session should be set
-          if (!result?.redirected && !result?.error) {
-            const { data: finalSession } = await supabase.auth.getSession();
-            if (finalSession.session) {
-              diagLog("Step 3: SUCCESS ✓");
-              await redirectForUser(finalSession.session.user.id);
-              return;
-            }
-          }
-          // If it says "redirected", the SDK is sending us to Google again — abort
-          if (result?.redirected) {
-            diagLog("Step 3: SDK tried to redirect again (loop), aborting");
-            // The redirect is already happening, nothing to do
-            return;
-          }
-        } catch (sdkErr) {
-          diagLog("Step 3: Lovable SDK error", String(sdkErr));
-        }
-
-        // ── All steps failed ────────────────────────────────────────────
-        fail("All auth methods failed. Check console logs above for [AuthCallback] diagnostics.");
-      } catch (e) {
-        fail(`Unexpected error: ${String(e)}`);
       }
-    })();
 
-    return () => {};
+      // C: PKCE code exchange (email magic-link, Supabase native flows)
+      if (search.has("code")) {
+        log("Trying PKCE exchangeCodeForSession");
+        const { data, error } = await supabase.auth.exchangeCodeForSession(
+          window.location.href
+        );
+        log("PKCE result", {
+          hasSession: !!data?.session,
+          error: error?.message ?? null,
+        });
+        if (data?.session) {
+          succeed(data.session.user.id, "PKCE exchange");
+          return;
+        }
+        // Don't fail yet — the auth state listener might still fire
+        log("PKCE exchange did not produce a session");
+      }
+    }, MANUAL_EXTRACTION_DELAY_MS);
+
+    // ── Timeout — give up after TIMEOUT_MS ────────────────────────────────
+    const timeoutTimer = setTimeout(() => {
+      fail("Timeout: no session received within " + TIMEOUT_MS + "ms");
+    }, TIMEOUT_MS);
+
+    // ── Cleanup ───────────────────────────────────────────────────────────
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(manualTimer);
+      clearTimeout(timeoutTimer);
+    };
   }, [navigate]);
 
   return (
