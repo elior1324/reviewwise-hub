@@ -70,6 +70,12 @@ const BusinessProfile = () => {
   const [affiliateMode,         setAffiliateMode]         = useState<"reviewhub_model" | "personal_affiliate" | "none">("none");
   const [personalAffiliateUrls, setPersonalAffiliateUrls] = useState<string[]>([]);
 
+  // Transparency score pillars (fetched from businesses table)
+  const [, setTransparencyScore]    = useState<number | null>(null);
+  const [, setResponseRate]         = useState<number | null>(null);
+  const [, setAvgResponseHours]     = useState<number | null>(null);
+  const [, setVerifiedReviewRatio]  = useState<number | null>(null);
+
   useEffect(() => {
     if (!slug) return;
 
@@ -164,7 +170,7 @@ const BusinessProfile = () => {
       // reviews has business_id directly
       const { data: reviewDataFinal } = await supabase
         .from("reviews")
-        .select("*, is_purchase_verified, review_source, is_flagged_spam, courses(name), business_responses(text, created_at)")
+        .select("*, is_purchase_verified, review_source, is_flagged_spam, courses(name), review_responses(response_text, created_at)")
         .eq("business_id", bizData.id)
         .eq("moderation_status", "approved")
         .order("created_at", { ascending: false });

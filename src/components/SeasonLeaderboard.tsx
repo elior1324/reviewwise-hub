@@ -177,18 +177,18 @@ const SeasonLeaderboard = ({ compact = false, limit = 10 }: Props) => {
 
     const userIds = entries.map((e: any) => e.user_id);
     const { data: profiles } = await supabase
-      .from("profiles")
-      .select("user_id, display_name, avatar_url")
-      .in("user_id", userIds.length > 0 ? userIds : ["00000000-0000-0000-0000-000000000000"]);
+      .from("users")
+      .select("id, full_name, avatar_url")
+      .in("id", userIds.length > 0 ? userIds : ["00000000-0000-0000-0000-000000000000"]);
 
-    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+    const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
 
     const mapped: LeaderRow[] = entries
       .map((e: any, idx: number) => {
         const p = profileMap.get(e.user_id);
         return {
           user_id: e.user_id,
-          display_name: p?.display_name || "משתמש",
+          display_name: p?.full_name || "משתמש",
           avatar_url: p?.avatar_url || null,
           points: Number(e.points) || 0,
           review_count: Number(e.review_count) || 0,

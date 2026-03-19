@@ -140,7 +140,7 @@ const SearchPage = () => {
       const { data: courseData } = await supabase
         .from("courses")
         .select("*, businesses(slug)")
-        .order("rating", { ascending: false });
+        .order("created_at", { ascending: false });
 
       if (courseData) {
         const mapped: Course[] = courseData.map((c: any) => ({

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import StarRating from "./StarRating";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Instagram, Linkedin, Twitter, Facebook, ShieldCheck, Cpu } from "lucide-react";
 import { motion } from "framer-motion";
 import type { SocialLinks, PricingModel } from "@/data/mockData";
@@ -65,6 +65,7 @@ function cardTrustGrade(rating: number, verifiedCount: number): { grade: string;
 }
 
 const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewCount, verifiedReviewCount = 0, description, logo, socialLinks, pricingModel, founderName, verifiedRatio, trustTier }: BusinessCardProps) => {
+  const navigate = useNavigate();
   const trust = cardTrustGrade(rating, verifiedReviewCount);
   const tierDisplay = trustTier && trustTier !== "unrated" ? TRUST_TIER_DISPLAY[trustTier] : null;
   const isSaas = type === "saas";
@@ -73,7 +74,7 @@ const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewC
     : [];
 
   return (
-    <Link to={`/biz/${slug}`}>
+    <div onClick={() => navigate(`/biz/${slug}`)} role="article" aria-label={name}>
       <Card className="shadow-card hover:shadow-card-hover transition-all duration-500 group cursor-pointer h-full animated-border bg-card overflow-hidden relative">
         {/* Ambient glow on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
@@ -195,7 +196,7 @@ const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewC
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </div>
   );
 };
 
