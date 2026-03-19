@@ -122,44 +122,32 @@ const InstagramDMReviewsSection = ({ reviews }: InstagramDMReviewsSectionProps) 
       </div>
 
       {/* ── Review cards ── */}
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {visible.map((review) => (
           <Card
             key={review.id}
             className="transition-colors"
             style={{ borderColor: `${IG_PINK}26`, background: `${IG_PINK}08` }}
           >
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-3 flex-wrap">
-                <div className="flex items-start gap-3">
-                  {/* Instagram avatar placeholder */}
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ background: `${IG_PINK}1a` }}
-                  >
-                    <InstagramIcon size={14} />
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">
-                      {review.author_name || "לקוח אנונימי"}
-                    </p>
-                    {review.rating != null && <StarRow rating={review.rating} />}
-                    <p className="text-[10px] text-muted-foreground/60">
-                      {new Date(review.received_at).toLocaleDateString("he-IL")}
-                    </p>
-                  </div>
-                </div>
-
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2 mb-1.5">
                 <div
-                  className="flex items-center gap-1 text-[10px] border rounded-full px-2 py-0.5 shrink-0"
-                  style={{ color: `${IG_PINK}b3`, borderColor: `${IG_PINK}33`, background: `${IG_PINK}0d` }}
+                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: `${IG_PINK}1a` }}
                 >
-                  <InstagramIcon size={9} />
-                  Instagram DM
+                  <InstagramIcon size={12} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-foreground truncate">
+                    {review.author_name || "לקוח אנונימי"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60">
+                    {new Date(review.received_at).toLocaleDateString("he-IL")}
+                  </p>
                 </div>
               </div>
-
-              <p className="text-sm text-foreground/80 leading-relaxed mt-3 pr-11">
+              {review.rating != null && <StarRow rating={review.rating} />}
+              <p className="text-xs text-foreground/80 leading-relaxed mt-1.5 line-clamp-4">
                 {review.text}
               </p>
             </CardContent>

@@ -145,65 +145,46 @@ const FacebookReviewsSection = ({
       </div>
 
       {/* ── Review cards ───────────────────────────────────────────────── */}
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {visible.map((review) => (
           <Card
             key={review.id}
             className="border border-[#1877F2]/15 bg-[#1877F2]/3 hover:bg-[#1877F2]/5 transition-colors"
           >
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-3 flex-wrap">
-                {/* Avatar + name */}
-                <div className="flex items-start gap-3">
-                  {review.author_photo_url ? (
-                    <img
-                      src={review.author_photo_url}
-                      alt={review.author_name ?? "Facebook user"}
-                      className="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-[#1877F2]/15 flex items-center justify-center shrink-0 mt-0.5">
-                      <FacebookIcon size={14} />
-                    </div>
-                  )}
-
-                  <div className="space-y-0.5">
-                    {review.author_profile_url ? (
-                      <a
-                        href={review.author_profile_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-foreground hover:text-[#1877F2] transition-colors flex items-center gap-1"
-                      >
-                        {review.author_name || "משתמש Facebook"}
-                        <ExternalLink size={9} className="opacity-50" />
-                      </a>
-                    ) : (
-                      <p className="text-sm font-medium text-foreground">
-                        {review.author_name || "משתמש Facebook"}
-                      </p>
-                    )}
-                    {review.rating != null && <StarRow rating={review.rating} />}
-                    {review.published_at && (
-                      <p className="text-[10px] text-muted-foreground/60">
-                        {new Date(review.published_at).toLocaleDateString("he-IL")}
-                      </p>
-                    )}
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2 mb-1.5">
+                {review.author_photo_url ? (
+                  <img
+                    src={review.author_photo_url}
+                    alt={review.author_name ?? "Facebook user"}
+                    className="w-7 h-7 rounded-full object-cover shrink-0"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-[#1877F2]/15 flex items-center justify-center shrink-0">
+                    <FacebookIcon size={12} />
                   </div>
-                </div>
-
-                {/* Source badge */}
-                <div className="flex items-center gap-1 text-[10px] text-[#1877F2]/70 border border-[#1877F2]/20 bg-[#1877F2]/5 px-2 py-0.5 rounded-full shrink-0">
-                  <FacebookIcon size={9} />
-                  Facebook Review
+                )}
+                <div className="min-w-0">
+                  {review.author_profile_url ? (
+                    <a href={review.author_profile_url} target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-medium text-foreground hover:text-[#1877F2] transition-colors flex items-center gap-0.5 truncate">
+                      <span className="truncate">{review.author_name || "משתמש Facebook"}</span>
+                      <ExternalLink size={8} className="opacity-50 shrink-0" />
+                    </a>
+                  ) : (
+                    <p className="text-xs font-medium text-foreground truncate">{review.author_name || "משתמש Facebook"}</p>
+                  )}
+                  {review.published_at && (
+                    <p className="text-[10px] text-muted-foreground/60">
+                      {new Date(review.published_at).toLocaleDateString("he-IL")}
+                    </p>
+                  )}
                 </div>
               </div>
-
+              {review.rating != null && <StarRow rating={review.rating} />}
               {review.text && (
-                <p className="text-sm text-foreground/80 leading-relaxed mt-3 pr-11">
+                <p className="text-xs text-foreground/80 leading-relaxed mt-1.5 line-clamp-4">
                   {review.text}
                 </p>
               )}

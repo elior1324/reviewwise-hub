@@ -113,42 +113,28 @@ const WhatsAppReviewsSection = ({ reviews }: WhatsAppReviewsSectionProps) => {
       </div>
 
       {/* ── Review cards ───────────────────────────────────────────────── */}
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {visible.map((review) => (
           <Card
             key={review.id}
             className="border border-[#25D366]/15 bg-[#25D366]/3 hover:bg-[#25D366]/5 transition-colors"
           >
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-3 flex-wrap">
-                {/* Left: avatar + name + stars */}
-                <div className="flex items-start gap-3">
-                  {/* WhatsApp avatar placeholder */}
-                  <div className="w-8 h-8 rounded-full bg-[#25D366]/15 flex items-center justify-center shrink-0 mt-0.5">
-                    <WhatsAppIcon size={14} />
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">
-                      {review.author_name || "לקוח 익명"}
-                    </p>
-                    {review.rating != null && (
-                      <StarRow rating={review.rating} />
-                    )}
-                    <p className="text-[10px] text-muted-foreground/60">
-                      {new Date(review.received_at).toLocaleDateString("he-IL")}
-                    </p>
-                  </div>
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-7 h-7 rounded-full bg-[#25D366]/15 flex items-center justify-center shrink-0">
+                  <WhatsAppIcon size={12} />
                 </div>
-
-                {/* Source badge */}
-                <div className="flex items-center gap-1 text-[10px] text-[#25D366]/70 border border-[#25D366]/20 bg-[#25D366]/5 px-2 py-0.5 rounded-full shrink-0">
-                  <WhatsAppIcon size={9} />
-                  WhatsApp Customer Feedback
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-foreground truncate">
+                    {review.author_name || "לקוח אנונימי"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60">
+                    {new Date(review.received_at).toLocaleDateString("he-IL")}
+                  </p>
                 </div>
               </div>
-
-              {/* Review text */}
-              <p className="text-sm text-foreground/80 leading-relaxed mt-3 pr-11">
+              {review.rating != null && <StarRow rating={review.rating} />}
+              <p className="text-xs text-foreground/80 leading-relaxed mt-1.5 line-clamp-4">
                 {review.text}
               </p>
             </CardContent>

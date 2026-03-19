@@ -214,7 +214,7 @@ const GoogleReviewsSection = ({
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {displayedReviews.map((review) => (
             <GoogleReviewCard key={review.id} review={review} />
           ))}
@@ -299,73 +299,49 @@ const GoogleReviewCard = ({ review }: { review: GoogleReview }) => {
 
   return (
     <Card className="shadow-card bg-card border-border/50">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          {/* Avatar */}
-          <div className="shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+      <CardContent className="p-3">
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="shrink-0 w-7 h-7 rounded-full bg-muted flex items-center justify-center overflow-hidden">
             {review.author_photo_url ? (
-              <img
-                src={review.author_photo_url}
-                alt={review.author_name}
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
+              <img src={review.author_photo_url} alt={review.author_name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             ) : (
-              <span className="text-sm font-bold text-muted-foreground uppercase">
-                {review.author_name.charAt(0)}
-              </span>
+              <span className="text-xs font-bold text-muted-foreground uppercase">{review.author_name.charAt(0)}</span>
             )}
           </div>
-
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2 mb-1">
-              <span className="text-sm font-medium text-foreground truncate">
-                {review.author_name}
-              </span>
-              <div className="flex items-center gap-2 shrink-0">
-                {dateStr && (
-                  <span className="text-[11px] text-muted-foreground">{dateStr}</span>
-                )}
-                {/* Source attribution — required per Google ToS */}
-                <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60 border border-border/30 rounded px-1.5 py-0.5">
-                  <GoogleIcon size={9} />
-                  <span>Google</span>
-                </div>
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs font-medium text-foreground truncate">{review.author_name}</span>
+              <div className="flex items-center gap-1 text-[9px] text-muted-foreground/60 border border-border/30 rounded px-1 py-0.5 shrink-0">
+                <GoogleIcon size={8} />
+                <span>Google</span>
               </div>
             </div>
-
-            <StarRow rating={review.rating} size={11} />
-
-            {text && (
-              <div className="mt-1.5">
-                <p className="text-sm text-foreground/80 leading-relaxed">
-                  {isLong && !expanded ? `${text.slice(0, 180)}…` : text}
-                </p>
-                {isLong && (
-                  <button
-                    onClick={() => setExpanded(e => !e)}
-                    className="text-xs text-primary hover:underline mt-0.5"
-                  >
-                    {expanded ? "הצג פחות" : "קרא עוד"}
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Attribution link — required per Google ToS */}
-            {review.source_url && (
-              <a
-                href={review.source_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 mt-1.5 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-              >
-                <ExternalLink size={9} />
-                צפה ב-Google
-              </a>
-            )}
+            {dateStr && <span className="text-[10px] text-muted-foreground">{dateStr}</span>}
           </div>
         </div>
+
+        <StarRow rating={review.rating} size={11} />
+
+        {text && (
+          <div className="mt-1.5">
+            <p className="text-xs text-foreground/80 leading-relaxed line-clamp-4">
+              {isLong && !expanded ? `${text.slice(0, 160)}…` : text}
+            </p>
+            {isLong && (
+              <button onClick={() => setExpanded(e => !e)} className="text-[10px] text-primary hover:underline mt-0.5">
+                {expanded ? "הצג פחות" : "קרא עוד"}
+              </button>
+            )}
+          </div>
+        )}
+
+        {review.source_url && (
+          <a href={review.source_url} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 mt-1.5 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+            <ExternalLink size={9} />
+            צפה ב-Google
+          </a>
+        )}
       </CardContent>
     </Card>
   );
