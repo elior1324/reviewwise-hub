@@ -581,80 +581,6 @@ const BusinessProfile = () => {
           />
         )}
 
-        {/* ── Collaboration: Synchronized Purchase Conditions ──────────────── */}
-        {collabActive && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="mb-8 rounded-xl border border-primary/30 bg-gradient-to-l from-primary/8 via-background to-background overflow-hidden"
-          >
-            <div className="p-5">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                {/* Icon + text */}
-                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Handshake size={22} className="text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                    <p className="font-display font-bold text-base text-foreground">
-                      תנאי רכישה מסונכרנים
-                    </p>
-                    <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wide">
-                      מאומת
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    גישה דרך ReviewHub מאפשרת תנאי רכישה מסונכרנים ומבטיחה שהרכישה תעבור תהליך אימות לביקורת מאומתת עתידית.
-                    {(collabMethod === "coupon" || collabMethod === "both") && !couponRevealed && (
-                      <button
-                        onClick={() => setCouponRevealed(true)}
-                        className="text-primary hover:underline mr-1 text-sm"
-                      >
-                        הצגת קוד קופון
-                      </button>
-                    )}
-                  </p>
-
-                  {/* Coupon reveal */}
-                  {(collabMethod === "coupon" || collabMethod === "both") && couponRevealed && collabCoupon && (
-                    <div className="mt-2 inline-flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-1.5">
-                      <Tag size={13} className="text-primary" />
-                      <code className="font-mono font-bold text-primary text-base tracking-widest">
-                        {collabCoupon}
-                      </code>
-                      <button
-                        onClick={handleCopyCoupon}
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                        title="העתקת קוד"
-                      >
-                        {collabCopied ? <CheckCheck size={14} className="text-primary" /> : <Copy size={14} />}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* CTA button */}
-                {(collabMethod === "link" || collabMethod === "both") && (
-                  <Button
-                    onClick={handleCollabAccess}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shrink-0"
-                  >
-                    <Link2 size={15} /> המשיכו לרכישה מאומתת
-                  </Button>
-                )}
-              </div>
-
-              {/* Disclosure */}
-              <div className="mt-3 flex items-start gap-1.5 text-[11px] text-muted-foreground/70">
-                <Info size={11} className="mt-0.5 shrink-0" />
-                <span>
-                  לשקיפות מלאה: רכישות דרך קישור זה עוברות דרך תשתית האימות של ReviewHub ומסייעות לאמת ביקורות עתידיות. ReviewHub עשויה לקבל אות תפעולי מרכישה זו. פעולה זו אינה משפיעה על ציון האמון האובייקטיבי של הספק.
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         {/* Courses */}
         {courses.length > 0 && (
@@ -684,12 +610,44 @@ const BusinessProfile = () => {
         {/* Testimonial Videos/Images */}
         {dbBusinessId && <TestimonialCarousel businessId={dbBusinessId} />}
 
-        {/* Add Review */}
-        <div className="mb-8">
-          <h2 className="font-display font-bold text-xl mb-1">תרמו לאמינות הכלכלה הדיגיטלית</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            ביקורת מאומתת רכישה נספרת בציון האמון ומוצגת ראשונה. משוב קהילה מוצג בנפרד ואינו נספר בחישוב.
-          </p>
+        {/* Add Review — compact header + optional collab strip */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <h2 className="font-semibold text-sm text-foreground">הוסף ביקורת</h2>
+            <span className="text-xs text-muted-foreground">· ביקורת מאומתת נספרת בציון האמון, משוב קהילה מוצג בנפרד</span>
+          </div>
+
+          {/* Compact collab strip */}
+          {collabActive && (
+            <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5 text-xs flex-wrap">
+              <Handshake size={12} className="text-primary shrink-0" />
+              <span className="font-medium text-primary">תנאי רכישה מסונכרנים</span>
+              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">מאומת</span>
+              <span className="text-muted-foreground flex-1 min-w-0">רכישה דרך ReviewHub מאפשרת אימות ביקורת עתידי.</span>
+              {(collabMethod === "coupon" || collabMethod === "both") && !couponRevealed && (
+                <button onClick={() => setCouponRevealed(true)} className="text-primary hover:underline font-medium shrink-0">
+                  הצג קופון
+                </button>
+              )}
+              {(collabMethod === "link" || collabMethod === "both") && (
+                <Button variant="ghost" size="sm" onClick={handleCollabAccess} className="h-6 px-2 text-[11px] gap-1 shrink-0">
+                  <Link2 size={10} /> לרכישה מאומתת
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Coupon code reveal */}
+          {collabActive && (collabMethod === "coupon" || collabMethod === "both") && couponRevealed && collabCoupon && (
+            <div className="mb-2 inline-flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-1.5">
+              <Tag size={13} className="text-primary" />
+              <code className="font-mono font-bold text-primary text-sm tracking-widest">{collabCoupon}</code>
+              <button onClick={handleCopyCoupon} className="text-muted-foreground hover:text-primary transition-colors" title="העתקת קוד">
+                {collabCopied ? <CheckCheck size={14} className="text-primary" /> : <Copy size={14} />}
+              </button>
+            </div>
+          )}
+
           <AddReviewForm
             businessSlug={business.slug}
             businessName={business.name}
