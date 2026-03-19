@@ -26,7 +26,7 @@ export class AuthPagePO {
 
   get submitBtn()     { return this.page.locator("button[type='submit']"); }
   get emailInput()    { return this.page.locator('input[type="email"]'); }
-  get passwordInput() { return this.page.locator('input[type="password"]'); }
+  get passwordInput() { return this.page.locator('#password'); }
   get googleBtn()     { return this.page.getByRole("button", { name: /Google/i }); }
   get showPassBtn()   { return this.page.getByRole("button", { name: /הצג סיסמה|הסתר סיסמה/i }); }
   get toggleMode()    { return this.page.getByRole("button", { name: /הרשמו כאן|התחברו/i }); }
@@ -34,7 +34,7 @@ export class AuthPagePO {
   get strengthLabel() { return this.page.locator("text=/חוזק הסיסמה/"); }
   get turnstile()     { return this.page.locator("[data-testid='cf-turnstile'], iframe[src*='challenges.cloudflare']"); }
   get nameInput()            { return this.page.getByLabel("שם תצוגה"); }
-  get confirmPasswordInput() { return this.page.getByLabel("אימות סיסמה"); }
+  get confirmPasswordInput() { return this.page.locator('#confirmPassword'); }
   get privacyChk()           { return this.page.getByRole("checkbox"); }
 
   async switchToSignup() {
