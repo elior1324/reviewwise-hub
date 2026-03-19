@@ -2,15 +2,14 @@
  * BusinessNavbar — the navigation bar shown inside the Business Dashboard.
  *
  * Visibility rules:
- *  • "דף הבית" and "מחירון" are always visible (logged-in and logged-out).
- *  • "לוח הבקרה", "אימות ביקורות", "ווידג׳טים ותגי אמון" are only shown to
- *    authenticated users — guests see a "התחברו / הרשמו" CTA instead.
+ *  • "דף הבית", "מחירון" and "משאבים" are always visible (logged-in and logged-out).
+ *  • "לוח הבקרה" is only shown to authenticated users — guests see a "התחברו / הרשמו" CTA instead.
  */
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  Menu, X, LogOut, User, LayoutDashboard, ShieldCheck,
-  ArrowLeftRight, Home, Tag, ChevronDown, BarChart3, Package, BookOpen, Settings,
+  Menu, X, LogOut, User, LayoutDashboard,
+  ArrowLeftRight, Home, Tag, BookOpen, Settings,
 } from "lucide-react";
 import AccessibilityMenu from "./AccessibilityMenu";
 import logoIcon from "@/assets/logo-icon-cropped.png";
@@ -18,16 +17,8 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppMode } from "@/contexts/ModeContext";
 
-/** Sub-items for the "מוצר" dropdown — always visible to all visitors */
-const PRODUCT_ITEMS = [
-  { to: "/business/solutions/reviews", icon: ShieldCheck, label: "אימות וביקורות"    },
-  { to: "/business/pricing",           icon: BarChart3,   label: "לוח בקרה ונתונים" },
-  { to: "/partners/prestige-badges",   icon: Tag,         label: "ווידג׳טים"          },
-] as const;
-
 const BusinessNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [productOpen, setProductOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { switchToUserMode } = useAppMode();
@@ -93,59 +84,6 @@ const BusinessNavbar = () => {
               לוח הבקרה
             </Link>
           )}
-
-          {/* מוצר dropdown — hover-based; pb-2 bridges the gap so panel never vanishes mid-travel */}
-          <div
-            className="relative pb-2"
-            onMouseEnter={() => setProductOpen(true)}
-            onMouseLeave={() => setProductOpen(false)}
-          >
-            <button
-              onClick={() => setProductOpen(v => !v)}
-              className={`text-sm transition-colors flex items-center gap-1 focus-visible:outline-none py-1 relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
-                PRODUCT_ITEMS.some(i => isActive(i.to))
-                  ? "text-white font-semibold after:bg-white"
-                  : "text-zinc-300 hover:text-white after:bg-transparent"
-              }`}
-              aria-haspopup="menu"
-              aria-expanded={productOpen}
-            >
-              מוצר
-              <ChevronDown
-                size={13}
-                className={`transition-transform duration-200 ${productOpen ? "rotate-180" : ""}`}
-                aria-hidden="true"
-              />
-            </button>
-
-            {/* Floating panel — top-full aligns with the bottom of the pb-2 zone so no gap */}
-            {productOpen && (
-              <div
-                className="absolute top-full right-1/2 translate-x-1/2 w-52 rounded-xl border border-zinc-700/80 bg-zinc-800/95 backdrop-blur-sm shadow-2xl py-1.5 z-50"
-                style={{ direction: "rtl" }}
-                role="menu"
-              >
-                {/* Arrow pointer */}
-                <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-zinc-800 border-l border-t border-zinc-700/80" />
-                {PRODUCT_ITEMS.map(({ to, icon: Icon, label }) => (
-                  <Link
-                    key={to}
-                    to={to}
-                    role="menuitem"
-                    className={`flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors ${
-                      isActive(to)
-                        ? "text-primary font-semibold bg-primary/10"
-                        : "text-zinc-200 hover:text-white hover:bg-zinc-700/50"
-                    }`}
-                    onClick={() => setProductOpen(false)}
-                  >
-                    <Icon size={15} className={isActive(to) ? "text-primary" : "text-zinc-400"} aria-hidden="true" />
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* מחירון — always visible, highlighted */}
           <Link
@@ -278,21 +216,6 @@ const BusinessNavbar = () => {
               <LayoutDashboard size={14} aria-hidden="true" /> לוח הבקרה
             </Link>
           )}
-
-          {/* מוצר section — always visible */}
-          <div className="border-t border-zinc-800/80 pt-2 mt-1">
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-0 mb-1 pr-2">מוצר</p>
-            {PRODUCT_ITEMS.map(({ to, icon: Icon, label }) => (
-              <Link
-                key={to}
-                to={to}
-                className={`flex items-center gap-2 text-sm py-2.5 min-h-[44px] border-r-2 pr-2 transition-colors ${isActive(to) ? "text-white border-white font-medium" : "text-zinc-400 border-transparent hover:text-white"}`}
-                onClick={() => setMobileOpen(false)}
-              >
-                <Icon size={14} aria-hidden="true" /> {label}
-              </Link>
-            ))}
-          </div>
 
           {/* מחירון — always visible */}
           <Link
