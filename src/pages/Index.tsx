@@ -193,9 +193,10 @@ const Index = () => {
           const handle = businessLabel ? `${sourceBadge} · ${businessLabel}` : sourceBadge;
 
           // Snippet — cap at 180 chars so cards stay compact
-          const snippet = r.text && r.text.length > 180
-            ? r.text.slice(0, 177) + "…"
-            : (r.text || "");
+          const reviewText = (r as any).review_text || (r as any).text || "";
+          const snippet = reviewText.length > 180
+            ? reviewText.slice(0, 177) + "…"
+            : reviewText;
 
           const businessSlug = r.businesses?.slug;
           return {
