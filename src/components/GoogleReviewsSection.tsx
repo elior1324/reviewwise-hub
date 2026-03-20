@@ -18,7 +18,7 @@
  */
 
 import { useState } from "react";
-import { Star, RefreshCw, ExternalLink, Info, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Star, RefreshCw, ExternalLink, Info, Clock, ChevronDown, ChevronUp, ThumbsUp } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -290,6 +290,12 @@ const GoogleReviewsSection = ({
 
 const GoogleReviewCard = ({ review }: { review: GoogleReview }) => {
   const [expanded, setExpanded] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const toggleLike = () => {
+    setLiked(prev => !prev);
+    setLikeCount(prev => liked ? Math.max(0, prev - 1) : prev + 1);
+  };
   const text = review.text || "";
   const isLong = text.length > 180;
 
@@ -335,13 +341,22 @@ const GoogleReviewCard = ({ review }: { review: GoogleReview }) => {
           </div>
         )}
 
-        {review.source_url && (
-          <a href={review.source_url} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 mt-1.5 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">
-            <ExternalLink size={9} />
-            צפה ב-Google
-          </a>
-        )}
+        <div className="mt-2 flex items-center justify-between">
+          <button
+            onClick={toggleLike}
+            className={`flex items-center gap-1 text-[10px] transition-colors ${liked ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+          >
+            <ThumbsUp size={10} className={liked ? "fill-primary" : ""} />
+            {likeCount > 0 ? likeCount : "מועיל"}
+          </button>
+          {review.source_url && (
+            <a href={review.source_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+              <ExternalLink size={9} />
+              צפה ב-Google
+            </a>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

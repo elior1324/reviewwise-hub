@@ -19,8 +19,8 @@
  */
 
 import { useState } from "react";
-import { Star, ChevronDown, ChevronUp, Info } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Star, ChevronDown, ChevronUp, Info, ThumbsUp } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ── WhatsApp SVG icon (inline) ────────────────────────────────────────────────
@@ -62,6 +62,47 @@ export interface WhatsAppReview {
 interface WhatsAppReviewsSectionProps {
   reviews: WhatsAppReview[];
 }
+
+// ── Individual card with local like state ─────────────────────────────────────
+
+const WhatsAppReviewCard = ({ review }: { review: WhatsAppReview }) => {
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const toggle = () => {
+    setLiked(prev => !prev);
+    setLikeCount(prev => liked ? Math.max(0, prev - 1) : prev + 1);
+  };
+  return (
+    <Card className="border border-[#25D366]/15 bg-[#25D366]/3 hover:bg-[#25D366]/5 transition-colors">
+      <CardContent className="p-3">
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="w-7 h-7 rounded-full bg-[#25D366]/15 flex items-center justify-center shrink-0">
+            <WhatsAppIcon size={12} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-foreground truncate">
+              {review.author_name || "לקוח אנונימי"}
+            </p>
+            <p className="text-[10px] text-muted-foreground/60">
+              {new Date(review.received_at).toLocaleDateString("he-IL")}
+            </p>
+          </div>
+        </div>
+        {review.rating != null && <StarRow rating={review.rating} />}
+        <p className="text-xs text-foreground/80 leading-relaxed mt-1.5 line-clamp-4">
+          {review.text}
+        </p>
+        <button
+          onClick={toggle}
+          className={`mt-2 flex items-center gap-1 text-[10px] transition-colors ${liked ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+        >
+          <ThumbsUp size={10} className={liked ? "fill-primary" : ""} />
+          {likeCount > 0 ? likeCount : "מועיל"}
+        </button>
+      </CardContent>
+    </Card>
+  );
+};
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -115,30 +156,7 @@ const WhatsAppReviewsSection = ({ reviews }: WhatsAppReviewsSectionProps) => {
       {/* ── Review cards ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {visible.map((review) => (
-          <Card
-            key={review.id}
-            className="border border-[#25D366]/15 bg-[#25D366]/3 hover:bg-[#25D366]/5 transition-colors"
-          >
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-7 h-7 rounded-full bg-[#25D366]/15 flex items-center justify-center shrink-0">
-                  <WhatsAppIcon size={12} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-foreground truncate">
-                    {review.author_name || "לקוח אנונימי"}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/60">
-                    {new Date(review.received_at).toLocaleDateString("he-IL")}
-                  </p>
-                </div>
-              </div>
-              {review.rating != null && <StarRow rating={review.rating} />}
-              <p className="text-xs text-foreground/80 leading-relaxed mt-1.5 line-clamp-4">
-                {review.text}
-              </p>
-            </CardContent>
-          </Card>
+          <WhatsAppReviewCard key={review.id} review={review} />
         ))}
       </div>
 

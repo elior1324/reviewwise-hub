@@ -279,7 +279,7 @@ const ReviewCard = ({
             </p>
           </div>
         )}
-        <CardContent className={`p-4 ${isDisputed ? "blur-[2px] pointer-events-none select-none" : ""}`}>
+        <CardContent className={`p-3 ${isDisputed ? "blur-[2px] pointer-events-none select-none" : ""}`}>
           {/* Tier badge — top left */}
           {reviewTier === "verified" && verified && (
             <div className="absolute top-2 left-2">
@@ -325,7 +325,7 @@ const ReviewCard = ({
             </div>
           )}
 
-          <div className="flex items-center gap-2 mb-2 mt-4">
+          <div className="flex items-center gap-2 mb-2 mt-3">
             <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 font-display font-semibold text-xs text-primary select-none">
               {anonymous ? <User size={12} className="text-primary/60" /> : reviewerName.charAt(0).toUpperCase()}
             </div>
@@ -481,24 +481,8 @@ const ReviewCard = ({
             </Tooltip>
           )}
 
-          {/* Like-to-points info */}
-          {likeCount > 0 && (
-            <div className="mt-2">
-              <Tooltip>
-                <TooltipTrigger>
-                  <span className="text-[10px] text-primary/70 cursor-help border-b border-dashed border-primary/30">
-                    {likeCount} לייק{likeCount !== 1 ? "ים" : ""} = {likeCount} נקודות
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs max-w-[220px]">
-                  <p>כל לייק = +1 נקודה לכותב הביקורת.</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          )}
-
           {ownerResponse && (
-            <div className="mt-3">
+            <div className="mt-2">
               <ReviewResponse text={ownerResponse.text} date={ownerResponse.date} />
               {!helpfulMarked ? (
                 <Button
@@ -518,17 +502,17 @@ const ReviewCard = ({
 
           {/* Open-tier notice */}
           {reviewTier === "open" && (
-            <p className="mt-3 text-[10px] text-muted-foreground/50 leading-snug border-t border-border/30 pt-2">
+            <p className="mt-2 text-[10px] text-muted-foreground/50 leading-snug border-t border-border/30 pt-1.5">
               משוב זה לא עבר אימות רכישה — אינו נספר בחישוב ציון האמון.
             </p>
           )}
 
           {/* Safe Harbor disclaimer */}
-          <p className="mt-2 text-[9px] text-muted-foreground/45 leading-snug">
+          <p className="mt-1 text-[9px] text-muted-foreground/45 leading-snug">
             דעת הכותב בלבד · ReviewHub אינה מאמתת עובדות
           </p>
 
-          <div className="mt-2 flex items-center justify-between">
+          <div className="mt-1.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button
                 aria-label={liked ? "ביטול מועיל" : "מועיל"}
