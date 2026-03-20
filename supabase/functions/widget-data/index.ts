@@ -69,7 +69,8 @@ serve(async (req) => {
 
     if (format === "html") {
       // Return an embeddable HTML widget
-      const profileUrl = `https://reviewhub.co.il/biz/${biz.slug}`;
+      const safeSlug = encodeURIComponent(biz.slug);
+      const profileUrl = `https://reviewhub.co.il/biz/${safeSlug}`;
       const logoUrl = "https://pujsopidbejeuqteormi.supabase.co/storage/v1/object/public/testimonials/reviewhub-logo-widget.png";
       
       const stars = Array.from({ length: 5 }, (_, i) => {
