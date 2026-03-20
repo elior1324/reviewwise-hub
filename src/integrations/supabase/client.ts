@@ -35,9 +35,9 @@ const SUPABASE_PUBLISHABLE_KEY =
     import.meta.env.VITE_SUPABASE_ANON_KEY) as string;
 
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error(
+  console.error(
     "[Security] VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY is missing. " +
-    "Check your .env.local file."
+    "Check your environment variables."
   );
 }
 
