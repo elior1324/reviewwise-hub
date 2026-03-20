@@ -104,7 +104,7 @@ serve(async (req) => {
 .rh-brand{font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:4px}
 </style></head>
 <body>
-<a href="${profileUrl}" target="_blank" rel="noopener" class="rh-widget">
+<a href="${escHtml(profileUrl)}" target="_blank" rel="noopener" class="rh-widget">
   <img src="${logoUrl}" alt="ReviewHub" class="rh-logo" />
   <div class="rh-info">
     <div class="rh-stars">
