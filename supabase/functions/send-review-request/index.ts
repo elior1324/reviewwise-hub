@@ -218,6 +218,21 @@ async function dispatchForPurchase(vp: VerifiedPurchase): Promise<string> {
 
 // ── Main ───────────────────────────────────────────────────────────────────
 Deno.serve(async (req: Request) => {
+  // CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204 });
+  }
+
+  // ── Auth: require CRON_SECRET (fail closed) ─────────────────────────────
+  const CRON_SECRET = Deno.env.get("CRON_SECRET");
+  const authHeader = req.headers.get("Authorization") ?? "";
+  if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const body   = req.method === "POST" ? await req.json().catch(() => ({})) : {};
     const action = (body?.action ?? "batch_7day") as string;
