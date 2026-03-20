@@ -57,25 +57,16 @@ interface AiSignals {
 }
 
 // ── Fetch AI signals from DB for a business slug ──────────────────────────────
+// Note: sentiment_score, quality_score, trending_score, response_rate, ai_flags
+// columns do not yet exist on the businesses table. Return null until they are added.
 
 async function fetchAiSignals(
-  db:   ReturnType<typeof createClient>,
+  _db:  unknown,
   slug: string | undefined,
 ): Promise<AiSignals | null> {
   if (!slug) return null;
-  const { data } = await db
-    .from("businesses")
-    .select("sentiment_score, quality_score, trending_score, response_rate, ai_flags")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (!data) return null;
-  return {
-    sentiment_score: data.sentiment_score ?? null,
-    quality_score:   data.quality_score   ?? null,
-    trending_score:  data.trending_score  ?? null,
-    response_rate:   data.response_rate   ?? null,
-    ai_flags:        Array.isArray(data.ai_flags) ? data.ai_flags : [],
-  };
+  // Columns not yet present in schema — return null gracefully
+  return null;
 }
 
 // ── Format a signal value as a human-readable label ──────────────────────────
