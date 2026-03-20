@@ -138,10 +138,10 @@ const Index = () => {
 
     const fetchReviews = async () => {
       // Fetch recent reviews — 12 rows covers both the marquee (up to 8) and recent cards (3)
+      // Use public_reviews view: masks user_id for anonymous reviews (privacy fix)
       const { data } = await supabase
-        .from("reviews")
+        .from("public_reviews")
         .select("*, courses(name), businesses(name, slug), review_responses(response_text, created_at)")
-        .eq("moderation_status", "approved")
         .order("created_at", { ascending: false })
         .limit(12);
 

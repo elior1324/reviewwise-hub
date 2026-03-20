@@ -168,11 +168,11 @@ const BusinessProfile = () => {
       //   columns: id, review_id, business_id, response_text, created_at
       //   joined via review_id FK (PostgREST: review_responses(response_text, created_at))
       // reviews has business_id directly
+      // Use public_reviews view: masks user_id for anonymous reviews (privacy fix)
       const { data: reviewDataFinal } = await supabase
-        .from("reviews")
+        .from("public_reviews")
         .select("*, is_purchase_verified, review_source, is_flagged_spam, courses(name), review_responses(response_text, created_at)")
         .eq("business_id", bizData.id)
-        .eq("moderation_status", "approved")
         .order("created_at", { ascending: false });
 
       // ── AI Summary metadata ──────────────────────────────────────────────────
