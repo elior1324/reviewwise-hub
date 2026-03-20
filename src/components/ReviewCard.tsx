@@ -1,10 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import StarRating from "./StarRating";
-import VerifiedBadge from "./VerifiedBadge";
 import ReviewResponse from "./ReviewResponse";
 import ReportReviewDialog from "./ReportReviewDialog";
 import ReviewProvenanceBadge, { type ReviewSource } from "./ReviewProvenanceBadge";
-import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2, MessageSquare, AlertTriangle, Eye, HelpCircle } from "lucide-react";
+import { User, Clock, Pencil, ThumbsUp, Zap, Shield, Trash2, X, Check, Loader2, AlertTriangle, Eye, HelpCircle } from "lucide-react";
 import { getTimeSincePurchase } from "@/data/mockData";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -289,12 +288,6 @@ const ReviewCard = ({
                 <p className="font-display font-semibold text-xs text-foreground truncate">
                   {anonymous ? "אנונימי" : reviewerName}
                 </p>
-                {reviewTier === "verified" && verified && <VerifiedBadge showBoost />}
-                {reviewTier === "open" && (
-                  <div className="inline-flex items-center gap-0.5 bg-muted/60 border border-border/50 rounded-full px-1.5 py-0.5 text-[9px] text-muted-foreground font-medium shrink-0">
-                    <MessageSquare size={8} aria-hidden="true" /> קהילה
-                  </div>
-                )}
                 {isExpert && (
                   <Tooltip>
                     <TooltipTrigger>

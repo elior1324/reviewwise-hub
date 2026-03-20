@@ -26,7 +26,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Receipt, Mail, Users, HelpCircle, MessageCircle, Facebook } from "lucide-react";
+import { BadgeCheck, Mail, Users, HelpCircle, MessageCircle, Facebook } from "lucide-react";
 
 export type ReviewSource =
   | "verified_purchase"
@@ -87,9 +87,9 @@ const WhatsAppIcon = () => (
 
 const SOURCE_CONFIG: Record<ReviewSource, SourceConfig> = {
   verified_purchase: {
-    label:      "מאומת — הוכחת רכישה",
-    shortLabel: "הוכחת רכישה",
-    icon:       Receipt,
+    label:      "רכישה מאומתת",
+    shortLabel: "רכישה מאומתת",
+    icon:       BadgeCheck,
     color:      "text-green-700 dark:text-green-400",
     bg:         "bg-green-500/10",
     border:     "border-green-500/30",
