@@ -19,6 +19,7 @@
 
 import { serve }        from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 const FROM_ADDRESS = "ReviewHub <noreply@reviewshub.info>";
 const RESEND_API   = "https://api.resend.com/emails";
@@ -174,8 +175,9 @@ function buildDiscountEndingEmail(opts: {
 }
 
 serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: { "Access-Control-Allow-Origin": "*" } });
+    return new Response("ok", { headers: corsHeaders });
   }
 
   const CRON_SECRET = Deno.env.get("CRON_SECRET");

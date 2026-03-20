@@ -90,6 +90,8 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // ── CORS headers ──────────────────────────────────────────────────────────────
+// auth-email-hook is invoked by Supabase Auth infrastructure (server-to-server),
+// not from a browser. "*" is intentional here — no user credentials are sent.
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
