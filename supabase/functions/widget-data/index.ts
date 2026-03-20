@@ -10,6 +10,16 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
+/** HTML-escape a string to prevent attribute injection / XSS */
+function escHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -59,7 +69,8 @@ serve(async (req) => {
 
     if (format === "html") {
       // Return an embeddable HTML widget
-      const profileUrl = `https://reviewhub.co.il/biz/${biz.slug}`;
+      const safeSlug = encodeURIComponent(biz.slug);
+      const profileUrl = `https://reviewhub.co.il/biz/${safeSlug}`;
       const logoUrl = "https://pujsopidbejeuqteormi.supabase.co/storage/v1/object/public/testimonials/reviewhub-logo-widget.png";
       
       const stars = Array.from({ length: 5 }, (_, i) => {
@@ -93,7 +104,7 @@ serve(async (req) => {
 .rh-brand{font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:4px}
 </style></head>
 <body>
-<a href="${profileUrl}" target="_blank" rel="noopener" class="rh-widget">
+<a href="${escHtml(profileUrl)}" target="_blank" rel="noopener" class="rh-widget">
   <img src="${logoUrl}" alt="ReviewHub" class="rh-logo" />
   <div class="rh-info">
     <div class="rh-stars">
