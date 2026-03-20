@@ -33,6 +33,7 @@ interface ReviewSummaryProps {
   periodLabel?: string;
   generatedAt?: string;
   modelVersion?: string;
+  topTraits?: string[];
 }
 
 const ReviewSummary = ({
@@ -41,6 +42,7 @@ const ReviewSummary = ({
   periodLabel,
   generatedAt,
   modelVersion = "AI",
+  topTraits = [],
 }: ReviewSummaryProps) => {
   const [expanded, setExpanded] = useState(false);
 
@@ -104,6 +106,29 @@ const ReviewSummary = ({
           </TooltipContent>
         </Tooltip>
       </div>
+
+      {/* Top 3 traits */}
+      {topTraits.length > 0 && (
+        <div className="px-5 pb-2">
+          <p className="text-[10px] text-primary/60 mb-1.5 font-medium">3 תכונות חזקות</p>
+          <div className="flex flex-wrap gap-1.5">
+            {topTraits.map((trait, i) => (
+              <span
+                key={trait}
+                className={`inline-flex items-center gap-1 text-[11px] font-semibold rounded-full px-2.5 py-1 border ${
+                  i === 0
+                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30"
+                    : i === 1
+                    ? "bg-primary/10 text-primary border-primary/30"
+                    : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
+                }`}
+              >
+                {i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"} {trait}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Meta chips row */}
       {metaChips.length > 0 && (

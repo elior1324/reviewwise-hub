@@ -16,7 +16,7 @@ import BusinessTrustStatusBadge, { type BusinessTrustStatus } from "@/components
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, MessageSquare, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star, ArrowUpDown, TrendingUp, TrendingDown, Minus, AlertTriangle, Brain } from "lucide-react";
+import { ShieldCheck, MessageSquare, Copy, CheckCheck, ExternalLink, Handshake, Tag, Link2, Info, BarChart3, CheckCircle2, Clock, Star, ArrowUpDown, TrendingUp, TrendingDown, Minus, AlertTriangle, Brain, PenLine } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { generateReviewSummary, FREELANCER_CATEGORIES, SAAS_CATEGORIES, type Business, type Course, type Review } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +39,7 @@ const BusinessProfile = () => {
   const [collabCoupon, setCollabCoupon] = useState<string | null>(null);
   const [couponRevealed, setCouponRevealed] = useState(false);
   const [collabCopied, setCollabCopied] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
 
   // Google Reviews state
   const [googleProfile, setGoogleProfile]   = useState<GoogleProfileData | null>(null);
@@ -401,6 +402,33 @@ const BusinessProfile = () => {
   const filteredReviews = nativeReviewsToShow;
   const summary = generateReviewSummary(reviews);
 
+  // Compute top 3 positive traits from review texts
+  const topTraits = useMemo(() => {
+    const TRAITS = [
+      { label: "מקצועיות", keywords: ["מקצועי", "מקצועיות", "מומחה", "expert"] },
+      { label: "שירות מעולה", keywords: ["שירות", "עזרה", "תמיכה", "מענה"] },
+      { label: "ידע מעמיק", keywords: ["ידע", "ניסיון", "בקיא", "מיומן"] },
+      { label: "זמינות גבוהה", keywords: ["זמין", "זמינות", "מהיר", "מהירות"] },
+      { label: "יחס אישי", keywords: ["אישי", "יחס", "קשב", "מקשיב"] },
+      { label: "תוצאות מוכחות", keywords: ["תוצאות", "הצלחה", "שיפור", "השפיע"] },
+      { label: "אמינות", keywords: ["אמין", "אמינות", "ישר", "הגון"] },
+      { label: "תמורה למחיר", keywords: ["מחיר", "תמורה", "שווה", "כדאי", "משתלם"] },
+      { label: "תקשורת ברורה", keywords: ["תקשורת", "הסבר", "ברור", "הנחייה"] },
+      { label: "יצירתיות", keywords: ["יצירתי", "חדשני", "פתרון", "רעיון"] },
+      { label: "סבלנות", keywords: ["סבלנות", "סבלני", "הבנה", "הקשבה"] },
+    ];
+    const allText = reviews.map(r => (r.text || "")).join(" ").toLowerCase();
+    const scored = TRAITS
+      .map(t => ({ label: t.label, score: t.keywords.filter(kw => allText.includes(kw)).length }))
+      .filter(t => t.score > 0)
+      .sort((a, b) => b.score - a.score);
+    const top = scored.slice(0, 3).map(t => t.label);
+    // Fallback if not enough matches
+    const defaults = ["מקצועיות", "שירות מעולה", "אמינות"];
+    while (top.length < 3 && reviews.length > 0) top.push(defaults[top.length]);
+    return top;
+  }, [reviews]);
+
   // Track referral click and redirect
   const handleCollabAccess = async () => {
     if (!dbBusinessId || !slug) return;
@@ -604,57 +632,61 @@ const BusinessProfile = () => {
             periodLabel={aiSummaryMeta?.periodLabel ?? "הביקורות הקיימות"}
             generatedAt={aiSummaryMeta?.generatedAt}
             modelVersion="GPT-4o"
+            topTraits={topTraits}
           />
         )}
 
         {/* Testimonial Videos/Images */}
         {dbBusinessId && <TestimonialCarousel businessId={dbBusinessId} />}
 
-        {/* Add Review — compact header + optional collab strip */}
-        <div className="mb-5">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <h2 className="font-semibold text-sm text-foreground">הוסף ביקורת</h2>
-            <span className="text-xs text-muted-foreground">· ביקורת מאומתת נספרת בציון האמון, משוב קהילה מוצג בנפרד</span>
-          </div>
+        {/* Add Review — compact single-line CTA */}
+        <div className="mb-5 flex items-center gap-2 flex-wrap">
+          <Button
+            size="sm"
+            variant={showReviewForm ? "outline" : "default"}
+            className="h-8 text-xs gap-1.5"
+            onClick={() => {
+              if (!user) { navigate("/auth"); return; }
+              setShowReviewForm(prev => !prev);
+            }}
+          >
+            <PenLine size={12} />
+            הוספת ביקורת
+          </Button>
 
-          {/* Compact collab strip */}
           {collabActive && (
-            <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5 text-xs flex-wrap">
-              <Handshake size={12} className="text-primary shrink-0" />
-              <span className="font-medium text-primary">תנאי רכישה מסונכרנים</span>
-              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">מאומת</span>
-              <span className="text-muted-foreground flex-1 min-w-0">רכישה דרך ReviewHub מאפשרת אימות ביקורת עתידי.</span>
+            <span className="flex items-center gap-1 text-[11px] text-primary border border-primary/20 bg-primary/5 px-2 py-1 rounded-lg">
+              <Handshake size={11} className="shrink-0" /> תנאי רכישה מסונכרנים
               {(collabMethod === "coupon" || collabMethod === "both") && !couponRevealed && (
-                <button onClick={() => setCouponRevealed(true)} className="text-primary hover:underline font-medium shrink-0">
-                  הצג קופון
-                </button>
+                <button onClick={() => setCouponRevealed(true)} className="underline mr-1">הצג קופון</button>
               )}
               {(collabMethod === "link" || collabMethod === "both") && (
-                <Button variant="ghost" size="sm" onClick={handleCollabAccess} className="h-6 px-2 text-[11px] gap-1 shrink-0">
-                  <Link2 size={10} /> לרכישה מאומתת
-                </Button>
+                <button onClick={handleCollabAccess} className="underline mr-1 flex items-center gap-0.5"><Link2 size={10} /> לרכישה</button>
               )}
-            </div>
+            </span>
           )}
 
-          {/* Coupon code reveal */}
           {collabActive && (collabMethod === "coupon" || collabMethod === "both") && couponRevealed && collabCoupon && (
-            <div className="mb-2 inline-flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-1.5">
-              <Tag size={13} className="text-primary" />
-              <code className="font-mono font-bold text-primary text-sm tracking-widest">{collabCoupon}</code>
+            <span className="inline-flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-1">
+              <Tag size={12} className="text-primary" />
+              <code className="font-mono font-bold text-primary tracking-widest">{collabCoupon}</code>
               <button onClick={handleCopyCoupon} className="text-muted-foreground hover:text-primary transition-colors" title="העתקת קוד">
-                {collabCopied ? <CheckCheck size={14} className="text-primary" /> : <Copy size={14} />}
+                {collabCopied ? <CheckCheck size={13} className="text-primary" /> : <Copy size={13} />}
               </button>
-            </div>
+            </span>
           )}
-
-          <AddReviewForm
-            businessSlug={business.slug}
-            businessName={business.name}
-            businessId={dbBusinessId || undefined}
-            isVerifiedPurchaser={false}
-          />
         </div>
+
+        {showReviewForm && user && (
+          <div className="mb-5">
+            <AddReviewForm
+              businessSlug={business.slug}
+              businessName={business.name}
+              businessId={dbBusinessId || undefined}
+              isVerifiedPurchaser={false}
+            />
+          </div>
+        )}
 
         {/* ══════════════════════════════════════════════════════════════════
             REVIEW SOURCE BREAKDOWN — dual-purpose: stats + filter
