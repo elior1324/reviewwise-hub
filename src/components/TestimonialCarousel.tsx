@@ -56,65 +56,44 @@ const TestimonialCarousel = ({ businessId }: Props) => {
     return match?.[1] || null;
   };
 
+  const PlayOverlay = () => (
+    <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-md group-hover:bg-black/45 transition-colors">
+      <div className="w-7 h-7 rounded-full bg-primary/90 flex items-center justify-center">
+        <Play size={13} className="text-primary-foreground mr-[-1px]" />
+      </div>
+    </div>
+  );
+
   const renderThumbnail = (item: MediaItem) => {
     if (item.media_type === "link" && item.external_url) {
       const ytId = getYouTubeEmbedId(item.external_url);
       if (ytId) {
         return (
           <div className="relative w-full h-full cursor-pointer group" onClick={() => setActiveVideo(item)}>
-            <img
-              src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`}
-              alt="סרטון לקוח"
-              className="w-full h-full object-cover rounded-lg"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg group-hover:bg-black/40 transition-colors">
-              <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center">
-                <Play size={20} className="text-primary-foreground mr-[-2px]" />
-              </div>
-            </div>
+            <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt="סרטון לקוח" className="w-full h-full object-cover rounded-md" />
+            <PlayOverlay />
           </div>
         );
       }
-      // TikTok or other - show generic play button
       return (
-        <div className="relative w-full h-full cursor-pointer group" onClick={() => setActiveVideo(item)}>
-          <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
-            <Video size={32} className="text-muted-foreground" />
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg group-hover:bg-black/30 transition-colors">
-            <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center">
-              <Play size={20} className="text-primary-foreground mr-[-2px]" />
-            </div>
-          </div>
+        <div className="relative w-full h-full cursor-pointer group bg-muted rounded-md flex items-center justify-center" onClick={() => setActiveVideo(item)}>
+          <Video size={20} className="text-muted-foreground" />
+          <PlayOverlay />
         </div>
       );
     }
 
     if (item.file_type === "image" && item.file_path) {
       return (
-        <img
-          src={getPublicUrl(item.file_path)}
-          alt="תמונת לקוח"
-          className="w-full h-full object-cover rounded-lg cursor-pointer"
-          onClick={() => setActiveVideo(item)}
-        />
+        <img src={getPublicUrl(item.file_path)} alt="תמונת לקוח" className="w-full h-full object-cover rounded-md cursor-pointer" onClick={() => setActiveVideo(item)} />
       );
     }
 
     if (item.file_type === "video" && item.file_path) {
       return (
         <div className="relative w-full h-full cursor-pointer group" onClick={() => setActiveVideo(item)}>
-          <video
-            src={getPublicUrl(item.file_path)}
-            className="w-full h-full object-cover rounded-lg"
-            muted
-            playsInline
-          />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg group-hover:bg-black/40 transition-colors">
-            <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center">
-              <Play size={20} className="text-primary-foreground mr-[-2px]" />
-            </div>
-          </div>
+          <video src={getPublicUrl(item.file_path)} className="w-full h-full object-cover rounded-md" muted playsInline />
+          <PlayOverlay />
         </div>
       );
     }
@@ -176,26 +155,29 @@ const TestimonialCarousel = ({ businessId }: Props) => {
   };
 
   return (
-    <div className="mb-8">
-      <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
-        <Video size={20} className="text-primary" />
-        חוויות לקוחות ({media.length})
-      </h2>
+    <div className="mb-4">
+      <div className="flex items-center gap-1.5 mb-2">
+        <Video size={12} className="text-muted-foreground" />
+        <span className="text-xs font-medium text-muted-foreground">חוויות לקוחות</span>
+      </div>
 
       <Carousel opts={{ align: "start", direction: "rtl" }} className="w-full">
-        <CarouselContent className="-ml-3">
+        <CarouselContent className="-ml-2">
           {media.map((item) => (
-            <CarouselItem key={item.id} className="pl-3 basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <div className="aspect-video overflow-hidden rounded-lg border border-border/50">
+            <CarouselItem key={item.id} className="pl-2 basis-1/3 sm:basis-1/4 md:basis-1/5">
+              <div className="h-20 overflow-hidden rounded-md border border-border/40">
                 {renderThumbnail(item)}
               </div>
+              {item.title && (
+                <p className="text-[10px] text-muted-foreground truncate mt-0.5 px-0.5">{item.title}</p>
+              )}
             </CarouselItem>
           ))}
         </CarouselContent>
-        {media.length > 3 && (
+        {media.length > 4 && (
           <>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
+            <CarouselPrevious className="hidden md:flex h-6 w-6" />
+            <CarouselNext className="hidden md:flex h-6 w-6" />
           </>
         )}
       </Carousel>
