@@ -227,6 +227,13 @@ export type Database = {
             foreignKeyName: "business_responses_review_id_fkey"
             columns: ["review_id"]
             isOneToOne: true
+            referencedRelation: "public_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_responses_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: true
             referencedRelation: "reviews"
             referencedColumns: ["id"]
           },
@@ -616,6 +623,13 @@ export type Database = {
             foreignKeyName: "leads_review_id_fkey"
             columns: ["review_id"]
             isOneToOne: false
+            referencedRelation: "public_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
             referencedRelation: "reviews"
             referencedColumns: ["id"]
           },
@@ -799,6 +813,13 @@ export type Database = {
             foreignKeyName: "review_likes_review_id_fkey"
             columns: ["review_id"]
             isOneToOne: false
+            referencedRelation: "public_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_likes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
             referencedRelation: "reviews"
             referencedColumns: ["id"]
           },
@@ -848,6 +869,13 @@ export type Database = {
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "review_reports_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "public_reviews"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "review_reports_review_id_fkey"
             columns: ["review_id"]
@@ -1065,6 +1093,13 @@ export type Database = {
             foreignKeyName: "rewards_log_review_id_fkey"
             columns: ["review_id"]
             isOneToOne: false
+            referencedRelation: "public_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rewards_log_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
             referencedRelation: "reviews"
             referencedColumns: ["id"]
           },
@@ -1167,7 +1202,88 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_reviews: {
+        Row: {
+          anonymous: boolean | null
+          business_id: string | null
+          course_id: string | null
+          created_at: string | null
+          flag_reason: string | null
+          flagged: boolean | null
+          id: string | null
+          like_count: number | null
+          purchase_id: string | null
+          rating: number | null
+          receipt_url: string | null
+          submission_ip: string | null
+          submission_user_agent: string | null
+          text: string | null
+          updated_at: string | null
+          user_id: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          anonymous?: boolean | null
+          business_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          flag_reason?: string | null
+          flagged?: boolean | null
+          id?: string | null
+          like_count?: number | null
+          purchase_id?: string | null
+          rating?: number | null
+          receipt_url?: string | null
+          submission_ip?: never
+          submission_user_agent?: never
+          text?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          anonymous?: boolean | null
+          business_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          flag_reason?: string | null
+          flagged?: boolean | null
+          id?: string | null
+          like_count?: number | null
+          purchase_id?: string | null
+          rating?: number | null
+          receipt_url?: string | null
+          submission_ip?: never
+          submission_user_agent?: never
+          text?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          verified?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       decrement_review_likes: {
