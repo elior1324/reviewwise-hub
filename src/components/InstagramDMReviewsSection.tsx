@@ -80,8 +80,11 @@ const InstagramDMReviewCard = ({ review }: { review: InstagramDMReview }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const toggle = () => {
-    setLiked(prev => !prev);
-    setLikeCount(prev => liked ? Math.max(0, prev - 1) : prev + 1);
+    setLiked(prev => {
+      const next = !prev;
+      setLikeCount(c => next ? c + 1 : Math.max(0, c - 1));
+      return next;
+    });
   };
   return (
     <Card className="transition-colors" style={{ borderColor: `${IG_PINK}26`, background: `${IG_PINK}08` }}>

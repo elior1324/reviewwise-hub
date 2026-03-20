@@ -293,8 +293,11 @@ const GoogleReviewCard = ({ review }: { review: GoogleReview }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const toggleLike = () => {
-    setLiked(prev => !prev);
-    setLikeCount(prev => liked ? Math.max(0, prev - 1) : prev + 1);
+    setLiked(prev => {
+      const next = !prev;
+      setLikeCount(c => next ? c + 1 : Math.max(0, c - 1));
+      return next;
+    });
   };
   const text = review.text || "";
   const isLong = text.length > 180;

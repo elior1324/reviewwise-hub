@@ -86,7 +86,7 @@ const CoursePage = () => {
       // NOTE: business_responses does NOT exist.
       const { data: reviewData } = await supabase
         .from("reviews")
-        .select("*, business_responses(text, created_at)")
+        .select("*, review_responses(response_text, created_at)")
         .eq("course_id", courseId)
         .eq("moderation_status", "approved")
         .order("created_at", { ascending: false });
@@ -149,9 +149,9 @@ const CoursePage = () => {
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: r.user_id ? (expertCounts[r.user_id] || 0) >= 3 : false,
           userId: r.user_id || undefined,
-          ownerResponse: r.business_responses?.[0] ? {
-            text: r.business_responses[0].text || "",
-            date: new Date(r.business_responses[0].created_at).toLocaleDateString("he-IL"),
+          ownerResponse: r.review_responses?.[0] ? {
+            text: r.review_responses[0].response_text || "",
+            date: new Date(r.review_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
         })));
       }

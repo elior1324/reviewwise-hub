@@ -140,7 +140,7 @@ const Index = () => {
       // Fetch recent reviews — 12 rows covers both the marquee (up to 8) and recent cards (3)
       const { data } = await supabase
         .from("reviews")
-        .select("*, courses(name), businesses(name, slug), business_responses(text, created_at)")
+        .select("*, courses(name), businesses(name, slug), review_responses(response_text, created_at)")
         .eq("moderation_status", "approved")
         .order("created_at", { ascending: false })
         .limit(12);

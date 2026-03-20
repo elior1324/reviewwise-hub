@@ -72,8 +72,11 @@ const FacebookReviewCard = ({ review }: { review: FacebookReview }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const toggle = () => {
-    setLiked(prev => !prev);
-    setLikeCount(prev => liked ? Math.max(0, prev - 1) : prev + 1);
+    setLiked(prev => {
+      const next = !prev;
+      setLikeCount(c => next ? c + 1 : Math.max(0, c - 1));
+      return next;
+    });
   };
   return (
     <Card className="border border-[#1877F2]/15 bg-[#1877F2]/3 hover:bg-[#1877F2]/5 transition-colors">
