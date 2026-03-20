@@ -280,59 +280,46 @@ const ReviewCard = ({
           </div>
         )}
         <CardContent className={`p-3 ${isDisputed ? "blur-[2px] pointer-events-none select-none" : ""}`}>
-          {/* Tier badge — top left */}
-          {reviewTier === "verified" && verified && (
-            <div className="absolute top-2 left-2">
-              <VerifiedBadge showBoost />
-            </div>
-          )}
-          {reviewTier === "open" && (
-            <div className="absolute top-2 left-2">
-              <div className="inline-flex items-center gap-0.5 bg-muted/60 border border-border/50 rounded-full px-1.5 py-0.5 text-[9px] text-muted-foreground font-medium">
-                <MessageSquare size={8} aria-hidden="true" />
-                קהילה
-              </div>
-            </div>
-          )}
-
-          {/* Expert & Early Bird badges — top right */}
-          {(isExpert || isEarlyBird) && (
-            <div className="absolute top-2 right-2 flex items-center gap-1">
-              {isExpert && (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Badge className="bg-accent/15 text-accent border-0 text-[9px] gap-0.5 px-1 py-0">
-                      <Shield size={9} /> מומחה
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="text-xs max-w-[200px]">
-                    משתמש עם 3+ ביקורות מדורגות גבוה בקטגוריה זו. לייקים ממומחה שווים x2!
-                  </TooltipContent>
-                </Tooltip>
-              )}
-              {isEarlyBird && (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Badge className="bg-accent/15 text-accent border-0 text-[9px] gap-0.5 px-1 py-0">
-                      <Zap size={9} /> Early Bird
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="text-xs max-w-[200px]">
-                    אחד מ-5 הביקורות הראשונות על העסק! +5 נקודות בונוס.
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 mb-2 mt-3">
+          <div className="flex items-center gap-2 mb-1.5">
             <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 font-display font-semibold text-xs text-primary select-none">
               {anonymous ? <User size={12} className="text-primary/60" /> : reviewerName.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-display font-semibold text-xs text-foreground truncate">
-                {anonymous ? "אנונימי" : reviewerName}
-              </p>
+              <div className="flex items-center gap-1 min-w-0 flex-wrap">
+                <p className="font-display font-semibold text-xs text-foreground truncate">
+                  {anonymous ? "אנונימי" : reviewerName}
+                </p>
+                {reviewTier === "verified" && verified && <VerifiedBadge showBoost />}
+                {reviewTier === "open" && (
+                  <div className="inline-flex items-center gap-0.5 bg-muted/60 border border-border/50 rounded-full px-1.5 py-0.5 text-[9px] text-muted-foreground font-medium shrink-0">
+                    <MessageSquare size={8} aria-hidden="true" /> קהילה
+                  </div>
+                )}
+                {isExpert && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge className="bg-accent/15 text-accent border-0 text-[9px] gap-0.5 px-1 py-0">
+                        <Shield size={9} /> מומחה
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs max-w-[200px]">
+                      משתמש עם 3+ ביקורות מדורגות גבוה בקטגוריה זו. לייקים ממומחה שווים x2!
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                {isEarlyBird && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge className="bg-accent/15 text-accent border-0 text-[9px] gap-0.5 px-1 py-0">
+                        <Zap size={9} /> Early Bird
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs max-w-[200px]">
+                      אחד מ-5 הביקורות הראשונות על העסק! +5 נקודות בונוס.
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
               <p className="text-[10px] text-muted-foreground">{date}</p>
             </div>
           </div>

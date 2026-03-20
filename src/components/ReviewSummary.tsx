@@ -63,32 +63,48 @@ const ReviewSummary = ({
   ];
 
   return (
-    <div className="rounded-xl border border-primary/20 bg-primary/5 overflow-hidden mb-6">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-5 pt-4 pb-2">
-        <Sparkles size={16} className="text-primary shrink-0" aria-hidden="true" />
-        <span className="font-display font-semibold text-sm text-primary flex-1">
-          סיכום ביקורות AI
-        </span>
-        {/* AI-generated disclosure tooltip */}
+    <div className="rounded-lg border border-primary/20 bg-primary/5 overflow-hidden mb-4">
+      {/* Header row — title + traits + disclosure all in one compact strip */}
+      <div className="flex items-center gap-2 px-4 pt-3 pb-2 flex-wrap">
+        <Sparkles size={13} className="text-primary shrink-0" aria-hidden="true" />
+        <span className="font-semibold text-xs text-primary">סיכום ביקורות AI</span>
+
+        {/* Top 3 traits — inline with header */}
+        {topTraits.map((trait, i) => (
+          <span
+            key={trait}
+            className={`inline-flex items-center gap-0.5 text-[10px] font-semibold rounded-full px-2 py-0.5 border ${
+              i === 0
+                ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30"
+                : i === 1
+                ? "bg-primary/10 text-primary border-primary/30"
+                : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
+            }`}
+          >
+            {i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"} {trait}
+          </span>
+        ))}
+
+        <div className="flex-1" />
+
+        {/* Disclosure */}
         <Tooltip>
           <TooltipTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1 text-[10px] text-primary/60
-                hover:text-primary transition-colors cursor-help"
+              className="flex items-center gap-0.5 text-[10px] text-primary/50 hover:text-primary transition-colors cursor-help shrink-0"
               aria-label="מידע על הסיכום"
             >
-              <Bot size={11} aria-hidden="true" />
+              <Bot size={10} aria-hidden="true" />
               נוצר אוטומטית
-              <HelpCircle size={10} aria-hidden="true" />
+              <HelpCircle size={9} aria-hidden="true" />
             </button>
           </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-[300px] space-y-2 p-3" dir="rtl">
+          <TooltipContent side="top" className="max-w-[280px] space-y-2 p-3" dir="rtl">
             <p className="font-semibold text-xs">למה אני רואה את זה?</p>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              סיכום זה נוצר אוטומטית על ידי מודל שפה ({modelVersion}) שניתח את הביקורות
-              הנוכחיות של העסק. הוא לא נכתב על ידי בן אדם ואינו מייצג את עמדת ReviewHub.
+              סיכום זה נוצר אוטומטית על ידי {modelVersion} שניתח את ביקורות העסק.
+              הוא לא נכתב על ידי בן אדם ואינו מייצג את עמדת ReviewHub.
             </p>
             {metaChips.length > 0 && (
               <div className="space-y-1 pt-1 border-t border-border/30">
@@ -100,61 +116,18 @@ const ReviewSummary = ({
                 ))}
               </div>
             )}
-            <p className="text-[10px] text-muted-foreground/60 leading-snug pt-1 border-t border-border/30">
-              סיכומי AI עשויים להכיל שגיאות. לתמונה המלאה, קראו את הביקורות הבודדות.
-            </p>
           </TooltipContent>
         </Tooltip>
       </div>
 
-      {/* Top 3 traits */}
-      {topTraits.length > 0 && (
-        <div className="px-5 pb-2">
-          <p className="text-[10px] text-primary/60 mb-1.5 font-medium">3 תכונות חזקות</p>
-          <div className="flex flex-wrap gap-1.5">
-            {topTraits.map((trait, i) => (
-              <span
-                key={trait}
-                className={`inline-flex items-center gap-1 text-[11px] font-semibold rounded-full px-2.5 py-1 border ${
-                  i === 0
-                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30"
-                    : i === 1
-                    ? "bg-primary/10 text-primary border-primary/30"
-                    : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
-                }`}
-              >
-                {i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"} {trait}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Meta chips row */}
-      {metaChips.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 px-5 pb-2">
-          {metaChips.map(chip => (
-            <span
-              key={chip.label}
-              className="inline-flex items-center gap-1 text-[10px] text-primary/70
-                bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5"
-            >
-              <span className="text-primary/40">{chip.label}:</span>
-              <span className="font-semibold">{chip.value}</span>
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Summary text — collapsible if long */}
-      <div className="px-5 pb-2">
+      {/* Summary text */}
+      <div className="px-4 pb-3">
         <div
-          className={`prose prose-sm max-w-none text-foreground/80 transition-all
-            ${!expanded && summary.length > 400 ? "max-h-[120px] overflow-hidden relative" : ""}`}
+          className={`prose prose-sm max-w-none text-foreground/80 text-xs leading-relaxed transition-all
+            ${!expanded && summary.length > 400 ? "max-h-[80px] overflow-hidden relative" : ""}`}
         >
           {!expanded && summary.length > 400 && (
-            <div className="absolute bottom-0 left-0 right-0 h-12
-              bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
           )}
           <ReactMarkdown>{summary}</ReactMarkdown>
         </div>
@@ -162,27 +135,11 @@ const ReviewSummary = ({
           <button
             type="button"
             onClick={() => setExpanded(e => !e)}
-            className="flex items-center gap-1 text-xs text-primary/70 hover:text-primary
-              transition-colors mt-2"
+            className="flex items-center gap-1 text-[10px] text-primary/60 hover:text-primary transition-colors mt-1"
           >
-            {expanded ? (
-              <><ChevronUp size={13} /> הצג פחות</>
-            ) : (
-              <><ChevronDown size={13} /> הצג את הסיכום המלא</>
-            )}
+            {expanded ? <><ChevronUp size={11} /> הצג פחות</> : <><ChevronDown size={11} /> הצג עוד</>}
           </button>
         )}
-      </div>
-
-      {/* Footer disclaimer */}
-      <div className="px-5 py-2.5 border-t border-primary/15 bg-primary/3">
-        <p className="text-[10px] text-primary/50 leading-snug flex items-start gap-1.5">
-          <Sparkles size={9} className="shrink-0 mt-0.5" aria-hidden="true" />
-          סיכום זה נוצר אוטומטית על ידי {modelVersion} ומבוסס על
-          {reviewCount > 0 ? ` ${reviewCount} ביקורות` : " הביקורות הקיימות"}
-          {periodLabel ? ` מ${periodLabel}` : ""}.
-          {" "}הוא אינו עורך-דין, יועץ פיננסי, או המלצה רשמית מטעם ReviewHub.
-        </p>
       </div>
     </div>
   );
