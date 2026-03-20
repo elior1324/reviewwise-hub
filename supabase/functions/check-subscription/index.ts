@@ -93,7 +93,7 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred. Please try again later." }), {
       headers: { ...cors, "Content-Type": "application/json" },
       status: 500,
     });
