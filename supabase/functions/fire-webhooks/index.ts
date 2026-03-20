@@ -296,6 +296,17 @@ serve(async (req) => {
           }
 
           if (intg.integration_type === "salesforce" && intg.config?.access_token && intg.config?.instance_url) {
+            // ← SSRF FIX: validate instance_url + allowlist Salesforce domains
+            try {
+              assertSafeUrl(intg.config.instance_url);
+              const sfHost = new URL(intg.config.instance_url).hostname.toLowerCase();
+              if (!sfHost.endsWith(".salesforce.com") && !sfHost.endsWith(".force.com")) {
+                throw new Error("Salesforce instance_url must be a *.salesforce.com or *.force.com domain");
+              }
+            } catch (err) {
+              return { integration: "salesforce", status: "blocked", reason: (err as Error).message };
+            }
+
             // Upsert reviewer as a Salesforce Lead
             const email    = sanitiseString(payload?.reviewer_email || payload?.customer_email);
             const firstname = sanitiseString(payload?.reviewer_name || payload?.customer_name);
