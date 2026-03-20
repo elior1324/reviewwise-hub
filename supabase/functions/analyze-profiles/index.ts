@@ -226,7 +226,7 @@ async function processOneBusiness(
 
   if (updateErr) {
     console.error(`[analyze-profiles] update failed for ${businessId}:`, updateErr.message);
-    return { id: businessId, updated: false, error: updateErr.message };
+    return { id: businessId, updated: false, error: "update failed" };
   }
 
   return { id: businessId, updated: true };

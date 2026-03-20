@@ -109,7 +109,8 @@ serve(async (req) => {
     }
   } catch (e) {
     console.error("api-gateway error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    console.error("api-gateway unhandled error:", e);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
     });
   }

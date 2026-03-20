@@ -212,7 +212,8 @@ ${JSON.stringify(businessStats, null, 2)}
     });
   } catch (e) {
     console.error("generate-monthly-top5 error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    console.error("generate-monthly-top5 unhandled error:", e);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

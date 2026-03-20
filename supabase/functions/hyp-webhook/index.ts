@@ -34,6 +34,7 @@
 
 import { serve }        from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { hmac }         from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 
 // ── hyp response code for success ─────────────────────────────────────────────
 const HYP_SUCCESS_CODE = "000";
@@ -137,13 +138,15 @@ serve(async (req: Request) => {
   const SUPABASE_URL              = Deno.env.get("SUPABASE_URL")!;
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const HYP_TERMINAL              = Deno.env.get("HYP_TERMINAL_NUMBER") ?? "";
+  const HYP_API_KEY               = Deno.env.get("HYP_API_KEY") ?? "";
   const RESEND_API_KEY            = Deno.env.get("RESEND_API_KEY");
   const FRONTEND_URL              = Deno.env.get("FRONTEND_URL") ?? "https://reviewhub.co.il";
 
   let params: URLSearchParams;
+  let rawBody: string;
   try {
-    const body = await req.text();
-    params = new URLSearchParams(body);
+    rawBody = await req.text();
+    params = new URLSearchParams(rawBody);
   } catch {
     return new Response("Invalid body", { status: 400 });
   }
@@ -157,11 +160,36 @@ serve(async (req: Request) => {
   const tier        = params.get("Fild1")  ?? "";
   const userId      = params.get("Fild2")  ?? "";
   const priceId     = params.get("Fild3")  ?? "";
+  const hesh        = params.get("Hesh")   ?? "";
 
   // ── Basic integrity checks ────────────────────────────────────────────────
   if (masof !== HYP_TERMINAL) {
     console.warn(`[hyp-webhook] Terminal mismatch: got ${masof}, expected ${HYP_TERMINAL}`);
     return new Response("Forbidden", { status: 403 });
+  }
+
+  // ── HMAC signature verification ───────────────────────────────────────────
+  // hyp signs the IPN with HMAC-SHA256 over sorted key=value pairs (excluding Hesh itself)
+  // using HYP_API_KEY (PassP) as the secret. This prevents forged payment notifications.
+  if (HYP_API_KEY) {
+    const sortedKeys = [...params.keys()]
+      .filter(k => k !== "Hesh")
+      .sort();
+    const message = sortedKeys.map(k => `${k}=${params.get(k)}`).join("&");
+    const expectedHesh = hmac("sha256", HYP_API_KEY, message, "utf8", "hex") as string;
+    // Constant-time comparison to prevent timing attacks
+    const expectedBytes = new TextEncoder().encode(expectedHesh.toLowerCase());
+    const receivedBytes = new TextEncoder().encode(hesh.toLowerCase());
+    let mismatch = expectedBytes.length !== receivedBytes.length ? 1 : 0;
+    for (let i = 0; i < Math.min(expectedBytes.length, receivedBytes.length); i++) {
+      mismatch |= expectedBytes[i] ^ receivedBytes[i];
+    }
+    if (mismatch !== 0) {
+      console.error(`[hyp-webhook] HMAC verification FAILED — possible forgery attempt`);
+      return new Response("Forbidden", { status: 403 });
+    }
+  } else {
+    console.warn("[hyp-webhook] HYP_API_KEY not set — skipping HMAC verification (insecure)");
   }
 
   if (!userId) {

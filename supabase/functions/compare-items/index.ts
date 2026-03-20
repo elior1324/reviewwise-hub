@@ -264,7 +264,8 @@ ${itemDescriptions}
 
   } catch (e) {
     console.error("[compare-items] error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    console.error("[compare-items] unhandled error:", e);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
