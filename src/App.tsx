@@ -50,7 +50,6 @@ import BusinessAuth from "./pages/business/BusinessAuth";
 import PricingPage from "./pages/business/PricingPage";
 import OAuthCallbackPage from "./pages/business/OAuthCallbackPage";
 import BusinessAboutPage from "./pages/business/BusinessAboutPage";
-import BusinessFaqPage from "./pages/business/BusinessFaqPage";
 
 // Partners / widgets
 import PrestigeBadgesPage from "./pages/partners/PrestigeBadgesPage";
@@ -142,7 +141,6 @@ const App = () => (
             <Route path="/business/signup" element={<BusinessAuth mode="signup" />} />
             <Route path="/business/pricing" element={<PricingPage />} />
             <Route path="/business/about" element={<BusinessAboutPage />} />
-            <Route path="/business/faq" element={<BusinessFaqPage />} />
 
             {/* Business dashboard — requires login */}
             <Route element={<AuthProtectedRoute />}>
