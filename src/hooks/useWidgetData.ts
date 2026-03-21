@@ -66,7 +66,7 @@ export function useWidgetData(slug: string | null | undefined): UseWidgetDataRes
         if (bizRow?.id) {
           const { data: rows } = await supabase
             .from("reviews")
-            .select("id, rating, text, anonymous, course_id, created_at, verified")
+            .select("id, rating, review_text, anonymous, course_id, created_at, verified")
             .eq("business_id", bizRow.id)
             .eq("moderation_status", "approved")
             .order("created_at", { ascending: false })
@@ -90,7 +90,7 @@ export function useWidgetData(slug: string | null | undefined): UseWidgetDataRes
             reviews = (rows as any[]).map(r => ({
               id: r.id,
               rating: Number(r.rating),
-              text: r.text ?? "",
+              text: r.review_text ?? r.text ?? "",
               reviewerName: "משתמש",
               anonymous: r.anonymous ?? false,
               verified: r.verified ?? false,

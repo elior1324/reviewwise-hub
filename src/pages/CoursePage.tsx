@@ -132,7 +132,7 @@ const CoursePage = () => {
           id: r.id,
           reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating || 0,
-          text: r.text || "",
+          text: r.review_text || r.text || "",
           courseName: courseData.name || "",
           courseId: r.course_id || "",
           businessSlug: (courseData.businesses as any)?.slug || "",
