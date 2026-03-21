@@ -201,11 +201,14 @@ const BusinessLanding = () => {
                 <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
                   <ShieldCheck size={16} /> ליוצרים ובעלי עסקים
                 </motion.div>
-                <motion.h1 variants={fadeUp} custom={1} className="text-3xl md:text-5xl font-display font-bold text-foreground leading-tight mb-6">
-                  הניחו לקורסים שלכם לצבור אמון — באופן עצמאי
+                <motion.h1 variants={fadeUp} custom={1} className="text-3xl md:text-5xl font-display font-bold text-foreground leading-tight mb-4">
+                  תפסיק לשכנע.<br />
+                  תן ללקוחות שלך לעשות את זה בשבילך.<br />
+                  <span className="gradient-text glow-text">שיווק שמבוסס על חוויית לקוח אמיתית.</span>
                 </motion.h1>
                 <motion.p variants={fadeUp} custom={2} className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                  ReviewHub מעניקה לקורסים שלכם ציון אמון המחושב מביקורות מאומתות רכישה. לא תקציב פרסום — אמון אמיתי.
+                  רכז את כל הביקורות שלך ממספר מקורות —<br />
+                  ותן ללקוחות להבין למה לבחור בך.
                 </motion.p>
                 <motion.div variants={fadeUp} custom={3} className="flex gap-3 flex-wrap">
                   {user ? (
@@ -217,7 +220,7 @@ const BusinessLanding = () => {
                   ) : (
                     <Link to="/business/signup">
                       <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
-                        צרו חשבון בחינם
+                        צור פרופיל עסקי
                       </Button>
                     </Link>
                   )}
