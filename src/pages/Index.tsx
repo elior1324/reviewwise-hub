@@ -138,10 +138,13 @@ const Index = () => {
 
     const fetchReviews = async () => {
       // Fetch recent reviews — 12 rows covers both the marquee (up to 8) and recent cards (3)
-      // Use public_reviews view: masks user_id for anonymous reviews (privacy fix)
+      // Use reviews table directly for join support (businesses, courses).
+      // The public_reviews view does not support PostgREST joins.
       const { data } = await supabase
-        .from("public_reviews")
+        .from("reviews")
         .select("*, courses(name), businesses(name, slug), review_responses(response_text, created_at)")
+        .eq("moderation_status", "approved")
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(12);
 

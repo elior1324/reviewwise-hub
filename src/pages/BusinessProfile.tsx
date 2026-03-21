@@ -168,11 +168,14 @@ const BusinessProfile = () => {
       //   columns: id, review_id, business_id, response_text, created_at
       //   joined via review_id FK (PostgREST: review_responses(response_text, created_at))
       // reviews has business_id directly
-      // Use public_reviews view: masks user_id for anonymous reviews (privacy fix)
+      // Use reviews table directly for join support (courses, review_responses).
+      // The public_reviews view does not support PostgREST joins.
       const { data: reviewDataFinal } = await supabase
-        .from("public_reviews")
+        .from("reviews")
         .select("*, is_purchase_verified, review_source, is_flagged_spam, courses(name), review_responses(response_text, created_at)")
         .eq("business_id", bizData.id)
+        .eq("moderation_status", "approved")
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       // ── AI Summary metadata ──────────────────────────────────────────────────
@@ -252,7 +255,7 @@ const BusinessProfile = () => {
           reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
           rating: r.rating || 0,
           text: r.review_text || "",              // ✅ review_text (NOT .text)
-          courseName: r.courses?.course_name || "", // ✅ course_name (NOT courses.name)
+          courseName: r.courses?.name || "",
           courseId: r.course_id || "",
           businessSlug: bizData.slug,
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
