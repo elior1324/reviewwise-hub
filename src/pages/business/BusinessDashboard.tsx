@@ -1,5 +1,5 @@
 import ReactMarkdown from "react-markdown";
-import Navbar from "@/components/Navbar";
+import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
 import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
@@ -28,7 +28,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { type Review, type Course } from "@/data/mockData";
 import { useState, useEffect } from "react";
 import { useAuth, SubscriptionTier } from "@/contexts/AuthContext";
-import { useAppMode } from "@/contexts/ModeContext";
 import { useFeatureGating } from "@/hooks/useFeatureGating";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -317,7 +316,6 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
 const BusinessDashboard = () => {
   const navigate = useNavigate();
   const { user, subscriptionTier } = useAuth();
-  const { switchToBusinessMode, switchToUserMode } = useAppMode();
 
   // Demo tier selector
   const [demoTier, setDemoTier] = useState<DemoTier>("pro");
@@ -379,13 +377,6 @@ const BusinessDashboard = () => {
     setUpgradeModalFeature(featureName);
     setUpgradeModalOpen(true);
   };
-
-  // Ensure business mode is active while on the dashboard; restore user mode on leave
-  useEffect(() => {
-    switchToBusinessMode();
-    return () => switchToUserMode();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Fetch real data if user is logged in and owns a business
   useEffect(() => {
@@ -703,7 +694,7 @@ const BusinessDashboard = () => {
   if (loadingData) {
     return (
       <div className="min-h-screen bg-background noise-overlay" dir="rtl">
-        <Navbar />
+        <BusinessNavbar />
         <div className="container py-20 text-center">
           <p className="text-muted-foreground">טוען נתונים...</p>
         </div>
@@ -714,7 +705,7 @@ const BusinessDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
-      <Navbar />
+      <BusinessNavbar />
       <div className="container pt-20 pb-10">
 
         {/* No business registered — prompt to register */}
