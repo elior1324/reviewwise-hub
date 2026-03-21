@@ -36,10 +36,8 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    // Only log in development — swap for Sentry in production if desired
-    if (import.meta.env.DEV) {
-      console.error("[ErrorBoundary] Uncaught render error:", error, info.componentStack);
-    }
+    // Log in all environments so we can diagnose production crashes
+    console.error("[ErrorBoundary] Uncaught render error:", error.message, error.stack, info.componentStack);
   }
 
   handleReset = () => {
