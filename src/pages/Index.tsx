@@ -143,8 +143,6 @@ const Index = () => {
       const { data } = await supabase
         .from("reviews")
         .select("*, courses(name), businesses(name, slug), review_responses(response_text, created_at)")
-        .eq("moderation_status", "approved")
-        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(12);
 
@@ -172,17 +170,11 @@ const Index = () => {
         const AVATAR_COLORS = ["b6e3f4", "c0aede", "d1f4e0", "ffd5dc", "ffdfbf", "e8d5f4"];
         const marqueeMapped = data.slice(0, 8).map((r: any, i: number) => {
           const isAnon    = r.anonymous || false;
-          const isVerified = r.verified || r.is_purchase_verified || false;
-          const isCommunity = r.review_source === "community";
+          const isVerified = r.verified || false;
 
-          const displayName = isAnon
-            ? "אנונימי"
-            : (r.reviewer_name || "משתמש");
+          const displayName = isAnon ? "אנונימי" : "משתמש";
 
-          // Deterministic avatar seed — use reviewer_name or review id for anonymous
-          const avatarSeed  = isAnon
-            ? `anon-${r.id}`
-            : encodeURIComponent(r.reviewer_name || r.id);
+          const avatarSeed = isAnon ? `anon-${r.id}` : r.id;
           const bgColor = AVATAR_COLORS[i % AVATAR_COLORS.length];
           const avatar  = `https://api.dicebear.com/9.x/avataaars/svg?seed=${avatarSeed}&backgroundColor=${bgColor}`;
 
@@ -196,7 +188,7 @@ const Index = () => {
           const handle = businessLabel ? `${sourceBadge} · ${businessLabel}` : sourceBadge;
 
           // Snippet — cap at 180 chars so cards stay compact
-          const reviewText = (r as any).review_text || (r as any).text || "";
+          const reviewText = r.text || "";
           const snippet = reviewText.length > 180
             ? reviewText.slice(0, 177) + "…"
             : reviewText;
@@ -218,8 +210,7 @@ const Index = () => {
     const fetchTotalReviews = async () => {
       const { count } = await supabase
         .from("reviews")
-        .select("*", { count: "exact", head: true })
-        .eq("moderation_status", "approved");
+        .select("*", { count: "exact", head: true });
       if (count !== null) setStats(prev => ({ ...prev, reviews: count }));
     };
 

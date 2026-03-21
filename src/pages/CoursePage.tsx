@@ -88,7 +88,6 @@ const CoursePage = () => {
         .from("reviews")
         .select("*, review_responses(response_text, created_at)")
         .eq("course_id", courseId)
-        .eq("moderation_status", "approved")
         .order("created_at", { ascending: false });
 
       // ── 3. Compute rating/reviewCount/verifiedPurchases from actual data ──────
@@ -96,7 +95,7 @@ const CoursePage = () => {
       const avgRating = totalReviews > 0
         ? (reviewData || []).reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / totalReviews
         : 0;
-      const verifiedCount = (reviewData || []).filter((r: any) => r.is_purchase_verified).length;
+      const verifiedCount = (reviewData || []).filter((r: any) => r.verified).length;
 
       setCourse({
         id: courseData.id,
@@ -132,19 +131,19 @@ const CoursePage = () => {
           id: r.id,
           reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating || 0,
-          text: r.review_text || "",
+          text: r.text || "",
           courseName: courseData.name || "",
           courseId: r.course_id || "",
           businessSlug: (courseData.businesses as any)?.slug || "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.is_purchase_verified || false,
+          verified: r.verified || false,
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at && r.updated_at !== r.created_at
             ? new Date(r.updated_at).toLocaleDateString("he-IL")
             : undefined,
-          flagged: r.is_flagged_spam || false,
-          flagReason: undefined,
+          flagged: r.flagged || false,
+          flagReason: r.flag_reason || undefined,
           likeCount: r.like_count || 0,
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: r.user_id ? (expertCounts[r.user_id] || 0) >= 3 : false,

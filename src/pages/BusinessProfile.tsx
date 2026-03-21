@@ -172,10 +172,8 @@ const BusinessProfile = () => {
       // The public_reviews view does not support PostgREST joins.
       const { data: reviewDataFinal } = await supabase
         .from("reviews")
-        .select("*, is_purchase_verified, review_source, is_flagged_spam, courses(name), review_responses(response_text, created_at)")
+        .select("*, courses(name), review_responses(response_text, created_at)")
         .eq("business_id", bizData.id)
-        .eq("moderation_status", "approved")
-        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       // ── AI Summary metadata ──────────────────────────────────────────────────
@@ -251,41 +249,32 @@ const BusinessProfile = () => {
 
         setReviews(reviewDataFinal.map((r: any) => ({
           id: r.id,
-          // ✅ reviewer_name is stored on reviews table directly (no profiles join needed)
-          reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
+          reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating || 0,
-          text: r.review_text || "",              // ✅ review_text (NOT .text)
+          text: r.text || "",
           courseName: r.courses?.name || "",
           courseId: r.course_id || "",
           businessSlug: bizData.slug,
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          // is_purchase_verified is the canonical flag (set by the purchase-proof trigger).
-          // Fall back to verified_purchase for backwards-compatibility.
-          verified: r.is_purchase_verified || r.verified_purchase || false,
+          verified: r.verified || false,
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at && r.updated_at !== r.created_at
             ? new Date(r.updated_at).toLocaleDateString("he-IL")
             : undefined,
-          flagged: false,                          // flagged doesn't exist in reviews table
-          flagReason: undefined,                   // flag_reason doesn't exist in reviews table
-          likeCount: 0,                            // like_count doesn't exist in reviews table
+          flagged: r.flagged || false,
+          flagReason: r.flag_reason || undefined,
+          likeCount: r.like_count || 0,
           isEarlyBird: earlyBirdIds.has(r.id),
           isExpert: r.user_id ? (expertCounts[r.user_id] || 0) >= 3 : false,
           userId: r.user_id || undefined,
-          // ✅ review_responses (NOT business_responses), response_text (NOT .text)
           ownerResponse: r.review_responses?.[0] ? {
             text: r.review_responses[0].response_text || "",
             date: new Date(r.review_responses[0].created_at).toLocaleDateString("he-IL"),
           } : undefined,
-          // ── Trust platform fields ─────────────────────────────────────────
-          reviewSource: r.review_source ?? (
-            r.is_purchase_verified || r.verified_purchase
-              ? "verified_purchase"
-              : "community"
-          ),
-          isSpamFlagged: r.is_flagged_spam ?? false,
-          activeCaseStatus: null, // fetched separately if needed
+          reviewSource: r.verified ? "verified_purchase" : "community",
+          isSpamFlagged: r.flagged ?? false,
+          activeCaseStatus: null,
         })));
       } else {
         const mappedBiz: Business = {

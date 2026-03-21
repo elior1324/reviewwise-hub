@@ -186,7 +186,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
     }
     const { data } = await supabase
       .from("purchase_verifications")
-      .select("*, reviews(review_text, reviewer_name)")
+      .select("*, reviews(text)")
       .eq("business_id", businessId)
       .order("submitted_at", { ascending: false })
       .limit(30);
@@ -269,8 +269,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
                 /* Desktop: 4-col grid  |  Mobile: stacked card */
                 <div key={row.id} className="sm:grid sm:grid-cols-[1fr_auto_auto_auto] gap-3 items-center py-2.5 border-b border-border/20 last:border-0 px-2 flex flex-col sm:flex-none">
                   <div className="min-w-0 w-full sm:w-auto">
-                    <p className="text-sm truncate">{row.reviews?.review_text || "—"}</p>
-                    <p className="text-xs text-muted-foreground">{row.reviews?.reviewer_name || "—"}</p>
+                    <p className="text-sm truncate">{row.reviews?.text || "—"}</p>
                     {row.rejection_reason && (
                       <p className="text-[10px] text-destructive/70 mt-0.5">{row.rejection_reason}</p>
                     )}
@@ -444,7 +443,7 @@ const BusinessDashboard = () => {
           id: r.id,
           reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating,
-          text: r.review_text || r.text || "",
+          text: r.text || "",
           courseName: r.courses?.name || "",
           courseId: r.course_id,
           businessSlug: biz.slug,
@@ -577,21 +576,16 @@ const BusinessDashboard = () => {
       // Fetch compliance reviews (flagged / under_review / removed)
       const { data: compReviewData } = await supabase
         .from("reviews")
-        .select("id, review_text, rating, status, ai_decision, ai_reason, created_at, courses(name)")
+        .select("id, text, rating, flagged, flag_reason, created_at, courses(name)")
         .eq("business_id", biz.id)
-        .in("status", ["flagged", "under_review", "removed", "pending"])
+        .eq("flagged", true)
         .order("created_at", { ascending: false })
         .limit(50);
       if (compReviewData) setComplianceReviews(compReviewData);
 
       // Fetch open reports against this business
-      const { data: reportsData } = await supabase
-        .from("reports")
-        .select("id, reason, moderation_status, ai_decision, ai_reason, created_at, review_id")
-        .eq("business_id", biz.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      if (reportsData) setOpenReports(reportsData);
+      // review_reports has no business_id — skip for now
+      setOpenReports([]);
 
       setLoadingData(false);
     };
@@ -1764,9 +1758,9 @@ const BusinessDashboard = () => {
                           key={r.id}
                           text={r.text}
                           course={r.courses?.name || ""}
-                          status={r.status}
-                          reason={r.ai_reason}
-                          aiDecision={r.ai_decision}
+                          status={r.flagged ? "flagged" : "pending"}
+                          reason={r.flag_reason}
+                          aiDecision={null}
                           date={r.created_at ? new Date(r.created_at).toLocaleDateString("he-IL") : undefined}
                         />
                       ))}
@@ -1803,9 +1797,9 @@ const BusinessDashboard = () => {
                         <ReportRow
                           key={rp.id}
                           reason={rp.reason}
-                          status={rp.moderation_status}
-                          aiDecision={rp.ai_decision}
-                          aiReason={rp.ai_reason}
+                          status={rp.status}
+                          aiDecision={null}
+                          aiReason={null}
                           date={rp.created_at ? new Date(rp.created_at).toLocaleDateString("he-IL") : undefined}
                         />
                       ))}
