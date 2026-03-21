@@ -303,10 +303,10 @@ const BusinessLanding = () => {
       <section className="container py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { value: "850+", label: "ישויות דיגיטליות מאומתות" },
-            { value: "12,400+", label: "ביקורות מאומתות" },
-            { value: "100%", label: "ביקורות מאומתות רכישה" },
-            { value: "פתוחה", label: "מתודולוגיית חישוב" },
+            { value: "01", label: "שלח קישור ללקוחות שלך" },
+            { value: "02", label: "הם כותבים ביקורת בקלות" },
+            { value: "03", label: "כל הביקורות מתרכזות במקום אחד" },
+            { value: "04", label: "לקוחות חדשים רואים ובוחרים בך" },
           ].map(({ value, label }, i) => (
             <motion.div key={label} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
               <p className="font-display font-bold text-3xl md:text-4xl text-foreground"><AnimatedCounter value={value} /></p>
@@ -581,7 +581,7 @@ const BusinessLanding = () => {
               <div className="flex gap-3 justify-center flex-wrap">
                 <Link to="/business/signup">
                   <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary gap-2">
-                    צרו חשבון בחינם <ArrowLeft size={16} />
+                    התחל לאסוף ביקורות <ArrowLeft size={16} />
                   </Button>
                 </Link>
                 <Link to="/business/login">
