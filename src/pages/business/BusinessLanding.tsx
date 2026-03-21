@@ -243,9 +243,9 @@ const BusinessLanding = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { label: "ציון אמון", value: "87/100" },
+                      { label: "דירוג ממוצע", value: "4.8 ⭐" },
                       { label: "ביקורות מאומתות", value: "23" },
-                      { label: "יחס החזרים", value: "2.1%" },
+                      { label: "סה״כ ביקורות", value: "31" },
                       { label: "תקופת פעילות", value: "14 חו׳" },
                     ].map(({ label, value }) => (
                       <div key={label} className="rounded-lg bg-secondary p-3">
