@@ -8,13 +8,14 @@ import DevControlPanel from "@/components/DevControlPanel";
 import UpgradeModal from "@/components/UpgradeModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
   Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2, Link2, Handshake,
-  ExternalLink, Tag, BarChart2, Shield, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Briefcase
+  ExternalLink, Tag, BarChart2, Shield, ShieldCheck, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Briefcase
 } from "lucide-react";
 import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
 import ModerationCaseTracker from "@/components/ModerationCaseTracker";
@@ -958,19 +959,19 @@ const BusinessDashboard = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {/* ── 4-Module Tab Navigation ──────────────────────────────────────────── */}
-          <div className="rounded-xl border border-border/40 bg-card/50 p-3 space-y-3">
+          {/* ── Tab Navigation — single TabsList required by Radix UI ─────────────── */}
+          <TabsList className="rounded-xl border border-border/40 bg-card/50 p-3 h-auto flex-col items-stretch gap-3 w-full">
 
-            {/* Module 1: Analytics (merged overview + clicks) */}
+            {/* Module 1: Analytics */}
             <div>
               <p className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
                 <BarChart3 size={10} /> אנליטיקס
               </p>
-              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1">
                 <TabsTrigger value="analytics" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <BarChart3 size={13} className="ml-1" /> אנליטיקס
                 </TabsTrigger>
-              </TabsList>
+              </div>
             </div>
 
             {/* Module 2: AI Insights & Reports */}
@@ -979,12 +980,12 @@ const BusinessDashboard = () => {
                 <Brain size={10} className="text-primary" />
                 <span className="text-primary/80">תובנות AI ודוחות</span>
               </p>
-              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1">
                 <TabsTrigger value="ai-insights" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Brain size={13} className="ml-1" /> תובנות AI ודוחות
                   {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
-              </TabsList>
+              </div>
             </div>
 
             {/* Module 3: Trust Center */}
@@ -993,7 +994,7 @@ const BusinessDashboard = () => {
                 <Shield size={10} className="text-amber-500" />
                 <span className="text-amber-600/80 dark:text-amber-400/80">מרכז האמון</span>
               </p>
-              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1">
                 <TabsTrigger value="trust-compliance" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Shield size={13} className="ml-1" /> ציות ומודרציה
                   {!isDemo && complianceReviews.filter(r => r.status === "flagged" || r.status === "under_review").length > 0 && (
@@ -1038,7 +1039,7 @@ const BusinessDashboard = () => {
                   <Video size={13} className="ml-1" /> הוכחה חברתית
                   {isFree && <ProBadge />}
                 </TabsTrigger>
-              </TabsList>
+              </div>
             </div>
 
             {/* Module 4: Monetization */}
@@ -1047,11 +1048,11 @@ const BusinessDashboard = () => {
                 <TrendingUp size={10} className="text-emerald-500" />
                 <span className="text-emerald-600/80">מונטיזציה</span>
               </p>
-              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1">
                 <TabsTrigger value="affiliate-program" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-emerald-600 data-[state=active]:text-white gap-1">
                   <TrendingUp size={13} className="ml-1" /> תוכנית שותפים
                 </TabsTrigger>
-              </TabsList>
+              </div>
             </div>
 
             {/* Module 5: Integrations */}
@@ -1060,15 +1061,15 @@ const BusinessDashboard = () => {
                 <Link2 size={10} className="text-accent" />
                 <span className="text-accent/80">אינטגרציות</span>
               </p>
-              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1">
                 <TabsTrigger value="integrations-hub" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
                   <Link2 size={13} className="ml-1" /> מרכז אינטגרציות
                   {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
-              </TabsList>
+              </div>
             </div>
 
-          </div>
+          </TabsList>
 
           {/* Analytics — merged overview + clicks */}
           <TabsContent value="analytics">

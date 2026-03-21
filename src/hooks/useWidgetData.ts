@@ -90,7 +90,7 @@ export function useWidgetData(slug: string | null | undefined): UseWidgetDataRes
             reviews = (rows as any[]).map(r => ({
               id: r.id,
               rating: Number(r.rating),
-              text: r.review_text ?? r.text ?? "",
+              text: r.review_text ?? "",
               reviewerName: "משתמש",
               anonymous: r.anonymous ?? false,
               verified: r.verified ?? false,
