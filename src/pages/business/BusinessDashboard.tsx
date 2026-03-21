@@ -1,5 +1,5 @@
 import ReactMarkdown from "react-markdown";
-import Navbar from "@/components/Navbar";
+import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
 import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
@@ -8,14 +8,13 @@ import DevControlPanel from "@/components/DevControlPanel";
 import UpgradeModal from "@/components/UpgradeModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
   Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2, Link2, Handshake,
-  ExternalLink, Tag, BarChart2, Shield, ShieldCheck, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Briefcase
+  ExternalLink, Tag, BarChart2, Shield, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Briefcase
 } from "lucide-react";
 import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
 import ModerationCaseTracker from "@/components/ModerationCaseTracker";
@@ -28,7 +27,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { type Review, type Course } from "@/data/mockData";
 import { useState, useEffect } from "react";
 import { useAuth, SubscriptionTier } from "@/contexts/AuthContext";
-import { useAppMode } from "@/contexts/ModeContext";
 import { useFeatureGating } from "@/hooks/useFeatureGating";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -187,7 +185,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
     }
     const { data } = await supabase
       .from("purchase_verifications")
-      .select("*, reviews(text)")
+      .select("*, reviews(review_text, reviewer_name)")
       .eq("business_id", businessId)
       .order("submitted_at", { ascending: false })
       .limit(30);
@@ -270,7 +268,8 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
                 /* Desktop: 4-col grid  |  Mobile: stacked card */
                 <div key={row.id} className="sm:grid sm:grid-cols-[1fr_auto_auto_auto] gap-3 items-center py-2.5 border-b border-border/20 last:border-0 px-2 flex flex-col sm:flex-none">
                   <div className="min-w-0 w-full sm:w-auto">
-                    <p className="text-sm truncate">{row.reviews?.text || "—"}</p>
+                    <p className="text-sm truncate">{row.reviews?.review_text || "—"}</p>
+                    <p className="text-xs text-muted-foreground">{row.reviews?.reviewer_name || "—"}</p>
                     {row.rejection_reason && (
                       <p className="text-[10px] text-destructive/70 mt-0.5">{row.rejection_reason}</p>
                     )}
@@ -317,7 +316,6 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
 const BusinessDashboard = () => {
   const navigate = useNavigate();
   const { user, subscriptionTier } = useAuth();
-  const { switchToBusinessMode, switchToUserMode } = useAppMode();
 
   // Demo tier selector
   const [demoTier, setDemoTier] = useState<DemoTier>("pro");
@@ -379,13 +377,6 @@ const BusinessDashboard = () => {
     setUpgradeModalFeature(featureName);
     setUpgradeModalOpen(true);
   };
-
-  // Ensure business mode is active while on the dashboard; restore user mode on leave
-  useEffect(() => {
-    switchToBusinessMode();
-    return () => switchToUserMode();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Fetch real data if user is logged in and owns a business
   useEffect(() => {
@@ -452,7 +443,7 @@ const BusinessDashboard = () => {
           id: r.id,
           reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating,
-          text: r.text || "",
+          text: r.text,
           courseName: r.courses?.name || "",
           courseId: r.course_id,
           businessSlug: biz.slug,
@@ -585,16 +576,21 @@ const BusinessDashboard = () => {
       // Fetch compliance reviews (flagged / under_review / removed)
       const { data: compReviewData } = await supabase
         .from("reviews")
-        .select("id, text, rating, flagged, flag_reason, created_at, courses(name)")
+        .select("id, text, rating, status, ai_decision, ai_reason, created_at, courses(name)")
         .eq("business_id", biz.id)
-        .eq("flagged", true)
+        .in("status", ["flagged", "under_review", "removed", "pending"])
         .order("created_at", { ascending: false })
         .limit(50);
       if (compReviewData) setComplianceReviews(compReviewData);
 
       // Fetch open reports against this business
-      // review_reports has no business_id — skip for now
-      setOpenReports([]);
+      const { data: reportsData } = await supabase
+        .from("reports")
+        .select("id, reason, moderation_status, ai_decision, ai_reason, created_at, review_id")
+        .eq("business_id", biz.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (reportsData) setOpenReports(reportsData);
 
       setLoadingData(false);
     };
@@ -700,10 +696,10 @@ const BusinessDashboard = () => {
     </span>
   );
 
-  if (loadingData) {
+  if (loadingData && user) {
     return (
       <div className="min-h-screen bg-background noise-overlay" dir="rtl">
-        <Navbar />
+        <BusinessNavbar />
         <div className="container py-20 text-center">
           <p className="text-muted-foreground">טוען נתונים...</p>
         </div>
@@ -714,7 +710,7 @@ const BusinessDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
-      <Navbar />
+      <BusinessNavbar />
       <div className="container pt-20 pb-10">
 
         {/* No business registered — prompt to register */}
@@ -962,19 +958,19 @@ const BusinessDashboard = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {/* ── Tab Navigation — single TabsList required by Radix UI ─────────────── */}
-          <TabsList className="rounded-xl border border-border/40 bg-card/50 p-3 h-auto flex-col items-stretch gap-3 w-full">
+          {/* ── 4-Module Tab Navigation ──────────────────────────────────────────── */}
+          <div className="rounded-xl border border-border/40 bg-card/50 p-3 space-y-3">
 
-            {/* Module 1: Analytics */}
+            {/* Module 1: Analytics (merged overview + clicks) */}
             <div>
               <p className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider px-1 mb-1.5 flex items-center gap-1.5">
                 <BarChart3 size={10} /> אנליטיקס
               </p>
-              <div className="flex flex-wrap gap-1">
+              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
                 <TabsTrigger value="analytics" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <BarChart3 size={13} className="ml-1" /> אנליטיקס
                 </TabsTrigger>
-              </div>
+              </TabsList>
             </div>
 
             {/* Module 2: AI Insights & Reports */}
@@ -983,12 +979,12 @@ const BusinessDashboard = () => {
                 <Brain size={10} className="text-primary" />
                 <span className="text-primary/80">תובנות AI ודוחות</span>
               </p>
-              <div className="flex flex-wrap gap-1">
+              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
                 <TabsTrigger value="ai-insights" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Brain size={13} className="ml-1" /> תובנות AI ודוחות
                   {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
-              </div>
+              </TabsList>
             </div>
 
             {/* Module 3: Trust Center */}
@@ -997,7 +993,7 @@ const BusinessDashboard = () => {
                 <Shield size={10} className="text-amber-500" />
                 <span className="text-amber-600/80 dark:text-amber-400/80">מרכז האמון</span>
               </p>
-              <div className="flex flex-wrap gap-1">
+              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
                 <TabsTrigger value="trust-compliance" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Shield size={13} className="ml-1" /> ציות ומודרציה
                   {!isDemo && complianceReviews.filter(r => r.status === "flagged" || r.status === "under_review").length > 0 && (
@@ -1042,7 +1038,7 @@ const BusinessDashboard = () => {
                   <Video size={13} className="ml-1" /> הוכחה חברתית
                   {isFree && <ProBadge />}
                 </TabsTrigger>
-              </div>
+              </TabsList>
             </div>
 
             {/* Module 4: Monetization */}
@@ -1051,11 +1047,11 @@ const BusinessDashboard = () => {
                 <TrendingUp size={10} className="text-emerald-500" />
                 <span className="text-emerald-600/80">מונטיזציה</span>
               </p>
-              <div className="flex flex-wrap gap-1">
+              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
                 <TabsTrigger value="affiliate-program" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-emerald-600 data-[state=active]:text-white gap-1">
                   <TrendingUp size={13} className="ml-1" /> תוכנית שותפים
                 </TabsTrigger>
-              </div>
+              </TabsList>
             </div>
 
             {/* Module 5: Integrations */}
@@ -1064,15 +1060,15 @@ const BusinessDashboard = () => {
                 <Link2 size={10} className="text-accent" />
                 <span className="text-accent/80">אינטגרציות</span>
               </p>
-              <div className="flex flex-wrap gap-1">
+              <TabsList className="bg-transparent p-0 h-auto flex flex-wrap gap-1">
                 <TabsTrigger value="integrations-hub" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
                   <Link2 size={13} className="ml-1" /> מרכז אינטגרציות
                   {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
-              </div>
+              </TabsList>
             </div>
 
-          </TabsList>
+          </div>
 
           {/* Analytics — merged overview + clicks */}
           <TabsContent value="analytics">
@@ -1767,9 +1763,9 @@ const BusinessDashboard = () => {
                           key={r.id}
                           text={r.text}
                           course={r.courses?.name || ""}
-                          status={r.flagged ? "flagged" : "pending"}
-                          reason={r.flag_reason}
-                          aiDecision={null}
+                          status={r.status}
+                          reason={r.ai_reason}
+                          aiDecision={r.ai_decision}
                           date={r.created_at ? new Date(r.created_at).toLocaleDateString("he-IL") : undefined}
                         />
                       ))}
@@ -1806,9 +1802,9 @@ const BusinessDashboard = () => {
                         <ReportRow
                           key={rp.id}
                           reason={rp.reason}
-                          status={rp.status}
-                          aiDecision={null}
-                          aiReason={null}
+                          status={rp.moderation_status}
+                          aiDecision={rp.ai_decision}
+                          aiReason={rp.ai_reason}
                           date={rp.created_at ? new Date(rp.created_at).toLocaleDateString("he-IL") : undefined}
                         />
                       ))}

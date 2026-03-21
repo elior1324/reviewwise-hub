@@ -78,10 +78,10 @@ interface Review {
   id: string;
   business_id: string;
   rating: number;
-  text: string;
+  review_text: string;
   status: string;
   created_at: string;
-  verified: boolean;
+  is_purchase_verified: boolean;
   businesses?: { name: string; slug: string };
 }
 
@@ -601,7 +601,7 @@ const ActivitySection = ({ userId }: { userId: string }) => {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <Badge variant={getReviewStatusColor(review.status)}>{getReviewStatusLabel(review.status)}</Badge>
-                    {review.verified && (
+                    {review.is_purchase_verified && (
                       <Badge variant="secondary" className="gap-1">
                         <CheckCircle2 className="w-3 h-3" />
                         אומת
@@ -614,8 +614,8 @@ const ActivitySection = ({ userId }: { userId: string }) => {
                     <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground/30"}`} />
                   ))}
                 </div>
-                {review.text && (
-                  <p className="text-sm text-foreground/80 line-clamp-2">{review.text}</p>
+                {review.review_text && (
+                  <p className="text-sm text-foreground/80 line-clamp-2">{review.review_text}</p>
                 )}
               </div>
             ))}

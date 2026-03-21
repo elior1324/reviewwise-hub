@@ -88,6 +88,7 @@ const CoursePage = () => {
         .from("reviews")
         .select("*, review_responses(response_text, created_at)")
         .eq("course_id", courseId)
+        .eq("moderation_status", "approved")
         .order("created_at", { ascending: false });
 
       // ── 3. Compute rating/reviewCount/verifiedPurchases from actual data ──────

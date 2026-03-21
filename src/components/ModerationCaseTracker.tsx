@@ -50,7 +50,8 @@ interface ModerationCase {
   proof_deadline: string | null;
   created_at: string;
   reviews?: {
-    text: string;
+    review_text: string;
+    reviewer_name: string;
   } | null;
 }
 
@@ -180,12 +181,13 @@ const CaseRow = ({ c }: { c: ModerationCase }) => {
             </span>
           </div>
           <p className="text-xs text-foreground/80 mt-1 truncate">
-            {c.reviews?.text
-              ? `"${c.reviews.text.slice(0, 80)}${c.reviews.text.length > 80 ? "…" : ""}"`
+            {c.reviews?.review_text
+              ? `"${c.reviews.review_text.slice(0, 80)}${c.reviews.review_text.length > 80 ? "…" : ""}"`
               : `תיק #${c.id.slice(0, 8)}`}
           </p>
           <p className="text-[10px] text-muted-foreground mt-0.5">
             נפתח: {new Date(c.created_at).toLocaleDateString("he-IL")}
+            {c.reviews?.reviewer_name && ` · כותב: ${c.reviews.reviewer_name}`}
           </p>
         </div>
         {expanded ? (
@@ -274,7 +276,7 @@ const ModerationCaseTracker = ({ businessId, isDemo = false }: ModerationCaseTra
       setLoading(true);
       const { data } = await supabase
         .from("moderation_cases")
-        .select("*, reviews(text)")
+        .select("*, reviews(review_text, reviewer_name)")
         .eq("business_id", businessId)
         .order("created_at", { ascending: false })
         .limit(50);

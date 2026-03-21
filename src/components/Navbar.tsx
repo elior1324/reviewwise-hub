@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
   ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen, Briefcase,
-  UserCircle, ArrowLeftRight, Gift, Settings, Layout,
+  UserCircle, ArrowLeftRight, Gift, Settings,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
@@ -212,13 +212,13 @@ const Navbar = () => {
                 <LayoutDashboard size={14} aria-hidden="true" />
                 לוח הבקרה
               </Link>
-              <Link to="/partners/prestige-badges?tab=widgets" className={navLinkCls("/partners/prestige-badges", true)}>
-                <Layout size={14} aria-hidden="true" />
-                וידג׳טים
-              </Link>
               <Link to="/business/pricing" className={navLinkCls("/business/pricing", true)}>
                 <Tag size={14} aria-hidden="true" />
                 תמחור
+              </Link>
+              <Link to="/business/solutions/reviews" className={navLinkCls("/business/solutions/reviews", true)}>
+                <ShieldCheck size={14} aria-hidden="true" />
+                אימות ביקורות
               </Link>
             </>
           ) : (
@@ -401,20 +401,20 @@ const Navbar = () => {
                 לוח הבקרה
               </Link>
               <Link
-                to="/partners/prestige-badges?tab=widgets"
-                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
-                onClick={() => setMobileOpen(false)}
-              >
-                <Layout size={14} aria-hidden="true" />
-                וידג׳טים
-              </Link>
-              <Link
                 to="/business/pricing"
                 className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
                 onClick={() => setMobileOpen(false)}
               >
                 <Tag size={14} aria-hidden="true" />
                 תמחור
+              </Link>
+              <Link
+                to="/business/solutions/reviews"
+                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
+                onClick={() => setMobileOpen(false)}
+              >
+                <ShieldCheck size={14} aria-hidden="true" />
+                אימות ביקורות
               </Link>
               <div className="border-t border-zinc-700/60 pt-1">
                 <button
