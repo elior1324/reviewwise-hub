@@ -1,15 +1,19 @@
 /**
  * TransparencyScore
  *
- * Displays a business's trust transparency score out of 10 with a visual
- * progress bar and a breakdown of the three contributing factors:
+ * Displays a business's transparency score out of 10 with a visual
+ * progress bar and a breakdown of three contributing factors:
  *
- *   • Verified review ratio  (40 % weight)
- *   • Owner response rate    (30 % weight)
- *   • Responsiveness         (30 % weight — based on avg_response_hours)
+ *   • Verified review ratio  — verification depth
+ *   • Owner response rate    — engagement signal
+ *   • Responsiveness         — based on avg_response_hours
+ *
+ * This is the TRUST LAYER — separate from the star rating.
+ * It does not affect the star rating and is not a weighted scoring formula
+ * visible to users. The sub-scores are shown as raw metrics, not as weights.
  *
  * The composite score is read from `businesses.transparency_score` (0-100,
- * stored by the DB migration).  The individual sub-scores are derived from
+ * stored by the DB migration). The individual sub-scores are derived from
  * `verified_review_ratio`, `response_rate`, and `avg_response_hours` so that
  * each pillar can be shown independently.
  *

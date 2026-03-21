@@ -471,7 +471,7 @@ const AboutPage = () => {
         </motion.div>
       </section>
 
-      {/* ── Ecosystem: Trust Score · Points · Benefits — one system ─────────── */}
+      {/* ── Ecosystem: Trust layer · Points · Benefits — one system ─────────── */}
       <section className="border-y border-border/50">
         <div className="container py-20">
           <motion.div
