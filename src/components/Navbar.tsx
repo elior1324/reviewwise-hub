@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   Menu, X, LogOut, User, Scale, Trophy,
   ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen, Briefcase,
-  UserCircle, ArrowLeftRight, Gift, Settings, Layout,
+  UserCircle, ArrowLeftRight, Gift, Settings, Layout, HelpCircle,
 } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import { useState, useEffect } from "react";
@@ -220,6 +220,14 @@ const Navbar = () => {
                 <Tag size={14} aria-hidden="true" />
                 תמחור
               </Link>
+              <Link to="/business/about" className={navLinkCls("/business/about", true)}>
+                <BookOpen size={14} aria-hidden="true" />
+                אודות
+              </Link>
+              <Link to="/business/faq" className={navLinkCls("/business/faq", true)}>
+                <HelpCircle size={14} aria-hidden="true" />
+                שאלות נפוצות
+              </Link>
             </>
           ) : (
             /* ── Consumer mode nav ── */
@@ -415,6 +423,22 @@ const Navbar = () => {
               >
                 <Tag size={14} aria-hidden="true" />
                 תמחור
+              </Link>
+              <Link
+                to="/business/about"
+                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
+                onClick={() => setMobileOpen(false)}
+              >
+                <BookOpen size={14} aria-hidden="true" />
+                אודות
+              </Link>
+              <Link
+                to="/business/faq"
+                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
+                onClick={() => setMobileOpen(false)}
+              >
+                <HelpCircle size={14} aria-hidden="true" />
+                שאלות נפוצות
               </Link>
               <div className="border-t border-zinc-700/60 pt-1">
                 <button
