@@ -2,6 +2,7 @@ import AnimatedCounter from "@/components/AnimatedCounter";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import logoIcon from "@/assets/logo-icon-cropped.png";
 import BusinessFooter from "@/components/BusinessFooter";
+import { HOMEPAGE_FAQ_PREVIEW } from "@/data/businessFaq";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -706,7 +707,7 @@ const BusinessLanding = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* FAQ Section — preview only; full list at /business/about */}
       <section className="border-t border-border/50" id="faq">
         <div className="container py-20">
           <div className="text-center mb-12">
@@ -714,38 +715,22 @@ const BusinessLanding = () => {
               <HelpCircle size={14} /> שאלות נפוצות
             </div>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">שאלות ותשובות לבעלי עסקים</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">כל מה שצריך לדעת לפני שמתחילים</p>
+            <p className="text-muted-foreground max-w-xl mx-auto">התשובות הכי נפוצות — לרשימה המלאה ראו את עמוד אודות</p>
           </div>
           <div className="max-w-3xl mx-auto space-y-3">
-            {[
-              { q: "מה זה ReviewHub?", a: "ReviewHub היא תשתית אימות עצמאית לחינוך דיגיטלי. הפלטפורמה מדרגת קורסים אונליין לפי ביקורות מאומתות רכישה — לא פרסום, לא דעות, ולא תשלום לשיפור דירוג. ציון האמון מחושב אוטומטית ולא ניתן לרכישה." },
-              { q: "מה ההבדל בין התוכניות?", a: "סטארטר — חינם, פרופיל בסיסי. מקצועי — ביקורות ללא הגבלה, דאשבורד אנליטיקס, וידג'טים, קישורי רכישה מאומתת ודוחות AI שבועיים. אנטרפרייז — כל מה שבמקצועי + CRM, API, Webhook, דוחות AI יומיים ומנהל הצלחה." },
-              { q: "איך מאמתים שהביקורת אמיתית?", a: "אימות רכישה מתבצע דרך חשבונית שהלקוח מעלה, אימות אוטומטי מול מערכת התשלומים, או קישור ביקורת ייעודי שנשלח רק ללקוחות שרכשו. ביקורות מאומתות מסומנות ב-✅." },
-              { q: "מה קורה אם לקוח כותב ביקורת שלילית?", a: "תוכלו להגיב באופן מקצועי מלוח הבקרה. מחקרים מראים שתגובה מקצועית לביקורת שלילית דווקא מגבירה אמון. ביקורות שמפרות כללים ניתן לדווח ונבדוק תוך 24-48 שעות." },
-              { q: "איך מטמיעים וידג'ט באתר שלי?", a: "מלוח הבקרה, גשו ל'וידג'ט להטמעה'. תקבלו קוד HTML/JavaScript פשוט — הדביקו אותו באתר שלכם. הוידג'ט מציג את הדירוג והביקורות ומתעדכן אוטומטית. זמין מתוכנית מקצועי." },
-              { q: "מה זה מודל 5/5 Verified Deal?", a: "מודל 5/5 מחלק את עמלת האמון (10% מהמחיר הרשמי) שווה בשווה: הלומד מקבל 5% הנחה מיידית בקופה, ו-ReviewHub גובה 5% עמלת תפעול מהיוצר. דוגמה: קורס ב-₪1,000 — הלומד משלם ₪950, ReviewHub מקבלת ₪50, היוצר מקבל ₪900. EAC (עלות גיוס לקוח) של 10% — מבוסס הצלחה בלבד, ללא תשלום מראש." },
-              { q: "מה זה מערכת קישורי הרכישה המאומתת?", a: "כשלומד לוחץ על קישור ReviewHub, הוא מועבר לדף הרכישה של היוצר עם פרמטרים ?ref=reviewhub&coupon=RH5 — שמפעילים אוטומטית את ההנחה של 5%. עוגיית מעקב של 30 יום מבטיחה שגם אם הלומד חוזר לרכוש ישירות תוך 30 ימים, ההנחה ועמלת האימות יחולו. לאחר הרכישה — webhook ממערכת התשלומים שולח אות לאימות, הלומד מקבל סטטוס \"קונה מאומת\" ויכול לכתוב ביקורת מאומתת (×1.0 משקל)." },
-              { q: "מה ה-CAC שלי עם ReviewHub?", a: "עלות גיוס לקוח (CAC) שלכם היא 10% קבוע מבוסס הצלחה — אתם משלמים רק על עסקאות שהושלמו. אין תשלום מראש, אין עלות קליק, אין תשלום על חשיפה. בנוסף, כל לקוח שנרכש דרך ReviewHub הופך ל\"קונה מאומת\" ויכול לכתוב ביקורת שמקבלת ×1.0 משקל בחישוב ציון האמון שלכם — תשלום שמחולל אפקט גדל בציון האמון." },
-              { q: "מה כולל דוח ה-AI?", a: "דוח ה-AI מנתח את הביקורות שלכם ומזהה חוזקות, חולשות, מגמות והמלצות קונקרטיות לצמיחה. במקצועי: שבועי, באנטרפרייז: יומי." },
-              { q: "יש תקופת ניסיון?", a: "כן! תוכנית מקצועי כוללת 14 ימי ניסיון חינם. תוכלו לבטל בכל עת ללא חיוב." },
-              { q: "אפשר לבטל את המנוי?", a: "כן, תוכלו לבטל בכל עת. לאחר הביטול, החשבון ירד לתוכנית סטארטר. כל הביקורות שנאספו נשמרות." },
-              { q: "האם המידע שלי מאובטח?", a: "בהחלט. אנחנו משתמשים בהצפנת SSL, בקרת גישה ברמת שורה (RLS), ותשתית מאובטחת. המידע העסקי שלכם מוגן ולא נמכר לצדדים שלישיים. ספקי שירות חיוניים (כגון עיבוד תשלומים) מקבלים גישה מינימלית הנדרשת לתפעול בלבד." },
-              { q: "האם ציון האמון מושפע מתשלום?", a: "לא. ציון האמון מחושב אוטומטית מנתוני ביקורות מאומתות בלבד. תוכנית המנוי (חינמי/פרו/אנטרפרייז) אינה משפיעה על הציון. עמלות תפעול מקישורי רכישה מאומתת אינן משפיעות על הציון. \"חומת אמון\" מבדילה לחלוטין בין כל מרכיב מסחרי לבין חישוב הציון." },
-              { q: "כמה עולה להירשם?", a: "יש תוכנית חינמית עם פרופיל בסיסי ועד 10 ביקורות בחודש. תוכניות מתקדמות: מקצועי (₪189/חודש) ואנטרפרייז (₪479/חודש) עם פיצ'רים מתקדמים." },
-              { q: "איך יוצרים קשר?", a: "לשאלות מהירות — השתמשו בצ'אטבוט ה-AI שלנו (הכפתור למטה). ליצירת קשר אנושית — שלחו מייל ל-reviewhub.il@gmail.com. מנויי מקצועי ואנטרפרייז מקבלים מענה בעדיפות." },
-            ].map(({ q, a }, i) => (
+            {HOMEPAGE_FAQ_PREVIEW.map(({ q, a }, i) => (
               <motion.div
-                key={i}
+                key={q}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeUp}
-                custom={Math.floor(i / 3)}
+                custom={i}
               >
                 <details className="group rounded-xl border border-border/50 bg-card hover:border-primary/30 transition-colors">
                   <summary className="flex items-center justify-between cursor-pointer p-5 text-sm font-display font-semibold text-foreground list-none">
-                    <span>{q}</span>
-                    <ChevronDown size={16} className="text-muted-foreground transition-transform duration-300 group-open:rotate-180 shrink-0 mr-3" />
+                    <ChevronDown size={16} className="text-muted-foreground transition-transform duration-300 group-open:rotate-180 shrink-0 ms-3" />
+                    <span className="flex-1 text-start">{q}</span>
                   </summary>
                   <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-border/30 pt-4">
                     {a}
@@ -753,6 +738,14 @@ const BusinessLanding = () => {
                 </details>
               </motion.div>
             ))}
+          </div>
+          <div className="text-center mt-10">
+            <Link to="/business/about#faq">
+              <Button variant="outline" className="border-border/50 font-semibold gap-2">
+                לכל השאלות והתשובות
+                <ArrowLeft size={14} aria-hidden="true" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
