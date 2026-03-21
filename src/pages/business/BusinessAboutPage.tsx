@@ -153,7 +153,7 @@ export default function BusinessAboutPage() {
               custom={2}
               className="text-lg text-muted-foreground mb-8 leading-relaxed"
             >
-              לא כלי שיווקי. לא "ניהול מוניטין" בסגנון ישן. תשתית — כי האמון נבנה לפני ששיחת המכירה מתחילה.
+              שיווק שמבוסס על חוויית לקוח אמיתית, לא על פרסום. האמון נבנה לפני ששיחת המכירה מתחילה — וזה מה שגורם ללקוח להישאר.
             </motion.p>
             <motion.div
               variants={fadeUp}

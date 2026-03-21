@@ -50,7 +50,7 @@ export function FeaturesGrid() {
           className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-4"
         >
           <ShieldCheck size={15} />
-          תשתית אמון — לא פלטפורמת שיווק
+          תשתית אמון — שיווק שמבוסס על חוויית לקוח אמיתית
         </motion.div>
         <motion.h2
           variants={fadeUp}

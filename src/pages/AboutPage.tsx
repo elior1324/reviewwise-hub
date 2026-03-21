@@ -72,7 +72,7 @@ const AboutPage = () => {
               className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-6"
             >
               תשתית אמון —{" "}
-              <span className="gradient-text glow-text">לא פלטפורמת שיווק</span>
+              <span className="gradient-text glow-text">שיווק שמבוסס על חוויית לקוח אמיתית</span>
             </motion.h1>
             <motion.p
               variants={fadeUp}
@@ -105,7 +105,7 @@ const AboutPage = () => {
             <p>
               ReviewHub היא תשתית אמון לחינוך הדיגיטלי. הפלטפורמה מדרגת קורסים אונליין לפי
               ביקורות מאומתות רכישה — ומפיקה ציון אמון עצמאי לכל קורס וכל יוצר. ReviewHub אינה
-              פלטפורמת שיווק ואינה גורמת עסקית של יוצרי הקורסים.
+              גורמת עסקית של יוצרי הקורסים ואינה מקדמת ספקים בתשלום.
             </p>
             <p>
               ציוני האמון מבוססים על אותות פעילות מאומתת — עקביות, נפח, ואמינות הביקורות לאורך
