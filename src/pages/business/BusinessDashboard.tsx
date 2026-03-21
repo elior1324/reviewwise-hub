@@ -443,7 +443,7 @@ const BusinessDashboard = () => {
           id: r.id,
           reviewerName: r.anonymous ? "אנונימי" : "משתמש",
           rating: r.rating,
-          text: r.text,
+          text: r.review_text || r.text || "",
           courseName: r.courses?.name || "",
           courseId: r.course_id,
           businessSlug: biz.slug,
@@ -576,7 +576,7 @@ const BusinessDashboard = () => {
       // Fetch compliance reviews (flagged / under_review / removed)
       const { data: compReviewData } = await supabase
         .from("reviews")
-        .select("id, text, rating, status, ai_decision, ai_reason, created_at, courses(name)")
+        .select("id, review_text, rating, status, ai_decision, ai_reason, created_at, courses(name)")
         .eq("business_id", biz.id)
         .in("status", ["flagged", "under_review", "removed", "pending"])
         .order("created_at", { ascending: false })
