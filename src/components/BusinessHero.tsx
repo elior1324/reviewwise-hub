@@ -8,19 +8,19 @@ import { useRef } from "react";
 import { sanitizeUrl } from "@/lib/sanitize";
 import { PrestigeBadge, computeEligibleBadges } from "./PrestigeBadge";
 
-// ── Trust Grade computation ──────────────────────────────────────────────────
-// A lightweight display grade derived from rating + verifiedReviewCount.
-// This is NOT the full TrustScore formula — it is a visual indicator only.
-function computeTrustGrade(rating: number, verifiedCount: number): {
+// ── Trust tier computation ───────────────────────────────────────────────────
+// Verification depth indicator — based solely on verified review count.
+// grade is internal only (used by PrestigeBadge); never shown in the UI.
+// label is what the user sees — progressive and non-punitive.
+function computeTrustGrade(_rating: number, verifiedCount: number): {
   grade: string; color: string; bgColor: string; label: string;
 } {
-  if (verifiedCount === 0) return { grade: "—", color: "text-muted-foreground", bgColor: "bg-muted/60", label: "טרם אומת" };
-  if (rating >= 4.7 && verifiedCount >= 10) return { grade: "A+", color: "text-emerald-600", bgColor: "bg-emerald-50 dark:bg-emerald-950/40", label: "מצוין" };
-  if (rating >= 4.3 && verifiedCount >= 5)  return { grade: "A",  color: "text-emerald-500", bgColor: "bg-emerald-50 dark:bg-emerald-950/40", label: "טוב מאוד" };
-  if (rating >= 3.8 && verifiedCount >= 3)  return { grade: "B",  color: "text-blue-500",    bgColor: "bg-blue-50 dark:bg-blue-950/40",    label: "טוב" };
-  if (rating >= 3.2)                         return { grade: "C",  color: "text-amber-500",   bgColor: "bg-amber-50 dark:bg-amber-950/40",  label: "בינוני" };
-  if (rating >= 2.5)                         return { grade: "D",  color: "text-orange-500",  bgColor: "bg-orange-50 dark:bg-orange-950/40", label: "חלש" };
-  return                                            { grade: "F",  color: "text-red-500",      bgColor: "bg-red-50 dark:bg-red-950/40",      label: "גרוע" };
+  if (verifiedCount === 0)  return { grade: "—",  color: "text-muted-foreground", bgColor: "bg-muted/60",                          label: ""               };
+  if (verifiedCount >= 20)  return { grade: "A+", color: "text-emerald-600",      bgColor: "bg-emerald-50 dark:bg-emerald-950/40", label: "אימות מעמיק"    };
+  if (verifiedCount >= 10)  return { grade: "A",  color: "text-emerald-500",      bgColor: "bg-emerald-50 dark:bg-emerald-950/40", label: "אימות גבוה"     };
+  if (verifiedCount >= 5)   return { grade: "B",  color: "text-blue-500",         bgColor: "bg-blue-50 dark:bg-blue-950/40",       label: "אימות מתקדם"    };
+  if (verifiedCount >= 2)   return { grade: "C",  color: "text-blue-400",         bgColor: "bg-blue-50 dark:bg-blue-950/40",       label: "אימות בתהליך"   };
+  return                           { grade: "D",  color: "text-primary",          bgColor: "bg-primary/10",                        label: "התחלת אימות"    };
 }
 
 // TikTok icon (not in lucide)
@@ -65,17 +65,7 @@ const SOCIAL_ICONS = [
 
 const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", affiliateSlug, personalAffiliateUrls = [] }: BusinessHeroProps) => {
   const verifiedCount = verifiedReviewCount ?? business.verifiedReviewCount ?? 0;
-  const trust = computeTrustGrade(business.rating, verifiedCount);
-
-  const grade = (() => {
-    const r = business.rating, vc = verifiedCount;
-    if (r >= 4.7 && vc >= 10) return "A+";
-    if (r >= 4.3 && vc >= 5)  return "A";
-    if (r >= 3.8 && vc >= 3)  return "B";
-    if (r >= 3.2)              return "C";
-    if (r >= 2.5)              return "D";
-    return vc > 0 ? "F" : "—";
-  })();
+  const grade = computeTrustGrade(business.rating, verifiedCount).grade;
 
   const eligibleBadges = computeEligibleBadges({
     rating: business.rating,
@@ -169,13 +159,22 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
                 {business.name}
               </motion.h1>
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }} className="flex items-center gap-2 flex-wrap">
-                {/* Trust grade badge — inline with business name */}
+                {/* Trust tier badge — verification depth only, no letter grade shown */}
                 {(() => {
                   const t = computeTrustGrade(business.rating, verifiedCount);
-                  if (t.grade === "—") return null;
+                  if (verifiedCount === 0) {
+                    return (
+                      <span className="text-xs text-muted-foreground">
+                        אין עדיין ביקורות מאומתות
+                      </span>
+                    );
+                  }
                   return (
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border text-sm font-bold ${t.bgColor} ${t.color}`}>
-                      ציון {t.grade}
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-semibold ${t.bgColor} ${t.color}`}
+                    >
+                      <ShieldCheck size={11} aria-hidden="true" />
+                      {t.label}
                     </span>
                   );
                 })()}

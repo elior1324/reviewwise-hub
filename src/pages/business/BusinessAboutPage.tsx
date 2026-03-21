@@ -56,16 +56,24 @@ const STEPS = [
   },
   {
     num: "04",
-    title: "ביקורת עולה, Trust Score מתעדכן",
+    title: "ביקורת עולה, הדירוג מתעדכן",
     body: "הכול אוטומטי. אתה מקבל התראה. הפרופיל שלך חי.",
   },
 ];
 
-const SCORE_PARAMS = [
-  { label: "ממוצע דירוג כוכבים",      weight: "50%" },
-  { label: "אחוז ביקורות מאומתות",    weight: "25%" },
-  { label: "עדכניות — 90 ימים אחרונים", weight: "15%" },
-  { label: "מגוון מבקרים ייחודיים",   weight: "10%" },
+const RATING_LAYERS = [
+  {
+    icon: "⭐",
+    title: "דירוג כוכבים",
+    desc: "ממוצע פשוט של כל הביקורות המאושרות — מ-ReviewHub, Google, Facebook, WhatsApp, Instagram. 1–5 כוכבים, מעוגל לעשרון אחד.",
+    note: "לא ניתן לרכישה",
+  },
+  {
+    icon: "🛡️",
+    title: "תג אימות",
+    desc: "מציג כמה ביקורות עברו אימות ואיזה אחוז מהסך הכולל הן מייצגות. מידע נוסף — לא משפיע על הכוכבים.",
+    note: "שכבה נפרדת",
+  },
 ];
 
 const DASHBOARD_FEATURES = [
@@ -250,47 +258,45 @@ export default function BusinessAboutPage() {
         </div>
       </section>
 
-      {/* ── Trust Score ──────────────────────────────────────── */}
+      {/* ── Rating model ─────────────────────────────────────── */}
       <section className="border-y border-border/50">
         <div className="container py-20">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-              <ShieldCheck size={14} aria-hidden="true" /> Trust Score
+              <ShieldCheck size={14} aria-hidden="true" /> מודל הדירוג
             </div>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">
               מספר שאי אפשר לקנות
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              כל עסק מקבל ציון 0–100, מחושב מנתוני ביקורות בלבד.
+              דירוג פשוט ושקוף — ממוצע אמיתי של ביקורות מאושרות. ללא נוסחאות מוסתרות.
             </p>
           </div>
 
-          <div className="max-w-2xl mx-auto">
-            <div className="rounded-xl border border-border/50 bg-card overflow-hidden mb-5">
-              <table className="w-full text-sm" aria-label="פרמטרי Trust Score">
-                <thead>
-                  <tr className="bg-primary/10">
-                    <th className="text-start px-5 py-3 font-display font-semibold text-foreground">פרמטר</th>
-                    <th className="text-end px-5 py-3 font-display font-semibold text-foreground">משקל</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/40">
-                  {SCORE_PARAMS.map(({ label, weight }) => (
-                    <tr key={label} className="hover:bg-primary/5 transition-colors">
-                      <td className="px-5 py-3 text-foreground/80">{label}</td>
-                      <td className="px-5 py-3 font-display font-bold text-primary text-end">{weight}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="max-w-2xl mx-auto space-y-4">
+            {RATING_LAYERS.map(({ icon, title, desc, note }) => (
+              <div key={title} className="rounded-xl border border-border/50 bg-card p-5 flex gap-4 items-start">
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">
+                  {icon}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <h3 className="font-display font-semibold text-foreground text-sm">{title}</h3>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-secondary text-secondary-foreground shrink-0">
+                      {note}
+                    </span>
+                  </div>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
 
             <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
               <p className="text-sm text-foreground">
-                <strong>מה לא משפיע:</strong> תוכנית המנוי שלך. כמה שילמת. כמה ותיק אתה.
+                <strong>מה לא משפיע על הכוכבים:</strong> תוכנית המנוי שלך. כמה שילמת. כמה ותיק אתה.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                ציון גבוה יש רק לעסק שנותן שירות טוב. זה לא באג — זו הסיבה שלקוחות סומכים עליו.
+                דירוג גבוה יש רק לעסק שנותן שירות טוב. זה לא באג — זו הסיבה שלקוחות סומכים עליו.
               </p>
             </div>
           </div>

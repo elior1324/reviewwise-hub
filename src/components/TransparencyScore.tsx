@@ -164,7 +164,6 @@ export default function TransparencyScore({
           <span className="text-sm font-bold">
             {verifiedPct != null ? `${verifiedPct}%` : "—"}
           </span>
-          <span className="text-[9px] text-muted-foreground/70">משקל 40%</span>
         </div>
 
         {/* Response rate */}
@@ -174,7 +173,6 @@ export default function TransparencyScore({
           <span className="text-sm font-bold">
             {respPct != null ? `${respPct}%` : "—"}
           </span>
-          <span className="text-[9px] text-muted-foreground/70">משקל 30%</span>
         </div>
 
         {/* Responsiveness */}
@@ -182,14 +180,13 @@ export default function TransparencyScore({
           <Clock size={14} className="text-violet-500" aria-hidden="true" />
           <span className="text-[11px] text-muted-foreground leading-tight">מהירות תגובה</span>
           <span className="text-sm font-bold">{respTime}</span>
-          <span className="text-[9px] text-muted-foreground/70">משקל 30%</span>
         </div>
 
       </div>
 
       {/* Why tooltip */}
       <p className="text-[10px] text-muted-foreground/70 leading-relaxed border-t border-border/40 pt-2">
-        הציון מחושב אוטומטית על בסיס: יחס ביקורות מאומתות (40%), שיעור מענה הבעלים לביקורות (30%), ומהירות התגובה הממוצעת (30%). ציון גבוה משקף עסק שקוף ומעורב.
+        ציון השקיפות מחושב על בסיס: יחס ביקורות מאומתות, שיעור מענה הבעלים, ומהירות התגובה הממוצעת. ציון גבוה משקף עסק שקוף ומעורב.
       </p>
     </div>
   );
