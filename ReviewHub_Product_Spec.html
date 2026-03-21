@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ReviewHub — מסמך איפיון מוצר מלא</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Heebo', 'Arial Hebrew', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #1a1a2e;
+    background: #fff;
+    direction: rtl;
+  }
+
+  /* ---------- COVER PAGE ---------- */
+  .cover {
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    color: #fff;
+    text-align: center;
+    padding: 60px 40px;
+  }
+
+  .cover-logo {
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, #e94560, #f4a261);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .cover-tagline {
+    font-size: 18px;
+    font-weight: 300;
+    color: #a8b2d8;
+    margin-bottom: 60px;
+  }
+
+  .cover-title {
+    font-size: 34px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+
+  .cover-subtitle {
+    font-size: 16px;
+    color: #a8b2d8;
+    max-width: 600px;
+    margin-bottom: 80px;
+  }
+
+  .cover-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 32px;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .cover-meta-item {
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .cover-meta-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7db3;
+    margin-bottom: 6px;
+  }
+
+  .cover-meta-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* ---------- TOC PAGE ---------- */
+  .toc-page {
+    page-break-after: always;
+    padding: 60px 80px;
+  }
+
+  .toc-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 32px;
+    border-bottom: 3px solid #e94560;
+    padding-bottom: 12px;
+  }
+
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #dde1ec;
+    font-size: 14px;
+  }
+
+  .toc-item:last-child { border-bottom: none; }
+
+  .toc-section-num {
+    font-weight: 700;
+    color: #e94560;
+    min-width: 32px;
+  }
+
+  .toc-section-title { flex: 1; padding: 0 12px; color: #2d3561; font-weight: 500; }
+  .toc-dots { flex: 1; border-bottom: 1px dotted #c0c7e0; margin: 0 8px; height: 1px; align-self: center; }
+  .toc-page-num { color: #6b7db3; font-size: 13px; }
+
+  /* ---------- MAIN CONTENT ---------- */
+  .page {
+    padding: 60px 80px;
+    page-break-after: always;
+  }
+
+  .page:last-child { page-break-after: auto; }
+
+  /* ---------- SECTION HEADERS ---------- */
+  h1 {
+    font-size: 30px;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+    position: relative;
+    padding-right: 20px;
+  }
+
+  h1::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 6px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #e94560, #f4a261);
+  }
+
+  .section-number {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e94560;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+
+  .section-divider {
+    height: 2px;
+    background: linear-gradient(90deg, #e94560 0%, #f4a261 50%, transparent 100%);
+    margin: 16px 0 32px 0;
+    border-radius: 2px;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2d3561;
+    margin: 28px 0 12px;
+    padding-right: 14px;
+    border-right: 4px solid #e94560;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f3460;
+    margin: 20px 0 8px;
+  }
+
+  p { margin-bottom: 12px; color: #3a3a5c; }
+
+  /* ---------- CARDS / BOXES ---------- */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .card {
+    background: #f8f9ff;
+    border: 1px solid #e0e4f5;
+    border-radius: 12px;
+    padding: 20px;
+    border-top: 4px solid #e94560;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+  }
+
+  .card-body {
+    font-size: 13px;
+    color: #555577;
+    line-height: 1.6;
+  }
+
+  .highlight-box {
+    background: linear-gradient(135deg, #fff5f7, #fff9f5);
+    border: 1px solid #ffd6de;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    border-right: 5px solid #e94560;
+  }
+
+  .info-box {
+    background: #f0f4ff;
+    border: 1px solid #d0d8f5;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 16px 0;
+    border-right: 5px solid #4361ee;
+  }
+
+  .warn-box {
+    background: #fffbf0;
+    border: 1px solid #ffe0a3;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 16px 0;
+    border-right: 5px solid #f4a261;
+  }
+
+  /* ---------- TABLES ---------- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+
+  thead tr {
+    background: #1a1a2e;
+    color: #fff;
+  }
+
+  thead th {
+    padding: 10px 14px;
+    text-align: right;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  tbody tr:nth-child(even) { background: #f8f9ff; }
+  tbody tr:hover { background: #eef0fc; }
+
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #e8eaf5;
+    color: #3a3a5c;
+  }
+
+  /* ---------- LISTS ---------- */
+  ul, ol {
+    padding-right: 24px;
+    margin: 12px 0;
+  }
+
+  li {
+    margin-bottom: 6px;
+    color: #3a3a5c;
+    font-size: 14px;
+  }
+
+  li::marker { color: #e94560; }
+
+  /* ---------- BADGE / TAG ---------- */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin: 2px;
+  }
+
+  .badge-red { background: #fee2e2; color: #b91c1c; }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-purple { background: #ede9fe; color: #6d28d9; }
+
+  /* ---------- FLOW CHART ---------- */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+
+  .flow-step {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .flow-arrow {
+    color: #e94560;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  /* ---------- TWO-COLUMN ---------- */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 16px 0;
+  }
+
+  /* ---------- PRINT SETTINGS ---------- */
+  @media print {
+    body { font-size: 12px; }
+    .cover { min-height: 100vh; }
+    .page { padding: 48px 64px; }
+    .toc-page { padding: 48px 64px; }
+    h1 { font-size: 26px; }
+    h2 { font-size: 18px; }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+  }
+
+  /* ---------- FOOTER ---------- */
+  .page-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #e8eaf5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #9098b5;
+  }
+
+  .print-btn {
+    position: fixed;
+    bottom: 32px;
+    left: 32px;
+    background: #e94560;
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(233,69,96,0.4);
+    font-family: 'Heebo', sans-serif;
+    z-index: 1000;
+    transition: transform 0.2s;
+  }
+
+  .print-btn:hover { transform: scale(1.04); }
+
+  @media print {
+    .print-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">⬇ שמור כ-PDF</button>
+
+<!-- ===== COVER PAGE ===== -->
+<div class="cover">
+  <div class="cover-logo">ReviewHub</div>
+  <div class="cover-tagline">פלטפורמת ניהול המוניטין החכמה לעסקים בישראל</div>
+  <div class="cover-title">מסמך איפיון מוצר — גרסה 1.0</div>
+  <div class="cover-subtitle">מסמך זה מכיל את האיפיון המלא של מוצר ReviewHub: חזון, משתמשים, מסעות, ארכיטקטורת מידע, עיצוב, מערכת ביקורות, AI, אימות, נתונים ואבטחה.</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">סטטוס</div>
+      <div class="cover-meta-value">MVP פעיל</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">שוק יעד</div>
+      <div class="cover-meta-value">ישראל — B2B + B2C</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">תאריך</div>
+      <div class="cover-meta-value">מרץ 2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TABLE OF CONTENTS ===== -->
+<div class="toc-page">
+  <div class="toc-title">תוכן עניינים</div>
+
+  <div class="toc-item"><span class="toc-section-num">01</span><span class="toc-section-title">חזון ומטרה</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">02</span><span class="toc-section-title">סוגי משתמשים ופרסונות</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">03</span><span class="toc-section-title">מסעות משתמש מרכזיים</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">04</span><span class="toc-section-title">ארכיטקטורת מידע וניווט</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">05</span><span class="toc-section-title">מערכת עיצוב ו-UI/UX</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">06</span><span class="toc-section-title">מערכת הביקורות</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">07</span><span class="toc-section-title">שכבת ה-AI</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">08</span><span class="toc-section-title">פורטל עסקי</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">09</span><span class="toc-section-title">מערכת האימות והאבטחה</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">10</span><span class="toc-section-title">מערכת שותפים ורפרלים</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">11</span><span class="toc-section-title">מודל הנתונים</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">12</span><span class="toc-section-title">ארכיטקטורת backend</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">13</span><span class="toc-section-title">אנליטיקה ובינה עסקית</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">14</span><span class="toc-section-title">ביצועים וזמינות</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">15</span><span class="toc-section-title">מניעת הונאה</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">16</span><span class="toc-section-title">מקרי קצה ומצבי שגיאה</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">17</span><span class="toc-section-title">טון המוצר ותוכן</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">18</span><span class="toc-section-title">MVP מול Roadmap</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">19</span><span class="toc-section-title">סיכונים ותלויות</span><span class="toc-dots"></span></div>
+  <div class="toc-item"><span class="toc-section-num">20</span><span class="toc-section-title">סיכום אדריכלי</span><span class="toc-dots"></span></div>
+</div>
+
+<!-- ===== SECTION 1: VISION ===== -->
+<div class="page">
+  <div class="section-number">סעיף 01</div>
+  <h1>חזון ומטרה</h1>
+  <div class="section-divider"></div>
+
+  <h2>הבעיה שהמוצר פותר</h2>
+  <p>שוק הקורסים, הכשרות והשירותים הדיגיטליים בישראל סובל מחוסר שקיפות: לצרכנים אין מקום ניטרלי ואמין לקרוא ביקורות אמיתיות, ולעסקים אין כלי מרכזי לניהול המוניטין הדיגיטלי שלהם. ReviewHub מגשר על הפער הזה.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">🎯 לצרכן</div>
+      <div class="card-body">מקום אחד לחפש, להשוות ולקרוא ביקורות אמיתיות על קורסים ועסקים — בעברית, ממקורות מאומתים.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏢 לעסק</div>
+      <div class="card-body">פלטפורמה מקצועית לאיסוף ביקורות, ניהול מוניטין, אנליטיקה מתקדמת ובניית אמון מול לקוחות חדשים.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🤝 לשוק</div>
+      <div class="card-body">קידום תרבות שקיפות ואחריות — עסקים טובים צוברים אמון, עסקים גרועים נחשפים לבדיקה ציבורית.</div>
+    </div>
+  </div>
+
+  <h2>הצהרת חזון</h2>
+  <div class="highlight-box">
+    <strong>ReviewHub</strong> שואפת להיות שכבת האמון של השוק הדיגיטלי הישראלי — המקום שבו כל מי שרוצה לקנות מחליט, וכל עסק שרוצה לגדול מוכיח.
+  </div>
+
+  <h2>מטרות מוצר ראשיות</h2>
+  <ol>
+    <li>לאפשר לצרכנים לחפש, להשוות ולגלות עסקים/קורסים בצורה מהירה ואמינה</li>
+    <li>לתת לעסקים כלי פעיל לאיסוף וניהול ביקורות — דרך WhatsApp, Instagram, QR ואימייל</li>
+    <li>לבנות מדד אמון (Trust Score) אובייקטיבי שמשקף את איכות השירות בפועל</li>
+    <li>לתגמל מבקרים פעילים ואמינים דרך מערכת נקודות ולוח מנהיגים</li>
+    <li>לייצר הכנסה עסקית ברת-קיימא מתוכניות פרמיום לעסקים</li>
+  </ol>
+
+  <h2>KPI מרכזיים לשנה הראשונה</h2>
+  <table>
+    <thead><tr><th>מדד</th><th>יעד</th><th>איך נמדד</th></tr></thead>
+    <tbody>
+      <tr><td>עסקים רשומים</td><td>2,000+</td><td>ספירת rows ב-`businesses`</td></tr>
+      <tr><td>ביקורות מאומתות</td><td>15,000+</td><td>ספירת `reviews` where `verified=true`</td></tr>
+      <tr><td>שיעור המרה לפרו</td><td>8–12%</td><td>pro/total businesses</td></tr>
+      <tr><td>NPS מבקרים</td><td>40+</td><td>סקר רבעוני</td></tr>
+      <tr><td>זמן ממוצע לביקורת ראשונה (לעסק)</td><td>&lt; 48 שעות</td><td>timestamp delta</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 01 — חזון ומטרה</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: USER TYPES ===== -->
+<div class="page">
+  <div class="section-number">סעיף 02</div>
+  <h1>סוגי משתמשים ופרסונות</h1>
+  <div class="section-divider"></div>
+
+  <h2>מפת משתמשים</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">👤 גולש אנונימי</div>
+      <div class="card-body">גולש בלי חשבון. יכול לחפש, לקרוא פרופילי עסקים ולצפות בביקורות. אינו יכול לכתוב ביקורת.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🌟 מבקר רשום (Reviewer)</div>
+      <div class="card-body">משתמש עם חשבון. כותב ביקורות, צובר נקודות, משתתף בלוח המנהיגים, מקבל הטבות.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏢 בעל עסק — Free</div>
+      <div class="card-body">גישה לפורטל עסקי, פרופיל ציבורי, עד 50 ביקורות. ללא אנליטיקה מתקדמת.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">💎 בעל עסק — Pro</div>
+      <div class="card-body">כל פיצ׳רי Free + ערוצי איסוף ביקורות (WA, IG), אנליטיקה מלאה, תג מאומת, ווידג׳טים.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🚀 בעל עסק — Enterprise</div>
+      <div class="card-body">רב-עסקים, API גישה, מנהל חשבון ייעודי, SLA מורחב, דוחות מותאמים אישית.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🛡 מנהל מערכת</div>
+      <div class="card-body">גישת super-admin: מודרציה, ניהול עסקים, הגדרות RLS, ניטור Edge Functions.</div>
+    </div>
+  </div>
+
+  <h2>פרסונות מפתח</h2>
+
+  <h3>ענת, 34 — אמא ועצמאית</h3>
+  <div class="info-box">
+    רוצה ללמוד שיווק דיגיטלי. מתלבטת בין 3 קורסים. מחפשת ביקורות אמיתיות בעברית לפני שמשקיעה ₪800. המוצר: חיפוש → השוואה → קריאת ביקורות → החלטה.
+  </div>
+
+  <h3>דוד, 42 — בעל סטודיו לצילום</h3>
+  <div class="info-box">
+    יש לו 40 לקוחות מרוצים אך ביקורת Google אחת שלילית שמזיקה. רוצה לגייס ביקורות אמיתיות מהלקוחות, לנהל תגובות ולצפות בגרף מגמות. המוצר: פורטל עסקי Pro, קישורי WhatsApp, אנליטיקה.
+  </div>
+
+  <h3>נועם, 26 — משפיען ותיק ו"שגריר"</h3>
+  <div class="info-box">
+    כותב ביקורות מפורטות, צובר נקודות, מדורג בלוח המנהיגים. משתמש בנקודות לקבלת הנחות. מביא חברים דרך קישור רפרל.
+  </div>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 02 — משתמשים ופרסונות</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: USER JOURNEYS ===== -->
+<div class="page">
+  <div class="section-number">סעיף 03</div>
+  <h1>מסעות משתמש מרכזיים</h1>
+  <div class="section-divider"></div>
+
+  <h2>מסע 1: צרכן מחפש קורס</h2>
+  <div class="flow">
+    <div class="flow-step">דף הבית</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">חיפוש</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">תוצאות</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">פרופיל עסק</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">ביקורות</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">השוואה</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">קישור אפיליאייט</div>
+  </div>
+
+  <h3>נקודות החלטה קריטיות</h3>
+  <ul>
+    <li><strong>Trust Score:</strong> מספר בולט בפרופיל — ראשון שהעין נוחתת עליו</li>
+    <li><strong>אחוז אימות ביקורות:</strong> כמה ביקורות מגיעות מרוכשים מאומתים</li>
+    <li><strong>ביקורת אחרונה:</strong> תאריך — עסק "חי" vs. נטוש</li>
+    <li><strong>תג מאומת:</strong> האם העסק עבר אימות מסמכי AFVE</li>
+  </ul>
+
+  <h2>מסע 2: כתיבת ביקורת</h2>
+  <div class="flow">
+    <div class="flow-step">קישור מ-WA/IG/Email</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">טוקן תקף?</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">טופס ביקורת</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">AI מנתח</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">שמירה</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">נקודות</div>
+  </div>
+
+  <h3>מצבי כשל בטוקן</h3>
+  <ul>
+    <li>טוקן פג תוקף → הודעה מותאמת + אפשרות לבקש חדש</li>
+    <li>טוקן כבר נוצל → "תודה, כבר קיבלנו את ביקורתך"</li>
+    <li>טוקן לא קיים → 404 + הפניה לדף הבית</li>
+  </ul>
+
+  <h2>מסע 3: עסק מצטרף ורושם</h2>
+  <div class="flow">
+    <div class="flow-step">/business</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">הרשמה</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">אימות אימייל</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">בחירת תוכנית</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">לוח בקרה</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">קישורי שיתוף</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">ביקורת ראשונה</div>
+  </div>
+
+  <h2>מסע 4: בעל עסק מגיב לביקורת שלילית</h2>
+  <ol>
+    <li>קבלת התראת אימייל/push על ביקורת חדשה</li>
+    <li>כניסה ללוח הבקרה → טאב "ביקורות"</li>
+    <li>קריאת ניתוח AI לביקורת</li>
+    <li>כתיבת תגובה מקצועית (360 תווים מקסימום)</li>
+    <li>AI בודק טון התגובה לפני פרסום</li>
+    <li>פרסום תגובה — גלויה ציבורית בפרופיל</li>
+    <li>דיווח על ביקורת מוטה → שלב מודרציה</li>
+  </ol>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 03 — מסעות משתמש</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: IA & NAVIGATION ===== -->
+<div class="page">
+  <div class="section-number">סעיף 04</div>
+  <h1>ארכיטקטורת מידע וניווט</h1>
+  <div class="section-divider"></div>
+
+  <h2>מצב צרכן — Navbar עליון</h2>
+  <div class="info-box">
+    <strong>שמאל ← ימין:</strong> לוגו ReviewHub | חיפוש | השוואה | לוח מנהיגים | לעסקים | כניסה/חשבון
+  </div>
+
+  <h2>מצב עסקי — Navbar עליון</h2>
+  <div class="info-box">
+    <strong>שמאל ← ימין:</strong> לוגו ReviewHub | דף הבית | לוח הבקרה | וידג׳טים | תמחור | אודות | כניסה/חשבון
+  </div>
+
+  <h2>מפת אתר מלאה</h2>
+
+  <h3>דפים ציבוריים</h3>
+  <table>
+    <thead><tr><th>נתיב</th><th>שם</th><th>תיאור</th></tr></thead>
+    <tbody>
+      <tr><td>/</td><td>דף הבית</td><td>חיפוש, ביקורות טרנדיות, CTA לעסקים</td></tr>
+      <tr><td>/search</td><td>חיפוש</td><td>חיפוש מלא עם פילטרים, מיון, תגיות</td></tr>
+      <tr><td>/compare</td><td>השוואה</td><td>השוואה של עד 3 עסקים זה לצד זה</td></tr>
+      <tr><td>/biz/:slug</td><td>פרופיל עסק</td><td>כל המידע, ביקורות, Trust Score, אפיליאייט</td></tr>
+      <tr><td>/leaderboard</td><td>לוח מנהיגים</td><td>דירוג מבקרים, נקודות, הטבות</td></tr>
+      <tr><td>/about</td><td>אודות</td><td>מידע על החברה</td></tr>
+    </tbody>
+  </table>
+
+  <h3>דפים מוגנים — עסק</h3>
+  <table>
+    <thead><tr><th>נתיב</th><th>שם</th><th>דרישה</th></tr></thead>
+    <tbody>
+      <tr><td>/business/dashboard</td><td>לוח בקרה</td><td>Login + עסק רשום</td></tr>
+      <tr><td>/business/settings</td><td>הגדרות עסק</td><td>Login + עסק רשום</td></tr>
+    </tbody>
+  </table>
+
+  <h3>דפים טוקן-בסיסיים (ללא Login)</h3>
+  <table>
+    <thead><tr><th>נתיב</th><th>מטרה</th></tr></thead>
+    <tbody>
+      <tr><td>/review/:token</td><td>כתיבת ביקורת מקישור</td></tr>
+      <tr><td>/wa/:token</td><td>כתיבת ביקורת מ-WhatsApp</td></tr>
+      <tr><td>/ig/:token</td><td>כתיבת ביקורת מ-Instagram DM</td></tr>
+      <tr><td>/evidence/:token</td><td>העלאת ראיות למודרציה</td></tr>
+      <tr><td>/business/verify-invoice</td><td>אימות מסמך עסקי AFVE</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 04 — ארכיטקטורת מידע</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 5: DESIGN SYSTEM ===== -->
+<div class="page">
+  <div class="section-number">סעיף 05</div>
+  <h1>מערכת עיצוב ו-UI/UX</h1>
+  <div class="section-divider"></div>
+
+  <h2>שפה ויזואלית</h2>
+  <div class="two-col">
+    <div>
+      <h3>צבעים ראשיים</h3>
+      <table>
+        <thead><tr><th>שם</th><th>HEX</th><th>שימוש</th></tr></thead>
+        <tbody>
+          <tr><td>Primary Red</td><td>#e94560</td><td>CTA, הדגשות, Trust Score</td></tr>
+          <tr><td>Deep Navy</td><td>#1a1a2e</td><td>Header, Navbar עסקי, טקסט כבד</td></tr>
+          <tr><td>Accent Orange</td><td>#f4a261</td><td>Gradient שני, כוכבים</td></tr>
+          <tr><td>Light Gray</td><td>#f8f9ff</td><td>רקע כרטיסים</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>טיפוגרפיה</h3>
+      <table>
+        <thead><tr><th>אלמנט</th><th>גודל</th><th>משקל</th></tr></thead>
+        <tbody>
+          <tr><td>כותרת ראשית H1</td><td>36px</td><td>800</td></tr>
+          <tr><td>כותרת H2</td><td>24px</td><td>700</td></tr>
+          <tr><td>טקסט גוף</td><td>16px</td><td>400</td></tr>
+          <tr><td>תוויות/Badge</td><td>12px</td><td>600</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>עקרונות UX</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">RTL ראשון</div>
+      <div class="card-body">המוצר מעוצב בעברית כשפה ראשונה. כל הרכיבים תומכים ב-dir="rtl". אין hardcode של left/right.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Mobile First</div>
+      <div class="card-body">כל דף עוצב תחילה לנייד (320px+) ומורחב לדסקטופ. Navbar ממיר ל-hamburger ב-768px-.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">ביצועים</div>
+      <div class="card-body">LCP &lt; 2.5s, CLS &lt; 0.1, lazy loading לתמונות, code splitting per-route.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">נגישות</div>
+      <div class="card-body">WCAG AA: ניגודיות צבעים, aria-label, ניווט מקלדת, focus ring נראה.</div>
+    </div>
+  </div>
+
+  <h2>קומפוננטים מרכזיים</h2>
+  <table>
+    <thead><tr><th>קומפוננט</th><th>ספריה</th><th>שימוש</th></tr></thead>
+    <tbody>
+      <tr><td>Button, Input, Select</td><td>shadcn/ui</td><td>בכל הטפסים</td></tr>
+      <tr><td>Dialog, Sheet</td><td>Radix UI</td><td>מודאלים, פאנלים צדדיים</td></tr>
+      <tr><td>Tabs</td><td>Radix UI</td><td>לוח בקרה, פרופיל עסק</td></tr>
+      <tr><td>Toast, Sonner</td><td>shadcn/ui</td><td>הודעות מערכת</td></tr>
+      <tr><td>Card, Badge, Avatar</td><td>shadcn/ui</td><td>כרטיסי עסקים, תגיות</td></tr>
+      <tr><td>Chart</td><td>Recharts</td><td>גרפי אנליטיקה בלוח הבקרה</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 05 — מערכת עיצוב</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 6: REVIEW SYSTEM ===== -->
+<div class="page">
+  <div class="section-number">סעיף 06</div>
+  <h1>מערכת הביקורות</h1>
+  <div class="section-divider"></div>
+
+  <h2>מחזור חיי ביקורת</h2>
+  <div class="flow">
+    <div class="flow-step">קישור נשלח</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">טוקן אומת</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">טופס מולא</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">AI בדק</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">נשמר ב-DB</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">גלוי ציבורית</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">Trust Score עודכן</div>
+  </div>
+
+  <h2>סכמת ביקורת — טבלת `reviews`</h2>
+  <table>
+    <thead><tr><th>עמודה</th><th>סוג</th><th>תיאור</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>uuid</td><td>מזהה ייחודי</td></tr>
+      <tr><td>business_id</td><td>uuid FK</td><td>מזהה העסק</td></tr>
+      <tr><td>reviewer_id</td><td>uuid FK</td><td>משתמש כותב (null = אנונימי)</td></tr>
+      <tr><td>text</td><td>text</td><td>תוכן הביקורת (max 2000 תווים)</td></tr>
+      <tr><td>rating</td><td>int 1–5</td><td>דירוג כוכבים</td></tr>
+      <tr><td>verified</td><td>boolean</td><td>האם רכישה אומתה</td></tr>
+      <tr><td>anonymous</td><td>boolean</td><td>הסתרת שם כותב</td></tr>
+      <tr><td>flagged</td><td>boolean</td><td>מסומן לבדיקה</td></tr>
+      <tr><td>flag_reason</td><td>text</td><td>סיבת הדגלה</td></tr>
+      <tr><td>like_count</td><td>int</td><td>מספר לייקים</td></tr>
+      <tr><td>created_at</td><td>timestamptz</td><td>תאריך יצירה</td></tr>
+    </tbody>
+  </table>
+
+  <h2>ערוצי איסוף ביקורות</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">📱 WhatsApp</div>
+      <div class="card-body">קישור ייחודי שנשלח ללקוח. טוקן חד-פעמי, מוגבל ל-24 שעות, מזהה רכישה.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">📸 Instagram DM</div>
+      <div class="card-body">אוטומציה דרך Make.com + API רשמי של Meta. ביקורת כתשובה ל-DM.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">✉️ Email</div>
+      <div class="card-body">קישור ב-Resend email. טמפלייט מותאם לעסק. tracking pixel לפתיחה.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 QR Code</div>
+      <div class="card-body">QR לדלפק/מוצר. מוביל לטופס ביקורת. ניתן להדפסה מלוח הבקרה.</div>
+    </div>
+  </div>
+
+  <h2>Trust Score — חישוב</h2>
+  <div class="warn-box">
+    <strong>Trust Score (0–100)</strong> מחושב אך ורק מנתוני ביקורות. אינו מושפע מתוכנית מנוי, נקודות פעילות, או לוח מנהיגים.
+  </div>
+  <table>
+    <thead><tr><th>פרמטר</th><th>משקל</th></tr></thead>
+    <tbody>
+      <tr><td>ממוצע דירוג כוכבים (weighted)</td><td>50%</td></tr>
+      <tr><td>אחוז ביקורות מאומתות</td><td>25%</td></tr>
+      <tr><td>עדכניות (ביקורות 90 ימים אחרונים)</td><td>15%</td></tr>
+      <tr><td>מגוון מבקרים ייחודיים</td><td>10%</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 06 — מערכת הביקורות</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 7: AI LAYER ===== -->
+<div class="page">
+  <div class="section-number">סעיף 07</div>
+  <h1>שכבת ה-AI</h1>
+  <div class="section-divider"></div>
+
+  <p>ReviewHub משלבת AI בשלב כתיבת ביקורת, מודרציה, ניתוח sentiment, ועזרה לעסקים לנסח תגובות. כל שימוש ב-AI הוא עזר — ההחלטה הסופית נשארת אנושית.</p>
+
+  <h2>מקרי שימוש ב-AI</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">🔍 זיהוי ספאם</div>
+      <div class="card-body">מודל מסווג תוכן ביקורת לפני שמירה. מזהה דפוסי ספאם, שפה עוינת, ביקורות גנריות.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">💬 ניתוח Sentiment</div>
+      <div class="card-body">ניתוח עמוק: חיובי/שלילי/ניטרלי + נושאים מרכזיים (שירות, מחיר, איכות).</div>
+    </div>
+    <div class="card">
+      <div class="card-title">✍️ עוזר תגובה</div>
+      <div class="card-body">מציע טיוטת תגובה לעסק בהתבסס על תוכן הביקורת. טון מקצועי + הישראלי.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 סיכום אוטומטי</div>
+      <div class="card-body">יוצר סיכום של כל הביקורות לעסק: נקודות חוזק, חולשות, מגמות.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🚩 מודרציה</div>
+      <div class="card-body">מסמן ביקורות חשודות לבדיקה אנושית. מסביר למה. מוריד עומס מהמנהל.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔖 תיוג נושאים</div>
+      <div class="card-body">מתייג כל ביקורת: "זמן אספקה", "יחס אישי", "מחיר הוגן" — לפילטור עתידי.</div>
+    </div>
+  </div>
+
+  <h2>עקרונות AI</h2>
+  <ul>
+    <li><strong>שקיפות:</strong> המשתמש תמיד יודע שהוא מקבל הצעת AI — לא תוצר סופי</li>
+    <li><strong>גבולות:</strong> AI אינו מוחק ביקורות אוטומטית — רק מסמן לבדיקה</li>
+    <li><strong>פרטיות:</strong> תוכן ביקורות אינו נשלח לספקי AI חיצוניים ללא הסכמה</li>
+    <li><strong>עברית:</strong> כל המודלים מכוונים לעברית ישראלית עסקית</li>
+  </ul>
+
+  <h2>pipeline ניתוח ביקורת</h2>
+  <div class="flow">
+    <div class="flow-step">ביקורת נשמרת</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">Edge Function מופעלת</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">ניתוח Sentiment</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">בדיקת Spam</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">עדכון DB</div>
+    <div class="flow-arrow">←</div>
+    <div class="flow-step">עדכון Trust Score</div>
+  </div>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 07 — שכבת ה-AI</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 8: BUSINESS PORTAL ===== -->
+<div class="page">
+  <div class="section-number">סעיף 08</div>
+  <h1>פורטל עסקי</h1>
+  <div class="section-divider"></div>
+
+  <h2>לוח הבקרה — Business Dashboard</h2>
+  <p>הדף המרכזי של כל עסק. מאורגן ב-Tabs של Radix UI. גישה דורשת Login.</p>
+
+  <h3>מבנה הטאבים</h3>
+  <table>
+    <thead><tr><th>טאב</th><th>תוכן</th><th>תוכנית נדרשת</th></tr></thead>
+    <tbody>
+      <tr><td>סקירה כללית</td><td>KPIs, Trust Score, ביקורות אחרונות, גרף מגמה</td><td>Free+</td></tr>
+      <tr><td>ביקורות</td><td>רשימת ביקורות, תגובה, דיווח, מיון</td><td>Free+</td></tr>
+      <tr><td>ערוצים</td><td>WhatsApp, Instagram, Email, QR — יצירת קישורים</td><td>Pro+</td></tr>
+      <tr><td>אנליטיקה</td><td>גרפים מפורטים, פילטר לפי תאריך/ערוץ/דירוג</td><td>Pro+</td></tr>
+      <tr><td>תחרות</td><td>השוואה לעסקים מתחרים באותה קטגוריה</td><td>Pro+</td></tr>
+      <tr><td>וידג׳טים</td><td>קוד embed, תצוגה מקדימה, סגנונות</td><td>Pro+</td></tr>
+      <tr><td>אימות AFVE</td><td>העלאת מסמכים לאימות עסק</td><td>Free+</td></tr>
+    </tbody>
+  </table>
+
+  <h2>תוכניות מחיר</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Free — ₪0/חודש</div>
+      <div class="card-body">
+        <ul>
+          <li>פרופיל עסקי בסיסי</li>
+          <li>עד 50 ביקורות</li>
+          <li>תגובה לביקורות</li>
+          <li>Trust Score בסיסי</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Pro — ₪XX/חודש</div>
+      <div class="card-body">
+        <ul>
+          <li>ביקורות ללא הגבלה</li>
+          <li>כל ערוצי האיסוף</li>
+          <li>אנליטיקה מלאה</li>
+          <li>תג מאומת</li>
+          <li>ווידג׳טים</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Enterprise — בהתאם</div>
+      <div class="card-body">
+        <ul>
+          <li>רב-עסקים</li>
+          <li>API גישה</li>
+          <li>מנהל חשבון</li>
+          <li>SLA מורחב</li>
+          <li>דוחות Custom</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2>הגדרות עסק — /business/settings</h2>
+  <ul>
+    <li>עריכת פרטי עסק (שם, תיאור, לוגו, קטגוריה)</li>
+    <li>ניהול חשבון PayPlus (כרטיס אשראי, חידוש מנוי)</li>
+    <li>ניהול חשבון WhatsApp Business API</li>
+    <li>הגדרת חשבון Instagram לאיסוף ביקורות</li>
+    <li>מחיקת חשבון / ביטול מנוי</li>
+    <li>ייצוא נתונים (GDPR)</li>
+  </ul>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 08 — פורטל עסקי</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 9: AUTH & SECURITY ===== -->
+<div class="page">
+  <div class="section-number">סעיף 09</div>
+  <h1>מערכת האימות והאבטחה</h1>
+  <div class="section-divider"></div>
+
+  <h2>שיטות כניסה נתמכות</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">אימייל + סיסמה</div>
+      <div class="card-body">הרשמה עם בדיקת חוזק סיסמה (zxcvbn). אימות אימייל חובה. ניתן לאפס.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Google OAuth</div>
+      <div class="card-body">PKCE flow. Callback: /auth/callback. אין implicit grant.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Apple Sign In</div>
+      <div class="card-body">PKCE flow. תואם iOS + macOS. דורש app bundle.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">TOTP MFA</div>
+      <div class="card-body">אימות דו-שלבי אופציונלי. Enrollment, אתגר, unenroll. Authenticator app.</div>
+    </div>
+  </div>
+
+  <h2>הגנות שכבה-על-שכבה</h2>
+  <table>
+    <thead><tr><th>שכבה</th><th>מנגנון</th><th>מיקום</th></tr></thead>
+    <tbody>
+      <tr><td>Rate Limiting — Client</td><td>ClientRateLimiter — 5 ניסיונות / 15 דקות, sessionStorage</td><td>AuthContext.tsx</td></tr>
+      <tr><td>Rate Limiting — Server</td><td>check_login_rate_limit RPC — נעילת DB ל-30 דקות</td><td>Edge Function</td></tr>
+      <tr><td>CAPTCHA</td><td>Cloudflare Turnstile — בטפסי כניסה והרשמה</td><td>Auth pages</td></tr>
+      <tr><td>Session Timeout</td><td>30 דקות idle, אזהרה ב-25 דקות</td><td>AuthContext.tsx</td></tr>
+      <tr><td>Token Storage</td><td>sessionStorage בלבד (נמחק עם סגירת טאב)</td><td>Supabase client</td></tr>
+      <tr><td>RLS</td><td>Row Level Security על כל טבלה ב-Supabase</td><td>PostgreSQL</td></tr>
+      <tr><td>CSP</td><td>Content Security Policy headers</td><td>vite.config.ts + _headers</td></tr>
+      <tr><td>XSS</td><td>sanitize.ts — DOMPurify לכל UGC</td><td>כל ה-render points</td></tr>
+    </tbody>
+  </table>
+
+  <h2>זרימת Login (מלאה)</h2>
+  <ol>
+    <li><strong>ClientRateLimiter.check()</strong> — בדיקת sessionStorage. מעל 5 ניסיונות? חסום 15 דקות.</li>
+    <li><strong>check_login_rate_limit RPC</strong> — בדיקת DB. חשבון נעול? הצג הודעה.</li>
+    <li><strong>supabase.auth.signInWithPassword()</strong> — ניסיון כניסה.</li>
+    <li>שגיאה? → increment counter → המשך לשלב 1 בניסיון הבא.</li>
+    <li>MFA enrolled? → החזר {mfaRequired: true, mfaFactorId} → UI מחכה ל-TOTP.</li>
+    <li>הצלחה → טעינת פרופיל משתמש + נתוני מנוי.</li>
+    <li>הפעלת session timeout timer.</li>
+  </ol>
+
+  <div class="warn-box">
+    <strong>אסורות מוחלטות:</strong> אסור לדלג על שלב כלשהו, לאחד שלבים, לקצר לצורכי פיתוח, להוסיף bypass, או לשנות את סדר השלבים.
+  </div>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 09 — אימות ואבטחה</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 10: AFFILIATE SYSTEM ===== -->
+<div class="page">
+  <div class="section-number">סעיף 10</div>
+  <h1>מערכת שותפים ורפרלים</h1>
+  <div class="section-divider"></div>
+
+  <h2>שני מערכי תגמול מקבילים</h2>
+
+  <div class="two-col">
+    <div class="info-box">
+      <h3>נקודות פעילות (Activity Points)</h3>
+      <p>מטבע פנימי נצבר לביקורות, רפרלים, ופעולות. ניתן לממוש: 600 נקודות = 20% הנחה לעסק.</p>
+      <p><strong>טבלה:</strong> <code>user_points</code></p>
+      <p><strong>אינו משפיע</strong> על Trust Score.</p>
+    </div>
+    <div class="info-box">
+      <h3>נקודות קהילה (Community Points)</h3>
+      <p>נקודות עונתיות לדירוג בלוח המנהיגים. אין ערך כספי. מתאפסים בתחילת עונה.</p>
+      <p><strong>טבלה:</strong> <code>leaderboard_entries</code></p>
+      <p><strong>אינו משפיע</strong> על Trust Score.</p>
+    </div>
+  </div>
+
+  <h2>כלכלת נקודות פעילות</h2>
+  <table>
+    <thead><tr><th>פעולה</th><th>נקודות</th></tr></thead>
+    <tbody>
+      <tr><td>כתיבת ביקורת (מאומתת)</td><td>+50</td></tr>
+      <tr><td>כתיבת ביקורת (לא מאומתת)</td><td>+20</td></tr>
+      <tr><td>ביקורת עם תמונה/וידאו</td><td>+30 בונוס</td></tr>
+      <tr><td>רפרל שהוביל לרישום</td><td>+100</td></tr>
+      <tr><td>רפרל שהוביל לרכישת Pro</td><td>+500</td></tr>
+    </tbody>
+  </table>
+
+  <h2>מנגנון אפיליאייט בפרופיל עסק</h2>
+  <p>כל פרופיל עסק יכול להכיל קישור אפיליאייט לקורס/שירות. הקישור עובר דרך <code>/go/:courseId</code> שמזהה את המקור, רושם את ה-click ב-DB, ומפנה לשרת הסוחר.</p>
+
+  <h2>לוח מנהיגים</h2>
+  <ul>
+    <li>דירוג עונתי — top 100 מבקרים</li>
+    <li>מוצג ב-/leaderboard עם Avatar, שם (או אנונימי), נקודות, מספר ביקורות</li>
+    <li>תגי רמה: Bronze / Silver / Gold / Platinum / Diamond</li>
+    <li>Top 3 מקבלים תג מיוחד בפרופיל הציבורי</li>
+    <li>מתחדש כל רבעון (Q1–Q4)</li>
+  </ul>
+
+  <h2>הגנות מניעת ניצול לרעה</h2>
+  <ul>
+    <li>ביקורת אחת לאותו עסק לכל 90 יום (per reviewer)</li>
+    <li>זיהוי רפרל self-referral → נקודות לא יינתנו</li>
+    <li>נקודות על ביקורת שנמחקת/שמסומנת כספאם → מבוטלות</li>
+    <li>IP + fingerprint tracking על ביקורות אנונימיות</li>
+  </ul>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 10 — שותפים ורפרלים</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 11: DATA MODEL ===== -->
+<div class="page">
+  <div class="section-number">סעיף 11</div>
+  <h1>מודל הנתונים</h1>
+  <div class="section-divider"></div>
+
+  <h2>טבלאות מרכזיות</h2>
+
+  <table>
+    <thead><tr><th>טבלה</th><th>שורות עיקריות</th><th>תיאור</th></tr></thead>
+    <tbody>
+      <tr><td>businesses</td><td>id, name, slug, trust_score, subscription_tier, verified</td><td>פרופיל עסק</td></tr>
+      <tr><td>reviews</td><td>id, business_id, reviewer_id, text, rating, verified, flagged, anonymous</td><td>ביקורות</td></tr>
+      <tr><td>profiles</td><td>id, user_id, display_name, avatar_url, role</td><td>פרופיל משתמש</td></tr>
+      <tr><td>user_points</td><td>id, user_id, points, reason, created_at</td><td>נקודות פעילות</td></tr>
+      <tr><td>leaderboard_entries</td><td>id, user_id, season, points, rank</td><td>לוח מנהיגים</td></tr>
+      <tr><td>review_tokens</td><td>id, business_id, token, channel, expires_at, used_at</td><td>טוקני ביקורת</td></tr>
+      <tr><td>review_reports</td><td>id, review_id, reporter_id, reason, status</td><td>דיווחים</td></tr>
+      <tr><td>business_responses</td><td>id, review_id, business_id, text, created_at</td><td>תגובות עסק</td></tr>
+      <tr><td>courses</td><td>id, business_id, name, url, affiliate_url, price</td><td>קורסים/שירותים</td></tr>
+      <tr><td>referrals</td><td>id, referrer_id, referred_id, code, converted</td><td>רפרלים</td></tr>
+      <tr><td>invite_codes</td><td>id, code, user_id, used_count, max_uses</td><td>קודי הזמנה</td></tr>
+    </tbody>
+  </table>
+
+  <h2>מערכות בידוד (Isolation)</h2>
+  <div class="warn-box">
+    <strong>חוק ברזל:</strong> שלוש שכבות — Trust Score, נקודות פעילות, נקודות קהילה — מבודדות לחלוטין. אין JOIN בין trust_score ל-user_points. אין trigger שמשנה את שניהם. שינוי בשכבה אחת אינו יכול להשפיע על שכבה אחרת.
+  </div>
+
+  <h2>RLS — Row Level Security</h2>
+  <table>
+    <thead><tr><th>טבלה</th><th>anon</th><th>authenticated</th><th>service role</th></tr></thead>
+    <tbody>
+      <tr><td>businesses</td><td>READ</td><td>READ + UPDATE (own)</td><td>ALL</td></tr>
+      <tr><td>reviews</td><td>READ</td><td>READ + INSERT + UPDATE (own)</td><td>ALL</td></tr>
+      <tr><td>user_points</td><td>NONE</td><td>READ (own)</td><td>ALL</td></tr>
+      <tr><td>review_tokens</td><td>READ (by token)</td><td>READ + INSERT (own business)</td><td>ALL</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 11 — מודל הנתונים</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 12: BACKEND ARCHITECTURE ===== -->
+<div class="page">
+  <div class="section-number">סעיף 12</div>
+  <h1>ארכיטקטורת Backend</h1>
+  <div class="section-divider"></div>
+
+  <h2>Stack</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Supabase (PostgreSQL)</div>
+      <div class="card-body">DB ראשי. RLS. Auth. Storage לתמונות/מסמכים. Realtime subscriptions לביקורות חדשות.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Deno Edge Functions (×39)</div>
+      <div class="card-body">Logic עסקי, webhooks, שליחת אימייל, AI calls, cron tasks. ריצה על edge Supabase.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Resend</div>
+      <div class="card-body">שליחת אימיילים עסקיים: קישורי ביקורת, אישורי הרשמה, התראות.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Make.com</div>
+      <div class="card-body">אוטומציות Instagram DM, חיבור WhatsApp Business, webhooks חיצוניים.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cloudflare Turnstile</div>
+      <div class="card-body">CAPTCHA אנושי בכל טפסי auth. Edge verification ב-Edge Function.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Netlify CDN</div>
+      <div class="card-body">Hosting של ה-SPA. _headers לאבטחה. Edge caching לנכסים.</div>
+    </div>
+  </div>
+
+  <h2>Edge Functions מרכזיות</h2>
+  <table>
+    <thead><tr><th>Function</th><th>טריגר</th><th>מטרה</th></tr></thead>
+    <tbody>
+      <tr><td>send-review-request</td><td>בעל עסק מבקש קישור</td><td>יצירת טוקן + שליחת WA/Email</td></tr>
+      <tr><td>validate-review-token</td><td>לקוח פותח קישור</td><td>אימות טוקן + הגשת ביקורת</td></tr>
+      <tr><td>analyze-review</td><td>ביקורת חדשה נשמרת</td><td>AI: sentiment, spam, tags</td></tr>
+      <tr><td>update-trust-score</td><td>trigger DB על reviews</td><td>חישוב מחדש של Trust Score</td></tr>
+      <tr><td>check-login-rate-limit</td><td>ניסיון login</td><td>בדיקת נעילת חשבון</td></tr>
+      <tr><td>send-business-notification</td><td>ביקורת חדשה</td><td>Email/Push לבעל עסק</td></tr>
+      <tr><td>process-instagram-review</td><td>Make.com webhook</td><td>קליטת ביקורת מ-Instagram DM</td></tr>
+      <tr><td>verify-merchant-invoice</td><td>AFVE dashboard</td><td>בדיקת מסמך עסקי</td></tr>
+      <tr><td>grant-user-points</td><td>פעולות מגיעות נקודות</td><td>עדכון user_points</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Cron Jobs</h2>
+  <ul>
+    <li><strong>daily:</strong> חישוב מחדש של Trust Score לעסקים שינוי ביקורות</li>
+    <li><strong>weekly:</strong> חישוב דירוג לוח מנהיגים</li>
+    <li><strong>monthly:</strong> ניקוי טוקנים פגי תוקף, ארכוב נתוני ביקורות ישנים</li>
+    <li><strong>quarterly:</strong> איפוס נקודות קהילה, יצירת season חדש</li>
+  </ul>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיף 12 — ארכיטקטורת Backend</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 13–20 COMBINED ===== -->
+<div class="page">
+  <div class="section-number">סעיפים 13–20</div>
+  <h1>אנליטיקה, ביצועים, אבטחה, טון, Roadmap וסיכום</h1>
+  <div class="section-divider"></div>
+
+  <h2>סעיף 13 — אנליטיקה ובינה עסקית</h2>
+  <p>לוח הבקרה מציג לעסקים:</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">KPI Summary</div>
+      <div class="card-body">Trust Score, ממוצע דירוג, מספר ביקורות החודש, % ביקורות מאומתות, מגמת שינוי.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">גרף מגמה</div>
+      <div class="card-body">ממוצע דירוג ב-12 חודשים אחרונים. מספר ביקורות חודשי. Trust Score לאורך זמן.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">פילוח ערוצים</div>
+      <div class="card-body">כמה ביקורות מכל ערוץ: WA, Instagram, Email, QR, ידני.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">ניתוח Sentiment</div>
+      <div class="card-body">% חיובי/שלילי/ניטרלי. נושאים עיקריים חוזרים בביקורות.</div>
+    </div>
+  </div>
+
+  <h2>סעיף 14 — ביצועים וזמינות</h2>
+  <table>
+    <thead><tr><th>מדד</th><th>יעד</th></tr></thead>
+    <tbody>
+      <tr><td>LCP (Largest Contentful Paint)</td><td>&lt; 2.5 שניות</td></tr>
+      <tr><td>CLS (Cumulative Layout Shift)</td><td>&lt; 0.1</td></tr>
+      <tr><td>TTI (Time to Interactive)</td><td>&lt; 3.5 שניות</td></tr>
+      <tr><td>Uptime</td><td>99.9%+</td></tr>
+      <tr><td>Edge Function p95 latency</td><td>&lt; 800ms</td></tr>
+      <tr><td>DB query p95</td><td>&lt; 200ms</td></tr>
+    </tbody>
+  </table>
+  <p><strong>טכניקות:</strong> Code splitting per-route, lazy loading images, React Query caching (staleTime 5 min), CDN assets, Supabase connection pooling, composite indexes על reviews(business_id, created_at).</p>
+
+  <h2>סעיף 15 — מניעת הונאה</h2>
+  <ul>
+    <li>טוקן חד-פעמי לכל בקשת ביקורת — לא ניתן לשימוש חוזר</li>
+    <li>IP rate limiting + Cloudflare WAF</li>
+    <li>AI spam detection על כל ביקורת</li>
+    <li>Fingerprinting למניעת ביקורות כפולות מאותו מכשיר</li>
+    <li>AFVE (Authenticated Free-form Verification Engine) — אימות מסמכי עסק אנושי</li>
+    <li>דיווח על ביקורת → queue מודרציה → בדיקה אנושית → החלטה</li>
+    <li>חסימת self-review (בעל עסק אינו יכול לבקר את עצמו)</li>
+  </ul>
+
+  <h2>סעיף 16 — מקרי קצה ושגיאות</h2>
+  <table>
+    <thead><tr><th>מצב</th><th>טיפול</th></tr></thead>
+    <tbody>
+      <tr><td>טוקן ביקורת פג תוקף</td><td>הודעה + אפשרות לבקש חדש</td></tr>
+      <tr><td>Edge Function offline</td><td>Toast שגיאה + retry אוטומטי × 3</td></tr>
+      <tr><td>Supabase outage</td><td>דף fallback + status page link</td></tr>
+      <tr><td>מבקר חסום (spam)</td><td>הסבר + דרך ערעור</td></tr>
+      <tr><td>ביקורת נמחקה ע"י מנהל</td><td>הודעת email + נקודות מבוטלות</td></tr>
+      <tr><td>OAuth callback error</td><td>הפניה ל-/auth + error toast</td></tr>
+    </tbody>
+  </table>
+
+  <h2>סעיף 17 — טון המוצר</h2>
+  <div class="highlight-box">
+    <strong>ישיר, אנושי, מקצועי.</strong> לא bureaucratic. לא clickbait. לא מנפח הבטחות. עברית ישראלית עדכנית — לא מתורגמת מאנגלית. פניה בגוף שני יחיד. הצהרות שלילה בגוף שני ("אל תחכה") — בזהירות בלבד.
+  </div>
+
+  <h2>סעיף 18 — MVP מול Roadmap</h2>
+  <div class="two-col">
+    <div>
+      <h3>✅ ב-MVP (פעיל)</h3>
+      <ul>
+        <li>חיפוש והשוואת עסקים</li>
+        <li>כתיבת ביקורות (WA, IG, Email, QR)</li>
+        <li>Trust Score</li>
+        <li>לוח מנהיגים</li>
+        <li>פורטל עסקי (Free + Pro)</li>
+        <li>אנליטיקה בסיסית</li>
+        <li>ווידג׳טים embed</li>
+        <li>AFVE אימות עסק</li>
+      </ul>
+    </div>
+    <div>
+      <h3>🔜 Roadmap עתידי</h3>
+      <ul>
+        <li>אפליקציה נייטיב (React Native)</li>
+        <li>API ציבורי לעסקים</li>
+        <li>ביקורות וידאו</li>
+        <li>AI response bot מלא</li>
+        <li>אנליטיקה תחרותית מתקדמת</li>
+        <li>תשלום PayPlus ישראלי</li>
+        <li>הרחבה לשוק אירופי</li>
+        <li>Enterprise multi-business dashboard</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>סעיף 19 — סיכונים ותלויות</h2>
+  <table>
+    <thead><tr><th>סיכון</th><th>הסתברות</th><th>מיטיגציה</th></tr></thead>
+    <tbody>
+      <tr><td>שינוי API Meta/Instagram</td><td>גבוה</td><td>Make.com abstraction layer, fallback ל-QR</td></tr>
+      <tr><td>ספאם ביקורות מאורגן</td><td>בינוני</td><td>AFVE, fingerprinting, AI detection</td></tr>
+      <tr><td>שינוי מחיר Supabase</td><td>נמוך</td><td>ארכיטקטורה ניתנת להגירה</td></tr>
+      <tr><td>תלות בחיבורי WhatsApp Business</td><td>בינוני</td><td>multi-channel redundancy</td></tr>
+      <tr><td>תביעות משפטיות מעסקים</td><td>נמוך</td><td>T&C מפורשים, מדיניות מחיקה</td></tr>
+    </tbody>
+  </table>
+
+  <h2>סעיף 20 — סיכום אדריכלי</h2>
+  <div class="highlight-box">
+    <p>ReviewHub היא SPA מבוסס React 18 + TypeScript + Vite, עם Supabase כ-backend מלא (DB, Auth, Storage, Edge Functions). הארכיטקטורה מדגישה אבטחה רב-שכבתית, מניעת הונאה, ובידוד מוחלט בין שלוש מערכות הנקודות וה-Trust Score.</p>
+    <p>המוצר מתמקד בשוק הישראלי עם עברית RTL first, ומשרת שני פרופילים ראשיים: צרכנים המחפשים שקיפות ועסקים המחפשים כלי מוניטין פעיל. ה-moat של המוצר הוא אמינות הנתונים — Trust Score שלא ניתן לרכוש, ביקורות שלא ניתן לזייף.</p>
+  </div>
+
+  <div class="page-footer">
+    <span>ReviewHub — מסמך איפיון מוצר</span>
+    <span>סעיפים 13–20 | גרסה 1.0 | מרץ 2026</span>
+  </div>
+</div>
+
+</body>
+</html>
