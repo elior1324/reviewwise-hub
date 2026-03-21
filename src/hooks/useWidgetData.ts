@@ -68,7 +68,6 @@ export function useWidgetData(slug: string | null | undefined): UseWidgetDataRes
             .from("reviews")
             .select("id, rating, text, anonymous, course_id, created_at, verified")
             .eq("business_id", bizRow.id)
-            .eq("moderation_status", "approved")
             .order("created_at", { ascending: false })
             .limit(MAX_REVIEWS);
 

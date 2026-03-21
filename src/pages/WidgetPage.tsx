@@ -96,9 +96,8 @@ export default function WidgetPage() {
       // ── 2. Fetch top reviews ─────────────────────────────────────────────
       const { data: reviewRows } = await supabase
         .from("reviews")
-        .select("id, reviewer_name, rating, review_text, anonymous, verified, created_at, courses(course_name)")
+        .select("id, rating, text, anonymous, verified, created_at, courses(name)")
         .eq("business_id", biz.id)
-        .eq("moderation_status", "approved")
         .gte("rating", 4)
         .order("created_at", { ascending: false })
         .limit(20);
@@ -107,10 +106,10 @@ export default function WidgetPage() {
 
       const reviews: WidgetReview[] = (reviewRows ?? []).map((r: any) => ({
         id:           r.id,
-        reviewerName: r.anonymous ? "אנונימי" : (r.reviewer_name || "משתמש"),
+        reviewerName: r.anonymous ? "אנונימי" : "משתמש",
         rating:       r.rating ?? 0,
-        text:         r.review_text ?? "",
-        courseName:   r.courses?.course_name ?? "",
+        text:         r.text ?? "",
+        courseName:   r.courses?.name ?? "",
         date:         heDate(r.created_at),
         verified:     r.verified ?? false,
         anonymous:    r.anonymous ?? false,
