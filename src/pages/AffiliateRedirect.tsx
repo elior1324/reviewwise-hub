@@ -252,7 +252,7 @@ const AffiliateRedirect = () => {
               </div>
 
               <h1 className="font-display font-bold text-xl text-foreground">
-                מעביר אותך לרכישה מאומתת...
+                מעביר אותך לרכישה דרך הפלטפורמה...
               </h1>
               <p className="text-muted-foreground font-medium">{target.name}</p>
 
@@ -292,9 +292,9 @@ const AffiliateRedirect = () => {
               {/* Trust benefits */}
               <ul className="space-y-1.5 text-xs text-muted-foreground text-right">
                 {[
-                  `הנחה מיידית של ${LEARNER_DISCOUNT_RATE * 100}% — ללא צורך להזין קוד`,
-                  "סטטוס \"קונה מאומת\" אוטומטי לאחר הרכישה",
-                  "כתיבת ביקורת מאומתת עם משקל ×1.0 בציון האמון",
+                  `הנחה של ${LEARNER_DISCOUNT_RATE * 100}% — ללא צורך להזין קוד`,
+                  "רכישה דרך הפלטפורמה — מאפשרת כתיבת ביקורת לאחר הרכישה",
+                  "ביקורת שנכתבת לאחר רכישה דרך הפלטפורמה מסומנת בהתאם בציון האמון",
                   `עוגיית מעקב של ${AFFILIATE_COOKIE_DAYS} יום — ההנחה תחול גם אם תרכשו מאוחר יותר`,
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-1.5">
@@ -371,9 +371,9 @@ const AffiliateRedirect = () => {
             {/* Benefits */}
             <ul className="space-y-1.5 text-xs text-muted-foreground text-right">
               {[
-                `הנחה מיידית של 5% — עם קוד ${AFFILIATE_COUPON_CODE} בקישור`,
-                "רכישה זו מוכרת אוטומטית כ\"קנייה מאומתת\" — ביקורת עתידית תקבל משקל גבוה יותר",
-                "הגרלה חודשית ₪5,000 — כתבו ביקורת מאומתת לאחר הרכישה",
+                `הנחה של 5% — עם קוד ${AFFILIATE_COUPON_CODE} בקישור`,
+                "רכישה דרך הפלטפורמה — ביקורת עתידית תסומן כרכישה מהפלטפורמה",
+                "הגרלה חודשית ₪5,000 — כתבו ביקורת לאחר הרכישה",
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5">
                   <ShieldCheck size={10} className="text-primary shrink-0 mt-0.5" />

@@ -63,7 +63,7 @@ const CollaborationPromoCard = ({
                 <p className="text-sm text-muted-foreground max-w-xl leading-relaxed mb-4">
                   הפעילו את תוכנית האימות ואפשרו לגולשי ReviewHub לרכוש בתנאי קהילה מסונכרנים —{" "}
                   <strong className="text-foreground">10% הנחה לקהילת ReviewHub</strong> הנגזרת
-                  מכוח הקנייה הקולקטיבי. רכישות דרך ReviewHub עוברות אימות אוטומטי ומקנות סטטוס ״קונה מאומת״ לגולש. עמלת תפעול עשויה להיווצר — אינה משפיעה על ציון האמון שלכם.
+                  מכוח הקנייה הקולקטיבי. רכישות דרך ReviewHub מתועדות בפלטפורמה ומאפשרות ללקוח לכתוב ביקורת לאחר הרכישה. עמלת תפעול עשויה להיווצר — אינה משפיעה על ציון האמון שלכם.
                 </p>
 
                 {/* Benefits row */}

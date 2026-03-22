@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DOMPurify from "dompurify";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -298,7 +299,7 @@ const DocsPage = () => {
                                 return (
                                   <li key={li} className="flex items-start gap-2 list-none">
                                     <span className="text-primary mt-1 shrink-0">•</span>
-                                    <span dangerouslySetInnerHTML={{ __html: line.slice(2).replace(/`([^`]+)`/g, '<code class="font-mono text-xs bg-muted/60 px-1.5 py-0.5 rounded text-blue-300">$1</code>') }} />
+                                    <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line.slice(2).replace(/`([^`]+)`/g, '<code class="font-mono text-xs bg-muted/60 px-1.5 py-0.5 rounded text-blue-300">$1</code>')) }} />
                                   </li>
                                 );
                               }
@@ -310,7 +311,7 @@ const DocsPage = () => {
                                 );
                               }
                               return (
-                                <p key={li} dangerouslySetInnerHTML={{ __html: line.replace(/`([^`]+)`/g, '<code class="font-mono text-xs bg-muted/60 px-1.5 py-0.5 rounded text-blue-300">$1</code>') }} />
+                                <p key={li} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line.replace(/`([^`]+)`/g, '<code class="font-mono text-xs bg-muted/60 px-1.5 py-0.5 rounded text-blue-300">$1</code>')) }} />
                               );
                             })}
                           </div>

@@ -85,7 +85,7 @@ export const PROOF_META: Record<ProofType, {
   multiplier:   number;
 }> = {
   purchase_receipt: {
-    labelHe:    "קנייה מאומתת",
+    labelHe:    "רכישה דרך הפלטפורמה",
     labelEn:    "Verified Purchase",
     icon:       Receipt,
     color:      "text-emerald-700 dark:text-emerald-300",

@@ -236,7 +236,7 @@ export function getProofTierLabel(proofTypes: string[]): {
   signal: number;
 } {
   if (proofTypes.includes("purchase_receipt") || proofTypes.includes("booking_ref")) {
-    return { tier: "gold",   label: "קנייה מאומתת",       signal: 1.00 };
+    return { tier: "gold",   label: "רכישה דרך הפלטפורמה", signal: 1.00 };
   }
   if (proofTypes.includes("photo_evidence")) {
     return { tier: "silver", label: "ראיה צילומית",        signal: 0.75 };

@@ -273,15 +273,15 @@ const CoursePage = () => {
                       <ul className="space-y-1 text-[11px] text-muted-foreground">
                         <li className="flex items-center gap-1.5">
                           <ShieldCheck size={10} className="text-primary shrink-0" />
-                          {hasPrice ? `הנחה מיידית של ${pricing.learnerDiscountPct}% — ללא קוד` : "הנחה מאומתת מיידית — ללא קוד"}
+                          {hasPrice ? `הנחה של ${pricing.learnerDiscountPct}% — מופעלת בקישור` : "הנחה מופעלת בקישור — ללא קוד"}
                         </li>
                         <li className="flex items-center gap-1.5">
                           <ShieldCheck size={10} className="text-primary shrink-0" />
-                          סטטוס &quot;קונה מאומת&quot; אוטומטי
+                          רכישה דרך הפלטפורמה — מאפשרת כתיבת ביקורת לאחריה
                         </li>
                         <li className="flex items-center gap-1.5">
                           <ShieldCheck size={10} className="text-primary shrink-0" />
-                          אפשרות לכתוב ביקורת מאומתת (משקל ×1.0)
+                          ביקורת שנכתבת לאחר רכישה דרך הפלטפורמה מסומנת בהתאם
                         </li>
                         <li className="flex items-center gap-1.5">
                           <ShieldCheck size={10} className="text-primary shrink-0" />

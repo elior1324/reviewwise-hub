@@ -217,7 +217,7 @@ export const ExpandedWidget = ({
         <TrustBar pct={trustPct} />
 
         <span style={{ color: "hsl(0 0% 100% / 0.38)", fontSize: 10 }}>
-          {reviewCount.toLocaleString("he-IL")} ביקורות מאומתות · עודכן בזמן אמת
+          {reviewCount.toLocaleString("he-IL")} ביקורות שנבדקו · עודכן בזמן אמת
         </span>
       </div>
 

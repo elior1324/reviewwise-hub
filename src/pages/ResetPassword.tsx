@@ -15,6 +15,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ const ResetPassword = () => {
   // True once Supabase fires the PASSWORD_RECOVERY event
   const [isRecovery, setIsRecovery]     = useState(false);
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   // ── Listen for Supabase PASSWORD_RECOVERY event ────────────────────────────
   // This works with BOTH the legacy implicit-grant hash flow and the modern
@@ -75,7 +77,8 @@ const ResetPassword = () => {
         description: "מעבירים אתכם לדף ההתחברות.",
       });
       // Sign the user out so they log in fresh with the new password
-      await supabase.auth.signOut();
+      // Uses AuthContext.signOut() to ensure SessionTimeout timer is stopped
+      await signOut();
       navigate("/auth");
     }
     setLoading(false);

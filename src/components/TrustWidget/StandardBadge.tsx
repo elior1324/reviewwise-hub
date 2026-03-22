@@ -109,7 +109,7 @@ export const StandardBadge = ({
         </div>
 
         <span style={{ color: "hsl(0 0% 100% / 0.4)", fontSize: 11 }}>
-          מבוסס על {reviewCount.toLocaleString("he-IL")} ביקורות מאומתות
+          מבוסס על {reviewCount.toLocaleString("he-IL")} ביקורות שנבדקו
         </span>
       </div>
 

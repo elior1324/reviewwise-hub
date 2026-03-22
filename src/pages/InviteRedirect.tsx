@@ -24,8 +24,8 @@ import Footer from "@/components/Footer";
 const PERKS = [
   {
     icon: <ShieldCheck size={18} className="text-primary" />,
-    title: "ביקורות מאומתות בלבד",
-    desc: "רק ביקורות אמיתיות — ללא ספאם, ללא בוטים",
+    title: "ביקורות שעברו בדיקה",
+    desc: "כל ביקורת עוברת סינון — ללא ספאם, ללא בוטים",
   },
   {
     icon: <Star size={18} className="text-primary" />,

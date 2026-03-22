@@ -145,7 +145,9 @@ test.describe("JSON-LD XSS regression (F02 — CRITICAL fix)", () => {
     const headers = response?.headers() ?? {};
 
     expect(headers["x-content-type-options"]).toBe("nosniff");
-    expect(headers["x-frame-options"]).toMatch(/SAMEORIGIN|DENY/);
+    // X-Frame-Options is intentionally omitted — CSP frame-ancestors supersedes it
+    // and supports the *.lovable.app whitelist (X-Frame-Options cannot do this).
+    // Verified in vite.config.ts and public/_headers comments.
     expect(headers["referrer-policy"]).toBeTruthy();
   });
 });

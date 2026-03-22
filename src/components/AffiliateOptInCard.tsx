@@ -55,7 +55,7 @@ const SPLIT_ROWS = [
     share: "−5%",
     color: "text-emerald-600",
     bg:    "bg-emerald-50 border-emerald-200",
-    note:  "הנחה מיידית בקופה עם קוד RH5",
+    note:  "הנחה בקופה עם קוד RH5",
   },
   {
     icon:  <BadgeDollarSign size={14} className="text-primary" />,

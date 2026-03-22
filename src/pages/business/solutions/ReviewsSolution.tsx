@@ -63,7 +63,7 @@ const ReviewsSolution = () => {
               <span className="gradient-text glow-text">באמת סומכים עליהן</span>
             </motion.h1>
             <motion.p variants={fadeUp} custom={2} className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
-              ReviewHub מאמתת כל ביקורת מול רכישה אמיתית — כך שהדירוג שלכם משקף חוויות לקוח אמיתיות בלבד.
+              ReviewHub מסננת ובודקת ביקורות לפני פרסום — כך שהדירוג שלכם משקף חוויות לקוח מהשטח.
             </motion.p>
             <motion.div variants={fadeUp} custom={3} className="flex gap-4 justify-center flex-wrap">
               <Link to="/business/signup">
