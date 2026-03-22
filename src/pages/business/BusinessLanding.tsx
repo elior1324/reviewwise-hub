@@ -28,7 +28,7 @@ const fadeUp = {
 // ─── Features organized by tier ───────────────────────────
 type Feature = { icon: any; title: string; desc: string; preview?: string; locked?: boolean; tooltip?: string };
 const FREE_FEATURES: Feature[] = [
-  { icon: ShieldCheck, title: "ביקורות מאומתות", desc: "רק לקוחות שרכשו בפועל יכולים לכתוב ביקורות. אמינות מוחלטת.", tooltip: "המערכת מוודאת שרק מי שרכש את המוצר יכול להשאיר ביקורת — כך כל ביקורת היא אמיתית ומהימנה." },
+  { icon: ShieldCheck, title: "ביקורות נבדקות לפני פרסום", desc: "כל ביקורת עוברת סינון ובדיקה לפני פרסום — AI ואנושי.", tooltip: "כל ביקורת עוברת בדיקת תוכן אוטומטית ואנושית לפני שהיא מתפרסמת בפרופיל — המטרה היא לשמור על רמת מידע גבוהה ואמינה." },
   { icon: UserCheck, title: "פרופיל עסקי ציבורי", desc: "עמוד עסק מותאם אישית עם פרטים, לוגו ותיאור.", tooltip: "עמוד ייעודי לעסק שלכם שנגיש לכולם, כולל לוגו, תיאור, פרטי קשר ודירוג מצטבר." },
   { icon: MessageSquare, title: "תגובות לביקורות", desc: "הגיבו לביקורות של הלקוחות שלכם ובנו שיח.", tooltip: "אפשרות להגיב לכל ביקורת ישירות מהדאשבורד — מראים ללקוחות שאכפת לכם." },
   { icon: Star, title: "תג דירוג בסיסי", desc: "הציגו את הדירוג שלכם עם תג אמינות ReviewHub.", tooltip: "תג קטן עם הדירוג שלכם שאפשר לשתף או להציג, מעיד על אמינות העסק." },
@@ -247,7 +247,7 @@ const BusinessLanding = () => {
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       { label: "דירוג ממוצע", value: "4.8 ⭐" },
-                      { label: "ביקורות מאומתות", value: "23" },
+                      { label: "ביקורות שנבדקו", value: "23" },
                       { label: "סה״כ ביקורות", value: "31" },
                       { label: "תקופת פעילות", value: "14 חו׳" },
                     ].map(({ label, value }) => (
@@ -259,7 +259,7 @@ const BusinessLanding = () => {
                   </div>
                   <div className="flex items-center gap-2 text-xs text-primary">
                     <ShieldCheck size={14} />
-                    <span>כל הנתונים מאומתים באופן עצמאי</span>
+                    <span>הנתונים מחושבים מפעילות בפלטפורמה</span>
                   </div>
                 </div>
               </motion.div>
@@ -323,8 +323,8 @@ const BusinessLanding = () => {
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
               חינם לתמיד
             </div>
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">התחילו באימות</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">פרופיל עסקי ציבורי עם ציון אמון מאומת — ללא עלות</p>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">התחילו בחינם</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">פרופיל עסקי ציבורי עם ציון שקיפות — ללא עלות</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {FREE_FEATURES.map(({ icon: Icon, title, desc, preview, tooltip }, i) => (

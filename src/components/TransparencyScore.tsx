@@ -133,7 +133,7 @@ export default function TransparencyScore({
           </div>
           <div>
             <p className="text-sm font-semibold leading-tight">ציון שקיפות</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">מבוסס ביקורות מאומתות, מענה ומהירות תגובה</p>
+            <p className="text-[10px] text-muted-foreground leading-tight">מבוסס על ביקורות שנבדקו, מענה בעלים ומהירות תגובה</p>
           </div>
         </div>
         {/* Circular-ish score badge */}
@@ -164,7 +164,7 @@ export default function TransparencyScore({
         {/* Verified reviews */}
         <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/40 text-center">
           <ShieldCheck size={14} className="text-emerald-500" aria-hidden="true" />
-          <span className="text-[11px] text-muted-foreground leading-tight">ביקורות מאומתות</span>
+          <span className="text-[11px] text-muted-foreground leading-tight">ביקורות שנבדקו</span>
           <span className="text-sm font-bold">
             {verifiedPct != null ? `${verifiedPct}%` : "—"}
           </span>
@@ -190,7 +190,7 @@ export default function TransparencyScore({
 
       {/* Why tooltip */}
       <p className="text-[10px] text-muted-foreground/70 leading-relaxed border-t border-border/40 pt-2">
-        ציון השקיפות מחושב על בסיס: יחס ביקורות מאומתות, שיעור מענה הבעלים, ומהירות התגובה הממוצעת. ציון גבוה משקף עסק שקוף ומעורב.
+        ציון השקיפות מחושב על בסיס: יחס ביקורות שנבדקו, שיעור מענה הבעלים, ומהירות התגובה הממוצעת. ציון גבוה משקף עסק שקוף ומעורב.
       </p>
     </div>
   );
