@@ -980,7 +980,7 @@ interface AiInsightsSectionProps {
 
 function trendingInfo(score: number | null): {
   label: string;
-  Icon:  React.FC<{ size?: number; className?: string }>;
+  Icon:  React.FC<{ size?: number | string; className?: string }>;
   color: string;
   bg:    string;
 } {

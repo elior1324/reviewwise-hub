@@ -31,6 +31,7 @@ import { BadgeCheck, Mail, Users, HelpCircle, MessageCircle, Facebook } from "lu
 export type ReviewSource =
   | "verified_purchase"
   | "email_verified"
+  | "crm_verified"
   | "community"
   | "google"
   | "whatsapp"
