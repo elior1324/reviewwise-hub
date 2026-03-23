@@ -13,12 +13,13 @@
  *   4. FAQ accordion
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Code2, Copy, CheckCheck, ExternalLink, ChevronDown,
   Layers, Minimize2, PanelRight, Star, Lock, Zap,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import { TrustWidget, FixedMiniBadge } from "@/components/TrustWidget";
 import type { TrustWidgetProps } from "@/components/TrustWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWidgetData } from "@/hooks/useWidgetData";
+import { supabase } from "@/integrations/supabase/client";
 
 // ─── Widget preview props — no fake data, shows the widget in its empty state ──
 
@@ -158,14 +160,27 @@ export default function TrustBadgePage() {
   const { user } = useAuth();
   const [activeVariant, setActiveVariant] = useState<"full" | "mini" | "sidebar">("full");
   const [showFixed, setShowFixed] = useState(false);
+  const [realSlug, setRealSlug] = useState<string | null>(null);
+
+  // Fetch the authenticated user's business slug
+  useEffect(() => {
+    if (!user) { setRealSlug(null); return; }
+    supabase
+      .from("businesses")
+      .select("slug")
+      .eq("owner_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setRealSlug(data?.slug ?? null));
+  }, [user]);
 
   // Use demo data (no businessProfile in auth context)
   const widgetProps = DEMO_PROPS;
 
-  const snippet = buildEmbedSnippet(
-    "your-business-slug",
-    activeVariant
-  );
+  const PLACEHOLDER_SLUG = "your-business-slug";
+  const snippetSlug = realSlug ?? PLACEHOLDER_SLUG;
+
+  const snippet = buildEmbedSnippet(snippetSlug, activeVariant);
+  const placeholderSnippet = buildEmbedSnippet(PLACEHOLDER_SLUG, activeVariant);
 
   const isPro = false;
 
@@ -346,7 +361,9 @@ export default function TrustBadgePage() {
               <div>
                 <h2 className="text-lg font-bold text-white">קוד ההטמעה</h2>
                 <p className="text-xs text-white/40">
-                  העתיקו את הקוד והדביקו ב-HTML של האתר שלכם
+                  {user
+                    ? "קוד ההטמעה מותאם לעסק שלכם"
+                    : "העתיקו את הקוד והדביקו ב-HTML של האתר שלכם"}
                 </p>
               </div>
             </div>
@@ -369,16 +386,52 @@ export default function TrustBadgePage() {
                     </button>
                   ))}
                 </div>
-                <CopyButton text={snippet} />
+                {user && <CopyButton text={snippet} />}
               </div>
 
-              {/* Code block */}
-              <pre
-                className="p-5 text-xs leading-relaxed overflow-x-auto"
-                style={{ color: "hsl(168 60% 65%)", background: "hsl(0 0% 6%)" }}
-              >
-                <code>{snippet}</code>
-              </pre>
+              {/* Code block — gated for logged-out users */}
+              <div className="relative">
+                <pre
+                  className="p-5 text-xs leading-relaxed overflow-x-auto"
+                  style={{
+                    color: "hsl(168 60% 65%)",
+                    background: "hsl(0 0% 6%)",
+                    filter: user ? "none" : "blur(4px)",
+                    userSelect: user ? "auto" : "none",
+                    pointerEvents: user ? "auto" : "none",
+                  }}
+                  aria-hidden={!user}
+                >
+                  <code>{user ? snippet : placeholderSnippet}</code>
+                </pre>
+
+                {/* Logged-out overlay */}
+                {!user && (
+                  <div
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-b-2xl"
+                    style={{ background: "hsl(0 0% 6% / 0.85)", backdropFilter: "blur(2px)" }}
+                  >
+                    <div className="flex flex-col items-center gap-3 text-center px-6">
+                      <div className="w-10 h-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
+                        <Lock size={16} className="text-primary" />
+                      </div>
+                      <p className="text-sm font-semibold text-white/90">
+                        קוד ההטמעה מותאם לעסק שלך
+                      </p>
+                      <p className="text-xs text-white/45 max-w-xs leading-relaxed">
+                        התחברו כדי לצפות בקוד ההטמעה המלא והמותאם לעסק שלכם
+                      </p>
+                      <Button
+                        asChild
+                        size="sm"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold mt-1"
+                      >
+                        <Link to="/auth">התחברו</Link>
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <p className="text-xs text-white/30 mt-3 leading-relaxed">
