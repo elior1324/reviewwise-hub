@@ -65,8 +65,7 @@ const CollaborationSetupModal = ({
 
   const handleSave = async () => {
     setSaving(true);
-    const { error } = await supabase
-      .from("businesses")
+    const { error } = await (supabase.from as any)("businesses")
       .update({
         collaboration_active: true,
         collaboration_method: method,
