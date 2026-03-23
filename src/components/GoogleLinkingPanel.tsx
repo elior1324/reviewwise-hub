@@ -247,7 +247,7 @@ const GoogleLinkingPanel = ({ businessId }: Props) => {
                   <Button
                     size="sm"
                     className="h-8 px-3"
-                    disabled={!manualPlaceId.startsWith("ChIJ") || state === "confirming"}
+                    disabled={!manualPlaceId.startsWith("ChIJ") || (state as PanelState) === "confirming"}
                     onClick={() => handleConfirm(manualPlaceId)}
                   >
                     <Link2 size={12} />
