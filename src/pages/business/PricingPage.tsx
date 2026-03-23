@@ -98,9 +98,10 @@ const PricingPage = () => {
         phone,
         success_url:   `${window.location.origin}/business/dashboard?payment=success`,
         cancel_url:    `${window.location.origin}/business/pricing`,
+        debug_version: "checkout_v2_live_test",
       };
 
-      console.log("[Checkout] Sending to Make webhook:", payload);
+      console.log("[Checkout] Sending to Make webhook JSON:", JSON.stringify(payload, null, 2));
 
       // ── Call Make webhook → Grow payment link creation ──────────────────
       const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL
