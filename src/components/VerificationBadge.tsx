@@ -76,7 +76,7 @@ export interface VerificationBadgeProps {
 const METHOD_META: Record<VerificationMethod, {
   label:    string;
   labelHe:  string;
-  icon:     React.FC<{ size?: number; className?: string }>;
+  icon:     React.FC<{ size?: number | string; className?: string }>;
   color:    string;
   weight:   number;  // higher = more authoritative, shown first
   tooltip:  string;
