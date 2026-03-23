@@ -103,14 +103,14 @@ const InstagramDMReviewPage = () => {
 
     const resolve = async () => {
       const { data: flow } = await supabase
-        .from("instagram_dm_review_flows")
+        .from("instagram_dm_review_flows" as any)
         .select("id, active, business_id, businesses(name, slug)")
         .eq("flow_token", token)
         .maybeSingle();
 
-      if (!flow || !flow.active) { setPageState("invalid"); return; }
+      if (!flow || !(flow as any).active) { setPageState("invalid"); return; }
 
-      const biz = flow.businesses as { name: string; slug: string } | null;
+      const biz = (flow as any).businesses as { name: string; slug: string } | null;
       setBusinessName(biz?.name ?? "");
       setBusinessSlug(biz?.slug ?? "");
       setPageState("ready");

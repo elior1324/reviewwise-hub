@@ -161,11 +161,11 @@ const UserReferralDashboard = () => {
     setLoading(true);
     try {
       const [statsRes, rewardsRes, redemptionsRes] = await Promise.all([
-        supabase.rpc("get_my_referral_stats"),
-        supabase.from("reward_catalog").select("*").eq("active", true).order("points_required"),
+        (supabase.rpc as any)("get_my_referral_stats"),
+        (supabase.from as any)("reward_catalog").select("*").eq("active", true).order("points_required"),
         // Count how many rewards this user has already redeemed (graceful fallback if table missing)
         supabase
-          .from("reward_redemptions")
+          .from("reward_redemptions" as any)
           .select("id", { count: "exact", head: true })
           .eq("user_id", user?.id ?? ""),
       ]);
@@ -188,7 +188,7 @@ const UserReferralDashboard = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.rpc("get_or_create_my_invite_code").then(({ data }) => {
+    (supabase.rpc as any)("get_or_create_my_invite_code").then(({ data }) => {
       if (data && !stats?.invite_code) {
         setStats((prev) => prev ? { ...prev, invite_code: data as string } : {
           invite_code:     data as string,
@@ -224,7 +224,7 @@ const UserReferralDashboard = () => {
     }
     setRedeeming(rewardId);
     try {
-      const { error } = await supabase.rpc("redeem_reward", { p_reward_id: rewardId });
+      const { error } = await (supabase.rpc as any)("redeem_reward", { p_reward_id: rewardId });
       if (error) {
         toast.error(error.message ?? "שגיאה במימוש הפרס");
       } else {

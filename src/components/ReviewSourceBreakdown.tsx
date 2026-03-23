@@ -291,6 +291,7 @@ const ReviewSourceBreakdown = ({
     instagram_dm: instagramCount,
     facebook: facebookCount,
     email_verified: 0, // not shown as separate filter
+    crm_verified: 0,
   };
 
   return (

@@ -75,8 +75,7 @@ const WriteReview = () => {
     document.title = "כתבו ביקורת מאומתת | ReviewHub";
 
     const validateToken = async () => {
-      const { data: rr } = await supabase
-        .from("review_requests")
+      const { data: rr } = await (supabase.from as any)("review_requests")
         .select(`
           id, token, user_email, course_id, business_id, verified_purchase_id,
           reviewed_at, expires_at,
@@ -87,22 +86,23 @@ const WriteReview = () => {
         .maybeSingle();
 
       if (!rr) { setTokenError("not_found"); setLoading(false); return; }
-      if (rr.reviewed_at) { setTokenError("used"); setLoading(false); return; }
-      if (rr.expires_at && new Date(rr.expires_at) < new Date()) {
+      if ((rr as any).reviewed_at) { setTokenError("used"); setLoading(false); return; }
+      if ((rr as any).expires_at && new Date((rr as any).expires_at) < new Date()) {
         setTokenError("expired"); setLoading(false); return;
       }
 
-      const courseName   = (rr.courses as any)?.name   || "";
-      const bizName      = (rr.businesses as any)?.name || "";
-      const bizSlug      = (rr.businesses as any)?.slug || null;
+      const rrAny = rr as any;
+      const courseName   = rrAny.courses?.name   || "";
+      const bizName      = rrAny.businesses?.name || "";
+      const bizSlug      = rrAny.businesses?.slug || null;
 
       setCtx({
-        id:                 rr.id,
-        token:              rr.token,
-        userEmail:          rr.user_email,
-        courseId:           rr.course_id,
-        businessId:         rr.business_id,
-        verifiedPurchaseId: rr.verified_purchase_id,
+        id:                 rrAny.id,
+        token:              rrAny.token,
+        userEmail:          rrAny.user_email,
+        courseId:           rrAny.course_id,
+        businessId:         rrAny.business_id,
+        verifiedPurchaseId: rrAny.verified_purchase_id,
         productName:        courseName || bizName,
         businessName:       bizName,
         businessSlug:       bizSlug,
@@ -161,7 +161,7 @@ const WriteReview = () => {
       // ── Mark review_request as used
       await supabase
         .from("review_requests")
-        .update({ reviewed_at: new Date().toISOString() })
+        .update({ reviewed_at: new Date().toISOString() } as any)
         .eq("id", ctx.id);
 
       // ── Create giveaway entry (one per review + one per user per month)
@@ -173,7 +173,7 @@ const WriteReview = () => {
       })();
 
       if (reviewId && authUserId) {
-        const { error: entryError } = await supabase.from("giveaway_entries").insert({
+        const { error: entryError } = await (supabase.from as any)("giveaway_entries").insert({
           user_id:              authUserId,
           review_id:            reviewId,
           verified_purchase_id: ctx.verifiedPurchaseId,

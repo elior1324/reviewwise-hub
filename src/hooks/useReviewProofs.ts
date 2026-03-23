@@ -147,8 +147,8 @@ export function useReviewProofs(reviewId: string): UseReviewProofsReturn {
     setLoading(true);
     setError(null);
 
-    const { data, error: err } = await supabase
-      .from("review_proofs")
+    const { data, error: err } = await (supabase.from as any)("review_proofs")
+      .select("*")
       .select("*")
       .eq("review_id", reviewId)
       .order("created_at", { ascending: false });
@@ -204,8 +204,7 @@ export function useReviewProofs(reviewId: string): UseReviewProofsReturn {
         if (uploadErr) throw new Error(uploadErr.message);
 
         // 3. Attach proof via DB function
-        const { data: proofId, error: fnErr } = await supabase
-          .rpc("fn_attach_proof", {
+        const { data: proofId, error: fnErr } = await (supabase.rpc as any)("fn_attach_proof", {
             p_review_id:       reviewId,
             p_user_id:         user.id,
             p_proof_type:      proofType,
@@ -249,8 +248,7 @@ export function useReviewProofs(reviewId: string): UseReviewProofsReturn {
         const { latitude, longitude, accuracy } = position.coords;
 
         // 2. Attach proof via DB function
-        const { data: proofId, error: fnErr } = await supabase
-          .rpc("fn_attach_proof", {
+        const { data: proofId, error: fnErr } = await (supabase.rpc as any)("fn_attach_proof", {
             p_review_id:            reviewId,
             p_user_id:              user.id,
             p_proof_type:           "location_gps",
@@ -290,8 +288,7 @@ export function useReviewProofs(reviewId: string): UseReviewProofsReturn {
       setError(null);
 
       try {
-        const { data: proofId, error: fnErr } = await supabase
-          .rpc("fn_attach_proof", {
+        const { data: proofId, error: fnErr } = await (supabase.rpc as any)("fn_attach_proof", {
             p_review_id:        reviewId,
             p_user_id:          user.id,
             p_proof_type:       "booking_ref",

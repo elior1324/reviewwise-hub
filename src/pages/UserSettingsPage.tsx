@@ -537,7 +537,7 @@ const ActivitySection = ({ userId }: { userId: string }) => {
             .select("*", { count: "exact", head: true })
             .eq("customer_user_id", userId),
         ]);
-        setReviews((reviewsData || []) as Review[]);
+        setReviews((reviewsData || []) as unknown as Review[]);
         setTotalPurchases(count || 0);
       } catch {
         toast.error("שגיאה בטעינת הנתונים");
@@ -638,12 +638,12 @@ const PointsSection = ({ userId }: { userId: string }) => {
       setLoading(true);
       try {
         const { data } = await supabase
-          .from("user_points")
+          .from("user_points" as any)
           .select("*")
           .eq("user_id", userId)
           .order("created_at", { ascending: false });
 
-        const rows = (data || []) as UserPoint[];
+        const rows = (data || []) as unknown as UserPoint[];
         setPoints(rows);
         setTotalPoints(rows.reduce((s, p) => s + p.points, 0));
       } catch {
@@ -812,7 +812,7 @@ const AccountSection = ({ profile }: { profile: UserProfile }) => {
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 const UserSettingsPage = () => {
-  const { user, isLoading } = useAuth();
+  const { user, loading: isLoading } = useAuth();
   const navigate = useNavigate();
 
   const [profile, setProfile]           = useState<UserProfile | null>(null);
@@ -829,14 +829,13 @@ const UserSettingsPage = () => {
   useEffect(() => {
     if (!user) return;
     setLoadingProfile(true);
-    supabase
-      .from("users")
+    (supabase.from as any)("users")
       .select("*")
       .eq("id", user.id)
       .single()
       .then(({ data, error }) => {
         if (error) { toast.error("שגיאה בטעינת הפרופיל"); return; }
-        setProfile(data as UserProfile);
+        setProfile(data as unknown as UserProfile);
       })
       .finally(() => setLoadingProfile(false));
   }, [user]);
@@ -846,7 +845,7 @@ const UserSettingsPage = () => {
     if (!user) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from("users").update(updates).eq("id", user.id);
+      const { error } = await (supabase.from as any)("users").update(updates).eq("id", user.id);
       if (error) throw error;
       setProfile((prev) => (prev ? { ...prev, ...updates } : null));
       toast.success("הפרופיל עודכן בהצלחה");

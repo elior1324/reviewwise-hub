@@ -247,7 +247,7 @@ const GoogleLinkingPanel = ({ businessId }: Props) => {
                   <Button
                     size="sm"
                     className="h-8 px-3"
-                    disabled={!manualPlaceId.startsWith("ChIJ") || state === "confirming"}
+                    disabled={!manualPlaceId.startsWith("ChIJ") || (state as PanelState) === "confirming"}
                     onClick={() => handleConfirm(manualPlaceId)}
                   >
                     <Link2 size={12} />
@@ -293,7 +293,7 @@ const GoogleLinkingPanel = ({ businessId }: Props) => {
                   size="sm"
                   className="w-full h-7 text-xs gap-1.5"
                   onClick={() => handleConfirm(c.place_id)}
-                  disabled={state === "confirming"}
+                  disabled={(state as PanelState) === "confirming"}
                 >
                   <CheckCircle2 size={11} /> בחר פרופיל זה
                 </Button>

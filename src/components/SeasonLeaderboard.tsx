@@ -176,12 +176,12 @@ const SeasonLeaderboard = ({ compact = false, limit = 10 }: Props) => {
     }
 
     const userIds = entries.map((e: any) => e.user_id);
-    const { data: profiles } = await supabase
-      .from("users")
+    const { data: profiles } = await (supabase.from as any)("users")
+      .select("id, full_name, avatar_url")
       .select("id, full_name, avatar_url")
       .in("id", userIds.length > 0 ? userIds : ["00000000-0000-0000-0000-000000000000"]);
 
-    const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+    const profileMap = new Map<string, any>((profiles || []).map((p: any) => [p.id, p]));
 
     const mapped: LeaderRow[] = entries
       .map((e: any, idx: number) => {

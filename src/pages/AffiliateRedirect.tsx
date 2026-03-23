@@ -32,8 +32,7 @@ const AffiliateRedirect = () => {
       try {
         // ── 1. Try business slug — affiliate program link ─────────────────
         //    Checks affiliate_mode (new), affiliate_enrolled (legacy), and collaboration_active
-        const { data: biz } = await supabase
-          .from("businesses")
+        const { data: biz } = await (supabase.from as any)("businesses")
           .select("id, name, website, slug, affiliate_enrolled, affiliate_link_active, affiliate_mode, personal_affiliate_url, personal_affiliate_urls, collaboration_active, collaboration_method, collaboration_coupon")
           .eq("slug", courseId)
           .maybeSingle();
@@ -75,8 +74,7 @@ const AffiliateRedirect = () => {
           if (isNewSession) sessionStorage.setItem(sessionKey, sessionToken);
 
           // Track affiliate click
-          const { data: clickRecord } = await supabase
-            .from("business_affiliate_clicks")
+          const { data: clickRecord } = await (supabase.from as any)("business_affiliate_clicks")
             .insert({
               business_id:   biz.id,
               session_token: isNewSession ? sessionToken : sessionStorage.getItem(sessionKey),
@@ -114,7 +112,7 @@ const AffiliateRedirect = () => {
 
         // ── 1b. Legacy collaboration program ─────────────────────────────
         if (biz && biz.website && biz.collaboration_active) {
-          await supabase.from("referral_clicks").insert({
+          await (supabase.from as any)("referral_clicks").insert({
             business_id:   biz.id,
             business_slug: courseId,
             referrer:      document.referrer || null,
@@ -125,7 +123,7 @@ const AffiliateRedirect = () => {
           const sessionKeyBiz = `rh_ps_biz_${biz.id}`;
           if (!sessionStorage.getItem(sessionKeyBiz)) {
             sessionStorage.setItem(sessionKeyBiz, "1");
-            await supabase.from("purchase_sessions").insert({
+            await (supabase.from as any)("purchase_sessions").insert({
               business_id: biz.id,
               referrer:    document.referrer || null,
               user_agent:  navigator.userAgent || null,
@@ -178,7 +176,7 @@ const AffiliateRedirect = () => {
         const sessionKey = `rh_ps_${courseId}`;
         if (!sessionStorage.getItem(sessionKey)) {
           sessionStorage.setItem(sessionKey, "1");
-          await supabase.from("purchase_sessions").insert({
+          await (supabase.from as any)("purchase_sessions").insert({
             course_id:   courseId,
             referrer:    document.referrer || null,
             user_agent:  navigator.userAgent || null,

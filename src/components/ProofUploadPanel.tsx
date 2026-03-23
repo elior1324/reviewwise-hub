@@ -56,7 +56,7 @@ interface ProofCardConfig {
   type:        ProofType;
   titleHe:     string;
   descHe:      string;
-  icon:        React.FC<{ size?: number; className?: string }>;
+  icon:        React.FC<{ size?: number | string; className?: string }>;
   actionLabel: string;
   inputType:   "file" | "geolocation" | "text";
   acceptMime?: string;
@@ -102,7 +102,7 @@ const PROOF_CARDS: ProofCardConfig[] = [
 // ─── Helper: proof status display ─────────────────────────────────────────────
 
 function proofStatusDisplay(proof: ReviewProof | undefined): {
-  icon: React.FC<{ size?: number; className?: string }>;
+  icon: React.FC<{ size?: number | string; className?: string }>;
   label: string;
   color: string;
 } {

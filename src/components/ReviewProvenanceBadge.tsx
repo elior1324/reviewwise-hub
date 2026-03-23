@@ -31,6 +31,7 @@ import { BadgeCheck, Mail, Users, HelpCircle, MessageCircle, Facebook } from "lu
 export type ReviewSource =
   | "verified_purchase"
   | "email_verified"
+  | "crm_verified"
   | "community"
   | "google"
   | "whatsapp"
@@ -97,6 +98,17 @@ const SOURCE_CONFIG: Record<ReviewSource, SourceConfig> = {
       "הכותב העלה קבלה, חשבונית, או אסמכתה אחרת, ומערכת ה-AI אישרה שהיא תואמת לרכישה אמיתית.",
     whySeeing:
       "ביקורת זו מוצגת עם תג אימות מכיוון שהכותב הוכיח שרכש בפועל את המוצר לפני כתיבת הביקורת.",
+    trustLevel: "high",
+  },
+  crm_verified: {
+    label:      "אומת דרך CRM",
+    shortLabel: "CRM מאומת",
+    icon:       BadgeCheck,
+    color:      "text-green-700 dark:text-green-400",
+    bg:         "bg-green-500/10",
+    border:     "border-green-500/30",
+    explanation: "הכותב אומת דרך מערכת CRM של העסק.",
+    whySeeing:   "ביקורת זו מוצגת עם תג אימות CRM.",
     trustLevel: "high",
   },
   email_verified: {
