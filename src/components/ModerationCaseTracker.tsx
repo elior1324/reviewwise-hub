@@ -272,8 +272,7 @@ const ModerationCaseTracker = ({ businessId, isDemo = false }: ModerationCaseTra
     }
     const fetchCases = async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("moderation_cases")
+      const { data } = await (supabase.from as any)("moderation_cases")
         .select("*, reviews(text)")
         .eq("business_id", businessId)
         .order("created_at", { ascending: false })

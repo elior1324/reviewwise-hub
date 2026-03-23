@@ -295,8 +295,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
 
     setLoading(true);
     try {
-      const { data: biz } = await supabase
-        .from("businesses")
+      const { data: biz } = await (supabase.from as any)("businesses")
         .select("affiliate_enrolled, affiliate_program_status, affiliate_mode, personal_affiliate_url, personal_affiliate_urls")
         .eq("id", businessId)
         .single();
@@ -321,11 +320,10 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
       }
 
       // Stats only relevant for reviewhub_model
-      const { data: statsData } = await supabase.rpc("get_affiliate_stats", { p_business_id: businessId });
+      const { data: statsData } = await (supabase.rpc as any)("get_affiliate_stats", { p_business_id: businessId });
       if (statsData) setStats(statsData as AffiliateStats);
 
-      const { data: convData } = await supabase
-        .from("business_affiliate_conversions")
+      const { data: convData } = await (supabase.from as any)("business_affiliate_conversions")
         .select("id, transaction_amount, customer_discount, platform_commission, business_net, coupon_code, status, created_at")
         .eq("business_id", businessId)
         .order("created_at", { ascending: false })

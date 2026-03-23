@@ -125,7 +125,7 @@ const DefamationComplaintDialog = ({ reviewId, trigger }: DefamationComplaintDia
         ? [evidenceNote.trim()]
         : undefined;
 
-      const { error } = await supabase.from("defamation_complaints").insert({
+      const { error } = await (supabase.from as any)("defamation_complaints").insert({
         review_id:         reviewId,
         complainant_id:    user?.id ?? null,
         complainant_name:  complainantName.trim(),

@@ -77,7 +77,7 @@ export interface ProofDetail {
 export const PROOF_META: Record<ProofType, {
   labelHe:      string;
   labelEn:      string;
-  icon:         React.FC<{ size?: number; className?: string }>;
+  icon:         React.FC<{ size?: number | string; className?: string }>;
   color:        string;          // Tailwind text colour
   bg:           string;          // Tailwind bg colour
   border:       string;          // Tailwind border colour

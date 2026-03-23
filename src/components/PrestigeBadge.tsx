@@ -71,7 +71,7 @@ const BADGE_CONFIG = {
   },
 } as const satisfies Record<PrestigeBadgeType, {
   label: string; sublabel: string; accent: string;
-  accentBg: string; border: string; Icon: React.ComponentType<{ size?: number; color?: string }>;
+  accentBg: string; border: string; Icon: React.ComponentType<{ size?: number | string; color?: string }>;
 }>;
 
 const SIZE_MAP = {
