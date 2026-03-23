@@ -929,7 +929,7 @@ const BusinessDashboard = () => {
             {notifStripExpanded && (
               <div className="border-t border-border/30 divide-y divide-border/20">
                 {displayNotifications.map((n) => (
-                  <div key={n.id} className="flex items-start gap-3 px-4 py-2.5">
+                  <div key={n.id} className="flex items-start gap-3 px-4 py-3">
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
                       n.type === "review" ? "bg-primary/10" :
                       n.type === "conversion" ? "bg-accent/10" :
@@ -942,8 +942,8 @@ const BusinessDashboard = () => {
                       {n.type === "report" && <Brain size={12} className="text-muted-foreground" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-foreground/80">{n.text}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{n.time}</p>
+                      <p className="text-xs text-foreground/80 leading-relaxed">{n.text}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">{n.time}</p>
                     </div>
                   </div>
                 ))}

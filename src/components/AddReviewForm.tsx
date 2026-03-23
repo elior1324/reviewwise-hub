@@ -431,6 +431,29 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
           >
             <Card className="shadow-card animated-border bg-card">
               <CardHeader className="pb-3">
+                {/* Step progress indicator */}
+                <div className="flex items-center gap-1.5 mb-3" aria-label="שלבי כתיבת ביקורת" role="list">
+                  {[
+                    { label: "דירוג",     done: rating > 0 },
+                    { label: "פירוט",     done: reviewText.trim().length >= 10 },
+                    { label: "משך זמן",   done: !!duration },
+                    { label: "שליחה",     done: false },
+                  ].map(({ label, done }, idx) => (
+                    <div key={label} role="listitem" className="flex items-center gap-1">
+                      <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold shrink-0 transition-colors ${
+                        done
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
+                      }`}>
+                        {done ? "✓" : idx + 1}
+                      </span>
+                      <span className={`text-[10px] font-medium ${done ? "text-primary" : "text-muted-foreground"}`}>
+                        {label}
+                      </span>
+                      {idx < 3 && <span className="w-4 h-px bg-border/50 mx-0.5" aria-hidden="true" />}
+                    </div>
+                  ))}
+                </div>
                 <div className="flex items-center justify-between">
                   <CardTitle className="font-display text-lg">כתבו ביקורת על {businessName}</CardTitle>
                   <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)} className="text-muted-foreground">
@@ -531,6 +554,15 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                       rows={4}
                       className="glass border-border/50 resize-none"
                     />
+                    {/* Contextual writing guidance — shown while text is short */}
+                    {reviewText.length < 80 && (
+                      <div className="mt-2 rounded-lg bg-muted/30 border border-border/30 px-3 py-2 text-xs text-muted-foreground text-right space-y-0.5">
+                        <p className="font-medium text-foreground/70">טיפים לביקורת איכותית:</p>
+                        <p>• מה למדתם / קיבלתם מהקורס?</p>
+                        <p>• מה עבד טוב ומה פחות?</p>
+                        <p>• למי הייתם ממליצים עליו?</p>
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground mt-1 text-left">
                       {reviewText.length}/{REVIEW_MAX_LENGTH} תווים
                     </p>

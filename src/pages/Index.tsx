@@ -281,7 +281,7 @@ const Index = () => {
               screen reader landmark navigation (WCAG 1.3.1 / ARIA landmark roles).
               aria-label distinguishes it from any other search forms on the page.
             */}
-            <motion.form role="search" aria-label="חיפוש קורסים דיגיטליים" variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto mb-12 w-full px-4 sm:px-0">
+            <motion.form role="search" aria-label="חיפוש קורסים דיגיטליים" variants={fadeUp} custom={3} onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto mb-4 w-full px-4 sm:px-0">
               <div className="relative flex-1">
                 {/* Search icon is decorative — the input's aria-label conveys the purpose */}
                 <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
@@ -297,6 +297,34 @@ const Index = () => {
                 חיפוש
               </Button>
             </motion.form>
+
+            {/* Category quick-filter chips */}
+            <motion.div
+              variants={fadeUp}
+              custom={4}
+              className="flex flex-wrap justify-center gap-2 mb-12 px-4"
+              role="list"
+              aria-label="קטגוריות חיפוש מהירות"
+            >
+              {[
+                { label: "שיווק דיגיטלי", q: "שיווק" },
+                { label: "AI ואוטומציה",   q: "AI" },
+                { label: "פיתוח תוכנה",    q: "פיתוח" },
+                { label: "עיצוב UX/UI",    q: "עיצוב" },
+                { label: "יזמות",           q: "יזמות" },
+                { label: "פיננסים",         q: "פיננסים" },
+              ].map(({ label, q }) => (
+                <button
+                  key={q}
+                  role="listitem"
+                  type="button"
+                  onClick={() => navigate(`/search?q=${encodeURIComponent(q)}`)}
+                  className="text-xs font-medium px-3 py-1.5 rounded-full border border-border/50 bg-card/40 text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-primary/5 transition-colors"
+                >
+                  {label}
+                </button>
+              ))}
+            </motion.div>
           </motion.div>
 
         </motion.div>
@@ -695,11 +723,42 @@ const Index = () => {
               ))}
             </div>
 
+            {/* Trust Methodology — score formula breakdown */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.42, duration: 0.5 }}
+              className="mt-8 max-w-3xl mx-auto rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm px-6 py-5"
+              aria-label="מתודולוגיית ציון האמון"
+            >
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 text-right">
+                מתודולוגיית ציון האמון — 0–100
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-right">
+                {[
+                  { label: "איכות ביקורות",  weight: "עד 20",  desc: "סנטימנט ואורך" },
+                  { label: "נפח (לוגריתמי)", weight: "עד 25",  desc: "כמות הביקורות" },
+                  { label: "עדכניות",         weight: "עד 25",  desc: "ביקורות אחרונות" },
+                  { label: "עקביות",          weight: "עד 30",  desc: "יציבות לאורך זמן" },
+                ].map(({ label, weight, desc }) => (
+                  <div key={label} className="rounded-lg bg-muted/30 px-3 py-2.5">
+                    <p className="text-sm font-semibold text-foreground">{weight} נק׳</p>
+                    <p className="text-xs font-medium text-muted-foreground mt-0.5">{label}</p>
+                    <p className="text-[10px] text-muted-foreground/70 mt-0.5">{desc}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground/60 mt-3 text-right">
+                הציון מוגן מעמלות תפעול ומפרסום. המתודולוגיה פתוחה לציבור.
+              </p>
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.45, duration: 0.5 }}
+              transition={{ delay: 0.52, duration: 0.5 }}
               className="flex gap-3 justify-center flex-wrap mt-8"
             >
               <Link to="/about">
