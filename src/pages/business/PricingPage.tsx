@@ -45,8 +45,13 @@ const PricingPage = () => {
       const token = sessionData.session?.access_token;
       if (!token) throw new Error("לא נמצאה הפעלה פעילה — אנא התחברו מחדש");
 
+      // Normalise billing cycle: frontend uses "annually", Edge Function expects "annual"
+      const cycle = billingCycle === "annually" ? "annual" : billingCycle;
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://pujsopidbejeuqteormi.supabase.co";
+
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`,
+        `${supabaseUrl}/functions/v1/create-checkout`,
         {
           method: "POST",
           headers: {
@@ -55,16 +60,40 @@ const PricingPage = () => {
           },
           body: JSON.stringify({
             plan: selectedPlanId,
-            billing_cycle: billingCycle,
+            billing_cycle: cycle,
           }),
         }
       );
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "שגיאה ביצירת עמוד תשלום");
+      let data: Record<string, unknown>;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("שגיאה בתקשורת עם שרת התשלומים");
+      }
 
-      // Redirect to hyp's hosted payment page
-      window.location.href = data.checkoutUrl;
+      if (!res.ok) {
+        const serverMsg = typeof data.error === "string" ? data.error : "";
+        // Translate known server errors to user-friendly Hebrew
+        if (serverMsg === "Payment provider not configured") {
+          throw new Error("מערכת התשלומים עדיין לא מוגדרת — אנא נסו שוב מאוחר יותר");
+        }
+        throw new Error(serverMsg || "שגיאה ביצירת עמוד תשלום");
+      }
+
+      // Validate the checkout URL before redirecting
+      const checkoutUrl = typeof data.checkoutUrl === "string" ? data.checkoutUrl : "";
+      if (!checkoutUrl) {
+        throw new Error("לא התקבל קישור תשלום מהשרת");
+      }
+      try {
+        new URL(checkoutUrl); // validate it's a well-formed URL
+      } catch {
+        console.error("[Checkout] Invalid checkoutUrl received:", checkoutUrl.slice(0, 80));
+        throw new Error("קישור התשלום שהתקבל אינו תקין — אנא נסו שוב");
+      }
+
+      window.location.href = checkoutUrl;
     } catch (err) {
       setCheckoutError(err instanceof Error ? err.message : "שגיאה בחיבור לשרת התשלומים");
     } finally {
