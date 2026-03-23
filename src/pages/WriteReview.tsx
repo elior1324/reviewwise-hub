@@ -173,7 +173,7 @@ const WriteReview = () => {
       })();
 
       if (reviewId && authUserId) {
-        const { error: entryError } = await supabase.from("giveaway_entries").insert({
+        const { error: entryError } = await (supabase.from as any)("giveaway_entries").insert({
           user_id:              authUserId,
           review_id:            reviewId,
           verified_purchase_id: ctx.verifiedPurchaseId,

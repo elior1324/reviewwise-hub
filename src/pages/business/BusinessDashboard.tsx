@@ -214,7 +214,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
     } else {
       // ── Trust moderation log ────────────────────────────────────────────
       // Fire-and-forget; log the manual moderation decision for audit trail.
-      supabase.from("trust_moderation_log").insert({
+      (supabase.from as any)("trust_moderation_log").insert({
         decision_type: newStatus === "approved" ? "verify_purchase_approved" : "verify_purchase_rejected",
         reason:        newStatus === "approved"
           ? "הוכחת הרכישה אומתה ידנית על-ידי הבעלים"

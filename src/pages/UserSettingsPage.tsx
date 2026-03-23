@@ -846,7 +846,7 @@ const UserSettingsPage = () => {
     if (!user) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from("users").update(updates).eq("id", user.id);
+      const { error } = await (supabase.from as any)("users").update(updates).eq("id", user.id);
       if (error) throw error;
       setProfile((prev) => (prev ? { ...prev, ...updates } : null));
       toast.success("הפרופיל עודכן בהצלחה");
