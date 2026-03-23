@@ -418,7 +418,7 @@ const BusinessProfile = () => {
   const handleCollabAccess = async () => {
     if (!dbBusinessId || !slug) return;
     // Record click
-    await supabase.from("referral_clicks").insert({
+    await (supabase.from as any)("referral_clicks").insert({
       business_id: dbBusinessId,
       business_slug: slug,
       referrer: document.referrer || null,
