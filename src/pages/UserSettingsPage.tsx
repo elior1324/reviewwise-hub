@@ -829,8 +829,7 @@ const UserSettingsPage = () => {
   useEffect(() => {
     if (!user) return;
     setLoadingProfile(true);
-    supabase
-      .from("users")
+    (supabase.from as any)("users")
       .select("*")
       .eq("id", user.id)
       .single()

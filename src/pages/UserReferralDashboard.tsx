@@ -165,7 +165,7 @@ const UserReferralDashboard = () => {
         (supabase.from as any)("reward_catalog").select("*").eq("active", true).order("points_required"),
         // Count how many rewards this user has already redeemed (graceful fallback if table missing)
         supabase
-          .from("reward_redemptions")
+          .from("reward_redemptions" as any)
           .select("id", { count: "exact", head: true })
           .eq("user_id", user?.id ?? ""),
       ]);

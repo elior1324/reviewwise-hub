@@ -183,7 +183,7 @@ const Index = () => {
           let sourceBadge: string;
           if (isAnon)        sourceBadge = "ביקורת אנונימית";
           else if (isVerified) sourceBadge = "✓ ביקורת מאומתת";
-          else if (isCommunity) sourceBadge = "ביקורת קהילה";
+          else if (!isVerified) sourceBadge = "ביקורת קהילה";
           else                sourceBadge = "ביקורת מאומתת";
           const handle = businessLabel ? `${sourceBadge} · ${businessLabel}` : sourceBadge;
 
