@@ -176,8 +176,7 @@ const BusinessProfile = () => {
         .order("created_at", { ascending: false });
 
       // ── AI Summary metadata ──────────────────────────────────────────────────
-      const { data: summaryMeta } = await supabase
-        .from("ai_summary_meta")
+      const { data: summaryMeta } = await (supabase.from as any)("ai_summary_meta")
         .select("review_count, period_start, period_end, generated_at")
         .eq("business_id", bizData.id)
         .eq("is_current", true)
