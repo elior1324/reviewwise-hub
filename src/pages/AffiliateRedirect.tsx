@@ -112,7 +112,7 @@ const AffiliateRedirect = () => {
 
         // ── 1b. Legacy collaboration program ─────────────────────────────
         if (biz && biz.website && biz.collaboration_active) {
-          await supabase.from("referral_clicks").insert({
+          await (supabase.from as any)("referral_clicks").insert({
             business_id:   biz.id,
             business_slug: courseId,
             referrer:      document.referrer || null,
