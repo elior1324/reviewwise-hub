@@ -295,8 +295,7 @@ const BusinessProfile = () => {
       }
 
       // ── 4. Fetch Google external profile + reviews ───────────────────────────
-      const { data: extProfile } = await supabase
-        .from("business_external_profiles")
+      const { data: extProfile } = await (supabase.from as any)("business_external_profiles")
         .select("external_id,external_url,external_name,external_rating,external_review_count,last_synced_at,sync_status")
         .eq("business_id", bizData.id)
         .eq("status", "confirmed")
