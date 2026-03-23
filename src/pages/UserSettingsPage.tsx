@@ -537,7 +537,7 @@ const ActivitySection = ({ userId }: { userId: string }) => {
             .select("*", { count: "exact", head: true })
             .eq("customer_user_id", userId),
         ]);
-        setReviews((reviewsData || []) as unknown as Review[]);
+        setReviews((reviewsData || []) as any as Review[]);
         setTotalPurchases(count || 0);
       } catch {
         toast.error("שגיאה בטעינת הנתונים");
