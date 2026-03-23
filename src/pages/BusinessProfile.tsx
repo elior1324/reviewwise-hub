@@ -326,8 +326,7 @@ const BusinessProfile = () => {
       if (waReviews) setWhatsappReviews(waReviews as WhatsAppReview[]);
 
       // ── 5b. Fetch Instagram DM reviews (approved, non-flagged) ───────────────
-      const { data: igReviews } = await supabase
-        .from("instagram_dm_reviews")
+      const { data: igReviews } = await (supabase.from as any)("instagram_dm_reviews")
         .select("id, author_name, rating, text, received_at")
         .eq("business_id", bizData.id)
         .eq("is_approved", true)
