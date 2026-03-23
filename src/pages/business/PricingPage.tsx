@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Zap, ArrowLeft, BarChart3, TrendingUp, Bell, LineChart, Target, Eye,
          Loader2, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 // ── Analytics features (merged from AnalyticsSolution) ────────────────────────
 const ANALYTICS_FEATURES = [
@@ -32,44 +33,83 @@ const PricingPage = () => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError,   setCheckoutError]   = useState<string | null>(null);
 
+  // ── Load user profile data (full_name, phone) for Grow ───────────────────
+  const [profileName,  setProfileName]  = useState<string | null>(null);
+  const [profilePhone, setProfilePhone] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    // Fetch from both `users` (full_name) and `businesses` (phone, founder_name)
+    // to get the best available contact details for Grow.
+    Promise.all([
+      supabase.from("users").select("full_name").eq("id", user.id).maybeSingle(),
+      supabase.from("businesses").select("phone, founder_name, name").eq("owner_id", user.id).maybeSingle(),
+    ]).then(([usersRes, bizRes]) => {
+      // full_name: prefer users.full_name → businesses.founder_name → businesses.name
+      const name =
+        usersRes.data?.full_name ||
+        bizRes.data?.founder_name ||
+        bizRes.data?.name ||
+        null;
+      setProfileName(name);
+      // phone: from businesses table
+      setProfilePhone(bizRes.data?.phone || null);
+    });
+  }, [user]);
+
   const handleCheckout = async () => {
     if (!user) {
       setCheckoutError("יש להתחבר כדי להמשיך לתשלום");
       return;
     }
+
+    // ── Validate required Grow fields ─────────────────────────────────────
+    const fullName = profileName || user.user_metadata?.full_name || null;
+    const phone    = profilePhone || user.phone || null;
+
+    if (!fullName) {
+      setCheckoutError("חסר שם מלא בפרופיל — אנא עדכנו את הפרטים בהגדרות לפני המשך לתשלום");
+      return;
+    }
+    if (!phone) {
+      setCheckoutError("חסר מספר טלפון בפרופיל — אנא עדכנו את הפרטים בהגדרות לפני המשך לתשלום");
+      return;
+    }
+
     setCheckoutLoading(true);
     setCheckoutError(null);
     try {
-      // ── Resolve plan pricing ──────────────────────────────────────────────
+      // ── Build plan identifiers (pricing is defined in Grow, not here) ───
       const cycle = billingCycle === "annually" ? "annual" : billingCycle;
-      const planKey = `${selectedPlanId}_${cycle}`;
-      const planPrices: Record<string, { price: number; label: string; priceId: string }> = {
-        pro_monthly:        { price: 189,  label: "ReviewHub Pro — חודשי",        priceId: "plan_pro_monthly"        },
-        pro_annual:         { price: 1814, label: "ReviewHub Pro — שנתי",         priceId: "plan_pro_annual"         },
-        enterprise_monthly: { price: 479,  label: "ReviewHub Enterprise — חודשי", priceId: "plan_enterprise_monthly" },
-        enterprise_annual:  { price: 4598, label: "ReviewHub Enterprise — שנתי",  priceId: "plan_enterprise_annual"  },
-      };
-      const planMeta = planPrices[planKey];
-      if (!planMeta) throw new Error("תוכנית לא תקינה");
+      const priceId = `plan_${selectedPlanId}_${cycle}`;
+      const title = selectedPlanId === "pro"
+        ? `ReviewHub Pro — ${cycle === "annual" ? "שנתי" : "חודשי"}`
+        : `ReviewHub Enterprise — ${cycle === "annual" ? "שנתי" : "חודשי"}`;
 
-      // ── Call Make webhook → Grow payment link creation ────────────────────
+      // ── Build webhook payload ───────────────────────────────────────────
+      const payload = {
+        plan:          selectedPlanId,
+        billing_cycle: cycle,
+        price_id:      priceId,
+        title,
+        user_id:       user.id,
+        user_email:    user.email ?? "",
+        full_name:     fullName,
+        phone,
+        success_url:   `${window.location.origin}/business/dashboard?payment=success`,
+        cancel_url:    `${window.location.origin}/business/pricing`,
+      };
+
+      console.log("[Checkout] Sending to Make webhook:", payload);
+
+      // ── Call Make webhook → Grow payment link creation ──────────────────
       const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL
         || "https://hook.eu1.make.com/hmk5zq1jvyyc4fn1kkkg0y3jyg541k29";
 
       const res = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan:          selectedPlanId,
-          billing_cycle: cycle,
-          price_id:      planMeta.priceId,
-          price:         planMeta.price,
-          title:         planMeta.label,
-          user_id:       user.id,
-          user_email:    user.email ?? "",
-          success_url:   `${window.location.origin}/business/dashboard?payment=success`,
-          cancel_url:    `${window.location.origin}/business/pricing`,
-        }),
+        body: JSON.stringify(payload),
       });
 
       let data: Record<string, unknown>;
@@ -84,8 +124,7 @@ const PricingPage = () => {
         throw new Error(serverMsg || "שגיאה ביצירת קישור תשלום");
       }
 
-      // ── Extract and validate payment URL ──────────────────────────────────
-      // Grow returns data.url; Make may wrap it as checkoutUrl or url
+      // ── Extract and validate payment URL ────────────────────────────────
       const checkoutUrl =
         (typeof data.checkoutUrl === "string" && data.checkoutUrl) ||
         (typeof data.url === "string" && data.url) ||
