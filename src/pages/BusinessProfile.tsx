@@ -316,8 +316,7 @@ const BusinessProfile = () => {
       }
 
       // ── 5. Fetch WhatsApp reviews (approved, non-flagged) ────────────────────
-      const { data: waReviews } = await supabase
-        .from("whatsapp_reviews")
+      const { data: waReviews } = await (supabase.from as any)("whatsapp_reviews")
         .select("id, author_name, rating, text, received_at, source_url")
         .eq("business_id", bizData.id)
         .eq("is_approved", true)
