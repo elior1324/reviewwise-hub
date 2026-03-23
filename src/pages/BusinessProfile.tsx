@@ -304,8 +304,7 @@ const BusinessProfile = () => {
       if (extProfile) {
         setGoogleProfile(extProfile as GoogleProfileData);
 
-        const { data: gReviews } = await supabase
-          .from("imported_google_reviews")
+        const { data: gReviews } = await (supabase.from as any)("imported_google_reviews")
           .select("id,author_name,author_photo_url,rating,text,published_at,source_url")
           .eq("business_id", bizData.id)
           .eq("display_allowed", true)
