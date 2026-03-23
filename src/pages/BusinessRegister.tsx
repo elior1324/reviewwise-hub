@@ -170,7 +170,7 @@ const BusinessRegister = () => {
           affiliate_enrolled_at:     affiliateMode === "reviewhub_model" ? new Date().toISOString() : null,
           affiliate_program_status:  affiliateMode === "reviewhub_model" ? "enrolled" :
                                      affiliateMode === "personal_affiliate" ? "enrolled" : "declined",
-        } as any)
+        })
         .select("id")
         .single();
 

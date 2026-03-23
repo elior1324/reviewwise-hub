@@ -7,7 +7,7 @@
  *     Two layers that must both pass before a password is checked:
  *     a) Client-side  — in-memory counter in sessionStorage; instant feedback,
  *        no network round-trip needed.
- *     b) Server-side  — (supabase.rpc as any)("check_login_rate_limit") queries the
+ *     b) Server-side  — supabase.rpc("check_login_rate_limit") queries the
  *        login_attempts table.  Survives tab refresh; blocks across devices
  *        sharing the same email address.
  *
@@ -19,7 +19,7 @@
  *
  *  3. ATTEMPT RECORDING
  *     Every password-login attempt (success or failure) is recorded via
- *     (supabase.rpc as any)("record_login_attempt") so the server-side limiter has
+ *     supabase.rpc("record_login_attempt") so the server-side limiter has
  *     accurate data.
  *
  *  4. SESSION TIMEOUT
@@ -223,9 +223,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!code) return;
     localStorage.removeItem("rh_invite_code"); // clear immediately to avoid double-processing
     try {
-      const { error } = await (supabase.rpc as any)("process_user_referral", {
-        invite_code: code,
-        new_user_id: userId,
+      const { error } = await supabase.rpc("process_user_referral", {
+        p_invite_code: code,
+        p_new_user_id: userId,
       });
       if (error) {
         devWarn("[Auth] process_user_referral error (non-fatal):", error.message);

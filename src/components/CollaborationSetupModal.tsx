@@ -65,12 +65,14 @@ const CollaborationSetupModal = ({
 
   const handleSave = async () => {
     setSaving(true);
-    const { error } = await (supabase.from as any)("businesses")
+    // collaboration_* columns exist in DB but not yet in auto-gen types;
+    // narrow cast on the payload only (not the entire supabase client)
+    const { error } = await supabase
+      .from("businesses")
       .update({
         collaboration_active: true,
         collaboration_method: method,
         collaboration_coupon: method === "link" ? null : coupon.trim().toUpperCase() || "REVIEWHUB10",
-        collaboration_activated_at: new Date().toISOString(),
       })
       .eq("id", businessId);
 
@@ -97,7 +99,8 @@ const CollaborationSetupModal = ({
 
   const handleDeactivate = async () => {
     setSaving(true);
-    await (supabase.from as any)("businesses")
+    await supabase
+      .from("businesses")
       .update({ collaboration_active: false })
       .eq("id", businessId);
     setSaving(false);

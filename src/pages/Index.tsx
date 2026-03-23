@@ -14,7 +14,7 @@ import AnimatedCounter from "@/components/AnimatedCounter";
 import { TestimonialsSection } from "@/components/blocks/testimonials-with-marquee";
 import { FeaturesGrid } from "@/components/blocks/features-grid";
 import { useState, useRef, useEffect } from "react";
-import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, SAAS_CATEGORIES, type Business } from "@/data/mockData";
+import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, SAAS_CATEGORIES, type Business, type SocialLinks } from "@/data/mockData";
 import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -105,7 +105,7 @@ const Index = () => {
         website: b.website || undefined,
         email: b.email || undefined,
         phone: b.phone || undefined,
-        socialLinks: b.social_links as any || undefined,
+        socialLinks: (b.social_links as unknown as SocialLinks) || undefined,
         pricingModel: b.pricing_model || undefined,
         founderName: b.founder_name || undefined,
       }));

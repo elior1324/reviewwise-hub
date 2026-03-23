@@ -72,7 +72,7 @@ export function useWidgetData(slug: string | null | undefined): UseWidgetDataRes
             .limit(MAX_REVIEWS);
 
           if (rows) {
-            const courseIds = [...new Set((rows as any[]).map(r => r.course_id).filter(Boolean))];
+            const courseIds = [...new Set(rows.map(r => r.course_id).filter(Boolean))];
             let courseNames: Record<string, string> = {};
 
             if (courseIds.length > 0) {
@@ -82,11 +82,11 @@ export function useWidgetData(slug: string | null | undefined): UseWidgetDataRes
                 .in("id", courseIds as string[]);
 
               if (courses) {
-                courseNames = Object.fromEntries((courses as any[]).map(c => [c.id, c.name]));
+                courseNames = Object.fromEntries(courses.map(c => [c.id, c.name]));
               }
             }
 
-            reviews = (rows as any[]).map(r => ({
+            reviews = rows.map(r => ({
               id: r.id,
               rating: Number(r.rating),
               text: r.text ?? "",

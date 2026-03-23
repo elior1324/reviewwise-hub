@@ -195,7 +195,7 @@ const ReportReviewDialog = ({ reviewId }: ReportReviewDialogProps) => {
       reporter_id: user.id,
       reason,
       details: details.trim() || null,
-    } as any);
+    });
     setSubmitting(false);
 
     if (error) {
@@ -219,7 +219,7 @@ const ReportReviewDialog = ({ reviewId }: ReportReviewDialogProps) => {
     try {
       const evidenceUrls = evidenceNote.trim() ? [evidenceNote.trim()] : undefined;
 
-      const { error } = await (supabase.from as any)("defamation_complaints").insert({
+      const { error } = await supabase.from("defamation_complaints").insert({
         review_id: reviewId,
         complainant_id: user?.id ?? null,
         complainant_name: complainantName.trim(),
@@ -227,7 +227,7 @@ const ReportReviewDialog = ({ reviewId }: ReportReviewDialogProps) => {
         complaint_type: complaintType,
         description: description.trim(),
         evidence_urls: evidenceUrls,
-      } as any);
+      });
 
       if (error) throw error;
       setStep("done");

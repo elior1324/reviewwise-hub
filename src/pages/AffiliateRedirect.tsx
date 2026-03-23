@@ -32,16 +32,18 @@ const AffiliateRedirect = () => {
       try {
         // ── 1. Try business slug — affiliate program link ─────────────────
         //    Checks affiliate_mode (new), affiliate_enrolled (legacy), and collaboration_active
-        const { data: biz } = await (supabase.from as any)("businesses")
+        const { data: bizRaw } = await supabase.from("businesses")
           .select("id, name, website, slug, affiliate_enrolled, affiliate_link_active, affiliate_mode, personal_affiliate_url, personal_affiliate_urls, collaboration_active, collaboration_method, collaboration_coupon")
           .eq("slug", courseId)
           .maybeSingle();
+
+        const biz = bizRaw;
 
         // ── 1a-i. Personal affiliate link mode ────────────────────────────
         //    Business has its own affiliate/tracking system; redirect directly.
         //    Prefer the array (personal_affiliate_urls), fall back to singular.
         if (biz && (biz.affiliate_mode === "personal_affiliate")) {
-          const rawUrls = (biz as any).personal_affiliate_urls as string[] | null;
+          const rawUrls = biz.personal_affiliate_urls as string[] | null;
           const allUrls: string[] = Array.isArray(rawUrls) && rawUrls.length > 0
             ? rawUrls.filter((u: string) => u.trim())
             : biz.personal_affiliate_url ? [biz.personal_affiliate_url] : [];
@@ -74,7 +76,7 @@ const AffiliateRedirect = () => {
           if (isNewSession) sessionStorage.setItem(sessionKey, sessionToken);
 
           // Track affiliate click
-          const { data: clickRecord } = await (supabase.from as any)("business_affiliate_clicks")
+          const { data: clickRecord } = await supabase.from("business_affiliate_clicks")
             .insert({
               business_id:   biz.id,
               session_token: isNewSession ? sessionToken : sessionStorage.getItem(sessionKey),
@@ -112,7 +114,7 @@ const AffiliateRedirect = () => {
 
         // ── 1b. Legacy collaboration program ─────────────────────────────
         if (biz && biz.website && biz.collaboration_active) {
-          await (supabase.from as any)("referral_clicks").insert({
+          await supabase.from("referral_clicks").insert({
             business_id:   biz.id,
             business_slug: courseId,
             referrer:      document.referrer || null,
@@ -123,7 +125,7 @@ const AffiliateRedirect = () => {
           const sessionKeyBiz = `rh_ps_biz_${biz.id}`;
           if (!sessionStorage.getItem(sessionKeyBiz)) {
             sessionStorage.setItem(sessionKeyBiz, "1");
-            await (supabase.from as any)("purchase_sessions").insert({
+            await supabase.from("purchase_sessions").insert({
               business_id: biz.id,
               referrer:    document.referrer || null,
               user_agent:  navigator.userAgent || null,
@@ -176,7 +178,7 @@ const AffiliateRedirect = () => {
         const sessionKey = `rh_ps_${courseId}`;
         if (!sessionStorage.getItem(sessionKey)) {
           sessionStorage.setItem(sessionKey, "1");
-          await (supabase.from as any)("purchase_sessions").insert({
+          await supabase.from("purchase_sessions").insert({
             course_id:   courseId,
             referrer:    document.referrer || null,
             user_agent:  navigator.userAgent || null,
@@ -238,7 +240,7 @@ const AffiliateRedirect = () => {
 
         {/* Course redirect */}
         {!error && target?.kind === "course" && (() => {
-          const price   = (target as any).price as number | null;
+          const price   = (target as Extract<RedirectTarget, { kind: "course" }>).price;
           const pricing = price ? computeVerifiedPricing(price) : null;
 
           return (
@@ -437,10 +439,10 @@ const AffiliateRedirect = () => {
             </div>
 
             {/* Additional URLs (when business has more than one) */}
-            {(target as any).additionalUrls && (target as any).additionalUrls.length > 0 && (
+            {(target as Extract<RedirectTarget, { kind: "personal" }>).additionalUrls && (target as Extract<RedirectTarget, { kind: "personal" }>).additionalUrls!.length > 0 && (
               <div className="rounded-xl border border-blue-200/60 bg-blue-50/30 p-4 text-right">
                 <p className="text-xs font-bold text-blue-700 mb-2">קישורים נוספים מהספק</p>
-                {((target as any).additionalUrls as string[]).map((url: string, i: number) => (
+                {(target as Extract<RedirectTarget, { kind: "personal" }>).additionalUrls!.map((url: string, i: number) => (
                   <a
                     key={i}
                     href={url}

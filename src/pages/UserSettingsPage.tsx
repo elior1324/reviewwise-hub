@@ -537,7 +537,7 @@ const ActivitySection = ({ userId }: { userId: string }) => {
             .select("*", { count: "exact", head: true })
             .eq("customer_user_id", userId),
         ]);
-        setReviews((reviewsData || []) as any as Review[]);
+        setReviews(reviewsData || []);
         setTotalPurchases(count || 0);
       } catch {
         toast.error("שגיאה בטעינת הנתונים");
@@ -637,13 +637,12 @@ const PointsSection = ({ userId }: { userId: string }) => {
     (async () => {
       setLoading(true);
       try {
-        const { data } = await (supabase as any)
-          .from("user_points")
+        const { data } = await supabase.from("user_points")
           .select("*")
           .eq("user_id", userId)
           .order("created_at", { ascending: false });
 
-        const rows = (data || []) as any as UserPoint[];
+        const rows: UserPoint[] = data || [];
         setPoints(rows);
         setTotalPoints(rows.reduce((s, p) => s + p.points, 0));
       } catch {
@@ -829,13 +828,13 @@ const UserSettingsPage = () => {
   useEffect(() => {
     if (!user) return;
     setLoadingProfile(true);
-    (supabase.from as any)("users")
+    supabase.from("users")
       .select("*")
       .eq("id", user.id)
       .single()
       .then(({ data, error }) => {
         if (error) { toast.error("שגיאה בטעינת הפרופיל"); return; }
-        setProfile(data as unknown as UserProfile);
+        setProfile(data);
       })
       .finally(() => setLoadingProfile(false));
   }, [user]);
@@ -845,7 +844,7 @@ const UserSettingsPage = () => {
     if (!user) return;
     setSaving(true);
     try {
-      const { error } = await (supabase.from as any)("users").update(updates).eq("id", user.id);
+      const { error } = await supabase.from("users").update(updates).eq("id", user.id);
       if (error) throw error;
       setProfile((prev) => (prev ? { ...prev, ...updates } : null));
       toast.success("הפרופיל עודכן בהצלחה");

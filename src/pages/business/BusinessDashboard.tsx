@@ -132,7 +132,7 @@ const PurchaseVerificationStats = ({ businessId, isDemo }: { businessId: string 
       setCounts({ approved: 18, pending: 4, rejected: 2 });
       return;
     }
-    (supabase.from as any)("purchase_verifications")
+    supabase.from("purchase_verifications")
       .select("status")
       .eq("business_id", businessId)
       .then(({ data }) => {
@@ -183,7 +183,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
       setLoading(false);
       return;
     }
-    const { data } = await (supabase.from as any)("purchase_verifications")
+    const { data } = await supabase.from("purchase_verifications")
       .select("*, reviews(text)")
       .eq("business_id", businessId)
       .order("submitted_at", { ascending: false })
@@ -201,7 +201,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
     const snapshot = rows;
     setRows(r => r.map(x => x.id === id ? { ...x, status: newStatus } : x));
     const row = rows.find(r => r.id === id);
-    const { error } = await (supabase.from as any)("purchase_verifications")
+    const { error } = await supabase.from("purchase_verifications")
       .update({ status: newStatus, reviewed_at: new Date().toISOString() })
       .eq("id", id);
     if (error) {
@@ -211,7 +211,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
     } else {
       // ── Trust moderation log ────────────────────────────────────────────
       // Fire-and-forget; log the manual moderation decision for audit trail.
-      (supabase.from as any)("trust_moderation_log").insert({
+      supabase.from("trust_moderation_log").insert({
         decision_type: newStatus === "approved" ? "verify_purchase_approved" : "verify_purchase_rejected",
         reason:        newStatus === "approved"
           ? "הוכחת הרכישה אומתה ידנית על-ידי הבעלים"
@@ -413,8 +413,8 @@ const BusinessDashboard = () => {
       setBusinessInfo({ name: biz.name, email: biz.email || user.email || "" });
       setDbTier((biz.subscription_tier || "free") as SubscriptionTier);
       // Affiliate program lifecycle
-      setAffiliateEnrolled(!!(biz as any).affiliate_enrolled);
-      setAffiliateProgramStatus((biz as any).affiliate_program_status || "not_set");
+      setAffiliateEnrolled(!!biz.affiliate_enrolled);
+      setAffiliateProgramStatus(biz.affiliate_program_status || "not_set");
 
       // Fetch monthly review count
       const startOfMonth = new Date();
@@ -539,13 +539,13 @@ const BusinessDashboard = () => {
 
       // Fetch collaboration config from business row
       setCollabConfig({
-        active: (biz as any).collaboration_active || false,
-        method: (biz as any).collaboration_method || null,
-        coupon: (biz as any).collaboration_coupon || null,
+        active: extBiz.collaboration_active || false,
+        method: extBiz.collaboration_method || null,
+        coupon: extBiz.collaboration_coupon || null,
       });
 
       // Fetch referral clicks count
-      const { count: rclickCount } = await (supabase.from as any)("referral_clicks")
+      const { count: rclickCount } = await supabase.from("referral_clicks")
         .select("id", { count: "exact", head: true })
         .eq("business_id", biz.id);
       setReferralClickCount(rclickCount || 0);
@@ -553,7 +553,7 @@ const BusinessDashboard = () => {
       // Fetch referral clicks by day (last 30 days)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const { data: rclickRows } = await (supabase.from as any)("referral_clicks")
+      const { data: rclickRows } = await supabase.from("referral_clicks")
         .select("created_at")
         .eq("business_id", biz.id)
         .gte("created_at", thirtyDaysAgo.toISOString())
@@ -1948,7 +1948,7 @@ const WhatsAppFlowPanel = ({
   useEffect(() => {
     if (isDemo || !businessId) return;
     setLoadingFlow(true);
-    (supabase.rpc as any)("get_or_create_whatsapp_flow", { p_business_id: businessId })
+    supabase.rpc("get_or_create_whatsapp_flow", { p_business_id: businessId })
       .then(({ data }) => {
         if (data && data.length > 0) setFlowToken(data[0].flow_token);
         setLoadingFlow(false);
@@ -1958,7 +1958,7 @@ const WhatsAppFlowPanel = ({
   // ── Load pending reviews ─────────────────────────────────────────────────
   useEffect(() => {
     if (isDemo || !businessId) return;
-    (supabase.from as any)("whatsapp_reviews")
+    supabase.from("whatsapp_reviews")
       .select("id, author_name, rating, text, received_at")
       .eq("business_id", businessId)
       .eq("is_approved", false)
@@ -1980,7 +1980,7 @@ const WhatsAppFlowPanel = ({
 
   const handleApprove = async (id: string) => {
     setApprovingId(id);
-    await (supabase.from as any)("whatsapp_reviews")
+    await supabase.from("whatsapp_reviews")
       .update({ is_approved: true, approved_at: new Date().toISOString() })
       .eq("id", id);
     setPendingReviews(prev => prev.filter(r => r.id !== id));
@@ -1989,7 +1989,7 @@ const WhatsAppFlowPanel = ({
 
   const handleReject = async (id: string) => {
     setRejectingId(id);
-    await (supabase.from as any)("whatsapp_reviews")
+    await supabase.from("whatsapp_reviews")
       .update({ is_flagged: true, flagged_reason: "rejected_by_owner" })
       .eq("id", id);
     setPendingReviews(prev => prev.filter(r => r.id !== id));
@@ -2192,8 +2192,8 @@ const InstagramDMFlowPanel = ({
   useEffect(() => {
     if (isDemo || !businessId) return;
     setLoadingFlow(true);
-    (supabase.rpc as any)("get_or_create_instagram_dm_flow", { p_business_id: businessId })
-      .then(({ data }: any) => {
+    supabase.rpc("get_or_create_instagram_dm_flow", { p_business_id: businessId })
+      .then(({ data }) => {
         if (data && data.length > 0) setFlowToken(data[0].flow_token);
         setLoadingFlow(false);
       });
@@ -2201,7 +2201,7 @@ const InstagramDMFlowPanel = ({
 
   useEffect(() => {
     if (isDemo || !businessId) return;
-    (supabase.from as any)("instagram_dm_reviews")
+    supabase.from("instagram_dm_reviews")
       .select("id, author_name, rating, text, received_at")
       .eq("business_id", businessId)
       .eq("is_approved", false)
@@ -2223,7 +2223,7 @@ const InstagramDMFlowPanel = ({
 
   const handleApprove = async (id: string) => {
     setApprovingId(id);
-    await (supabase.from as any)("instagram_dm_reviews")
+    await supabase.from("instagram_dm_reviews")
       .update({ is_approved: true, approved_at: new Date().toISOString() })
       .eq("id", id);
     setPendingReviews(prev => prev.filter(r => r.id !== id));
@@ -2232,7 +2232,7 @@ const InstagramDMFlowPanel = ({
 
   const handleReject = async (id: string) => {
     setRejectingId(id);
-    await (supabase.from as any)("instagram_dm_reviews")
+    await supabase.from("instagram_dm_reviews")
       .update({ is_flagged: true, flagged_reason: "rejected_by_owner" })
       .eq("id", id);
     setPendingReviews(prev => prev.filter(r => r.id !== id));

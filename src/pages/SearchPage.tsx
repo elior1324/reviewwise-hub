@@ -10,7 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, FREELANCER_CATEGORIES, SAAS_CATEGORIES,
-  SAAS_SUBCATEGORIES, PRICING_MODEL_LABELS, COURSE_FORMATS, type Business, type Course, type PricingModel, type CourseFormat,
+  SAAS_SUBCATEGORIES, PRICING_MODEL_LABELS, COURSE_FORMATS, type Business, type Course, type PricingModel, type CourseFormat, type SocialLinks,
 } from "@/data/mockData";
 import { Cpu } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -128,7 +128,7 @@ const SearchPage = () => {
           website: b.website || undefined,
           email: b.email || undefined,
           phone: b.phone || undefined,
-          socialLinks: b.social_links as any || undefined,
+          socialLinks: (b.social_links as unknown as SocialLinks) || undefined,
           pricingModel: b.pricing_model || undefined,
           founderName: b.founder_name || undefined,
           verifiedRatio: b.verified_ratio != null ? Number(b.verified_ratio) : undefined,

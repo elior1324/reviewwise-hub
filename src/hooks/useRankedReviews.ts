@@ -85,7 +85,8 @@ export const rankedReviewsKeys = {
 async function fetchRankedReviews(
   opts: UseRankedReviewsOptions,
 ): Promise<RankedReview[]> {
-  const { data, error } = await (supabase.rpc as any)("fn_get_ranked_reviews", {
+  // fn_get_ranked_reviews is not in the auto-generated types (migration-only RPC)
+  const { data, error } = await supabase.rpc("fn_get_ranked_reviews" as string, {
     p_business_id:    opts.businessId,
     p_limit:          opts.limit          ?? 20,
     p_offset:         opts.offset         ?? 0,
@@ -93,7 +94,7 @@ async function fetchRankedReviews(
     p_proof_only:     opts.proofOnly      ?? false,
     p_use_cache:      opts.useCache       ?? true,
     p_min_rank_score: opts.minRankScore   ?? 0.0,
-  });
+  } as Record<string, unknown>);
 
   if (error) throw new Error(error.message);
   return (data ?? []) as RankedReview[];

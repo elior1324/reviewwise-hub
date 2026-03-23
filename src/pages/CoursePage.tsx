@@ -106,10 +106,10 @@ const CoursePage = () => {
         reviewCount: totalReviews,
         verifiedPurchases: verifiedCount,
         affiliateUrl: courseData.affiliate_url || "",
-        businessSlug: (courseData.businesses as any)?.slug || "",
-        businessName: (courseData.businesses as any)?.name || "",
+        businessSlug: courseData.businesses?.slug || "",
+        businessName: courseData.businesses?.name || "",
         businessId: courseData.business_id,
-        businessAffiliateMode: (courseData.businesses as any)?.affiliate_mode ?? "none",
+        businessAffiliateMode: courseData.businesses?.affiliate_mode ?? "none",
       });
 
       if (reviewData) {
@@ -134,7 +134,7 @@ const CoursePage = () => {
           text: r.text || "",
           courseName: courseData.name || "",
           courseId: r.course_id || "",
-          businessSlug: (courseData.businesses as any)?.slug || "",
+          businessSlug: courseData.businesses?.slug || "",
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
           verified: r.verified || false,

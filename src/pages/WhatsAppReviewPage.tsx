@@ -96,20 +96,18 @@ const WhatsAppReviewPage = () => {
     if (!token) { setPageState("invalid"); return; }
 
     const resolve = async () => {
-      const { data: flow } = await (supabase as any)
-        .from("whatsapp_review_flows")
+      const { data: flow } = await supabase.from("whatsapp_review_flows")
         .select("id, active, business_id, businesses(name, slug)")
         .eq("flow_token", token)
         .maybeSingle();
 
-      if (!flow || !(flow as any).active) {
+      if (!flow || !flow.active) {
         setPageState("invalid");
         return;
       }
 
-      const biz = (flow as any).businesses as { name: string; slug: string } | null;
-      setBusinessName(biz?.name ?? "");
-      setBusinessSlug(biz?.slug ?? "");
+      setBusinessName(flow.businesses?.name ?? "");
+      setBusinessSlug(flow.businesses?.slug ?? "");
       setPageState("ready");
     };
 

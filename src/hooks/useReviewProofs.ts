@@ -28,6 +28,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth }  from "@/contexts/AuthContext";
 import type { ProofType } from "@/components/ProofBadge";
 
+// fn_attach_proof is not in auto-generated types (migration-only RPC).
+// This helper provides a typed wrapper to avoid repeating the cast pattern.
+function callAttachProof(args: Record<string, unknown>) {
+  return supabase.rpc("fn_attach_proof" as string, args);
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ReviewProof {
@@ -147,8 +153,7 @@ export function useReviewProofs(reviewId: string): UseReviewProofsReturn {
     setLoading(true);
     setError(null);
 
-    const { data, error: err } = await (supabase.from as any)("review_proofs")
-      .select("*")
+    const { data, error: err } = await supabase.from("review_proofs")
       .select("*")
       .eq("review_id", reviewId)
       .order("created_at", { ascending: false });
@@ -204,7 +209,7 @@ export function useReviewProofs(reviewId: string): UseReviewProofsReturn {
         if (uploadErr) throw new Error(uploadErr.message);
 
         // 3. Attach proof via DB function
-        const { data: proofId, error: fnErr } = await (supabase.rpc as any)("fn_attach_proof", {
+        const { data: proofId, error: fnErr } = await callAttachProof( {
             p_review_id:       reviewId,
             p_user_id:         user.id,
             p_proof_type:      proofType,
@@ -248,7 +253,7 @@ export function useReviewProofs(reviewId: string): UseReviewProofsReturn {
         const { latitude, longitude, accuracy } = position.coords;
 
         // 2. Attach proof via DB function
-        const { data: proofId, error: fnErr } = await (supabase.rpc as any)("fn_attach_proof", {
+        const { data: proofId, error: fnErr } = await callAttachProof( {
             p_review_id:            reviewId,
             p_user_id:              user.id,
             p_proof_type:           "location_gps",
@@ -288,7 +293,7 @@ export function useReviewProofs(reviewId: string): UseReviewProofsReturn {
       setError(null);
 
       try {
-        const { data: proofId, error: fnErr } = await (supabase.rpc as any)("fn_attach_proof", {
+        const { data: proofId, error: fnErr } = await callAttachProof( {
             p_review_id:        reviewId,
             p_user_id:          user.id,
             p_proof_type:       "booking_ref",

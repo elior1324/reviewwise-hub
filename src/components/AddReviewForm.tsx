@@ -241,7 +241,7 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
           return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
         })();
 
-        const { error: entryError } = await (supabase.from as any)("giveaway_entries").insert({
+        const { error: entryError } = await supabase.from("giveaway_entries").insert({
           user_id:        user.id,
           review_id:      fnResult.reviewId,
           giveaway_month: giveawayMonth,

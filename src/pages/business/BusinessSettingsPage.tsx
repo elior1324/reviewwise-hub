@@ -699,8 +699,8 @@ const BusinessSettingsPage = () => {
         }
 
         if (data) {
-          setBusiness(data as any);
-          const d = data as any;
+          const d = data;
+          setBusiness(d);
           setProfileForm({
             name: d.name || "",
             description: d.description || "",

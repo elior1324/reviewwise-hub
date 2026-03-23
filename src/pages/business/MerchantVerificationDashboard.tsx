@@ -226,7 +226,7 @@ export default function MerchantVerificationDashboard() {
     if (!businessId || token) return;
     setLoading(true);
 
-    const query = (supabase.from as any)("merchant_verif_queue")
+    const query = supabase.from("merchant_verif_queue")
       .select("*")
       .eq("business_id", businessId)
       .order("created_at", { ascending: false });

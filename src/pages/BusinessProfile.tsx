@@ -87,10 +87,12 @@ const BusinessProfile = () => {
       //   phone, category, description, slug, verified, created_at
       // NOTE: rating, review_count, logo_url, social_links do NOT exist in this table.
       //   Rating and reviewCount are computed below from the reviews we fetch.
-      const { data: bizData } = await (supabase.from as any)("businesses")
+      const { data: bizRaw } = await supabase.from("businesses")
         .select("id, slug, name, website, email, phone, category, description, verified, logo_url, social_links, created_at, founder_name, collaboration_active, collaboration_method, collaboration_coupon, trust_status, trust_status_reason, transparency_score, response_rate, avg_response_hours, verified_review_ratio, ai_summary, sentiment_score, trending_score, ai_flags, affiliate_mode, personal_affiliate_url, personal_affiliate_urls")
         .eq("slug", slug)
         .maybeSingle();
+
+      const bizData = bizRaw;
 
       if (!bizData) {
         setLoading(false);
@@ -116,10 +118,10 @@ const BusinessProfile = () => {
       setAiFlags(Array.isArray(bizData.ai_flags) ? bizData.ai_flags : []);
 
       // Affiliate program
-      setAffiliateMode(((bizData as any).affiliate_mode as "reviewhub_model" | "personal_affiliate" | "none") || "none");
+      setAffiliateMode((bizData.affiliate_mode as "reviewhub_model" | "personal_affiliate" | "none") || "none");
       {
-        const rawUrls  = (bizData as any).personal_affiliate_urls as string[] | null;
-        const singular = (bizData as any).personal_affiliate_url  as string | null;
+        const rawUrls  = bizData.personal_affiliate_urls as string[] | null;
+        const singular = bizData.personal_affiliate_url  as string | null;
         const urls: string[] = Array.isArray(rawUrls) && rawUrls.length > 0
           ? rawUrls
           : singular ? [singular] : [];
@@ -176,7 +178,7 @@ const BusinessProfile = () => {
         .order("created_at", { ascending: false });
 
       // ── AI Summary metadata ──────────────────────────────────────────────────
-      const { data: summaryMeta } = await (supabase.from as any)("ai_summary_meta")
+      const { data: summaryMeta } = await supabase.from("ai_summary_meta")
         .select("review_count, period_start, period_end, generated_at")
         .eq("business_id", bizData.id)
         .eq("is_current", true)
@@ -287,15 +289,15 @@ const BusinessProfile = () => {
           website: bizData.website || undefined,
           email: bizData.email || undefined,
           phone: bizData.phone || undefined,
-          founderName: (bizData as any).founder_name || undefined,
-          socialLinks: (bizData as any).social_links || undefined,
+          founderName: bizData.founder_name || undefined,
+          socialLinks: bizData.social_links as Record<string, string> | undefined,
           createdAt: bizData.created_at || undefined,
         };
         setBusiness(mappedBiz);
       }
 
       // ── 4. Fetch Google external profile + reviews ───────────────────────────
-      const { data: extProfile } = await (supabase.from as any)("business_external_profiles")
+      const { data: extProfile } = await supabase.from("business_external_profiles")
         .select("external_id,external_url,external_name,external_rating,external_review_count,last_synced_at,sync_status")
         .eq("business_id", bizData.id)
         .eq("status", "confirmed")
@@ -304,7 +306,7 @@ const BusinessProfile = () => {
       if (extProfile) {
         setGoogleProfile(extProfile as GoogleProfileData);
 
-        const { data: gReviews } = await (supabase.from as any)("imported_google_reviews")
+        const { data: gReviews } = await supabase.from("imported_google_reviews")
           .select("id,author_name,author_photo_url,rating,text,published_at,source_url")
           .eq("business_id", bizData.id)
           .eq("display_allowed", true)
@@ -316,7 +318,7 @@ const BusinessProfile = () => {
       }
 
       // ── 5. Fetch WhatsApp reviews (approved, non-flagged) ────────────────────
-      const { data: waReviews } = await (supabase.from as any)("whatsapp_reviews")
+      const { data: waReviews } = await supabase.from("whatsapp_reviews")
         .select("id, author_name, rating, text, received_at, source_url")
         .eq("business_id", bizData.id)
         .eq("is_approved", true)
@@ -326,7 +328,7 @@ const BusinessProfile = () => {
       if (waReviews) setWhatsappReviews(waReviews as WhatsAppReview[]);
 
       // ── 5b. Fetch Instagram DM reviews (approved, non-flagged) ───────────────
-      const { data: igReviews } = await (supabase.from as any)("instagram_dm_reviews")
+      const { data: igReviews } = await supabase.from("instagram_dm_reviews")
         .select("id, author_name, rating, text, received_at")
         .eq("business_id", bizData.id)
         .eq("is_approved", true)
@@ -336,7 +338,7 @@ const BusinessProfile = () => {
       if (igReviews) setInstagramReviews(igReviews as InstagramDMReview[]);
 
       // ── 6. Fetch Facebook reviews ────────────────────────────────────────────
-      const { data: fbReviews } = await (supabase.from as any)("facebook_reviews")
+      const { data: fbReviews } = await supabase.from("facebook_reviews")
         .select("id, author_name, author_profile_url, author_photo_url, rating, text, published_at, source_url")
         .eq("business_id", bizData.id)
         .order("published_at", { ascending: false });
@@ -418,7 +420,7 @@ const BusinessProfile = () => {
   const handleCollabAccess = async () => {
     if (!dbBusinessId || !slug) return;
     // Record click
-    await (supabase.from as any)("referral_clicks").insert({
+    await supabase.from("referral_clicks").insert({
       business_id: dbBusinessId,
       business_slug: slug,
       referrer: document.referrer || null,

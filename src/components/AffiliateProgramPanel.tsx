@@ -295,17 +295,19 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
 
     setLoading(true);
     try {
-      const { data: biz } = await (supabase.from as any)("businesses")
+      const { data: bizRaw } = await supabase
+        .from("businesses")
         .select("affiliate_enrolled, affiliate_program_status, affiliate_mode, personal_affiliate_url, personal_affiliate_urls")
         .eq("id", businessId)
         .single();
 
+      const biz = bizRaw;
+
       if (biz) {
         const mode     = (biz.affiliate_mode as AffiliateMode) || "none";
         const status   = (biz.affiliate_program_status as AffiliateProgramStatus) || "not_set";
-        const url      = (biz.personal_affiliate_url as string) || "";
-        // Load URL array; fall back to wrapping singular URL
-        const rawUrls  = (biz as any).personal_affiliate_urls as string[] | null;
+        const url      = biz.personal_affiliate_url || "";
+        const rawUrls  = biz.personal_affiliate_urls;
         const urls: string[] = Array.isArray(rawUrls) && rawUrls.length > 0
           ? rawUrls
           : url ? [url] : [""];
@@ -320,16 +322,16 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
       }
 
       // Stats only relevant for reviewhub_model
-      const { data: statsData } = await (supabase.rpc as any)("get_affiliate_stats", { p_business_id: businessId });
+      const { data: statsData } = await supabase.rpc("get_affiliate_stats", { p_business_id: businessId });
       if (statsData) setStats(statsData as AffiliateStats);
 
-      const { data: convData } = await (supabase.from as any)("business_affiliate_conversions")
+      const { data: convData } = await supabase.from("business_affiliate_conversions")
         .select("id, transaction_amount, customer_discount, platform_commission, business_net, coupon_code, status, created_at")
         .eq("business_id", businessId)
         .order("created_at", { ascending: false })
         .limit(10);
 
-      if (convData) setConversions(convData as Conversion[]);
+      if (convData) setConversions(convData as unknown as Conversion[]);
     } catch (err) {
       console.error("[AffiliateProgramPanel] load error:", err);
     } finally {
@@ -375,7 +377,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
       : [];
     const primaryUrl = validUrls[0] ?? null;
 
-    const updatePayload: Record<string, unknown> = {
+    const updatePayload = {
       affiliate_mode:           draftMode,
       personal_affiliate_url:   primaryUrl,
       personal_affiliate_urls:  validUrls,
@@ -387,7 +389,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
     try {
       const { error } = await supabase
         .from("businesses")
-        .update(updatePayload as any)
+        .update(updatePayload)
         .eq("id", businessId);
 
       if (error) throw error;
@@ -443,7 +445,7 @@ const AffiliateProgramPanel = ({ businessId, businessSlug, isDemo, onEnrolledCha
           affiliate_enrolled_at:    requestedValue ? new Date().toISOString() : null,
           affiliate_program_status: newStatus,
           affiliate_mode:           requestedValue ? "reviewhub_model" : "none",
-        } as any)
+        })
         .eq("id", businessId);
 
       if (error) throw error;

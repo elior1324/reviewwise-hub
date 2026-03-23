@@ -161,11 +161,10 @@ const UserReferralDashboard = () => {
     setLoading(true);
     try {
       const [statsRes, rewardsRes, redemptionsRes] = await Promise.all([
-        (supabase.rpc as any)("get_my_referral_stats"),
-        (supabase.from as any)("reward_catalog").select("*").eq("active", true).order("points_required"),
+        supabase.rpc("get_my_referral_stats", {}),
+        supabase.from("reward_catalog").select("*").eq("active", true).order("points_required"),
         // Count how many rewards this user has already redeemed (graceful fallback if table missing)
-        supabase
-          .from("reward_redemptions" as any)
+        supabase.from("reward_redemptions")
           .select("id", { count: "exact", head: true })
           .eq("user_id", user?.id ?? ""),
       ]);
@@ -175,7 +174,7 @@ const UserReferralDashboard = () => {
       } else if (statsRes.data && !Array.isArray(statsRes.data)) {
         setStats(statsRes.data as unknown as ReferralStats);
       }
-      if (rewardsRes.data) setRewards(rewardsRes.data as RewardItem[]);
+      if (rewardsRes.data) setRewards(rewardsRes.data);
       if (redemptionsRes.count !== null) setRedeemedCount(redemptionsRes.count);
     } finally {
       setLoading(false);
@@ -188,7 +187,7 @@ const UserReferralDashboard = () => {
 
   useEffect(() => {
     if (!user) return;
-    (supabase.rpc as any)("get_or_create_my_invite_code").then(({ data }) => {
+    supabase.rpc("get_or_create_my_invite_code", {}).then(({ data }) => {
       if (data && !stats?.invite_code) {
         setStats((prev) => prev ? { ...prev, invite_code: data as string } : {
           invite_code:     data as string,
@@ -224,7 +223,7 @@ const UserReferralDashboard = () => {
     }
     setRedeeming(rewardId);
     try {
-      const { error } = await (supabase.rpc as any)("redeem_reward", { p_reward_id: rewardId });
+      const { error } = await supabase.rpc("redeem_reward", { p_reward_id: rewardId });
       if (error) {
         toast.error(error.message ?? "שגיאה במימוש הפרס");
       } else {
