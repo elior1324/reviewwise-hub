@@ -638,7 +638,7 @@ const PointsSection = ({ userId }: { userId: string }) => {
       setLoading(true);
       try {
         const { data } = await supabase
-          .from("user_points")
+          .from("user_points" as any)
           .select("*")
           .eq("user_id", userId)
           .order("created_at", { ascending: false });

@@ -48,7 +48,7 @@ const GiveawayPage = () => {
 
       // Past winners (public)
       const { data: winnerData } = await supabase
-        .from("giveaway_winners")
+        .from("giveaway_winners" as any)
         .select("month_year, prize_amount, announced_at")
         .not("announced_at", "is", null)
         .order("month_year", { ascending: false })
@@ -58,7 +58,7 @@ const GiveawayPage = () => {
 
       // This month's entry count (public aggregate)
       const { count } = await supabase
-        .from("giveaway_entries")
+        .from("giveaway_entries" as any)
         .select("id", { count: "exact", head: true })
         .eq("giveaway_month", currentMonth());
 
@@ -67,7 +67,7 @@ const GiveawayPage = () => {
       // My entries this month
       if (user) {
         const { count: myCount } = await supabase
-          .from("giveaway_entries")
+          .from("giveaway_entries" as any)
           .select("id", { count: "exact", head: true })
           .eq("user_id", user.id)
           .eq("giveaway_month", currentMonth());

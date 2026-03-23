@@ -103,7 +103,7 @@ const InstagramDMReviewPage = () => {
 
     const resolve = async () => {
       const { data: flow } = await supabase
-        .from("instagram_dm_review_flows")
+        .from("instagram_dm_review_flows" as any)
         .select("id, active, business_id, businesses(name, slug)")
         .eq("flow_token", token)
         .maybeSingle();
