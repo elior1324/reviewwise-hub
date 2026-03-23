@@ -2192,9 +2192,8 @@ const InstagramDMFlowPanel = ({
   useEffect(() => {
     if (isDemo || !businessId) return;
     setLoadingFlow(true);
-    supabase
-      .rpc("get_or_create_instagram_dm_flow", { p_business_id: businessId })
-      .then(({ data }) => {
+    (supabase.rpc as any)("get_or_create_instagram_dm_flow", { p_business_id: businessId })
+      .then(({ data }: any) => {
         if (data && data.length > 0) setFlowToken(data[0].flow_token);
         setLoadingFlow(false);
       });

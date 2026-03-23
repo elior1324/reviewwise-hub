@@ -102,8 +102,8 @@ const InstagramDMReviewPage = () => {
     if (!token) { setPageState("invalid"); return; }
 
     const resolve = async () => {
-      const { data: flow } = await supabase
-        .from("instagram_dm_review_flows" as any)
+      const { data: flow } = await (supabase as any)
+        .from("instagram_dm_review_flows")
         .select("id, active, business_id, businesses(name, slug)")
         .eq("flow_token", token)
         .maybeSingle();
