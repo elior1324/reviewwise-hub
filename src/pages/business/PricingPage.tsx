@@ -63,22 +63,16 @@ const PricingPage = () => {
       return;
     }
 
-    // ── Validate required Grow fields ─────────────────────────────────────
-    const fullName = profileName || user.user_metadata?.full_name || null;
-    const phone    = profilePhone || user.phone || null;
-
-    if (!fullName) {
-      setCheckoutError("חסר שם מלא בפרופיל — אנא עדכנו את הפרטים בהגדרות לפני המשך לתשלום");
-      return;
-    }
-    if (!phone) {
-      setCheckoutError("חסר מספר טלפון בפרופיל — אנא עדכנו את הפרטים בהגדרות לפני המשך לתשלום");
-      return;
-    }
-
     setCheckoutLoading(true);
     setCheckoutError(null);
     try {
+      // ── Resolve user fields directly (no dependency on async profile state) ──
+      const userEmail = user.email ?? "";
+      const fullName  = profileName
+        || (user.user_metadata as Record<string, unknown>)?.full_name as string | undefined
+        || "";
+      const phone     = profilePhone || user.phone || "";
+
       // ── Build plan identifiers (pricing is defined in Grow, not here) ───
       const cycle = billingCycle === "annually" ? "annual" : billingCycle;
       const priceId = `plan_${selectedPlanId}_${cycle}`;
@@ -86,14 +80,14 @@ const PricingPage = () => {
         ? `ReviewHub Pro — ${cycle === "annual" ? "שנתי" : "חודשי"}`
         : `ReviewHub Enterprise — ${cycle === "annual" ? "שנתי" : "חודשי"}`;
 
-      // ── Build webhook payload ───────────────────────────────────────────
+      // ── Build webhook payload (all keys always present) ─────────────────
       const payload = {
         plan:          selectedPlanId,
         billing_cycle: cycle,
         price_id:      priceId,
         title,
         user_id:       user.id,
-        user_email:    user.email ?? "",
+        user_email:    userEmail,
         full_name:     fullName,
         phone,
         success_url:   `${window.location.origin}/business/dashboard?payment=success`,
@@ -101,7 +95,7 @@ const PricingPage = () => {
         debug_version: "checkout_v2_live_test",
       };
 
-      console.log("[Checkout] Sending to Make webhook JSON:", JSON.stringify(payload, null, 2));
+      console.log("FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
 
       // ── Call Make webhook → Grow payment link creation ──────────────────
       const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL
