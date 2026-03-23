@@ -9,7 +9,6 @@ import { Zap, ArrowLeft, BarChart3, TrendingUp, Bell, LineChart, Target, Eye,
          Loader2, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 
 // ── Analytics features (merged from AnalyticsSolution) ────────────────────────
 const ANALYTICS_FEATURES = [
@@ -41,29 +40,37 @@ const PricingPage = () => {
     setCheckoutLoading(true);
     setCheckoutError(null);
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) throw new Error("לא נמצאה הפעלה פעילה — אנא התחברו מחדש");
-
-      // Normalise billing cycle: frontend uses "annually", Edge Function expects "annual"
+      // ── Resolve plan pricing ──────────────────────────────────────────────
       const cycle = billingCycle === "annually" ? "annual" : billingCycle;
+      const planKey = `${selectedPlanId}_${cycle}`;
+      const planPrices: Record<string, { price: number; label: string; priceId: string }> = {
+        pro_monthly:        { price: 189,  label: "ReviewHub Pro — חודשי",        priceId: "plan_pro_monthly"        },
+        pro_annual:         { price: 1814, label: "ReviewHub Pro — שנתי",         priceId: "plan_pro_annual"         },
+        enterprise_monthly: { price: 479,  label: "ReviewHub Enterprise — חודשי", priceId: "plan_enterprise_monthly" },
+        enterprise_annual:  { price: 4598, label: "ReviewHub Enterprise — שנתי",  priceId: "plan_enterprise_annual"  },
+      };
+      const planMeta = planPrices[planKey];
+      if (!planMeta) throw new Error("תוכנית לא תקינה");
 
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://pujsopidbejeuqteormi.supabase.co";
+      // ── Call Make webhook → Grow payment link creation ────────────────────
+      const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL
+        || "https://hook.eu1.make.com/hmk5zq1jvyyc4fn1kkkg0y3jyg541k29";
 
-      const res = await fetch(
-        `${supabaseUrl}/functions/v1/create-checkout`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            plan: selectedPlanId,
-            billing_cycle: cycle,
-          }),
-        }
-      );
+      const res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan:          selectedPlanId,
+          billing_cycle: cycle,
+          price_id:      planMeta.priceId,
+          price:         planMeta.price,
+          title:         planMeta.label,
+          user_id:       user.id,
+          user_email:    user.email ?? "",
+          success_url:   `${window.location.origin}/business/dashboard?payment=success`,
+          cancel_url:    `${window.location.origin}/business/pricing`,
+        }),
+      });
 
       let data: Record<string, unknown>;
       try {
@@ -74,22 +81,22 @@ const PricingPage = () => {
 
       if (!res.ok) {
         const serverMsg = typeof data.error === "string" ? data.error : "";
-        // Translate known server errors to user-friendly Hebrew
-        if (serverMsg === "Payment provider not configured") {
-          throw new Error("מערכת התשלומים עדיין לא מוגדרת — אנא נסו שוב מאוחר יותר");
-        }
-        throw new Error(serverMsg || "שגיאה ביצירת עמוד תשלום");
+        throw new Error(serverMsg || "שגיאה ביצירת קישור תשלום");
       }
 
-      // Validate the checkout URL before redirecting
-      const checkoutUrl = typeof data.checkoutUrl === "string" ? data.checkoutUrl : "";
+      // ── Extract and validate payment URL ──────────────────────────────────
+      // Grow returns data.url; Make may wrap it as checkoutUrl or url
+      const checkoutUrl =
+        (typeof data.checkoutUrl === "string" && data.checkoutUrl) ||
+        (typeof data.url === "string" && data.url) ||
+        "";
       if (!checkoutUrl) {
         throw new Error("לא התקבל קישור תשלום מהשרת");
       }
       try {
-        new URL(checkoutUrl); // validate it's a well-formed URL
+        new URL(checkoutUrl);
       } catch {
-        console.error("[Checkout] Invalid checkoutUrl received:", checkoutUrl.slice(0, 80));
+        console.error("[Checkout] Invalid payment URL:", checkoutUrl.slice(0, 80));
         throw new Error("קישור התשלום שהתקבל אינו תקין — אנא נסו שוב");
       }
 
