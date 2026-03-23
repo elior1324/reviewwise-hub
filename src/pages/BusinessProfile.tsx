@@ -336,8 +336,7 @@ const BusinessProfile = () => {
       if (igReviews) setInstagramReviews(igReviews as InstagramDMReview[]);
 
       // ── 6. Fetch Facebook reviews ────────────────────────────────────────────
-      const { data: fbReviews } = await supabase
-        .from("facebook_reviews")
+      const { data: fbReviews } = await (supabase.from as any)("facebook_reviews")
         .select("id, author_name, author_profile_url, author_photo_url, rating, text, published_at, source_url")
         .eq("business_id", bizData.id)
         .order("published_at", { ascending: false });
