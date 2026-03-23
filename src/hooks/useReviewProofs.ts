@@ -288,8 +288,7 @@ export function useReviewProofs(reviewId: string): UseReviewProofsReturn {
       setError(null);
 
       try {
-        const { data: proofId, error: fnErr } = await supabase
-          .rpc("fn_attach_proof", {
+        const { data: proofId, error: fnErr } = await (supabase.rpc as any)("fn_attach_proof", {
             p_review_id:        reviewId,
             p_user_id:          user.id,
             p_proof_type:       "booking_ref",

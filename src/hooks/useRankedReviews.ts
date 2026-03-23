@@ -85,7 +85,7 @@ export const rankedReviewsKeys = {
 async function fetchRankedReviews(
   opts: UseRankedReviewsOptions,
 ): Promise<RankedReview[]> {
-  const { data, error } = await supabase.rpc("fn_get_ranked_reviews", {
+  const { data, error } = await (supabase.rpc as any)("fn_get_ranked_reviews", {
     p_business_id:    opts.businessId,
     p_limit:          opts.limit          ?? 20,
     p_offset:         opts.offset         ?? 0,

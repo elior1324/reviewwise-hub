@@ -223,7 +223,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!code) return;
     localStorage.removeItem("rh_invite_code"); // clear immediately to avoid double-processing
     try {
-      const { error } = await supabase.rpc("process_user_referral", {
+      const { error } = await (supabase.rpc as any)("process_user_referral", {
         invite_code: code,
         new_user_id: userId,
       });

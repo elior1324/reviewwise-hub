@@ -32,8 +32,7 @@ const AffiliateRedirect = () => {
       try {
         // ── 1. Try business slug — affiliate program link ─────────────────
         //    Checks affiliate_mode (new), affiliate_enrolled (legacy), and collaboration_active
-        const { data: biz } = await supabase
-          .from("businesses")
+        const { data: biz } = await (supabase.from as any)("businesses")
           .select("id, name, website, slug, affiliate_enrolled, affiliate_link_active, affiliate_mode, personal_affiliate_url, personal_affiliate_urls, collaboration_active, collaboration_method, collaboration_coupon")
           .eq("slug", courseId)
           .maybeSingle();

@@ -102,7 +102,7 @@ const PROOF_CARDS: ProofCardConfig[] = [
 // ─── Helper: proof status display ─────────────────────────────────────────────
 
 function proofStatusDisplay(proof: ReviewProof | undefined): {
-  icon: React.FC<{ size?: number; className?: string }>;
+  icon: React.FC<{ size?: number | string; className?: string }>;
   label: string;
   color: string;
 } {

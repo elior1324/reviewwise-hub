@@ -135,7 +135,7 @@ const METHOD_META: Record<VerificationMethod, {
 
 const STATUS_META: Record<AfveStatus, {
   label:   string;
-  icon:    React.FC<{ size?: number; className?: string }>;
+  icon:    React.FC<{ size?: number | string; className?: string }>;
   bg:      string;
   border:  string;
   text:    string;
