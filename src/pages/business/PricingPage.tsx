@@ -66,13 +66,6 @@ const PricingPage = () => {
     setCheckoutLoading(true);
     setCheckoutError(null);
     try {
-      // ── Resolve user fields directly (no dependency on async profile state) ──
-      const userEmail = user.email ?? "";
-      const fullName  = profileName
-        || (user.user_metadata as Record<string, unknown>)?.full_name as string | undefined
-        || "";
-      const phone     = profilePhone || user.phone || "";
-
       // ── Build plan identifiers (pricing is defined in Grow, not here) ───
       const cycle = billingCycle === "annually" ? "annual" : billingCycle;
       const priceId = `plan_${selectedPlanId}_${cycle}`;
@@ -80,16 +73,18 @@ const PricingPage = () => {
         ? `ReviewHub Pro — ${cycle === "annual" ? "שנתי" : "חודשי"}`
         : `ReviewHub Enterprise — ${cycle === "annual" ? "שנתי" : "חודשי"}`;
 
-      // ── Build webhook payload (all keys always present) ─────────────────
+      // ── Build webhook payload (all keys always present, inline from user) ─
       const payload = {
         plan:          selectedPlanId,
         billing_cycle: cycle,
         price_id:      priceId,
-        title,
+        title:         title,
         user_id:       user.id,
-        user_email:    userEmail,
-        full_name:     fullName,
-        phone,
+        user_email:    user.email || "",
+        full_name:     (user as Record<string, unknown>).user_metadata
+                         ? String(((user as Record<string, unknown>).user_metadata as Record<string, unknown>)?.full_name || "")
+                         : "",
+        phone:         user.phone || "",
         success_url:   `${window.location.origin}/business/dashboard?payment=success`,
         cancel_url:    `${window.location.origin}/business/pricing`,
         debug_version: "checkout_v2_live_test",
