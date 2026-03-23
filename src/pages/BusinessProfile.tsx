@@ -87,8 +87,7 @@ const BusinessProfile = () => {
       //   phone, category, description, slug, verified, created_at
       // NOTE: rating, review_count, logo_url, social_links do NOT exist in this table.
       //   Rating and reviewCount are computed below from the reviews we fetch.
-      const { data: bizData } = await supabase
-        .from("businesses")
+      const { data: bizData } = await (supabase.from as any)("businesses")
         .select("id, slug, name, website, email, phone, category, description, verified, logo_url, social_links, created_at, founder_name, collaboration_active, collaboration_method, collaboration_coupon, trust_status, trust_status_reason, transparency_score, response_rate, avg_response_hours, verified_review_ratio, ai_summary, sentiment_score, trending_score, ai_flags, affiliate_mode, personal_affiliate_url, personal_affiliate_urls")
         .eq("slug", slug)
         .maybeSingle();

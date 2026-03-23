@@ -176,7 +176,7 @@ const AffiliateRedirect = () => {
         const sessionKey = `rh_ps_${courseId}`;
         if (!sessionStorage.getItem(sessionKey)) {
           sessionStorage.setItem(sessionKey, "1");
-          await supabase.from("purchase_sessions").insert({
+          await (supabase.from as any)("purchase_sessions").insert({
             course_id:   courseId,
             referrer:    document.referrer || null,
             user_agent:  navigator.userAgent || null,
