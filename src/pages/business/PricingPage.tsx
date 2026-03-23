@@ -50,9 +50,13 @@ const PricingPage = () => {
         .maybeSingle();
 
       // Same fallback chain as BusinessSettingsPage contact form
-      const bizEmail = biz?.email || "";
+      const bizEmail = biz?.email || user.email || "";
       const bizPhone = biz?.phone || "";
       const bizFullName = biz?.founder_name || biz?.name || "";
+
+      if (!bizPhone) {
+        throw new Error("חסר מספר טלפון בפרופיל העסק — עדכנו בהגדרות ונסו שוב");
+      }
 
       // ── Build plan identifiers (pricing is defined in Grow, not here) ───
       const cycle = billingCycle === "annually" ? "yearly" : billingCycle;
