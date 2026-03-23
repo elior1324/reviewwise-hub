@@ -20,6 +20,8 @@ import {
   CheckCircle2,
   HelpCircle,
   ChevronDown,
+  Tag,
+  Eye,
 } from "lucide-react";
 
 const fadeUp = {
@@ -347,26 +349,90 @@ export default function BusinessAboutPage() {
         </div>
       </section>
 
-      {/* ── Affiliate ────────────────────────────────────────── */}
-      <section className="border-y border-border/50 bg-primary/5">
+      {/* ── Affiliate & Collaboration paths ──────────────────── */}
+      <section className="border-y border-border/50 bg-primary/5" id="collaboration">
         <div className="container py-16">
           <motion.div
-            className="max-w-2xl mx-auto text-center"
+            className="max-w-3xl mx-auto"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            variants={fadeUp}
-            custom={0}
           >
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Link2 size={22} className="text-primary" aria-hidden="true" />
+            {/* Section header */}
+            <motion.div variants={fadeUp} custom={0} className="text-center mb-10">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Link2 size={22} className="text-primary" aria-hidden="true" />
+              </div>
+              <h2 className="font-display font-bold text-xl md:text-2xl text-foreground mb-3">
+                הפרופיל שלך גם מרוויח
+              </h2>
+              <p className="text-muted-foreground leading-relaxed max-w-xl mx-auto">
+                צרף קישור לקורס, שירות, או מוצר. כל לקוח שמגיע לפרופיל שלך ולוחץ — הקליק נרשם, הוא מועבר ליעד. האמון שבנית הופך לתנועה.
+              </p>
+            </motion.div>
+
+            {/* Two collaboration paths */}
+            <motion.div variants={fadeUp} custom={1} className="mb-8">
+              <div className="inline-flex items-center gap-2 bg-card border border-border/50 text-muted-foreground text-xs font-semibold px-3 py-1 rounded-full mb-6 mx-auto block w-fit">
+                2 דרכים ליצירת שיתוף פעולה שיווקי — אופציונלי לחלוטין
+              </div>
+            </motion.div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Path 1 — discount-based */}
+              <motion.div
+                variants={fadeUp}
+                custom={2}
+                className="rounded-xl border border-border/50 bg-card p-6 flex flex-col gap-4"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Tag size={17} className="text-primary" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-display font-semibold text-foreground text-sm">מסלול הנחה</p>
+                    <p className="text-xs text-muted-foreground">Verified Deal</p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  תוכל להציע הנחה ללקוחות שמגיעים דרך ReviewHub. הנחה שכזו יכולה לעודד רכישות ולהגדיל את הפעילות בפרופיל שלך. ReviewHub גובה עמלת תפעול רק על עסקאות שהושלמו — אין חיוב קבוע מראש.
+                </p>
+                <p className="text-xs text-muted-foreground/70 mt-auto pt-2 border-t border-border/30">
+                  ניתן להפעיל מלוח הבקרה · לא חובה · ניתן לביטול בכל עת
+                </p>
+              </motion.div>
+
+              {/* Path 2 — visibility-based */}
+              <motion.div
+                variants={fadeUp}
+                custom={3}
+                className="rounded-xl border border-border/50 bg-card p-6 flex flex-col gap-4"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Eye size={17} className="text-primary" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-display font-semibold text-foreground text-sm">מסלול חשיפה</p>
+                    <p className="text-xs text-muted-foreground">Profile & Trust</p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  עסקים שמעדיפים לא להציע הנחה יכולים להתמקד בחיזוק הנוכחות הדיגיטלית שלהם — פרופיל מלא, ביקורות שנבדקו, ואמון שנבנה לאורך זמן. מסלול זה מתאים לעסקים שרוצים לחזק את עצמם ללא תמחור פרומואי.
+                </p>
+                <p className="text-xs text-muted-foreground/70 mt-auto pt-2 border-t border-border/30">
+                  ברירת המחדל לכל עסק · ללא עמלות תפעול נוספות
+                </p>
+              </motion.div>
             </div>
-            <h2 className="font-display font-bold text-xl md:text-2xl text-foreground mb-3">
-              הפרופיל שלך גם מרוויח
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              צרף קישור אפיליאייט לקורס, שירות, או מוצר. כל לקוח שמגיע לפרופיל שלך ולוחץ — הקליק נרשם, הוא מועבר ליעד. האמון שבנית הופך לתנועה שמכניסה.
-            </p>
+
+            <motion.p
+              variants={fadeUp}
+              custom={4}
+              className="text-xs text-muted-foreground/60 text-center mt-6"
+            >
+              שני המסלולים זמינים מלוח הבקרה לאחר ההרשמה. ציון האמון מחושב באופן עצמאי ואינו מושפע מהמסלול שנבחר.
+            </motion.p>
           </motion.div>
         </div>
       </section>
