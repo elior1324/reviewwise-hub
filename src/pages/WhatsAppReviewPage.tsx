@@ -96,8 +96,7 @@ const WhatsAppReviewPage = () => {
     if (!token) { setPageState("invalid"); return; }
 
     const resolve = async () => {
-      const { data: flow } = await supabase
-        .from("whatsapp_review_flows")
+      const { data: flow } = await (supabase.from as any)("whatsapp_review_flows")
         .select("id, active, business_id, businesses(name, slug)")
         .eq("flow_token", token)
         .maybeSingle();

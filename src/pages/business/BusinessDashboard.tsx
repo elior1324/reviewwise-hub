@@ -132,8 +132,7 @@ const PurchaseVerificationStats = ({ businessId, isDemo }: { businessId: string 
       setCounts({ approved: 18, pending: 4, rejected: 2 });
       return;
     }
-    supabase
-      .from("purchase_verifications")
+    (supabase.from as any)("purchase_verifications")
       .select("status")
       .eq("business_id", businessId)
       .then(({ data }) => {
@@ -184,8 +183,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
       setLoading(false);
       return;
     }
-    const { data } = await supabase
-      .from("purchase_verifications")
+    const { data } = await (supabase.from as any)("purchase_verifications")
       .select("*, reviews(text)")
       .eq("business_id", businessId)
       .order("submitted_at", { ascending: false })
@@ -203,8 +201,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
     const snapshot = rows;
     setRows(r => r.map(x => x.id === id ? { ...x, status: newStatus } : x));
     const row = rows.find(r => r.id === id);
-    const { error } = await supabase
-      .from("purchase_verifications")
+    const { error } = await (supabase.from as any)("purchase_verifications")
       .update({ status: newStatus, reviewed_at: new Date().toISOString() })
       .eq("id", id);
     if (error) {
@@ -548,8 +545,7 @@ const BusinessDashboard = () => {
       });
 
       // Fetch referral clicks count
-      const { count: rclickCount } = await supabase
-        .from("referral_clicks")
+      const { count: rclickCount } = await (supabase.from as any)("referral_clicks")
         .select("id", { count: "exact", head: true })
         .eq("business_id", biz.id);
       setReferralClickCount(rclickCount || 0);
@@ -557,8 +553,7 @@ const BusinessDashboard = () => {
       // Fetch referral clicks by day (last 30 days)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const { data: rclickRows } = await supabase
-        .from("referral_clicks")
+      const { data: rclickRows } = await (supabase.from as any)("referral_clicks")
         .select("created_at")
         .eq("business_id", biz.id)
         .gte("created_at", thirtyDaysAgo.toISOString())
@@ -1964,8 +1959,7 @@ const WhatsAppFlowPanel = ({
   // ── Load pending reviews ─────────────────────────────────────────────────
   useEffect(() => {
     if (isDemo || !businessId) return;
-    supabase
-      .from("whatsapp_reviews")
+    (supabase.from as any)("whatsapp_reviews")
       .select("id, author_name, rating, text, received_at")
       .eq("business_id", businessId)
       .eq("is_approved", false)
@@ -1987,8 +1981,7 @@ const WhatsAppFlowPanel = ({
 
   const handleApprove = async (id: string) => {
     setApprovingId(id);
-    await supabase
-      .from("whatsapp_reviews")
+    await (supabase.from as any)("whatsapp_reviews")
       .update({ is_approved: true, approved_at: new Date().toISOString() })
       .eq("id", id);
     setPendingReviews(prev => prev.filter(r => r.id !== id));
@@ -1997,8 +1990,7 @@ const WhatsAppFlowPanel = ({
 
   const handleReject = async (id: string) => {
     setRejectingId(id);
-    await supabase
-      .from("whatsapp_reviews")
+    await (supabase.from as any)("whatsapp_reviews")
       .update({ is_flagged: true, flagged_reason: "rejected_by_owner" })
       .eq("id", id);
     setPendingReviews(prev => prev.filter(r => r.id !== id));
@@ -2211,8 +2203,7 @@ const InstagramDMFlowPanel = ({
 
   useEffect(() => {
     if (isDemo || !businessId) return;
-    supabase
-      .from("instagram_dm_reviews")
+    (supabase.from as any)("instagram_dm_reviews")
       .select("id, author_name, rating, text, received_at")
       .eq("business_id", businessId)
       .eq("is_approved", false)
@@ -2234,8 +2225,7 @@ const InstagramDMFlowPanel = ({
 
   const handleApprove = async (id: string) => {
     setApprovingId(id);
-    await supabase
-      .from("instagram_dm_reviews")
+    await (supabase.from as any)("instagram_dm_reviews")
       .update({ is_approved: true, approved_at: new Date().toISOString() })
       .eq("id", id);
     setPendingReviews(prev => prev.filter(r => r.id !== id));
@@ -2244,8 +2234,7 @@ const InstagramDMFlowPanel = ({
 
   const handleReject = async (id: string) => {
     setRejectingId(id);
-    await supabase
-      .from("instagram_dm_reviews")
+    await (supabase.from as any)("instagram_dm_reviews")
       .update({ is_flagged: true, flagged_reason: "rejected_by_owner" })
       .eq("id", id);
     setPendingReviews(prev => prev.filter(r => r.id !== id));

@@ -7,7 +7,7 @@
  *     Two layers that must both pass before a password is checked:
  *     a) Client-side  — in-memory counter in sessionStorage; instant feedback,
  *        no network round-trip needed.
- *     b) Server-side  — supabase.rpc("check_login_rate_limit") queries the
+ *     b) Server-side  — (supabase.rpc as any)("check_login_rate_limit") queries the
  *        login_attempts table.  Survives tab refresh; blocks across devices
  *        sharing the same email address.
  *
@@ -19,7 +19,7 @@
  *
  *  3. ATTEMPT RECORDING
  *     Every password-login attempt (success or failure) is recorded via
- *     supabase.rpc("record_login_attempt") so the server-side limiter has
+ *     (supabase.rpc as any)("record_login_attempt") so the server-side limiter has
  *     accurate data.
  *
  *  4. SESSION TIMEOUT
