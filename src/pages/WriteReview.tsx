@@ -160,9 +160,9 @@ const WriteReview = () => {
       }
 
       // ── Mark review_request as used
-      await supabase
+      await (supabase as any)
         .from("review_requests")
-        .update({ reviewed_at: new Date().toISOString() } as any)
+        .update({ reviewed_at: new Date().toISOString() })
         .eq("id", ctx.id);
 
       // ── Create giveaway entry (one per review + one per user per month)

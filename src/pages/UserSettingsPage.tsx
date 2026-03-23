@@ -637,13 +637,13 @@ const PointsSection = ({ userId }: { userId: string }) => {
     (async () => {
       setLoading(true);
       try {
-        const { data } = await supabase
-          .from("user_points" as any)
+        const { data } = await (supabase as any)
+          .from("user_points")
           .select("*")
           .eq("user_id", userId)
           .order("created_at", { ascending: false });
 
-        const rows = (data || []) as unknown as UserPoint[];
+        const rows = (data || []) as any as UserPoint[];
         setPoints(rows);
         setTotalPoints(rows.reduce((s, p) => s + p.points, 0));
       } catch {

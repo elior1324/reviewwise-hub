@@ -188,7 +188,7 @@ const SeasonLeaderboard = ({ compact = false, limit = 10 }: Props) => {
         const p = profileMap.get(e.user_id);
         return {
           user_id: e.user_id,
-          display_name: p?.full_name || "משתמש",
+          display_name: p?.display_name || "משתמש",
           avatar_url: p?.avatar_url || null,
           points: Number(e.points) || 0,
           review_count: Number(e.review_count) || 0,
