@@ -147,8 +147,8 @@ export function useReviewProofs(reviewId: string): UseReviewProofsReturn {
     setLoading(true);
     setError(null);
 
-    const { data, error: err } = await supabase
-      .from("review_proofs")
+    const { data, error: err } = await (supabase.from as any)("review_proofs")
+      .select("*")
       .select("*")
       .eq("review_id", reviewId)
       .order("created_at", { ascending: false });
