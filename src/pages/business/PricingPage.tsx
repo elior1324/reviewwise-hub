@@ -217,7 +217,7 @@ const PricingPage = () => {
                 שדרוג לתוכנית {selectedPlan}
               </h2>
               <p className="text-xs text-muted-foreground mb-4">
-                חיוב {billingCycle === "annual" ? "שנתי" : "חודשי"} — ניתן לבטל בכל עת
+                חיוב {billingCycle === "annually" ? "שנתי" : "חודשי"} — ניתן לבטל בכל עת
               </p>
 
               {/* Free first month */}

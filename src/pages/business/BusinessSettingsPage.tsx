@@ -699,20 +699,21 @@ const BusinessSettingsPage = () => {
         }
 
         if (data) {
-          setBusiness(data);
+          setBusiness(data as any);
+          const d = data as any;
           setProfileForm({
-            name: data.name || "",
-            description: data.description || "",
-            category: data.category || "",
-            founder_name: data.founder_name || "",
-            logo_url: data.logo_url || "",
-            cover_url: data.cover_url || "",
+            name: d.name || "",
+            description: d.description || "",
+            category: d.category || "",
+            founder_name: d.founder_name || "",
+            logo_url: d.logo_url || "",
+            cover_url: d.cover_url || "",
           });
           setContactForm({
-            email: data.email || "",
-            phone: data.phone || "",
-            website: data.website || "",
-            social_links: data.social_links || { facebook: "", instagram: "", linkedin: "", twitter: "", tiktok: "" },
+            email: d.email || "",
+            phone: d.phone || "",
+            website: d.website || "",
+            social_links: d.social_links || { facebook: "", instagram: "", linkedin: "", twitter: "", tiktok: "" },
           });
 
           // Fetch review stats
