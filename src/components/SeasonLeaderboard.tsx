@@ -181,7 +181,7 @@ const SeasonLeaderboard = ({ compact = false, limit = 10 }: Props) => {
       .select("id, full_name, avatar_url")
       .in("id", userIds.length > 0 ? userIds : ["00000000-0000-0000-0000-000000000000"]);
 
-    const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+    const profileMap = new Map<string, any>((profiles || []).map((p: any) => [p.id, p]));
 
     const mapped: LeaderRow[] = entries
       .map((e: any, idx: number) => {

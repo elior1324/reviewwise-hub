@@ -537,7 +537,7 @@ const ActivitySection = ({ userId }: { userId: string }) => {
             .select("*", { count: "exact", head: true })
             .eq("customer_user_id", userId),
         ]);
-        setReviews((reviewsData || []) as Review[]);
+        setReviews((reviewsData || []) as unknown as Review[]);
         setTotalPurchases(count || 0);
       } catch {
         toast.error("שגיאה בטעינת הנתונים");
@@ -643,7 +643,7 @@ const PointsSection = ({ userId }: { userId: string }) => {
           .eq("user_id", userId)
           .order("created_at", { ascending: false });
 
-        const rows = (data || []) as UserPoint[];
+        const rows = (data || []) as unknown as UserPoint[];
         setPoints(rows);
         setTotalPoints(rows.reduce((s, p) => s + p.points, 0));
       } catch {
@@ -812,7 +812,7 @@ const AccountSection = ({ profile }: { profile: UserProfile }) => {
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 const UserSettingsPage = () => {
-  const { user, isLoading } = useAuth();
+  const { user, loading: isLoading } = useAuth();
   const navigate = useNavigate();
 
   const [profile, setProfile]           = useState<UserProfile | null>(null);
@@ -835,7 +835,7 @@ const UserSettingsPage = () => {
       .single()
       .then(({ data, error }) => {
         if (error) { toast.error("שגיאה בטעינת הפרופיל"); return; }
-        setProfile(data as UserProfile);
+        setProfile(data as unknown as UserProfile);
       })
       .finally(() => setLoadingProfile(false));
   }, [user]);

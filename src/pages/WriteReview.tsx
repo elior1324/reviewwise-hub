@@ -87,8 +87,8 @@ const WriteReview = () => {
         .maybeSingle();
 
       if (!rr) { setTokenError("not_found"); setLoading(false); return; }
-      if (rr.reviewed_at) { setTokenError("used"); setLoading(false); return; }
-      if (rr.expires_at && new Date(rr.expires_at) < new Date()) {
+      if ((rr as any).reviewed_at) { setTokenError("used"); setLoading(false); return; }
+      if ((rr as any).expires_at && new Date((rr as any).expires_at) < new Date()) {
         setTokenError("expired"); setLoading(false); return;
       }
 

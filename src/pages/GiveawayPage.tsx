@@ -54,7 +54,7 @@ const GiveawayPage = () => {
         .order("month_year", { ascending: false })
         .limit(6);
 
-      setWinners(winnerData || []);
+      setWinners((winnerData || []) as any);
 
       // This month's entry count (public aggregate)
       const { count } = await supabase
