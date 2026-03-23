@@ -75,8 +75,7 @@ const WriteReview = () => {
     document.title = "כתבו ביקורת מאומתת | ReviewHub";
 
     const validateToken = async () => {
-      const { data: rr } = await supabase
-        .from("review_requests")
+      const { data: rr } = await (supabase.from as any)("review_requests")
         .select(`
           id, token, user_email, course_id, business_id, verified_purchase_id,
           reviewed_at, expires_at,
@@ -92,17 +91,18 @@ const WriteReview = () => {
         setTokenError("expired"); setLoading(false); return;
       }
 
-      const courseName   = (rr.courses as any)?.name   || "";
-      const bizName      = (rr.businesses as any)?.name || "";
-      const bizSlug      = (rr.businesses as any)?.slug || null;
+      const rrAny = rr as any;
+      const courseName   = rrAny.courses?.name   || "";
+      const bizName      = rrAny.businesses?.name || "";
+      const bizSlug      = rrAny.businesses?.slug || null;
 
       setCtx({
-        id:                 rr.id,
-        token:              rr.token,
-        userEmail:          rr.user_email,
-        courseId:           rr.course_id,
-        businessId:         rr.business_id,
-        verifiedPurchaseId: rr.verified_purchase_id,
+        id:                 rrAny.id,
+        token:              rrAny.token,
+        userEmail:          rrAny.user_email,
+        courseId:           rrAny.course_id,
+        businessId:         rrAny.business_id,
+        verifiedPurchaseId: rrAny.verified_purchase_id,
         productName:        courseName || bizName,
         businessName:       bizName,
         businessSlug:       bizSlug,
@@ -161,7 +161,7 @@ const WriteReview = () => {
       // ── Mark review_request as used
       await supabase
         .from("review_requests")
-        .update({ reviewed_at: new Date().toISOString() })
+        .update({ reviewed_at: new Date().toISOString() } as any)
         .eq("id", ctx.id);
 
       // ── Create giveaway entry (one per review + one per user per month)

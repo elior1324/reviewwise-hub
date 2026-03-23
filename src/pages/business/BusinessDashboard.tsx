@@ -413,8 +413,8 @@ const BusinessDashboard = () => {
       setBusinessInfo({ name: biz.name, email: biz.email || user.email || "" });
       setDbTier((biz.subscription_tier || "free") as SubscriptionTier);
       // Affiliate program lifecycle
-      setAffiliateEnrolled(!!biz.affiliate_enrolled);
-      setAffiliateProgramStatus(biz.affiliate_program_status || "not_set");
+      setAffiliateEnrolled(!!(biz as any).affiliate_enrolled);
+      setAffiliateProgramStatus((biz as any).affiliate_program_status || "not_set");
 
       // Fetch monthly review count
       const startOfMonth = new Date();
@@ -539,9 +539,9 @@ const BusinessDashboard = () => {
 
       // Fetch collaboration config from business row
       setCollabConfig({
-        active: biz.collaboration_active || false,
-        method: biz.collaboration_method || null,
-        coupon: biz.collaboration_coupon || null,
+        active: (biz as any).collaboration_active || false,
+        method: (biz as any).collaboration_method || null,
+        coupon: (biz as any).collaboration_coupon || null,
       });
 
       // Fetch referral clicks count
@@ -1948,8 +1948,7 @@ const WhatsAppFlowPanel = ({
   useEffect(() => {
     if (isDemo || !businessId) return;
     setLoadingFlow(true);
-    supabase
-      .rpc("get_or_create_whatsapp_flow", { p_business_id: businessId })
+    (supabase.rpc as any)("get_or_create_whatsapp_flow", { p_business_id: businessId })
       .then(({ data }) => {
         if (data && data.length > 0) setFlowToken(data[0].flow_token);
         setLoadingFlow(false);
