@@ -123,7 +123,7 @@ const AffiliateRedirect = () => {
           const sessionKeyBiz = `rh_ps_biz_${biz.id}`;
           if (!sessionStorage.getItem(sessionKeyBiz)) {
             sessionStorage.setItem(sessionKeyBiz, "1");
-            await supabase.from("purchase_sessions").insert({
+            await (supabase.from as any)("purchase_sessions").insert({
               business_id: biz.id,
               referrer:    document.referrer || null,
               user_agent:  navigator.userAgent || null,
