@@ -76,11 +76,13 @@ const PricingPage = () => {
         debug_version: "checkout_v2_live_test",
       };
 
-      console.log("CHECKOUT SOURCE VALUES", {
-        visibleEmailSource: bizEmail,
-        visiblePhoneSource: bizPhone,
-        visibleNameSource:  bizFullName,
-        payload,
+      console.log("CHECKOUT PLAN DEBUG:", {
+        selectedPlanId,
+        selectedPlan,
+        billingCycle,
+        resolvedCycle: cycle,
+        resolvedPriceId: priceId,
+        resolvedTitle: title,
       });
       console.log("FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
 

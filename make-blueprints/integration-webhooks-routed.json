@@ -1,0 +1,231 @@
+{
+  "name": "Integration Webhooks",
+  "metadata": { "version": 1 },
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": { "hook": 2668181, "maxResults": 1 },
+      "mapper": {},
+      "metadata": { "designer": { "x": 0, "y": 0 } }
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": { "designer": { "x": 300, "y": 0 } },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 10,
+              "module": "grow:CreatePaymentLink",
+              "version": 1,
+              "parameters": { "__IMTCONN__": 5966251 },
+              "filter": {
+                "name": "Pro Monthly",
+                "conditions": [[{ "a": "{{1.price_id}}", "b": "plan_pro_monthly", "o": "text:equal" }]]
+              },
+              "mapper": {
+                "title": "{{1.title}}",
+                "sendingMode": 3,
+                "pageFieldSettings": {
+                  "fullName": "{{1.full_name}}",
+                  "phone": "{{1.phone}}",
+                  "email": "{{1.user_email}}"
+                },
+                "chargeType": 1,
+                "successUrl": "{{1.success_url}}",
+                "products": {
+                  "data": [{
+                    "catalogNumber": "plan_pro_monthly",
+                    "name": "ReviewHub Pro — חודשי",
+                    "price": 189,
+                    "quantity": 1,
+                    "vatType": 1
+                  }]
+                },
+                "cField1": "{{1.plan}}",
+                "cField2": "{{1.user_id}}",
+                "cField3": "{{1.price_id}}",
+                "cField4": "{{1.billing_cycle}}",
+                "cField5": "{{1.user_email}}"
+              },
+              "metadata": { "designer": { "x": 600, "y": -450 } }
+            },
+            {
+              "id": 11,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "status": "200",
+                "body": "{\"url\": \"{{10.data.url}}\", \"checkoutUrl\": \"{{10.data.url}}\"}",
+                "headers": [{ "key": "Content-Type", "value": "application/json" }]
+              },
+              "metadata": { "designer": { "x": 900, "y": -450 } }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 20,
+              "module": "grow:CreatePaymentLink",
+              "version": 1,
+              "parameters": { "__IMTCONN__": 5966251 },
+              "filter": {
+                "name": "Pro Annual",
+                "conditions": [[{ "a": "{{1.price_id}}", "b": "plan_pro_annual", "o": "text:equal" }]]
+              },
+              "mapper": {
+                "title": "{{1.title}}",
+                "sendingMode": 3,
+                "pageFieldSettings": {
+                  "fullName": "{{1.full_name}}",
+                  "phone": "{{1.phone}}",
+                  "email": "{{1.user_email}}"
+                },
+                "chargeType": 1,
+                "successUrl": "{{1.success_url}}",
+                "products": {
+                  "data": [{
+                    "catalogNumber": "plan_pro_annual",
+                    "name": "ReviewHub Pro — שנתי",
+                    "price": 1814,
+                    "quantity": 1,
+                    "vatType": 1
+                  }]
+                },
+                "cField1": "{{1.plan}}",
+                "cField2": "{{1.user_id}}",
+                "cField3": "{{1.price_id}}",
+                "cField4": "{{1.billing_cycle}}",
+                "cField5": "{{1.user_email}}"
+              },
+              "metadata": { "designer": { "x": 600, "y": -150 } }
+            },
+            {
+              "id": 21,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "status": "200",
+                "body": "{\"url\": \"{{20.data.url}}\", \"checkoutUrl\": \"{{20.data.url}}\"}",
+                "headers": [{ "key": "Content-Type", "value": "application/json" }]
+              },
+              "metadata": { "designer": { "x": 900, "y": -150 } }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 30,
+              "module": "grow:CreatePaymentLink",
+              "version": 1,
+              "parameters": { "__IMTCONN__": 5966251 },
+              "filter": {
+                "name": "Enterprise Monthly",
+                "conditions": [[{ "a": "{{1.price_id}}", "b": "plan_enterprise_monthly", "o": "text:equal" }]]
+              },
+              "mapper": {
+                "title": "{{1.title}}",
+                "sendingMode": 3,
+                "pageFieldSettings": {
+                  "fullName": "{{1.full_name}}",
+                  "phone": "{{1.phone}}",
+                  "email": "{{1.user_email}}"
+                },
+                "chargeType": 1,
+                "successUrl": "{{1.success_url}}",
+                "products": {
+                  "data": [{
+                    "catalogNumber": "plan_enterprise_monthly",
+                    "name": "ReviewHub Enterprise — חודשי",
+                    "price": 479,
+                    "quantity": 1,
+                    "vatType": 1
+                  }]
+                },
+                "cField1": "{{1.plan}}",
+                "cField2": "{{1.user_id}}",
+                "cField3": "{{1.price_id}}",
+                "cField4": "{{1.billing_cycle}}",
+                "cField5": "{{1.user_email}}"
+              },
+              "metadata": { "designer": { "x": 600, "y": 150 } }
+            },
+            {
+              "id": 31,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "status": "200",
+                "body": "{\"url\": \"{{30.data.url}}\", \"checkoutUrl\": \"{{30.data.url}}\"}",
+                "headers": [{ "key": "Content-Type", "value": "application/json" }]
+              },
+              "metadata": { "designer": { "x": 900, "y": 150 } }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 40,
+              "module": "grow:CreatePaymentLink",
+              "version": 1,
+              "parameters": { "__IMTCONN__": 5966251 },
+              "filter": {
+                "name": "Enterprise Annual",
+                "conditions": [[{ "a": "{{1.price_id}}", "b": "plan_enterprise_annual", "o": "text:equal" }]]
+              },
+              "mapper": {
+                "title": "{{1.title}}",
+                "sendingMode": 3,
+                "pageFieldSettings": {
+                  "fullName": "{{1.full_name}}",
+                  "phone": "{{1.phone}}",
+                  "email": "{{1.user_email}}"
+                },
+                "chargeType": 1,
+                "successUrl": "{{1.success_url}}",
+                "products": {
+                  "data": [{
+                    "catalogNumber": "plan_enterprise_annual",
+                    "name": "ReviewHub Enterprise — שנתי",
+                    "price": 4598,
+                    "quantity": 1,
+                    "vatType": 1
+                  }]
+                },
+                "cField1": "{{1.plan}}",
+                "cField2": "{{1.user_id}}",
+                "cField3": "{{1.price_id}}",
+                "cField4": "{{1.billing_cycle}}",
+                "cField5": "{{1.user_email}}"
+              },
+              "metadata": { "designer": { "x": 600, "y": 450 } }
+            },
+            {
+              "id": 41,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "status": "200",
+                "body": "{\"url\": \"{{40.data.url}}\", \"checkoutUrl\": \"{{40.data.url}}\"}",
+                "headers": [{ "key": "Content-Type", "value": "application/json" }]
+              },
+              "metadata": { "designer": { "x": 900, "y": 450 } }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
