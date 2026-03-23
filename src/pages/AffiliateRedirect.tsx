@@ -74,8 +74,7 @@ const AffiliateRedirect = () => {
           if (isNewSession) sessionStorage.setItem(sessionKey, sessionToken);
 
           // Track affiliate click
-          const { data: clickRecord } = await supabase
-            .from("business_affiliate_clicks")
+          const { data: clickRecord } = await (supabase.from as any)("business_affiliate_clicks")
             .insert({
               business_id:   biz.id,
               session_token: isNewSession ? sessionToken : sessionStorage.getItem(sessionKey),
