@@ -75,7 +75,8 @@ const WriteReview = () => {
     document.title = "כתבו ביקורת מאומתת | ReviewHub";
 
     const validateToken = async () => {
-      const { data: rr } = await (supabase.from as any)("review_requests")
+      const { data: rr } = await (supabase as any)
+        .from("review_requests")
         .select(`
           id, token, user_email, course_id, business_id, verified_purchase_id,
           reviewed_at, expires_at,
