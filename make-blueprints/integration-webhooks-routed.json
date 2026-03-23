@@ -77,8 +77,8 @@
               "version": 1,
               "parameters": { "__IMTCONN__": 5966251 },
               "filter": {
-                "name": "Pro Annual",
-                "conditions": [[{ "a": "{{1.price_id}}", "b": "plan_pro_annual", "o": "text:equal" }]]
+                "name": "Pro Yearly",
+                "conditions": [[{ "a": "{{1.price_id}}", "b": "plan_pro_yearly", "o": "text:equal" }]]
               },
               "mapper": {
                 "title": "{{1.title}}",
@@ -92,7 +92,7 @@
                 "successUrl": "{{1.success_url}}",
                 "products": {
                   "data": [{
-                    "catalogNumber": "plan_pro_annual",
+                    "catalogNumber": "plan_pro_yearly",
                     "name": "ReviewHub Pro — שנתי",
                     "price": 1814,
                     "quantity": 1,
@@ -181,8 +181,8 @@
               "version": 1,
               "parameters": { "__IMTCONN__": 5966251 },
               "filter": {
-                "name": "Enterprise Annual",
-                "conditions": [[{ "a": "{{1.price_id}}", "b": "plan_enterprise_annual", "o": "text:equal" }]]
+                "name": "Enterprise Yearly",
+                "conditions": [[{ "a": "{{1.price_id}}", "b": "plan_enterprise_yearly", "o": "text:equal" }]]
               },
               "mapper": {
                 "title": "{{1.title}}",
@@ -196,7 +196,7 @@
                 "successUrl": "{{1.success_url}}",
                 "products": {
                   "data": [{
-                    "catalogNumber": "plan_enterprise_annual",
+                    "catalogNumber": "plan_enterprise_yearly",
                     "name": "ReviewHub Enterprise — שנתי",
                     "price": 4598,
                     "quantity": 1,

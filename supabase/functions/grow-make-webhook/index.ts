@@ -78,10 +78,13 @@ interface PlanMeta {
 }
 
 const PLAN_META: Record<string, PlanMeta> = {
-  // Full format (preferred)
+  // Full format (preferred — "yearly" used by Make/Grow routes)
   "plan_pro_monthly":        { tier: "pro",        billingCycle: "monthly" },
-  "plan_pro_annual":         { tier: "pro",        billingCycle: "annual"  },
+  "plan_pro_yearly":         { tier: "pro",        billingCycle: "annual"  },
   "plan_enterprise_monthly": { tier: "enterprise", billingCycle: "monthly" },
+  "plan_enterprise_yearly":  { tier: "enterprise", billingCycle: "annual"  },
+  // Legacy format (keep for backwards compatibility)
+  "plan_pro_annual":         { tier: "pro",        billingCycle: "annual"  },
   "plan_enterprise_annual":  { tier: "enterprise", billingCycle: "annual"  },
   // Short format (sent by Make scenario — defaults to monthly)
   "pro":                     { tier: "pro",        billingCycle: "monthly" },

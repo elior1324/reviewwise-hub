@@ -55,11 +55,11 @@ const PricingPage = () => {
       const bizFullName = biz?.founder_name || biz?.name || "";
 
       // ── Build plan identifiers (pricing is defined in Grow, not here) ───
-      const cycle = billingCycle === "annually" ? "annual" : billingCycle;
+      const cycle = billingCycle === "annually" ? "yearly" : billingCycle;
       const priceId = `plan_${selectedPlanId}_${cycle}`;
       const title = selectedPlanId === "pro"
-        ? `ReviewHub Pro — ${cycle === "annual" ? "שנתי" : "חודשי"}`
-        : `ReviewHub Enterprise — ${cycle === "annual" ? "שנתי" : "חודשי"}`;
+        ? `ReviewHub Pro — ${cycle === "yearly" ? "שנתי" : "חודשי"}`
+        : `ReviewHub Enterprise — ${cycle === "yearly" ? "שנתי" : "חודשי"}`;
 
       // ── Build webhook payload (same data source as פרטי קשר page) ────────
       const payload = {
@@ -73,18 +73,7 @@ const PricingPage = () => {
         phone:         bizPhone,
         success_url:   `${window.location.origin}/business/dashboard?payment=success`,
         cancel_url:    `${window.location.origin}/business/pricing`,
-        debug_version: "checkout_v2_live_test",
       };
-
-      console.log("CHECKOUT PLAN DEBUG:", {
-        selectedPlanId,
-        selectedPlan,
-        billingCycle,
-        resolvedCycle: cycle,
-        resolvedPriceId: priceId,
-        resolvedTitle: title,
-      });
-      console.log("FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
 
       // ── Call Make webhook → Grow payment link creation ──────────────────
       const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL
