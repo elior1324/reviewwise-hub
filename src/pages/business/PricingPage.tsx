@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,30 +33,6 @@ const PricingPage = () => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError,   setCheckoutError]   = useState<string | null>(null);
 
-  // ── Load user profile data (full_name, phone) for Grow ───────────────────
-  const [profileName,  setProfileName]  = useState<string | null>(null);
-  const [profilePhone, setProfilePhone] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    // Fetch from both `users` (full_name) and `businesses` (phone, founder_name)
-    // to get the best available contact details for Grow.
-    Promise.all([
-      supabase.from("users").select("full_name").eq("id", user.id).maybeSingle(),
-      supabase.from("businesses").select("phone, founder_name, name").eq("owner_id", user.id).maybeSingle(),
-    ]).then(([usersRes, bizRes]) => {
-      // full_name: prefer users.full_name → businesses.founder_name → businesses.name
-      const name =
-        usersRes.data?.full_name ||
-        bizRes.data?.founder_name ||
-        bizRes.data?.name ||
-        null;
-      setProfileName(name);
-      // phone: from businesses table
-      setProfilePhone(bizRes.data?.phone || null);
-    });
-  }, [user]);
-
   const handleCheckout = async () => {
     if (!user) {
       setCheckoutError("יש להתחבר כדי להמשיך לתשלום");
@@ -66,6 +42,18 @@ const PricingPage = () => {
     setCheckoutLoading(true);
     setCheckoutError(null);
     try {
+      // ── Fetch business profile (same source as the contact/settings page) ─
+      const { data: biz } = await supabase
+        .from("businesses")
+        .select("email, phone, founder_name, name")
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+      // Same fallback chain as BusinessSettingsPage contact form
+      const bizEmail = biz?.email || "";
+      const bizPhone = biz?.phone || "";
+      const bizFullName = biz?.founder_name || biz?.name || "";
+
       // ── Build plan identifiers (pricing is defined in Grow, not here) ───
       const cycle = billingCycle === "annually" ? "annual" : billingCycle;
       const priceId = `plan_${selectedPlanId}_${cycle}`;
@@ -73,23 +61,27 @@ const PricingPage = () => {
         ? `ReviewHub Pro — ${cycle === "annual" ? "שנתי" : "חודשי"}`
         : `ReviewHub Enterprise — ${cycle === "annual" ? "שנתי" : "חודשי"}`;
 
-      // ── Build webhook payload (all keys always present, inline from user) ─
+      // ── Build webhook payload (same data source as פרטי קשר page) ────────
       const payload = {
         plan:          selectedPlanId,
         billing_cycle: cycle,
         price_id:      priceId,
         title:         title,
         user_id:       user.id,
-        user_email:    user.email || "",
-        full_name:     (user as Record<string, unknown>).user_metadata
-                         ? String(((user as Record<string, unknown>).user_metadata as Record<string, unknown>)?.full_name || "")
-                         : "",
-        phone:         user.phone || "",
+        user_email:    bizEmail || user.email || "",
+        full_name:     bizFullName,
+        phone:         bizPhone,
         success_url:   `${window.location.origin}/business/dashboard?payment=success`,
         cancel_url:    `${window.location.origin}/business/pricing`,
         debug_version: "checkout_v2_live_test",
       };
 
+      console.log("CHECKOUT SOURCE VALUES", {
+        visibleEmailSource: bizEmail,
+        visiblePhoneSource: bizPhone,
+        visibleNameSource:  bizFullName,
+        payload,
+      });
       console.log("FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
 
       // ── Call Make webhook → Grow payment link creation ──────────────────
