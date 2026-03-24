@@ -458,7 +458,7 @@ const Index = () => {
             {[
               { icon: Star, label: "ביקורות שנכתבו בקהילה", value: stats.reviews > 0 ? stats.reviews.toLocaleString() : "0" },
               { icon: Users, label: "קורסים על המפה הדיגיטלית", value: stats.businesses > 0 ? stats.businesses.toLocaleString() : "0" },
-              { icon: ShieldCheck, label: "ביקורות עוברות סינון לפני פרסום", value: "✓" },
+              { icon: ShieldCheck, label: "מערכת אימות רכישה פעילה", value: "✓" },
               { icon: TrendingUp, label: "מתודולוגיה שקופה ופתוחה", value: "פתוח" },
             ].map(({ icon: Icon, label, value }) => (
               <motion.div key={label} variants={scaleIn}>
@@ -484,7 +484,7 @@ const Index = () => {
       {marqueeReviews.length > 0 ? (
         <TestimonialsSection
           title="קולות מהקהילה הדיגיטלית"
-          description="כל ביקורת קושרה להוכחת רכישה לפני שפורסמה. המצפן לא משקר — לא ניתן לרכוש מיקום, לא ניתן להסיר ביקורת שלילית, ולא ניתן לכתוב ביקורת ללא אימות עצמאי."
+          description="ביקורות מאומתות מקושרות להוכחת רכישה. ביקורות קהילה מוצגות בנפרד ואינן נספרות בציון האמון. לא ניתן לרכוש מיקום ולא ניתן להסיר ביקורת שלילית."
           className="border-t border-border/40"
           testimonials={marqueeReviews}
         />

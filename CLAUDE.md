@@ -1,4 +1,6 @@
-# CLAUDE.md — ReviewWise Hub (Root)
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Identity
 
@@ -8,12 +10,33 @@
 **Server-state:** TanStack React Query 5
 **Global state:** Context API only — `AuthContext` (auth + MFA + rate limiting + subscription) and `ModeContext` (user/business toggle)
 **Forms:** React Hook Form + Zod — no exceptions
-**Backend:** Supabase (PostgreSQL + RLS + Auth + 39 Edge Functions in Deno TypeScript)
-**Payments:** Payment provider integration pending (PayPlus removed — not in use)
+**Backend:** Supabase (PostgreSQL + RLS + Auth + 42 Edge Functions in Deno TypeScript)
+**Payments:** Grow payment links (direct redirect, no server-side checkout). Coupon-based access system for premium tiers.
 **Hosting:** Lovable/Netlify CDN
 **UI language:** Hebrew-first, full RTL (`lang="he"`, `dir="rtl"`)
+**Supabase project:** `pujsopidbejeuqteormi` (region: ap-southeast-1)
 
 **This is NOT a Next.js project.** There is no App Router, no Server Components, no SSR, no `getServerSideProps`, no `getStaticProps`, no file-based routing. Do not apply Next.js patterns.
+
+## Build & Development Commands
+
+```bash
+npm run dev              # Start Vite dev server
+npm run build            # Production build
+npx tsc --noEmit         # Type check without emitting
+npm run lint             # ESLint
+npm run test             # Run unit tests (Vitest)
+npm run test:watch       # Watch mode
+npm run test:e2e         # Playwright E2E tests
+npm run test:e2e:headed  # E2E with browser visible
+```
+
+**Supabase CLI:**
+```bash
+npx supabase gen types typescript --linked > src/integrations/supabase/types.ts  # Regenerate DB types
+npx supabase db push                                                              # Push migrations
+npx supabase functions deploy <name>                                              # Deploy Edge Function
+```
 
 ---
 
@@ -62,6 +85,15 @@ The trust system has three strictly isolated layers. Never mix them.
 - When modifying any of these systems, verify you are touching the correct table and the correct layer before proceeding.
 - Functions that update Trust Score must not read from `user_points` or `leaderboard_entries`.
 - Functions that grant Activity Points or Community Points must not write to `businesses.trust_score`.
+
+### Checkout & Subscription Architecture
+
+- **Pricing page** (`PricingPage.tsx`) uses direct Grow payment links — no server-side checkout. Links are in `GROW_PAYMENT_LINKS` constant.
+- **Coupon system** (`apply-coupon` Edge Function) handles premium access codes. Coupons are in `public.coupons` table, redemptions in `public.coupon_redemptions`.
+- `duration_months = 0` means **lifetime** access (no expiration). `subscription_expires_at = NULL` on a non-free tier = lifetime.
+- `check-subscription` Edge Function determines active tier. It auto-downgrades to "free" when `subscription_expires_at` has passed, but **never** downgrades lifetime subscriptions (NULL expiry).
+- Three subscription tiers: `"free"` | `"pro"` | `"enterprise"`. Feature gating is in `src/hooks/useFeatureGating.ts`.
+- Do not introduce Stripe, PayPlus, or other payment providers without explicit discussion. The current system is coupon + Grow links only.
 
 ### Auth & Sessions
 
@@ -156,12 +188,52 @@ Frontend code cannot and must not access `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY
 | `src/contexts/ModeContext.tsx` | User/Business mode toggle (localStorage) |
 | `src/integrations/supabase/client.ts` | Supabase JS client (sessionStorage, PKCE) |
 | `src/integrations/supabase/types.ts` | Auto-generated DB types — never hand-edit |
+| `src/hooks/useFeatureGating.ts` | Subscription tier → feature access mapping (free/pro/enterprise) |
 | `src/lib/auth-security.ts` | `ClientRateLimiter`, `SessionTimeout` implementations |
 | `src/lib/sanitize.ts` | XSS prevention for user-generated content |
-| `src/lib/password-validation.ts` | Password complexity rules |
 | `src/lib/affiliate.ts` | Referral/affiliate tracking helpers |
-| `supabase/functions/` | 39 Deno TypeScript Edge Functions |
-| `supabase/migrations/` | 66+ SQL migration files (applied history) |
+| `src/components/BusinessHero.tsx` | Business profile hero — trust badges, affiliate CTA, contact |
+| `src/components/BusinessCard.tsx` | Business listing card — used in search/homepage grids |
+| `src/components/ReviewCard.tsx` | Review display with verification badges, proof indicators |
+| `src/components/ServiceCard.tsx` | Service/product card with dynamic affiliate CTA |
+| `src/components/CouponInput.tsx` | Coupon code input UI (used in settings page) |
+| `src/components/AccessibilityMenu.tsx` | Accessibility toolbar (9 a11y features, persisted in localStorage) |
+| `src/pages/business/PricingPage.tsx` | Pricing plans with Grow payment link redirect |
+| `src/pages/business/BusinessSettingsPage.tsx` | Business settings — profile, contact, affiliate URL, coupon activation |
+| `supabase/functions/` | 42 Deno TypeScript Edge Functions |
+| `supabase/functions/apply-coupon/` | Coupon redemption (supports lifetime via duration_months=0) |
+| `supabase/functions/check-subscription/` | Subscription state check (handles lifetime NULL expiry) |
+| `supabase/functions/grow-make-webhook/` | Post-payment webhook from Grow via Make |
+| `supabase/migrations/` | 78+ SQL migration files (applied history) |
 | `public/_headers` | Netlify security headers (CSP, HSTS, MIME) |
 | `vite.config.ts` | Build config + CSP header configuration |
 | `SYSTEM_COHERENCE.md` | Trust/Points architecture design doc (reference only) |
+
+## Review Verification Tiers
+
+Reviews have 4 trust tiers that determine how they affect the Trust Score:
+
+| Tier | Label | Source | Counts in Trust Score |
+|---|---|---|---|
+| T1 | ביקורות מאומתות | Verified purchase proof | Yes |
+| T2 | WhatsApp / Instagram | Business-approved feedback | Partial |
+| T3 | Google / Facebook | Imported external reviews | No |
+| T4 | קהילה | Community (no purchase proof) | No |
+
+Only T1 reviews count toward the Trust Score. All others are displayed separately. The `ReviewSourceBreakdown` component shows this breakdown on business profiles. Never claim "all reviews are verified" — use "ביקורות מאומתות" for T1 and acknowledge community reviews exist.
+
+## Accessibility System
+
+The accessibility menu (`AccessibilityMenu.tsx`) toggles CSS classes on `<html>`:
+- `a11y-high-contrast`, `a11y-reduced-motion`, `a11y-link-highlight`, `a11y-readable-font`, `a11y-big-cursor`, `a11y-grayscale`, `a11y-text-spacing`, `a11y-invert-colors`
+
+The CSS for these classes is in `src/index.css`. The `a11y-invert-colors` class includes extensive overrides for hardcoded Tailwind dark classes (`text-white`, `bg-zinc-*`, etc.) — if you add new hardcoded dark colors, you must also add overrides in the invert-colors section.
+
+## Storage Buckets & RLS
+
+Upload paths must use `auth.uid()` as the first folder segment to match storage RLS policies:
+- `covers` bucket: path = `{userId}/cover.ext`
+- `avatars` bucket: path = `{userId}/avatar.ext`
+- `testimonials` bucket: path = `{businessId}/filename.ext` (RLS checks business ownership)
+
+Using `businessId` instead of `userId` in covers/avatars will cause "row-level security policy" errors.

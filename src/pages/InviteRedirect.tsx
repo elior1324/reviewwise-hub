@@ -25,7 +25,7 @@ const PERKS = [
   {
     icon: <ShieldCheck size={18} className="text-primary" />,
     title: "ביקורות שעברו בדיקה",
-    desc: "כל ביקורת עוברת סינון — ללא ספאם, ללא בוטים",
+    desc: "מערכת סינון פעילה — ללא ספאם, ללא בוטים",
   },
   {
     icon: <Star size={18} className="text-primary" />,
