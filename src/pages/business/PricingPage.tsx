@@ -6,10 +6,27 @@ import { PricingComponent, REVIEWHUB_PLANS, type BillingCycle } from "@/componen
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import { Zap, ArrowLeft, BarChart3, TrendingUp, Bell, LineChart, Target, Eye,
-         Loader2, CheckCircle2 } from "lucide-react";
+         CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+
+// ── Grow payment links (direct redirect — no Make in the checkout path) ──────
+// Each plan has a pre-configured recurring payment link created in Grow.
+// After successful payment, Grow calls the Make webhook for post-payment
+// automation (subscription activation, DB sync, onboarding email).
+//
+// ┌──────────────────────────────────────────────────────────────────────┐
+// │  TO CONFIGURE: paste your Grow payment link URLs below.             │
+// │  Create them in Grow dashboard → Payment Links → New → Recurring.   │
+// │  Each link should have the correct product, price, and notifyUrl    │
+// │  pointing to your Make webhook for post-payment processing.         │
+// └──────────────────────────────────────────────────────────────────────┘
+const GROW_PAYMENT_LINKS: Record<string, string> = {
+  pro_monthly:        "", // ← paste Grow link for Pro Monthly (₪189)
+  pro_yearly:         "", // ← paste Grow link for Pro Yearly (₪1,814)
+  enterprise_monthly: "", // ← paste Grow link for Enterprise Monthly (₪479)
+  enterprise_yearly:  "", // ← paste Grow link for Enterprise Yearly (₪4,598)
+};
 
 // ── Analytics features (merged from AnalyticsSolution) ────────────────────────
 const ANALYTICS_FEATURES = [
@@ -29,99 +46,27 @@ const PricingPage = () => {
   const { user } = useAuth();
 
   // ── Checkout state ─────────────────────────────────────────────────────────
-  const [selectedPlanId,  setSelectedPlanId]  = useState<string>(""); // "pro" | "enterprise"
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [selectedPlanId,  setSelectedPlanId]  = useState<string>("");
   const [checkoutError,   setCheckoutError]   = useState<string | null>(null);
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!user) {
       setCheckoutError("יש להתחבר כדי להמשיך לתשלום");
       return;
     }
 
-    setCheckoutLoading(true);
-    setCheckoutError(null);
-    try {
-      // ── Fetch business profile (same source as the contact/settings page) ─
-      const { data: biz } = await supabase
-        .from("businesses")
-        .select("email, phone, founder_name, name")
-        .eq("owner_id", user.id)
-        .maybeSingle();
+    // ── Resolve the Grow payment link for the selected plan + cycle ──────
+    const cycle = billingCycle === "annually" ? "yearly" : billingCycle;
+    const planKey = `${selectedPlanId}_${cycle}`;
+    const growUrl = GROW_PAYMENT_LINKS[planKey];
 
-      // Same fallback chain as BusinessSettingsPage contact form
-      const bizEmail = biz?.email || user.email || "";
-      const bizPhone = biz?.phone || "";
-      const bizFullName = biz?.founder_name || biz?.name || "";
-
-      if (!bizPhone) {
-        throw new Error("חסר מספר טלפון בפרופיל העסק — עדכנו בהגדרות ונסו שוב");
-      }
-
-      // ── Build plan identifiers (pricing is defined in Grow, not here) ───
-      const cycle = billingCycle === "annually" ? "yearly" : billingCycle;
-      const priceId = `plan_${selectedPlanId}_${cycle}`;
-      const title = selectedPlanId === "pro"
-        ? `ReviewHub Pro — ${cycle === "yearly" ? "שנתי" : "חודשי"}`
-        : `ReviewHub Enterprise — ${cycle === "yearly" ? "שנתי" : "חודשי"}`;
-
-      // ── Build webhook payload (same data source as פרטי קשר page) ────────
-      const payload = {
-        plan:          selectedPlanId,
-        billing_cycle: cycle,
-        price_id:      priceId,
-        title:         title,
-        user_id:       user.id,
-        user_email:    bizEmail || user.email || "",
-        full_name:     bizFullName,
-        phone:         bizPhone,
-        success_url:   `${window.location.origin}/business/dashboard?payment=success`,
-        cancel_url:    `${window.location.origin}/business/pricing`,
-      };
-
-      // ── Call Make webhook → Grow payment link creation ──────────────────
-      const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL
-        || "https://hook.eu1.make.com/hmk5zq1jvyyc4fn1kkkg0y3jyg541k29";
-
-      const res = await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      let data: Record<string, unknown>;
-      try {
-        data = await res.json();
-      } catch {
-        throw new Error("שגיאה בתקשורת עם שרת התשלומים");
-      }
-
-      if (!res.ok) {
-        const serverMsg = typeof data.error === "string" ? data.error : "";
-        throw new Error(serverMsg || "שגיאה ביצירת קישור תשלום");
-      }
-
-      // ── Extract and validate payment URL ────────────────────────────────
-      const checkoutUrl =
-        (typeof data.checkoutUrl === "string" && data.checkoutUrl) ||
-        (typeof data.url === "string" && data.url) ||
-        "";
-      if (!checkoutUrl) {
-        throw new Error("לא התקבל קישור תשלום מהשרת");
-      }
-      try {
-        new URL(checkoutUrl);
-      } catch {
-        console.error("[Checkout] Invalid payment URL:", checkoutUrl.slice(0, 80));
-        throw new Error("קישור התשלום שהתקבל אינו תקין — אנא נסו שוב");
-      }
-
-      window.location.href = checkoutUrl;
-    } catch (err) {
-      setCheckoutError(err instanceof Error ? err.message : "שגיאה בחיבור לשרת התשלומים");
-    } finally {
-      setCheckoutLoading(false);
+    if (!growUrl) {
+      setCheckoutError("קישור תשלום לא מוגדר לתוכנית זו — אנא פנו לתמיכה");
+      return;
     }
+
+    // ── Redirect directly to Grow payment page ──────────────────────────
+    window.location.href = growUrl;
   };
 
   const handlePlanSelect = (planId: string) => {
@@ -288,18 +233,13 @@ const PricingPage = () => {
               <div className="space-y-2">
                 <Button
                   onClick={handleCheckout}
-                  disabled={checkoutLoading}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 gap-2"
                 >
-                  {checkoutLoading
-                    ? <><Loader2 size={15} className="animate-spin" /> מעביר לתשלום...</>
-                    : <><Zap size={14} aria-hidden="true" /> המשך לתשלום מאובטח ₪</>
-                  }
+                  <Zap size={14} aria-hidden="true" /> המשך לתשלום מאובטח
                 </Button>
                 <button
                   onClick={() => setShowPopup(false)}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  disabled={checkoutLoading}
                 >
                   אולי מאוחר יותר
                 </button>
