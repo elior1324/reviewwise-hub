@@ -57,7 +57,8 @@ html {
 
 /* ── Invert Colors: professional light mode ─────────────────────────
    Designed as a full light-theme alternative, not a naive CSS invert.
-   Every value is tuned for WCAG AA contrast on a white background. */
+   Every value is tuned for WCAG AA contrast on a white background.
+   ALSO overrides hardcoded Tailwind dark classes (text-white, bg-zinc-*, etc.) */
 .a11y-invert-colors {
   --background: 210 20% 98% !important;
   --foreground: 220 15% 15% !important;
@@ -109,6 +110,83 @@ html {
   --sidebar-accent-foreground: 220 15% 15% !important;
   --sidebar-border: 220 10% 82% !important;
   --sidebar-ring: 168 55% 32% !important;
+}
+
+/* ── Hardcoded dark class overrides for invert mode ────────────────
+   Many components use text-white, bg-zinc-900, etc. directly.
+   These don't respond to CSS variables, so we force-override them. */
+
+/* Text colors: white → dark, zinc-light → dark */
+.a11y-invert-colors .text-white { color: hsl(220 15% 15%) !important; }
+.a11y-invert-colors .text-zinc-100 { color: hsl(220 15% 20%) !important; }
+.a11y-invert-colors .text-zinc-200 { color: hsl(220 12% 25%) !important; }
+.a11y-invert-colors .text-zinc-300 { color: hsl(220 10% 32%) !important; }
+.a11y-invert-colors .text-zinc-400 { color: hsl(220 8% 42%) !important; }
+.a11y-invert-colors .text-zinc-500 { color: hsl(220 6% 50%) !important; }
+
+/* Background colors: dark → light */
+.a11y-invert-colors .bg-zinc-900 { background-color: hsl(210 20% 98%) !important; }
+.a11y-invert-colors .bg-zinc-800 { background-color: hsl(210 15% 96%) !important; }
+.a11y-invert-colors .bg-zinc-700 { background-color: hsl(210 12% 92%) !important; }
+.a11y-invert-colors .bg-black { background-color: hsl(210 20% 98%) !important; }
+
+/* Partial opacity backgrounds */
+.a11y-invert-colors [class*="bg-zinc-900\/"] { background-color: hsl(210 20% 96% / 0.5) !important; }
+.a11y-invert-colors [class*="bg-zinc-800\/"] { background-color: hsl(210 15% 94% / 0.5) !important; }
+.a11y-invert-colors [class*="bg-black\/"] { background-color: hsl(220 15% 15% / 0.3) !important; }
+
+/* Border colors: dark → light */
+.a11y-invert-colors .border-zinc-700 { border-color: hsl(220 10% 82%) !important; }
+.a11y-invert-colors .border-zinc-600 { border-color: hsl(220 10% 78%) !important; }
+.a11y-invert-colors [class*="border-zinc-700\/"] { border-color: hsl(220 10% 82% / 0.6) !important; }
+.a11y-invert-colors [class*="border-zinc-600\/"] { border-color: hsl(220 10% 78% / 0.6) !important; }
+
+/* Placeholder text */
+.a11y-invert-colors [class*="placeholder:text-zinc"] { --tw-placeholder-opacity: 1; }
+.a11y-invert-colors ::placeholder { color: hsl(220 8% 55%) !important; }
+
+/* Gradient text — make readable on light background */
+.a11y-invert-colors .gradient-text {
+  background: linear-gradient(135deg, hsl(168 55% 28%), hsl(168 45% 38%)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Noise overlay — reduce on light background */
+.a11y-invert-colors .noise-overlay::before { opacity: 0.02 !important; }
+
+/* Glass effect — lighter for light mode */
+.a11y-invert-colors .glass {
+  background: hsl(0 0% 100% / 0.85) !important;
+  border-color: hsl(220 10% 82% / 0.5) !important;
+}
+
+/* Animated border glow — reduce intensity for light mode */
+.a11y-invert-colors .animated-border::before { opacity: 0.3 !important; }
+
+/* Dark badges — flip for readability */
+.a11y-invert-colors [class*="dark:bg-"] { background-color: inherit; }
+.a11y-invert-colors [class*="dark:text-"] { color: inherit; }
+
+/* Scrollbar */
+.a11y-invert-colors ::-webkit-scrollbar-track { background: hsl(210 15% 96%) !important; }
+.a11y-invert-colors ::-webkit-scrollbar-thumb { background: hsl(220 10% 78%) !important; }
+
+/* Input fields in settings pages */
+.a11y-invert-colors input,
+.a11y-invert-colors textarea,
+.a11y-invert-colors select {
+  background-color: hsl(0 0% 100%) !important;
+  color: hsl(220 15% 15%) !important;
+  border-color: hsl(220 10% 78%) !important;
+}
+
+/* Dropdown menus */
+.a11y-invert-colors [role="menu"],
+.a11y-invert-colors [data-radix-popper-content-wrapper] * {
+  background-color: hsl(0 0% 100%) !important;
+  color: hsl(220 15% 15%) !important;
+  border-color: hsl(220 10% 82%) !important;
 }
 
 @layer base {
