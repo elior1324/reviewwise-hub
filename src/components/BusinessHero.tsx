@@ -119,20 +119,20 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
         transition={{ duration: 0.7, ease: "easeOut" }}
         className="relative shadow-card animated-border bg-card rounded-2xl overflow-hidden"
       >
-        {/* Cover image — integrated into card */}
+        {/* Cover image — blended into card background */}
         {business.coverUrl && (
-          <div className="relative w-full h-28 sm:h-36 md:h-44">
+          <div className="absolute inset-0 pointer-events-none">
             <img
               src={business.coverUrl}
               alt=""
-              className="w-full h-full object-cover"
+              className="w-full h-48 sm:h-56 md:h-64 object-cover"
               aria-hidden="true"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-card from-40% via-card/90 via-65% to-card/50" />
           </div>
         )}
 
-        <div className={`relative ${business.coverUrl ? "p-6 md:p-8 -mt-12" : "p-8 md:p-10"}`}
+        <div className={`relative ${business.coverUrl ? "pt-24 sm:pt-32 md:pt-40 px-6 pb-6 md:px-8 md:pb-8" : "p-8 md:p-10"}`}
       >
         <motion.div
           className="absolute inset-0 rounded-2xl pointer-events-none opacity-[0.07]"

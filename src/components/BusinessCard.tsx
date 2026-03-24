@@ -77,18 +77,18 @@ const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewC
   return (
     <div onClick={() => navigate(`/biz/${slug}`)} role="article" aria-label={name}>
       <Card className="shadow-card hover:shadow-card-hover transition-all duration-500 group cursor-pointer h-full animated-border bg-card overflow-hidden relative">
-        {/* Cover image */}
+        {/* Cover image — subtle background blend */}
         {coverUrl && (
-          <div className="relative w-full h-24 sm:h-28 overflow-hidden">
-            <img src={coverUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
-            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+          <div className="absolute inset-0 pointer-events-none">
+            <img src={coverUrl} alt="" className="w-full h-28 object-cover" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-t from-card from-50% via-card/90 via-75% to-card/40" />
           </div>
         )}
         {/* Ambient glow on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
           style={{ background: "radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.08), transparent 70%)" }}
         />
-        <CardContent className={`${coverUrl ? "p-5 -mt-6" : "p-6"} flex flex-col h-full relative z-10`}>
+        <CardContent className={`${coverUrl ? "pt-16" : ""} p-6 flex flex-col h-full relative z-10`}>
           <div className="flex items-start justify-between mb-4">
             {/* Logo with 3D float effect */}
             <motion.div
