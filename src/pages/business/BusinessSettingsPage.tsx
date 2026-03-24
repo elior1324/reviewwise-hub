@@ -581,13 +581,45 @@ const NotificationsSection = ({
 
 const AccountSection = ({
   business,
+  businessId,
   reviewStats,
   onOpenDelete,
+  onCouponSuccess,
 }: {
   business: Business;
+  businessId: string;
   reviewStats: { total: number; averageRating: number };
   onOpenDelete: () => void;
+  onCouponSuccess?: () => void;
 }) => {
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
+
+  const handleActivateCoupon = async () => {
+    const trimmed = couponCode.trim().toUpperCase();
+    if (!trimmed) { setCouponError("נא להזין קוד"); return; }
+    setCouponLoading(true);
+    setCouponError(null);
+    setCouponSuccess(null);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("apply-coupon", {
+        body: { code: trimmed, business_id: businessId },
+      });
+      if (fnError || !data?.success) {
+        setCouponError(data?.error ?? "קוד לא תקין או שכבר נעשה בו שימוש");
+        return;
+      }
+      setCouponSuccess("הקוד הופעל בהצלחה! יש לך גישת פרימיום");
+      setCouponCode("");
+      onCouponSuccess?.();
+    } catch {
+      setCouponError("שגיאת רשת. נסו שנית.");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
   const tierLabel = business.subscription_tier === "pro"
     ? "פרו" : business.subscription_tier === "enterprise"
     ? "ארגוני" : "חינמי";
@@ -629,6 +661,50 @@ const AccountSection = ({
           </div>
         </div>
       </div>
+
+      {/* Coupon activation — only shown for free tier users */}
+      {business.subscription_tier === "free" && !couponSuccess && (
+        <div className="max-w-lg">
+          <div className="border border-zinc-700/60 bg-zinc-800/30 rounded-xl p-5 space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold text-white">הפעלת קוד גישה</h3>
+              <p className="text-xs text-zinc-500 mt-1">הכנס קוד כדי לקבל גישת פרימיום ל-90 יום</p>
+            </div>
+            <div className="flex gap-2" dir="ltr">
+              <Input
+                value={couponCode}
+                onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(null); }}
+                onKeyDown={(e) => e.key === "Enter" && handleActivateCoupon()}
+                placeholder="הכנס קוד קופון"
+                className="font-mono tracking-widest bg-zinc-800/50 border-zinc-700/60 text-white placeholder:text-zinc-500 uppercase"
+                maxLength={12}
+                disabled={couponLoading}
+              />
+              <Button
+                onClick={handleActivateCoupon}
+                disabled={couponLoading || !couponCode.trim()}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 gap-1.5"
+                size="sm"
+              >
+                {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "הפעל קוד"}
+              </Button>
+            </div>
+            {couponError && (
+              <p className="text-red-400 text-xs">{couponError}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Coupon success message */}
+      {couponSuccess && (
+        <div className="max-w-lg">
+          <div className="border border-green-700/40 bg-green-950/20 rounded-xl p-4 flex items-center gap-3">
+            <CheckCircle2 className="text-green-400 shrink-0" size={18} />
+            <p className="text-green-300 text-sm font-medium">{couponSuccess}</p>
+          </div>
+        </div>
+      )}
 
       <Separator className="bg-zinc-700/40" />
 
@@ -1029,8 +1105,10 @@ const BusinessSettingsPage = () => {
                 {activeSection === "account" && (
                   <AccountSection
                     business={business}
+                    businessId={business.id}
                     reviewStats={reviewStats}
                     onOpenDelete={() => setDeleteModalOpen(true)}
+                    onCouponSuccess={() => window.location.reload()}
                   />
                 )}
               </div>
