@@ -62,16 +62,19 @@ serve(async (req) => {
     const trialEndsAt = biz?.trial_ends_at ? new Date(biz.trial_ends_at) : null;
 
     const inTrial     = trialEndsAt !== null && trialEndsAt > now;
-    const hasActiveSub = tier !== "free" && (inTrial || (expiresAt !== null && expiresAt > now));
+    // NULL expiresAt = lifetime access (coupon-based, no expiration)
+    const isLifetime   = tier !== "free" && expiresAt === null;
+    const hasActiveSub = tier !== "free" && (isLifetime || inTrial || (expiresAt !== null && expiresAt > now));
 
     logStep("Subscription state", {
-      tier, inTrial, hasActiveSub,
+      tier, inTrial, isLifetime, hasActiveSub,
       expiresAt: expiresAt?.toISOString(),
       trialEndsAt: trialEndsAt?.toISOString(),
     });
 
     // ── Auto-downgrade to free if subscription has lapsed ────────────────────
-    if (tier !== "free" && !inTrial && (expiresAt === null || expiresAt <= now)) {
+    // Never downgrade lifetime subscriptions (expiresAt === null)
+    if (tier !== "free" && !isLifetime && !inTrial && expiresAt !== null && expiresAt <= now) {
       await supabaseClient
         .from("businesses")
         .update({ subscription_tier: "free" })
@@ -82,9 +85,11 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       subscribed:       hasActiveSub,
       tier:             hasActiveSub ? tier : "free",
-      subscription_end: inTrial
-        ? trialEndsAt!.toISOString()
-        : (expiresAt?.toISOString() ?? null),
+      subscription_end: isLifetime
+        ? null  // null = no expiration (lifetime)
+        : inTrial
+          ? trialEndsAt!.toISOString()
+          : (expiresAt?.toISOString() ?? null),
       in_trial: inTrial,
     }), {
       headers: { ...cors, "Content-Type": "application/json" },

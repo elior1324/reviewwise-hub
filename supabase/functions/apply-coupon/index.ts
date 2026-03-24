@@ -107,9 +107,13 @@ serve(async (req: Request) => {
   if (existing) return json({ error: "כבר השתמשת בקופון זה" }, 400, cors);
 
   // ── 5. Calculate premium_until ──────────────────────────────────────────
+  // duration_months = 0 means lifetime (no expiration)
   const now = new Date();
-  const premiumUntil = new Date(now);
-  premiumUntil.setMonth(premiumUntil.getMonth() + coupon.duration_months);
+  const isLifetime = coupon.duration_months === 0;
+  const premiumUntil = isLifetime ? null : new Date(now);
+  if (premiumUntil) {
+    premiumUntil.setMonth(premiumUntil.getMonth() + coupon.duration_months);
+  }
 
   // ── 6. Atomically increment used_count (race-condition protection) ──────
   const { error: updateErr } = await admin
@@ -129,7 +133,7 @@ serve(async (req: Request) => {
       coupon_id:         coupon.id,
       user_id:           user.id,
       business_id:       body.business_id ?? null,
-      billing_starts_at: premiumUntil.toISOString(),
+      billing_starts_at: premiumUntil?.toISOString() ?? new Date("2099-12-31").toISOString(),
     });
 
   if (redeemErr) {
@@ -144,18 +148,24 @@ serve(async (req: Request) => {
       .from("businesses")
       .update({
         subscription_tier: "enterprise",
-        subscription_expires_at: premiumUntil.toISOString(),
+        subscription_expires_at: isLifetime ? null : premiumUntil!.toISOString(),
       })
       .eq("id", body.business_id)
       .eq("owner_id", user.id); // safety: only the owner can activate
   }
 
-  console.log(`[apply-coupon] User ${user.id} redeemed ${code} → premium until ${premiumUntil.toISOString()}`);
+  const logExpiry = isLifetime ? "LIFETIME" : premiumUntil!.toISOString();
+  console.log(`[apply-coupon] User ${user.id} redeemed ${code} → premium until ${logExpiry}`);
+
+  const message = isLifetime
+    ? "הקוד הופעל בהצלחה! יש לך גישת פרימיום ללא הגבלת זמן"
+    : `הקופון הופעל! גישת פרימיום פעילה עד ${premiumUntil!.toLocaleDateString("he-IL")}`;
 
   return json({
     success: true,
-    message: `הקופון הופעל! גישת פרימיום פעילה עד ${premiumUntil.toLocaleDateString("he-IL")}`,
-    premium_until: premiumUntil.toISOString(),
-    billing_starts_at: premiumUntil.toISOString(),
+    message,
+    premium_until: isLifetime ? null : premiumUntil!.toISOString(),
+    billing_starts_at: isLifetime ? null : premiumUntil!.toISOString(),
+    is_lifetime: isLifetime,
   }, 200, cors);
 });
