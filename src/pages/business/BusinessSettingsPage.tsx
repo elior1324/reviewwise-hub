@@ -69,6 +69,7 @@ import {
   Building2,
   Users,
   Settings,
+  Link2,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -274,7 +275,7 @@ const ContactSection = ({
   onSave,
   saving,
 }: {
-  contactForm: { email: string; phone: string; website: string; social_links: Record<string, string> };
+  contactForm: { email: string; phone: string; website: string; personal_affiliate_url: string; social_links: Record<string, string> };
   setContactForm: React.Dispatch<React.SetStateAction<typeof contactForm>>;
   onSave: () => Promise<void>;
   saving: boolean;
@@ -327,6 +328,25 @@ const ContactSection = ({
           placeholder="https://example.com"
           className="bg-zinc-800/50 border-zinc-700/60 text-white placeholder:text-zinc-500"
         />
+      </div>
+
+      {/* Affiliate link */}
+      <div className="space-y-2">
+        <Label htmlFor="c-affiliate" className="text-sm font-medium text-zinc-300 flex items-center gap-1.5">
+          <Link2 className="w-3.5 h-3.5" />קישור שיווק שותפים
+        </Label>
+        <Input
+          id="c-affiliate"
+          type="url"
+          value={contactForm.personal_affiliate_url}
+          onChange={(e) => setContactForm({ ...contactForm, personal_affiliate_url: e.target.value })}
+          placeholder="https://your-affiliate-link.com/ref=..."
+          className="bg-zinc-800/50 border-zinc-700/60 text-white placeholder:text-zinc-500"
+          dir="ltr"
+        />
+        <p className="text-[11px] text-zinc-500">
+          הוסיפו קישור ייחודי לרכישה דרככם (Affiliate Link) — יוצג בעמוד העסק הציבורי שלכם
+        </p>
       </div>
     </div>
 
@@ -665,7 +685,7 @@ const BusinessSettingsPage = () => {
 
   // Contact form
   const [contactForm, setContactForm] = useState({
-    email: "", phone: "", website: "",
+    email: "", phone: "", website: "", personal_affiliate_url: "",
     social_links: { facebook: "", instagram: "", linkedin: "", twitter: "", tiktok: "" } as Record<string, string>,
   });
 
@@ -713,6 +733,7 @@ const BusinessSettingsPage = () => {
             email: d.email || "",
             phone: d.phone || "",
             website: d.website || "",
+            personal_affiliate_url: d.personal_affiliate_url || "",
             social_links: d.social_links || { facebook: "", instagram: "", linkedin: "", twitter: "", tiktok: "" },
           });
 
@@ -753,10 +774,28 @@ const BusinessSettingsPage = () => {
     if (!business) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from("businesses").update({
+      // Validate affiliate URL if provided
+      const affUrl = contactForm.personal_affiliate_url.trim();
+      if (affUrl) {
+        try { new URL(affUrl); } catch {
+          toast.error("קישור השותפים אינו תקין — נא להזין כתובת מלאה (https://...)");
+          setSaving(false);
+          return;
+        }
+      }
+
+      const updatePayload: Record<string, unknown> = {
         email: contactForm.email, phone: contactForm.phone, website: contactForm.website,
+        personal_affiliate_url: affUrl || null,
         social_links: contactForm.social_links, updated_at: new Date().toISOString(),
-      }).eq("id", business.id);
+      };
+      // Auto-set affiliate mode based on URL presence
+      if (affUrl) {
+        updatePayload.affiliate_mode = "personal_affiliate";
+      }
+      const { error } = await supabase.from("businesses")
+        .update(updatePayload)
+        .eq("id", business.id);
       if (error) throw error;
       toast.success("פרטי הקשר נשמרו בהצלחה");
     } catch { toast.error("לא הצלחנו לשמור את פרטי הקשר"); }

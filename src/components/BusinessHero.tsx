@@ -263,22 +263,27 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
                     </span>
                   </>
                 )}
-                {affiliateMode === "personal_affiliate" && personalAffiliateUrls.map((raw, i) => {
-                  const safe = sanitizeUrl(raw);
+                {affiliateMode === "personal_affiliate" && personalAffiliateUrls.length > 0 && (() => {
+                  const safe = sanitizeUrl(personalAffiliateUrls[0]);
                   if (!safe) return null;
                   return (
-                    <a
-                      key={i}
-                      href={safe}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary border border-primary/40 bg-primary/8 hover:bg-primary/15 rounded-lg px-3 py-1.5 transition-colors"
-                    >
-                      <ExternalLink size={13} />
-                      {personalAffiliateUrls.length > 1 ? `כניסה לאתר ${i + 1}` : "כניסה לאתר"}
-                    </a>
+                    <>
+                      <a
+                        href={safe}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary border border-primary/40 bg-primary/8 hover:bg-primary/15 rounded-lg px-3 py-1.5 transition-colors"
+                      >
+                        <ExternalLink size={13} />
+                        קנו דרך הקישור
+                      </a>
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-amber-50 dark:bg-amber-950/30 border border-amber-400/40 text-amber-700 dark:text-amber-400 rounded-lg px-2.5 py-1.5">
+                        <Tag size={11} />
+                        רכישה דרך הקישור מקנה 5% הנחה
+                      </span>
+                    </>
                   );
-                })}
+                })()}
               </motion.div>
             )}
 
