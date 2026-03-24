@@ -332,34 +332,6 @@ const Index = () => {
       </section>
 
       {/* Top Course Providers — 1st */}
-      <section className="container py-10 md:py-20">
-        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <BookOpen size={22} className="text-primary" />
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">קורסים שהקהילה מכוונת אליהם</h2>
-            </div>
-            <p className="text-muted-foreground mt-1">דירוג מבוסס ציון אמון — מחושב מביקורות מאומתות רכישה בלבד. לא ניתן לרכוש מיקום.</p>
-          </div>
-          <Link to="/search?tab=courses">
-            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
-          </Link>
-        </div>
-        {topCourseProviders.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {topCourseProviders.map((biz, i) => (
-              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-                <BusinessCard {...biz} />
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-muted-foreground py-10">עדיין אין ספקי קורסים רשומים. היו הראשונים!</p>
-        )}
-      </section>
-
-      {/* Trending / Rising / Editor Picks — removed for MVP simplicity */}
-
       {/* Top SaaS & AI Tools */}
       <section className="container py-10 md:py-20">
         <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
@@ -446,37 +418,32 @@ const Index = () => {
         </section>
       )}
 
-      {/* Course Categories */}
-      {COURSE_CATS_DISPLAY.some(c => c.count > 0) && (
-        <section className="border-y border-border/50 glass">
-          <div className="container py-12">
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-60px" }}
-            >
-              <motion.div variants={fadeUp} custom={0} className="flex items-center gap-2 mb-2">
-                <BookOpen size={20} className="text-primary" />
-                <h2 className="font-display font-bold text-xl text-foreground">חינוך דיגיטלי</h2>
-              </motion.div>
-              <motion.p variants={fadeUp} custom={1} className="text-sm text-muted-foreground mb-5">קורסים אונליין, תוכניות מנטורינג, סדנאות — בתחומי שיווק, טק, AI, יזמות ופרילנסינג</motion.p>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                {COURSE_CATS_DISPLAY.filter(c => c.count > 0).map(({ label, query, count }, i) => (
-                  <motion.div key={label} variants={fadeUp} custom={2 + i * 0.3}>
-                    <Link
-                      to={`/search?q=${encodeURIComponent(query)}&tab=courses`}
-                      className="block rounded-xl p-4 bg-card/50 border border-border/40 hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 text-center group"
-                    >
-                      <p className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors">{label}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{count} ביקורות</p>
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+      {/* Top Courses / Digital Education */}
+      <section className="container py-10 md:py-20">
+        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <BookOpen size={22} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">חינוך דיגיטלי</h2>
+            </div>
+            <p className="text-muted-foreground mt-1">קורסים אונליין, תוכניות מנטורינג וסדנאות — מדורגים לפי ביקורות מאומתות</p>
           </div>
-        </section>
-      )}
+          <Link to="/search?tab=courses">
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+          </Link>
+        </div>
+        {topCourseProviders.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topCourseProviders.map((biz, i) => (
+              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <BusinessCard {...biz} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-10">עדיין אין קורסים רשומים. היו הראשונים!</p>
+        )}
+      </section>
 
       {/* Stats */}
       <section className="border-b border-border/50">
@@ -537,140 +504,6 @@ const Index = () => {
           </a>
         </section>
       )}
-
-      {/* How Verification Works — institutional methodology section */}
-      <section id="how-it-works" className="container py-20 scroll-mt-20">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="rounded-2xl relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.07), hsl(220 80% 40% / 0.05))" }}
-        >
-          <div className="absolute inset-0 noise-overlay opacity-30" />
-          <div className="absolute top-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
-
-          <div className="relative p-6 md:p-16 text-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-              className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6"
-            >
-              <ShieldCheck size={16} aria-hidden="true" />
-              המצפן של הקהילה הדיגיטלית
-            </motion.div>
-
-            <motion.h2
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="font-display font-bold text-3xl md:text-5xl text-foreground mb-4"
-            >
-              כיוון ברור, לא טענות שיווקיות
-            </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto"
-            >
-              כל ציון אמון מחושב מנתוני רכישה ממשיים — לא פרסום, לא דעות. הקהילה הדיגיטלית צריכה מצפן עצמאי, ו-ReviewHub היא אותו מצפן.
-            </motion.p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-              {[
-                {
-                  step: "01",
-                  title: "הקהילה רוכשת ומדווחת",
-                  desc: "רכישה דרך קישור ReviewHub מעניקה הנחה של 5% ומאפשרת כתיבת ביקורת לאחר הרכישה. ביקורות שנכתבות לאחר רכישה מתועדת מסומנות בהתאם — המצפן מתבסס על ניסיון אמיתי בשטח.",
-                },
-                {
-                  step: "02",
-                  title: "המצפן מחשב כיוון",
-                  desc: "ציון האמון מורכב מארבעה מרכיבים: איכות, נפח, עדכניות ועקביות — כפול מכפיל יחס ביקורות מאומתות. יוצר קטן עם 5 ביקורות מצוינות יכול להגיע לרמת Elite.",
-                },
-                {
-                  step: "03",
-                  title: "הכיוון לא למכירה",
-                  desc: "ציונים אינם למכירה. ביקורות שליליות אינן ניתנות למחיקה. עמלות תפעול מעסקאות מאומתות מחופאות ב\"חומת אמון\" — מוגנות מחישוב הציון לחלוטין. ReviewHub פועלת כמצפן עצמאי.",
-                },
-              ].map((item, i) => (
-                <motion.div
-                  key={item.step}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.15 + i * 0.08, duration: 0.5 }}
-                  className="rounded-xl border border-border/50 bg-card/60 backdrop-blur-sm p-5 text-right"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-muted-foreground">{item.step}</span>
-                    <ShieldCheck size={16} className="text-primary" aria-hidden="true" />
-                  </div>
-                  <p className="font-display font-bold text-foreground mb-1">{item.title}</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Trust Methodology — score formula breakdown */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.42, duration: 0.5 }}
-              className="mt-8 max-w-3xl mx-auto rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm px-6 py-5"
-              aria-label="מתודולוגיית ציון האמון"
-            >
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 text-right">
-                מתודולוגיית ציון האמון — 0–100
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-right">
-                {[
-                  { label: "איכות ביקורות",  weight: "עד 20",  desc: "סנטימנט ואורך" },
-                  { label: "נפח (לוגריתמי)", weight: "עד 25",  desc: "כמות הביקורות" },
-                  { label: "עדכניות",         weight: "עד 25",  desc: "ביקורות אחרונות" },
-                  { label: "עקביות",          weight: "עד 30",  desc: "יציבות לאורך זמן" },
-                ].map(({ label, weight, desc }) => (
-                  <div key={label} className="rounded-lg bg-muted/30 px-3 py-2.5">
-                    <p className="text-sm font-semibold text-foreground">{weight} נק׳</p>
-                    <p className="text-xs font-medium text-muted-foreground mt-0.5">{label}</p>
-                    <p className="text-[10px] text-muted-foreground/70 mt-0.5">{desc}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="text-[11px] text-muted-foreground/60 mt-3 text-right">
-                הציון מוגן מעמלות תפעול ומפרסום. המתודולוגיה פתוחה לציבור.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.52, duration: 0.5 }}
-              className="flex gap-3 justify-center flex-wrap mt-8"
-            >
-              <Link to="/about">
-                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary">
-                  איך עובד המצפן?
-                </Button>
-              </Link>
-              <Link to="/search">
-                <Button size="lg" variant="outline" className="border-border/50 font-semibold">
-                  גלו את הכיוון הנכון
-                </Button>
-              </Link>
-            </motion.div>
-          </div>
-        </motion.div>
-      </section>
 
       {/* FAQ Section */}
       <section className="border-t border-border/50" id="faq">
