@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { FREELANCER_CATEGORIES, COURSE_CATEGORIES, SAAS_CATEGORIES } from "@/data/mockData";
 
 import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
@@ -229,13 +230,28 @@ const ProfileSection = ({
       />
     </div>
 
-    {/* Category (read-only) */}
-    {profileForm.category && (
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-zinc-300">קטגוריה</Label>
-        <Badge variant="secondary" className="bg-zinc-800 text-zinc-200 text-sm">{profileForm.category}</Badge>
-      </div>
-    )}
+    {/* Category */}
+    <div className="space-y-2 max-w-md">
+      <Label htmlFor="p-category" className="text-sm font-medium text-zinc-300">קטגוריה</Label>
+      <select
+        id="p-category"
+        value={profileForm.category}
+        onChange={(e) => setProfileForm({ ...profileForm, category: e.target.value })}
+        className="w-full h-10 rounded-md border border-zinc-700/60 bg-zinc-800/50 text-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+        dir="rtl"
+      >
+        <option value="">בחרו קטגוריה</option>
+        <optgroup label="פרילנסרים ונותני שירות">
+          {FREELANCER_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+        </optgroup>
+        <optgroup label="קורסים והכשרות">
+          {COURSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+        </optgroup>
+        <optgroup label="SaaS וכלים דיגיטליים">
+          {SAAS_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+        </optgroup>
+      </select>
+    </div>
 
     {/* Founder name */}
     <div className="space-y-2 max-w-md">
@@ -762,6 +778,7 @@ const BusinessSettingsPage = () => {
       const updateData = {
         name: profileForm.name || business.name,
         description: profileForm.description || null,
+        category: profileForm.category || null,
         founder_name: profileForm.founder_name || null,
         logo_url: profileForm.logo_url || null,
         cover_url: profileForm.cover_url || null,
