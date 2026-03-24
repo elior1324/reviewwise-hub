@@ -76,7 +76,7 @@ const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewC
 
   return (
     <div onClick={() => navigate(`/biz/${slug}`)} role="article" aria-label={name}>
-      <Card className="shadow-card hover:shadow-card-hover transition-all duration-500 group cursor-pointer h-full animated-border bg-card overflow-hidden relative">
+      <Card className="shadow-card hover:shadow-card-hover transition-all duration-300 group cursor-pointer h-full animated-border bg-card overflow-hidden relative">
         {/* Cover image — subtle background blend */}
         {coverUrl && (
           <div className="absolute inset-0 pointer-events-none">
@@ -85,26 +85,26 @@ const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewC
           </div>
         )}
         {/* Ambient glow on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
           style={{ background: "radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.08), transparent 70%)" }}
         />
         <CardContent className={`${coverUrl ? "pt-16" : ""} p-6 flex flex-col h-full relative z-10`}>
           <div className="flex items-start justify-between mb-4">
             {/* Logo with 3D float effect */}
             <motion.div
-              whileHover={{ rotateY: 12, rotateX: -8, scale: 1.08 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              whileHover={{ rotateY: 10, rotateX: -6, scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="relative"
               style={{ perspective: "600px", transformStyle: "preserve-3d" }}
             >
               {logo ? (
-                <div className="w-16 h-16 rounded-xl overflow-hidden relative group-hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.4)] transition-shadow duration-500">
+                <div className="w-16 h-16 rounded-xl overflow-hidden relative group-hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.4)] transition-shadow duration-300">
                   <img src={logo} alt={name} className="w-full h-full object-contain bg-white/5 p-1.5" />
                   {/* Shine overlay */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-xl group-hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.4)] transition-shadow duration-500">
+                <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-xl group-hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.4)] transition-shadow duration-300">
                   {name.charAt(0)}
                 </div>
               )}

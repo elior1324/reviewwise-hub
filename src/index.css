@@ -226,10 +226,10 @@ html {
   .elegant-card {
     background: var(--card-gradient);
     box-shadow: var(--card-shadow);
-    transition: box-shadow 0.5s ease, transform 0.3s ease;
+    transition: box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .elegant-card:hover {
     box-shadow: var(--card-shadow-hover);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
   }
 }

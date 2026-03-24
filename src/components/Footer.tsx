@@ -57,7 +57,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 title={label}
                 aria-label={label}
-                className="w-9 h-9 rounded-lg bg-muted/50 hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-200"
+                className="w-9 h-9 rounded-lg bg-muted/50 hover:bg-primary/10 md:hover:scale-110 active:scale-95 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-300"
               >
                 <Icon size={15} aria-hidden="true" />
               </a>
@@ -71,25 +71,25 @@ const Footer = () => {
           <div className="space-y-2">
             <Link
               to="/business"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               פורטל עסקי
             </Link>
             <Link
               to="/business/solutions/reviews"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               אימות ביקורות
             </Link>
             <Link
               to="/business/solutions/analytics"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               לוח בקרה ונתונים
             </Link>
             <Link
               to="/business/solutions/widgets"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               ווידג'טים ותגי אמון
             </Link>
@@ -108,25 +108,25 @@ const Footer = () => {
           <div className="space-y-2">
             <Link
               to="/search"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               מאגר האמון
             </Link>
             <Link
               to="/compare"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               השוואה
             </Link>
             <Link
               to="/about"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               אודות
             </Link>
             <Link
               to="/business"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               ליוצרים ועסקים
             </Link>
@@ -139,25 +139,25 @@ const Footer = () => {
           <div className="space-y-2">
             <Link
               to="/privacy"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               מדיניות פרטיות
             </Link>
             <Link
               to="/terms"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               תנאי שימוש
             </Link>
             <Link
               to="/refund-policy"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               מדיניות ביטולים והחזרים
             </Link>
             <Link
               to="/accessibility"
-              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >
               הצהרת נגישות
             </Link>

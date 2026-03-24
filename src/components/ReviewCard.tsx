@@ -260,8 +260,8 @@ const ReviewCard = ({
   };
 
   return (
-    <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.2, ease: "easeOut" }}>
-      <Card className={`shadow-card hover:shadow-card-hover transition-all duration-500 animated-border bg-card relative ${reviewTier === "open" ? "opacity-90 bg-card/70" : ""} ${flagged ? "border-destructive/30" : ""} ${isDisputed ? "border-amber-500/40" : ""}`}>
+    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.3, ease: "easeOut" }}>
+      <Card className={`shadow-card hover:shadow-card-hover transition-all duration-300 animated-border bg-card relative ${reviewTier === "open" ? "opacity-90 bg-card/70" : ""} ${flagged ? "border-destructive/30" : ""} ${isDisputed ? "border-amber-500/40" : ""}`}>
         {/* ── Disputed overlay — blurs content while under investigation ── */}
         {isDisputed && (
           <div className="absolute inset-0 z-10 rounded-[inherit] overflow-hidden flex flex-col items-center justify-center gap-2 backdrop-blur-sm bg-background/60 border border-amber-500/30">
@@ -502,7 +502,7 @@ const ReviewCard = ({
                 disabled={likeLoading}
                 className={`gap-1.5 text-xs transition-all ${liked ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
               >
-                <motion.div animate={animating ? { scale: [1, 1.4, 1] } : {}} transition={{ duration: 0.4 }}>
+                <motion.div animate={animating ? { scale: [1, 1.2, 1] } : {}} transition={{ duration: 0.35 }}>
                   <ThumbsUp size={14} className={liked ? "fill-primary" : ""} />
                 </motion.div>
                 <span>{likeCount > 0 ? likeCount : ""}</span>

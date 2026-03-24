@@ -320,7 +320,7 @@ const Index = () => {
                   role="listitem"
                   type="button"
                   onClick={() => navigate(`/search?q=${encodeURIComponent(q)}`)}
-                  className="text-xs font-medium px-3 py-1.5 rounded-full border border-border/50 bg-card/40 text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-primary/5 transition-colors"
+                  className="text-xs font-medium px-3 py-1.5 rounded-full border border-border/50 bg-card/40 text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-primary/5 md:hover:scale-105 active:scale-95 transition-all duration-200"
                 >
                   {label}
                 </button>
