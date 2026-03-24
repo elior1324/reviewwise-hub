@@ -360,7 +360,59 @@ const Index = () => {
 
       {/* Trending / Rising / Editor Picks — removed for MVP simplicity */}
 
-      {/* SaaS & Freelancers — removed for MVP simplicity */}
+      {/* Top SaaS & AI Tools */}
+      <section className="container py-10 md:py-20">
+        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Cpu size={22} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">כלי SaaS ו-AI</h2>
+            </div>
+            <p className="text-muted-foreground mt-1">תוכנות, כלי AI ופלטפורמות דיגיטליות — מדורגים לפי אמינות, לא לפי תקציב פרסום</p>
+          </div>
+          <Link to="/search?tab=saas">
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+          </Link>
+        </div>
+        {topSaasTools.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topSaasTools.map((biz, i) => (
+              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <BusinessCard {...biz} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-10">עדיין אין כלי SaaS ו-AI רשומים. היו הראשונים!</p>
+        )}
+      </section>
+
+      {/* Top Digital Experts */}
+      <section className="container py-10 md:py-20">
+        <div className="flex items-start md:items-end justify-between mb-10 flex-wrap gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <UserCheck size={22} className="text-primary" />
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">מומחים דיגיטליים</h2>
+            </div>
+            <p className="text-muted-foreground mt-1">מומחים שפועלים בכלכלה הדיגיטלית — מדורגים לפי ביקורות לקוחות מאומתות</p>
+          </div>
+          <Link to="/search?tab=freelancers">
+            <Button variant="outline" size="sm" className="border-border/50">הצגת הכל</Button>
+          </Link>
+        </div>
+        {topFreelancers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topFreelancers.map((biz, i) => (
+              <motion.div key={biz.slug} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <BusinessCard {...biz} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-10">עדיין אין מומחים דיגיטליים רשומים. היו הראשונים!</p>
+        )}
+      </section>
 
       {/* Freelancer Categories */}
       {FREELANCER_CATS_DISPLAY.length > 0 && (
