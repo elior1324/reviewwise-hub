@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import StarRating from "@/components/StarRating";
 import ReviewCard from "@/components/ReviewCard";
 import ReviewSummary from "@/components/ReviewSummary";
-import CourseCard from "@/components/CourseCard";
+import ServiceCard from "@/components/ServiceCard";
 import BusinessHero from "@/components/BusinessHero";
 import AddReviewForm from "@/components/AddReviewForm";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
@@ -139,8 +139,9 @@ const BusinessProfile = () => {
       // NOTE: courses.name, rating, review_count, verified_purchases do NOT exist.
       const { data: courseData } = await supabase
         .from("courses")
-        .select("id, name, description, price, affiliate_url, category")
-        .eq("business_id", bizData.id);
+        .select("id, name, description, short_description, price, url, affiliate_url, affiliate_percentage, is_active, category")
+        .eq("business_id", bizData.id)
+        .eq("is_active", true);
 
       if (courseData) {
         setCourses(courseData.map((c: any) => ({
@@ -149,7 +150,10 @@ const BusinessProfile = () => {
           name: c.name || "",
           price: Number(c.price) || 0,
           description: c.description || "",
+          shortDescription: c.short_description || "",
+          url: c.url || "",
           affiliateUrl: c.affiliate_url || "",
+          affiliatePercentage: c.affiliate_percentage != null ? Number(c.affiliate_percentage) : null,
           category: c.category || "",
           rating: 0,
           reviewCount: 0,
@@ -600,11 +604,24 @@ const BusinessProfile = () => {
         {/* Courses */}
         {courses.length > 0 && (
           <div className="mb-10">
-            <h2 className="font-display font-bold text-xl mb-4">קורסים ({courses.length})</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="font-display font-bold text-xl mb-4">שירותים ומוצרים ({courses.length})</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {courses.map((course, i) => (
-                <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <CourseCard {...course} />
+                <motion.div key={course.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                  <ServiceCard
+                    id={course.id}
+                    name={course.name}
+                    shortDescription={course.shortDescription}
+                    description={course.description}
+                    price={course.price}
+                    url={course.url}
+                    affiliateUrl={course.affiliateUrl}
+                    affiliatePercentage={course.affiliatePercentage}
+                    category={course.category}
+                    rating={course.rating}
+                    reviewCount={course.reviewCount}
+                    businessSlug={course.businessSlug}
+                  />
                 </motion.div>
               ))}
             </div>

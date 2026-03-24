@@ -1108,34 +1108,49 @@ export type Database = {
       }
       courses: {
         Row: {
+          affiliate_percentage: number | null
           affiliate_url: string | null
           business_id: string | null
           category: string | null
           created_at: string | null
           description: string | null
           id: string
+          is_active: boolean
           name: string
           price: number | null
+          short_description: string | null
+          updated_at: string
+          url: string | null
         }
         Insert: {
+          affiliate_percentage?: number | null
           affiliate_url?: string | null
           business_id?: string | null
           category?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
+          is_active?: boolean
           name: string
           price?: number | null
+          short_description?: string | null
+          updated_at?: string
+          url?: string | null
         }
         Update: {
+          affiliate_percentage?: number | null
           affiliate_url?: string | null
           business_id?: string | null
           category?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
+          is_active?: boolean
           name?: string
           price?: number | null
+          short_description?: string | null
+          updated_at?: string
+          url?: string | null
         }
         Relationships: [
           {

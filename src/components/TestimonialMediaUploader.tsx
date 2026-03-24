@@ -8,12 +8,12 @@ import { Upload, X, Video, Image, Link, Trash2, GripVertical } from "lucide-reac
 
 interface MediaItem {
   id: string;
-  file_path: string;
-  file_type: string;
-  media_type: string;
-  external_url: string | null;
-  title: string | null;
+  business_id: string;
+  media_url: string;
+  media_type: string;    // "image" | "video" | "youtube" | "link"
+  caption: string | null;
   sort_order: number;
+  created_at: string;
 }
 
 interface Props {
@@ -75,13 +75,14 @@ const TestimonialMediaUploader = ({ businessId, maxItems = 5 }: Props) => {
       return;
     }
 
+    const { data: { publicUrl } } = supabase.storage.from("testimonials").getPublicUrl(path);
+
     const { error: insertError } = await supabase
       .from("testimonial_media")
       .insert({
         business_id: businessId,
-        file_path: path,
-        file_type: isVideo ? "video" : "image",
-        media_type: "upload",
+        media_url: publicUrl,
+        media_type: isVideo ? "video" : "image",
         sort_order: media.length,
       });
 
@@ -101,14 +102,15 @@ const TestimonialMediaUploader = ({ businessId, maxItems = 5 }: Props) => {
       return;
     }
 
+    const url = externalUrl.trim();
+    const isYouTube = /youtube\.com|youtu\.be/.test(url);
+
     const { error } = await supabase
       .from("testimonial_media")
       .insert({
         business_id: businessId,
-        file_path: "",
-        file_type: "video",
-        media_type: "link",
-        external_url: externalUrl.trim(),
+        media_url: url,
+        media_type: isYouTube ? "youtube" : "link",
         sort_order: media.length,
       });
 
@@ -122,22 +124,18 @@ const TestimonialMediaUploader = ({ businessId, maxItems = 5 }: Props) => {
   };
 
   const handleDelete = async (item: MediaItem) => {
-    if (item.media_type === "upload" && item.file_path) {
-      await supabase.storage.from("testimonials").remove([item.file_path]);
+    // If it's an uploaded file (not a link/youtube), remove from storage
+    if ((item.media_type === "image" || item.media_type === "video") && item.media_url.includes("testimonials")) {
+      // Extract storage path from public URL
+      const parts = item.media_url.split("/testimonials/");
+      if (parts[1]) {
+        const storagePath = parts[1].split("?")[0]; // strip cache-busting params
+        await supabase.storage.from("testimonials").remove([storagePath]);
+      }
     }
     await supabase.from("testimonial_media").delete().eq("id", item.id);
     toast.success("הפריט נמחק");
     fetchMedia();
-  };
-
-  const getPublicUrl = (path: string) => {
-    const { data } = supabase.storage.from("testimonials").getPublicUrl(path);
-    return data.publicUrl;
-  };
-
-  const getYouTubeEmbedId = (url: string) => {
-    const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    return match?.[1] || null;
   };
 
   if (loading) return null;
@@ -157,19 +155,15 @@ const TestimonialMediaUploader = ({ businessId, maxItems = 5 }: Props) => {
             {media.map((item) => (
               <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg border border-border/50 bg-muted/30">
                 <GripVertical size={14} className="text-muted-foreground" />
-                {item.file_type === "video" ? (
+                {item.media_type === "video" || item.media_type === "youtube" || item.media_type === "link" ? (
                   <Video size={16} className="text-primary shrink-0" />
                 ) : (
                   <Image size={16} className="text-primary shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
-                  {item.media_type === "link" ? (
-                    <p className="text-sm truncate">{item.external_url}</p>
-                  ) : (
-                    <p className="text-sm truncate">{item.file_path.split("/").pop()}</p>
-                  )}
+                  <p className="text-sm truncate" dir="ltr">{item.media_url}</p>
                   <p className="text-xs text-muted-foreground">
-                    {item.media_type === "link" ? "קישור חיצוני" : "קובץ מועלה"} · {item.file_type === "video" ? "סרטון" : "תמונה"}
+                    {item.media_type === "youtube" ? "YouTube" : item.media_type === "link" ? "קישור חיצוני" : item.media_type === "video" ? "סרטון" : "תמונה"}
                   </p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(item)}>

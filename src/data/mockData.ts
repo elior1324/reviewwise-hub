@@ -15,7 +15,10 @@ export interface Course {
   name: string;
   price: number;
   description: string;
+  shortDescription?: string;
+  url?: string;
   affiliateUrl: string;
+  affiliatePercentage?: number | null;
   category: string;
   courseType?: string;
   rating: number;
