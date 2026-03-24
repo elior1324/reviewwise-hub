@@ -784,18 +784,15 @@ const BusinessSettingsPage = () => {
         }
       }
 
-      const updatePayload: Record<string, unknown> = {
-        email: contactForm.email, phone: contactForm.phone, website: contactForm.website,
+      const { error } = await supabase.from("businesses").update({
+        email: contactForm.email,
+        phone: contactForm.phone,
+        website: contactForm.website,
         personal_affiliate_url: affUrl || null,
-        social_links: contactForm.social_links, updated_at: new Date().toISOString(),
-      };
-      // Auto-set affiliate mode based on URL presence
-      if (affUrl) {
-        updatePayload.affiliate_mode = "personal_affiliate";
-      }
-      const { error } = await supabase.from("businesses")
-        .update(updatePayload)
-        .eq("id", business.id);
+        ...(affUrl ? { affiliate_mode: "personal_affiliate" } : {}),
+        social_links: contactForm.social_links,
+        updated_at: new Date().toISOString(),
+      }).eq("id", business.id);
       if (error) throw error;
       toast.success("פרטי הקשר נשמרו בהצלחה");
     } catch { toast.error("לא הצלחנו לשמור את פרטי הקשר"); }
