@@ -139,7 +139,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
 
   // ── Pricing cards ─────────────────────────────────────────────────────────
   const PricingCards = (
-    <div className="grid gap-8 md:grid-cols-3 md:gap-6 lg:gap-8">
+    <div className="grid gap-4 sm:gap-6 md:grid-cols-3 lg:gap-8">
       {plans.map((plan) => {
         const currentPrice =
           billingCycle === "monthly" ? plan.priceMonthly : plan.priceAnnually;

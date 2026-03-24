@@ -262,12 +262,12 @@ const Index = () => {
         <FloatingPaths position={1} />
         <FloatingPaths position={-1} />
         {/* Decorative blur orbs — purely visual, skip for AT */}
-        <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl animate-float" aria-hidden="true" />
-        <div className="absolute bottom-10 right-1/4 w-64 h-64 rounded-full bg-accent/5 blur-3xl animate-float" style={{ animationDelay: "3s" }} aria-hidden="true" />
+        <div className="absolute top-20 left-1/4 w-48 h-48 sm:w-96 sm:h-96 rounded-full bg-primary/5 blur-3xl animate-float" aria-hidden="true" />
+        <div className="absolute bottom-10 right-1/4 w-40 h-40 sm:w-64 sm:h-64 rounded-full bg-accent/5 blur-3xl animate-float" style={{ animationDelay: "3s" }} aria-hidden="true" />
         <motion.div className="container py-16 md:py-24 relative" style={{ opacity: heroOpacity, y: heroY }}>
           <motion.div className="max-w-4xl mx-auto text-center" initial="hidden" animate="visible">
-            <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium mb-6 text-primary">
-              <ShieldCheck size={16} aria-hidden="true" /> ביקורות מקושרות לרכישה · כיוון ברור לקהילה הדיגיטלית
+            <motion.div variants={fadeUp} custom={0} className="inline-flex items-center gap-2 glass px-3 py-2 rounded-full text-xs sm:text-sm font-medium mb-6 text-primary">
+              <ShieldCheck size={14} className="shrink-0 sm:w-4 sm:h-4" aria-hidden="true" /> ביקורות מקושרות לרכישה · כיוון ברור לקהילה הדיגיטלית
             </motion.div>
             <motion.h1 id="hero-heading" variants={fadeUp} custom={1} className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-4">
               המצפן של{" "}
@@ -586,7 +586,7 @@ const Index = () => {
       <section className="border-b border-border/50">
         <div className="container py-10">
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 md:gap-8 text-center"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
@@ -602,11 +602,11 @@ const Index = () => {
                 <motion.div
                   whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
                 >
-                  <Icon size={24} className="mx-auto mb-2 text-primary" />
-                  <p className="font-display font-bold text-2xl text-foreground">
+                  <Icon size={20} className="mx-auto mb-2 text-primary sm:w-6 sm:h-6" />
+                  <p className="font-display font-bold text-xl sm:text-2xl text-foreground">
                     {value}
                   </p>
-                  <p className="text-sm text-muted-foreground">{label}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{label}</p>
                 </motion.div>
               </motion.div>
             ))}

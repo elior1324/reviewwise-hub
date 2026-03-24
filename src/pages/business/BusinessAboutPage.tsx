@@ -126,7 +126,7 @@ export default function BusinessAboutPage() {
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
-        <div className="absolute top-20 left-1/3 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl animate-float" />
+        <div className="absolute top-20 left-1/3 w-[250px] h-[250px] sm:w-[500px] sm:h-[500px] rounded-full bg-primary/5 blur-3xl animate-float" />
         {/* pt-24 accounts for fixed navbar (16) + optional business mode strip + comfortable breathing room */}
         <div className="container pt-28 pb-20 md:pt-32 md:pb-28 relative">
           <motion.div

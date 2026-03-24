@@ -192,7 +192,7 @@ const BusinessLanding = () => {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--hero-gradient)" }} />
-        <div className="absolute top-20 left-1/3 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl animate-float" />
+        <div className="absolute top-20 left-1/3 w-[250px] h-[250px] sm:w-[500px] sm:h-[500px] rounded-full bg-primary/5 blur-3xl animate-float" />
         <div className="container py-24 md:py-36 relative">
           <motion.div className="max-w-4xl mx-auto" initial="hidden" animate="visible">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">

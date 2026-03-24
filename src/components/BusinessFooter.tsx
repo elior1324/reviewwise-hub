@@ -27,7 +27,7 @@ const REVIEWHUB_SOCIALS = [
 const BusinessFooter = () => (
   <footer className="border-t border-border/50 mt-20" dir="rtl">
     <div className="container py-12">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6 lg:gap-8">
         <div>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-8 h-8 rounded-lg overflow-hidden">

@@ -35,7 +35,7 @@ const Footer = () => {
   <footer className="border-t border-border/50 mt-20">
     <div className="container py-12">
       {/* 4-column grid: brand · product · platform · legal */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-8">
 
         {/* Brand + socials */}
         <div>
