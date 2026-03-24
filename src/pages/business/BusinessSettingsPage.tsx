@@ -759,14 +759,25 @@ const BusinessSettingsPage = () => {
     if (!business) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from("businesses").update({
-        name: profileForm.name, description: profileForm.description,
-        founder_name: profileForm.founder_name, logo_url: profileForm.logo_url,
-        cover_url: profileForm.cover_url, updated_at: new Date().toISOString(),
-      }).eq("id", business.id);
-      if (error) throw error;
+      const updateData = {
+        name: profileForm.name || business.name,
+        description: profileForm.description || null,
+        founder_name: profileForm.founder_name || null,
+        logo_url: profileForm.logo_url || null,
+        cover_url: profileForm.cover_url || null,
+        updated_at: new Date().toISOString(),
+      };
+      console.log("[SaveProfile] updating business:", business.id, updateData);
+      const { error } = await supabase.from("businesses").update(updateData).eq("id", business.id);
+      if (error) {
+        console.error("[SaveProfile] Supabase error:", error.message, error.code, error.details);
+        throw error;
+      }
       toast.success("פרטי העסק נשמרו בהצלחה");
-    } catch { toast.error("לא הצלחנו לשמור את פרטי העסק"); }
+    } catch (err) {
+      console.error("[SaveProfile] error:", err);
+      toast.error("לא הצלחנו לשמור את פרטי העסק");
+    }
     finally { setSaving(false); }
   };
 
