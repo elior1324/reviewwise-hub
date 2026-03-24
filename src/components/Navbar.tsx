@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  Menu, X, LogOut, User, Scale, Trophy,
+  Menu, X, LogOut, User, Scale, Trophy, Search,
   ChevronDown, ShieldCheck, LayoutDashboard, BarChart3, Tag, BookOpen, Briefcase,
   UserCircle, ArrowLeftRight, Gift, Settings, Layout,
 } from "lucide-react";
@@ -294,6 +294,13 @@ const Navbar = () => {
 
         {/* ── Right side ───────────────────────────────────────────────────── */}
         <div className="flex items-center gap-2">
+          <Link
+            to="/search"
+            className="rounded-full border border-border/50 p-2 text-muted-foreground hover:text-primary hover:border-primary/50 transition-all duration-200"
+            aria-label="חיפוש"
+          >
+            <Search size={16} />
+          </Link>
           <AccessibilityMenu />
           {user && <NotificationBell />}
 

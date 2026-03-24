@@ -193,30 +193,15 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
                     </span>
                   );
                 })()}
-                <Badge className="bg-trust-green-light text-trust-green border-0 gap-1">
-                  <ShieldCheck size={14} /> מאומת
-                </Badge>
                 {business.type === "saas" && (
                   <Badge variant="outline" className="gap-1 border-primary/30 text-primary text-[10px]">
                     <Cpu size={11} /> מוצר דיגיטלי
                   </Badge>
                 )}
-                {/* ── Tenure badge — shown when the business has been on the platform 1+ year ── */}
-                {(() => {
-                  if (!business.createdAt) return null;
-                  const joined = new Date(business.createdAt);
-                  const now = new Date();
-                  const years = Math.floor((now.getTime() - joined.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
-                  if (years < 1) return null;
-                  return (
-                    <Badge variant="outline" className="gap-1 border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 text-[10px]">
-                      ★ פעיל {years}+ שנים
-                    </Badge>
-                  );
-                })()}
               </motion.div>
             </div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-3 mb-3 flex-wrap">
+            {/* ── Trust → CTA block (tight vertical grouping) ──────────── */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-3 mb-2 flex-wrap">
               <StarRating rating={business.rating} size={20} showValue />
               <span className="text-muted-foreground text-sm">
                 {business.reviewCount} ביקורות
@@ -225,82 +210,105 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
                 )}
               </span>
             </motion.div>
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-muted-foreground mb-4 max-w-2xl">
+
+            {/* Affiliate CTA — immediately after trust signals, before description */}
+            {affiliateMode !== "none" && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+                className="flex flex-col gap-2 mb-4"
+              >
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+                  {affiliateMode === "reviewhub_model" && affiliateSlug && (
+                    <>
+                      <a
+                        href={`/go/${affiliateSlug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 font-bold text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-5 py-2.5 transition-all duration-200 shadow-md shadow-primary/20"
+                      >
+                        <ExternalLink size={15} />
+                        כניסה לאתר
+                      </a>
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-amber-50 dark:bg-amber-950/30 border border-amber-400/40 text-amber-700 dark:text-amber-400 rounded-xl px-3 py-2">
+                        <Tag size={12} />
+                        קוד: <code className="font-mono font-bold tracking-wider">RH5</code>
+                        <span className="text-amber-600/70 dark:text-amber-400/60">· 5% הנחה</span>
+                      </span>
+                    </>
+                  )}
+                  {affiliateMode === "personal_affiliate" && personalAffiliateUrls.length > 0 && (() => {
+                    const safe = sanitizeUrl(personalAffiliateUrls[0]);
+                    if (!safe) return null;
+                    return (
+                      <>
+                        <a
+                          href={safe}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 font-bold text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-5 py-2.5 transition-all duration-200 shadow-md shadow-primary/20"
+                        >
+                          <ExternalLink size={15} />
+                          קנו דרך הקישור
+                        </a>
+                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-amber-50 dark:bg-amber-950/30 border border-amber-400/40 text-amber-700 dark:text-amber-400 rounded-xl px-3 py-2">
+                          <Tag size={12} />
+                          רכישה דרך הקישור מקנה 5% הנחה
+                        </span>
+                      </>
+                    );
+                  })()}
+                </div>
+                {/* Micro-trust text — reuses existing verified count text as CTA support */}
+                {verifiedCount > 0 && (
+                  <span className="text-[11px] text-muted-foreground/70 flex items-center gap-1">
+                    <ShieldCheck size={10} />
+                    {verifiedCount} מאומתות · {business.reviewCount} ביקורות
+                  </span>
+                )}
+              </motion.div>
+            )}
+
+            {/* Description — moved below CTA for natural flow */}
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-muted-foreground mb-4 max-w-2xl text-sm">
               {business.description}
             </motion.p>
 
-            {/* Contact info + SaaS-specific metadata */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
+            {/* Website + Contact button (email/phone hidden behind click) */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-3">
               {business.website && sanitizeUrl(business.website) && (
-                <a href={sanitizeUrl(business.website)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-primary transition-colors">
+                <a href={sanitizeUrl(business.website)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors">
                   <Globe size={14} /> {business.website.replace(/^https?:\/\//, "")}
                 </a>
               )}
-              {business.email && <span className="flex items-center gap-1"><Mail size={14} /> {business.email}</span>}
-              {business.phone && <span className="flex items-center gap-1"><Phone size={14} /> {business.phone}</span>}
-              {/* SaaS-specific: pricing model */}
+              {(business.email || business.phone) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const details = [
+                      business.email && `📧 ${business.email}`,
+                      business.phone && `📞 ${business.phone}`,
+                    ].filter(Boolean).join("\n");
+                    alert(details);
+                  }}
+                  className="flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors border border-primary/30 rounded-lg px-2.5 py-1 text-xs font-medium"
+                >
+                  <Mail size={12} />
+                  צרו קשר
+                </button>
+              )}
               {business.pricingModel && (
                 <span className="flex items-center gap-1 bg-muted/60 px-2 py-0.5 rounded border border-border/40 text-xs">
                   {PRICING_MODEL_LABELS[business.pricingModel]}
                 </span>
               )}
-              {/* SaaS-specific: founder */}
               {business.founderName && (
                 <span className="flex items-center gap-1 text-xs">
                   <User size={12} aria-hidden="true" /> מייסד: {business.founderName}
                 </span>
               )}
             </motion.div>
-
-            {/* ── Affiliate / purchase strip ─────────────────────────────── */}
-            {affiliateMode !== "none" && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.55 }}
-                className="flex items-center gap-3 flex-wrap mt-1 mb-1"
-              >
-                {affiliateMode === "reviewhub_model" && affiliateSlug && (
-                  <>
-                    <a
-                      href={`/go/${affiliateSlug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary border border-primary/40 bg-primary/8 hover:bg-primary/15 rounded-lg px-3 py-1.5 transition-colors"
-                    >
-                      <ExternalLink size={13} />
-                      כניסה לאתר
-                    </a>
-                    <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-amber-50 dark:bg-amber-950/30 border border-amber-400/40 text-amber-700 dark:text-amber-400 rounded-lg px-2.5 py-1.5">
-                      <Tag size={11} />
-                      קוד: <code className="font-mono font-bold tracking-wider">RH5</code>
-                      <span className="text-amber-600/70 dark:text-amber-400/60">· 5% הנחה</span>
-                    </span>
-                  </>
-                )}
-                {affiliateMode === "personal_affiliate" && personalAffiliateUrls.length > 0 && (() => {
-                  const safe = sanitizeUrl(personalAffiliateUrls[0]);
-                  if (!safe) return null;
-                  return (
-                    <>
-                      <a
-                        href={safe}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary border border-primary/40 bg-primary/8 hover:bg-primary/15 rounded-lg px-3 py-1.5 transition-colors"
-                      >
-                        <ExternalLink size={13} />
-                        קנו דרך הקישור
-                      </a>
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-amber-50 dark:bg-amber-950/30 border border-amber-400/40 text-amber-700 dark:text-amber-400 rounded-lg px-2.5 py-1.5">
-                        <Tag size={11} />
-                        רכישה דרך הקישור מקנה 5% הנחה
-                      </span>
-                    </>
-                  );
-                })()}
-              </motion.div>
-            )}
 
             {/* Social links */}
             {hasSocials && (
