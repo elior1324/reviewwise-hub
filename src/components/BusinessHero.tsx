@@ -99,24 +99,10 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
 
   return (
     <div className="relative overflow-hidden rounded-2xl mb-8">
-      {/* Cover image banner */}
-      {business.coverUrl && (
-        <div className="w-full h-32 sm:h-44 md:h-52 overflow-hidden rounded-t-2xl">
-          <img
-            src={business.coverUrl}
-            alt=""
-            className="w-full h-full object-cover"
-            aria-hidden="true"
-          />
-        </div>
-      )}
-
-      {!business.coverUrl && (
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px] animate-float" />
-          <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/3 blur-[80px] animate-float" style={{ animationDelay: "-3s" }} />
-        </div>
-      )}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 right-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px] animate-float" />
+        <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/3 blur-[80px] animate-float" style={{ animationDelay: "-3s" }} />
+      </div>
 
       <motion.div
         ref={cardRef}
@@ -131,7 +117,22 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
-        className="relative p-8 md:p-10 shadow-card animated-border bg-card rounded-2xl"
+        className="relative shadow-card animated-border bg-card rounded-2xl overflow-hidden"
+      >
+        {/* Cover image — integrated into card */}
+        {business.coverUrl && (
+          <div className="relative w-full h-28 sm:h-36 md:h-44">
+            <img
+              src={business.coverUrl}
+              alt=""
+              className="w-full h-full object-cover"
+              aria-hidden="true"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+          </div>
+        )}
+
+        <div className={`relative ${business.coverUrl ? "p-6 md:p-8 -mt-12" : "p-8 md:p-10"}`}
       >
         <motion.div
           className="absolute inset-0 rounded-2xl pointer-events-none opacity-[0.07]"
@@ -378,6 +379,7 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
           )}
         </motion.div>
 
+        </div>
       </motion.div>
     </div>
   );

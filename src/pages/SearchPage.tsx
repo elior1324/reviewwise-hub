@@ -125,6 +125,7 @@ const SearchPage = () => {
           verifiedReviewCount: b.verified_review_count || 0,
           description: b.description || "",
           logo: b.logo_url || undefined,
+          coverUrl: b.cover_url || undefined,
           website: b.website || undefined,
           email: b.email || undefined,
           phone: b.phone || undefined,
