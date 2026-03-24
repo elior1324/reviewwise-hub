@@ -539,9 +539,9 @@ const BusinessDashboard = () => {
 
       // Fetch collaboration config from business row
       setCollabConfig({
-        active: extBiz.collaboration_active || false,
-        method: extBiz.collaboration_method || null,
-        coupon: extBiz.collaboration_coupon || null,
+        active: biz.collaboration_active || false,
+        method: biz.collaboration_method || null,
+        coupon: biz.collaboration_coupon || null,
       });
 
       // Fetch referral clicks count

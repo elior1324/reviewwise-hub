@@ -176,7 +176,7 @@ const ProfileSection = ({
         value={profileForm.cover_url}
         onChange={(url) => setProfileForm({ ...profileForm, cover_url: url })}
         bucket="covers"
-        storagePath={`${user.id}/cover`}
+        storagePath={`${business.owner_id}/cover`}
         shape="rect"
         placeholder="לחצו להעלאת תמונת כריכה"
       />
@@ -190,7 +190,7 @@ const ProfileSection = ({
           value={profileForm.logo_url}
           onChange={(url) => setProfileForm({ ...profileForm, logo_url: url })}
           bucket="avatars"
-          storagePath={`${user.id}/logo`}
+          storagePath={`${business.owner_id}/logo`}
           shape="circle"
           placeholder="לוגו"
         />
