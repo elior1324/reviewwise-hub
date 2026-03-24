@@ -47,6 +47,7 @@ export interface Business {
   verifiedReviewCount?: number;
   description: string;
   logo?: string;
+  coverUrl?: string;
   website?: string;
   email?: string;
   phone?: string;

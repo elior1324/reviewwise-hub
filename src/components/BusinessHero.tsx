@@ -99,10 +99,24 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
 
   return (
     <div className="relative overflow-hidden rounded-2xl mb-8">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px] animate-float" />
-        <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/3 blur-[80px] animate-float" style={{ animationDelay: "-3s" }} />
-      </div>
+      {/* Cover image banner */}
+      {business.coverUrl && (
+        <div className="w-full h-32 sm:h-44 md:h-52 overflow-hidden rounded-t-2xl">
+          <img
+            src={business.coverUrl}
+            alt=""
+            className="w-full h-full object-cover"
+            aria-hidden="true"
+          />
+        </div>
+      )}
+
+      {!business.coverUrl && (
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px] animate-float" />
+          <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/3 blur-[80px] animate-float" style={{ animationDelay: "-3s" }} />
+        </div>
+      )}
 
       <motion.div
         ref={cardRef}
