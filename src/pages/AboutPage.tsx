@@ -574,13 +574,7 @@ const AboutPage = () => {
             </motion.div>
 
             <motion.div variants={fadeUp} custom={7}>
-              <Link to="/user/referrals">
-                <Button variant="outline" className="gap-2 text-sm border-border/50">
-                  <Trophy size={15} className="text-amber-500" />
-                  ראו את מסע הנקודות שלכם
-                  <ChevronRight size={13} />
-                </Button>
-              </Link>
+              {/* Referral CTA — temporarily disabled */}
             </motion.div>
           </motion.div>
         </div>

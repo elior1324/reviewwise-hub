@@ -98,7 +98,7 @@ const App = () => (
             <Route path="/biz/:slug" element={<BusinessProfile />} />
             <Route path="/course/:courseId" element={<CoursePage />} />
             <Route path="/go/:courseId" element={<AffiliateRedirect />} />
-            <Route path="/invite/:code" element={<InviteRedirect />} />
+            {/* <Route path="/invite/:code" element={<InviteRedirect />} /> — referral system disabled, keep for future */}
             <Route path="/giveaway" element={<GiveawayPage />} />
 
             {/* WhatsApp review collection — customer submits via link from business */}
@@ -162,7 +162,7 @@ const App = () => (
 
             {/* User pages — requires login */}
             <Route element={<AuthProtectedRoute />}>
-              <Route path="/user/referrals" element={<UserReferralDashboard />} />
+              {/* <Route path="/user/referrals" element={<UserReferralDashboard />} /> — referral system disabled */}
               <Route path="/settings"        element={<UserSettingsPage />} />
             </Route>
 

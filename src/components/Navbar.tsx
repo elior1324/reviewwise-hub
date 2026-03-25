@@ -239,7 +239,7 @@ const Navbar = () => {
                 <DropdownMenuTrigger asChild>
                   <button
                     className={`text-sm transition-colors flex items-center gap-1 focus-visible:outline-none relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
-                      isActive("/leaderboard") || isActive("/user/referrals")
+                      isActive("/leaderboard")
                         ? "text-foreground font-semibold after:bg-primary"
                         : "text-muted-foreground hover:text-foreground after:bg-transparent"
                     }`}
@@ -266,6 +266,7 @@ const Navbar = () => {
                       לוח המובילים
                     </Link>
                   </DropdownMenuItem>
+                  {/* Referral link — temporarily disabled, keep for future re-enable
                   {user && (
                     <DropdownMenuItem asChild>
                       <Link
@@ -278,6 +279,7 @@ const Navbar = () => {
                       </Link>
                     </DropdownMenuItem>
                   )}
+                  */}
                 </DropdownMenuContent>
               </DropdownMenu>
               <Link to="/compare" className={navLinkCls("/compare")}>
@@ -511,6 +513,7 @@ const Navbar = () => {
                   <Trophy size={14} aria-hidden="true" />
                   לוח המובילים
                 </Link>
+                {/* Referral link — temporarily disabled
                 {user && (
                   <Link
                     to="/user/referrals"
@@ -521,6 +524,7 @@ const Navbar = () => {
                     הזמינו חברים
                   </Link>
                 )}
+                */}
               </div>
 
               <div className="border-t border-border/30 pt-1">

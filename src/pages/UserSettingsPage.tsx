@@ -692,7 +692,7 @@ const PointsSection = ({ userId }: { userId: string }) => {
         </span>
       </div>
 
-      {/* Primary CTA — tier progress & rewards */}
+      {/* Referral CTA — temporarily disabled, keep for future
       <div className="rounded-xl border border-primary/30 p-4 bg-primary/5 flex items-center justify-between gap-4 max-w-lg">
         <div className="space-y-0.5">
           <p className="font-medium text-sm">מסע הנקודות והפרסים</p>
@@ -702,6 +702,7 @@ const PointsSection = ({ userId }: { userId: string }) => {
           <a href="/user/referrals">לדף הפרסים</a>
         </Button>
       </div>
+      */}
 
       {/* Secondary CTA — community leaderboard */}
       <div className="rounded-xl border border-border p-4 bg-card flex items-center justify-between gap-4 max-w-lg">

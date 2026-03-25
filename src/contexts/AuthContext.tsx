@@ -218,23 +218,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // code (set by InviteRedirect.tsx), it is redeemed via the DB function and
   // then cleared — ensuring the inviter gets 150 pts exactly once.
 
-  const processStoredReferral = useCallback(async (userId: string) => {
-    const code = localStorage.getItem("rh_invite_code");
-    if (!code) return;
-    localStorage.removeItem("rh_invite_code"); // clear immediately to avoid double-processing
-    try {
-      const { error } = await supabase.rpc("process_user_referral", {
-        p_invite_code: code,
-        p_new_user_id: userId,
-      });
-      if (error) {
-        devWarn("[Auth] process_user_referral error (non-fatal):", error.message);
-      } else {
-        devLog("[Auth] referral processed for code:", code);
-      }
-    } catch (e) {
-      devErr("[Auth] process_user_referral threw (non-fatal):", e);
-    }
+  // Referral processing — temporarily disabled, keep for future re-enable
+  const processStoredReferral = useCallback(async (_userId: string) => {
+    // Disabled: referral system is paused
+    return;
   }, []);
 
   // ── Auth state listener ────────────────────────────────────────────────────

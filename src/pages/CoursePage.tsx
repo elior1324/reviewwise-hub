@@ -305,13 +305,7 @@ const CoursePage = () => {
                               עד ₪{REWARD_DISCOUNT_CAP_ILS} הנחה ({discountPct}% מסכום הרכישה) ·{" "}
                               מינ׳ רכישה ₪{REWARD_MIN_PURCHASE_ILS.toLocaleString("he-IL")}
                             </p>
-                            <Link
-                              to="/user/referrals"
-                              className="text-[10px] font-semibold text-emerald-600 hover:underline inline-flex items-center gap-1"
-                            >
-                              <Gift size={10} />
-                              מממשים ב"הזמינו חברים" ←
-                            </Link>
+                            {/* Referral link — temporarily disabled */}
                           </div>
                         ) : (
                           <div className="rounded-lg border border-border/30 bg-muted/30 p-2.5">

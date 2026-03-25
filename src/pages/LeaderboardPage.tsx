@@ -43,8 +43,7 @@ export default function LeaderboardPage() {
           </span>
           <span className="hidden sm:inline-flex items-center gap-1.5 text-muted-foreground/70">
             <Info size={12} aria-hidden="true" />
-            לנקודות הניתנות למימוש להטבות פלטפורמה, ראו{" "}
-            <a href="/user/referrals" className="text-primary hover:underline">לוח ההזמנות</a>.
+            נקודות קהילה אינן ניתנות למימוש — הן מייצגות מוניטין בקהילה בלבד.
           </span>
         </div>
       </div>
@@ -68,13 +67,7 @@ export default function LeaderboardPage() {
             <p className="text-sm text-muted-foreground">
               רוצים לראות כיצד לצבור נקודות ולממש פרסים?
             </p>
-            <Link
-              to="/user/referrals"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-            >
-              <Gift size={14} aria-hidden="true" />
-              כל הדרכים לצבור נקודות
-            </Link>
+            {/* Referral link — temporarily disabled */}
           </motion.div>
         </div>
       </section>
