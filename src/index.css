@@ -48,6 +48,21 @@ html {
   filter: grayscale(100%) !important;
 }
 
+.a11y-bold-text,
+.a11y-bold-text * {
+  font-weight: bold !important;
+}
+.a11y-bold-text h1,
+.a11y-bold-text h2,
+.a11y-bold-text h3,
+.a11y-bold-text h4,
+.a11y-bold-text h5,
+.a11y-bold-text h6,
+.a11y-bold-text strong,
+.a11y-bold-text b {
+  font-weight: 900 !important;
+}
+
 .a11y-text-spacing,
 .a11y-text-spacing * {
   letter-spacing: 0.12em !important;
@@ -158,22 +173,22 @@ html {
 @layer base {
   :root {
     --background: 210 20% 98%;
-    --foreground: 220 15% 15%;
+    --foreground: 220 20% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 15%;
+    --card-foreground: 220 20% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 15%;
+    --popover-foreground: 220 20% 8%;
 
     --primary: 168 55% 32%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 15% 93%;
-    --secondary-foreground: 220 15% 25%;
+    --secondary-foreground: 220 20% 12%;
 
     --muted: 210 15% 94%;
-    --muted-foreground: 220 10% 42%;
+    --muted-foreground: 220 12% 35%;
 
     --accent: 40 95% 48%;
     --accent-foreground: 0 0% 5%;
@@ -216,12 +231,12 @@ html {
    flipped for the light default. Reverted by .a11y-invert-colors. */
 
 /* Text: white → dark on light backgrounds */
-:root:not(.a11y-invert-colors) .text-white { color: hsl(220 15% 15%); }
-:root:not(.a11y-invert-colors) .text-zinc-100 { color: hsl(220 15% 20%); }
-:root:not(.a11y-invert-colors) .text-zinc-200 { color: hsl(220 12% 25%); }
-:root:not(.a11y-invert-colors) .text-zinc-300 { color: hsl(220 10% 32%); }
-:root:not(.a11y-invert-colors) .text-zinc-400 { color: hsl(220 8% 42%); }
-:root:not(.a11y-invert-colors) .text-zinc-500 { color: hsl(220 6% 50%); }
+:root:not(.a11y-invert-colors) .text-white { color: hsl(220 20% 8%); }
+:root:not(.a11y-invert-colors) .text-zinc-100 { color: hsl(220 20% 10%); }
+:root:not(.a11y-invert-colors) .text-zinc-200 { color: hsl(220 18% 14%); }
+:root:not(.a11y-invert-colors) .text-zinc-300 { color: hsl(220 15% 22%); }
+:root:not(.a11y-invert-colors) .text-zinc-400 { color: hsl(220 12% 35%); }
+:root:not(.a11y-invert-colors) .text-zinc-500 { color: hsl(220 8% 42%); }
 
 /* Backgrounds: dark → light */
 :root:not(.a11y-invert-colors) .bg-zinc-900 { background-color: hsl(210 20% 98%); }

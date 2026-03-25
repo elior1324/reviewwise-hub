@@ -19,6 +19,7 @@ type AccessibilitySettings = {
   grayscale: boolean;
   textSpacing: boolean;
   invertColors: boolean;
+  boldText: boolean;
 };
 
 const defaults: AccessibilitySettings = {
@@ -31,6 +32,7 @@ const defaults: AccessibilitySettings = {
   grayscale: false,
   textSpacing: false,
   invertColors: false,
+  boldText: false,
 };
 
 const fontSizeLabels = ["רגיל", "גדול", "גדול מאוד"];
@@ -62,6 +64,7 @@ const AccessibilityMenu = () => {
     root.classList.toggle("a11y-grayscale", settings.grayscale);
     root.classList.toggle("a11y-text-spacing", settings.textSpacing);
     root.classList.toggle("a11y-invert-colors", settings.invertColors);
+    root.classList.toggle("a11y-bold-text", settings.boldText);
   }, [settings]);
 
   const toggle = (key: keyof Omit<AccessibilitySettings, "fontSize">) => {
@@ -145,6 +148,12 @@ const AccessibilityMenu = () => {
           <span className="flex items-center justify-between w-full">
             <span>ריווח טקסט</span>
             {isActive("textSpacing") && <span className="text-xs text-primary">✓</span>}
+          </span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => toggle("boldText")}>
+          <span className="flex items-center justify-between w-full">
+            <span>טקסט מודגש</span>
+            {isActive("boldText") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggle("invertColors")}>
