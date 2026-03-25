@@ -2,16 +2,14 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
-import { Play, X, Image, Video } from "lucide-react";
+import { Play, X, Video } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface MediaItem {
   id: string;
-  file_path: string;
-  file_type: string;
-  media_type: string;
-  external_url: string | null;
-  title: string | null;
+  media_url: string;
+  media_type: string; // "image" | "video" | "youtube" | "link"
+  caption: string | null;
   sort_order: number;
 }
 
@@ -22,13 +20,13 @@ interface Props {
 const TestimonialCarousel = ({ businessId }: Props) => {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeVideo, setActiveVideo] = useState<MediaItem | null>(null);
+  const [activeItem, setActiveItem] = useState<MediaItem | null>(null);
 
   useEffect(() => {
     const fetchMedia = async () => {
       const { data, error } = await supabase
         .from("testimonial_media")
-        .select("*")
+        .select("id, media_url, media_type, caption, sort_order")
         .eq("business_id", businessId)
         .order("sort_order", { ascending: true })
         .limit(5);
@@ -40,11 +38,6 @@ const TestimonialCarousel = ({ businessId }: Props) => {
   }, [businessId]);
 
   if (loading || media.length === 0) return null;
-
-  const getPublicUrl = (path: string) => {
-    const { data } = supabase.storage.from("testimonials").getPublicUrl(path);
-    return data.publicUrl;
-  };
 
   const getYouTubeEmbedId = (url: string) => {
     const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -65,34 +58,43 @@ const TestimonialCarousel = ({ businessId }: Props) => {
   );
 
   const renderThumbnail = (item: MediaItem) => {
-    if (item.media_type === "link" && item.external_url) {
-      const ytId = getYouTubeEmbedId(item.external_url);
+    const url = item.media_url;
+
+    // YouTube link
+    if (item.media_type === "youtube" || (item.media_type === "link" && /youtube\.com|youtu\.be/.test(url))) {
+      const ytId = getYouTubeEmbedId(url);
       if (ytId) {
         return (
-          <div className="relative w-full h-full cursor-pointer group" onClick={() => setActiveVideo(item)}>
+          <div className="relative w-full h-full cursor-pointer group" onClick={() => setActiveItem(item)}>
             <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt="סרטון לקוח" className="w-full h-full object-cover rounded-md" />
             <PlayOverlay />
           </div>
         );
       }
+    }
+
+    // Generic link (TikTok etc.)
+    if (item.media_type === "link") {
       return (
-        <div className="relative w-full h-full cursor-pointer group bg-muted rounded-md flex items-center justify-center" onClick={() => setActiveVideo(item)}>
+        <div className="relative w-full h-full cursor-pointer group bg-muted rounded-md flex items-center justify-center" onClick={() => setActiveItem(item)}>
           <Video size={20} className="text-muted-foreground" />
           <PlayOverlay />
         </div>
       );
     }
 
-    if (item.file_type === "image" && item.file_path) {
+    // Uploaded image
+    if (item.media_type === "image") {
       return (
-        <img src={getPublicUrl(item.file_path)} alt="תמונת לקוח" className="w-full h-full object-cover rounded-md cursor-pointer" onClick={() => setActiveVideo(item)} />
+        <img src={url} alt="תמונת לקוח" className="w-full h-full object-cover rounded-md cursor-pointer" onClick={() => setActiveItem(item)} />
       );
     }
 
-    if (item.file_type === "video" && item.file_path) {
+    // Uploaded video
+    if (item.media_type === "video") {
       return (
-        <div className="relative w-full h-full cursor-pointer group" onClick={() => setActiveVideo(item)}>
-          <video src={getPublicUrl(item.file_path)} className="w-full h-full object-cover rounded-md" muted playsInline />
+        <div className="relative w-full h-full cursor-pointer group" onClick={() => setActiveItem(item)}>
+          <video src={url} className="w-full h-full object-cover rounded-md" muted playsInline />
           <PlayOverlay />
         </div>
       );
@@ -102,8 +104,11 @@ const TestimonialCarousel = ({ businessId }: Props) => {
   };
 
   const renderFullMedia = (item: MediaItem) => {
-    if (item.media_type === "link" && item.external_url) {
-      const ytId = getYouTubeEmbedId(item.external_url);
+    const url = item.media_url;
+
+    // YouTube
+    if (item.media_type === "youtube" || (item.media_type === "link" && /youtube\.com|youtu\.be/.test(url))) {
+      const ytId = getYouTubeEmbedId(url);
       if (ytId) {
         return (
           <iframe
@@ -114,7 +119,11 @@ const TestimonialCarousel = ({ businessId }: Props) => {
           />
         );
       }
-      const tikTokId = getTikTokId(item.external_url);
+    }
+
+    // TikTok
+    if (item.media_type === "link") {
+      const tikTokId = getTikTokId(url);
       if (tikTokId) {
         return (
           <iframe
@@ -124,26 +133,28 @@ const TestimonialCarousel = ({ businessId }: Props) => {
           />
         );
       }
-      // Fallback - open in new tab
-      window.open(item.external_url, "_blank");
-      setActiveVideo(null);
+      // Fallback — open in new tab
+      window.open(url, "_blank");
+      setActiveItem(null);
       return null;
     }
 
-    if (item.file_type === "image" && item.file_path) {
+    // Uploaded image
+    if (item.media_type === "image") {
       return (
         <img
-          src={getPublicUrl(item.file_path)}
+          src={url}
           alt="תמונת לקוח"
           className="w-full max-h-[70vh] object-contain rounded-lg"
         />
       );
     }
 
-    if (item.file_type === "video" && item.file_path) {
+    // Uploaded video
+    if (item.media_type === "video") {
       return (
         <video
-          src={getPublicUrl(item.file_path)}
+          src={url}
           className="w-full max-h-[70vh] rounded-lg"
           controls
           autoPlay
@@ -168,8 +179,8 @@ const TestimonialCarousel = ({ businessId }: Props) => {
               <div className="h-20 overflow-hidden rounded-md border border-border/40">
                 {renderThumbnail(item)}
               </div>
-              {item.title && (
-                <p className="text-[10px] text-muted-foreground truncate mt-0.5 px-0.5">{item.title}</p>
+              {item.caption && (
+                <p className="text-[10px] text-muted-foreground truncate mt-0.5 px-0.5">{item.caption}</p>
               )}
             </CarouselItem>
           ))}
@@ -182,15 +193,15 @@ const TestimonialCarousel = ({ businessId }: Props) => {
         )}
       </Carousel>
 
-      {/* Full-screen overlay */}
+      {/* Full-screen overlay on click */}
       <AnimatePresence>
-        {activeVideo && (
+        {activeItem && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-            onClick={() => setActiveVideo(null)}
+            onClick={() => setActiveItem(null)}
           >
             <motion.div
               initial={{ scale: 0.9 }}
@@ -203,11 +214,11 @@ const TestimonialCarousel = ({ businessId }: Props) => {
                 variant="ghost"
                 size="icon"
                 className="absolute -top-12 left-0 text-white hover:bg-white/20 z-10"
-                onClick={() => setActiveVideo(null)}
+                onClick={() => setActiveItem(null)}
               >
                 <X size={24} />
               </Button>
-              {renderFullMedia(activeVideo)}
+              {renderFullMedia(activeItem)}
             </motion.div>
           </motion.div>
         )}
