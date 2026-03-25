@@ -429,6 +429,14 @@ const BusinessProfile = () => {
   const totalVerified    = reviews.filter(r => r.verified).length;
   const totalOpen        = reviews.filter(r => !r.verified).length;
 
+  // ── Apply rating filter to WhatsApp & Google reviews ─────────────────────
+  const filteredWhatsappReviews = filterRating
+    ? whatsappReviews.filter(r => r.rating === filterRating)
+    : whatsappReviews;
+  const filteredGoogleReviews = filterRating
+    ? googleReviews.filter(r => r.rating === filterRating)
+    : googleReviews;
+
   // ── Visibility flags for source-based section rendering ───────────────────
   const showNativeSection  = sourceFilter === "all" || sourceFilter === "verified_purchase" || sourceFilter === "community";
   const showGoogleSection  = (sourceFilter === "all" || sourceFilter === "google")        && !!googleProfile;
@@ -881,7 +889,7 @@ const BusinessProfile = () => {
               businessId={dbBusinessId!}
               businessSlug={slug!}
               profile={googleProfile!}
-              reviews={googleReviews}
+              reviews={filteredGoogleReviews}
               isOwner={isOwner}
             />
           </div>
@@ -897,7 +905,7 @@ const BusinessProfile = () => {
                 T2 · אושר על ידי בעל העסק
               </span>
             </div>
-            <WhatsAppReviewsSection reviews={whatsappReviews} />
+            <WhatsAppReviewsSection reviews={filteredWhatsappReviews} />
           </div>
         )}
 
