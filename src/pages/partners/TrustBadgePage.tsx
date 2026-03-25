@@ -109,14 +109,14 @@ const FAQ = [
 const FaqItem = ({ q, a }: { q: string; a: string }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-white/8 last:border-b-0">
+    <div className="border-b border-border/40 last:border-b-0">
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between gap-4 py-4 text-right text-sm font-medium text-white/80 hover:text-white transition-colors"
+        className="w-full flex items-center justify-between gap-4 py-4 text-right text-sm font-medium text-foreground/80 hover:text-white transition-colors"
       >
         <span>{q}</span>
         <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <ChevronDown size={15} className="shrink-0 text-white/40" />
+          <ChevronDown size={15} className="shrink-0 text-muted-foreground/70" />
         </motion.span>
       </button>
       <AnimatePresence initial={false}>
@@ -128,7 +128,7 @@ const FaqItem = ({ q, a }: { q: string; a: string }) => {
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <p className="pb-4 text-sm text-white/50 leading-relaxed">{a}</p>
+            <p className="pb-4 text-sm text-muted-foreground leading-relaxed">{a}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -146,7 +146,7 @@ const CopyButton = ({ text }: { text: string }) => {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/6 hover:bg-white/10 text-white/60 hover:text-white transition-all"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted/40 hover:bg-muted/50 text-muted-foreground hover:text-white transition-all"
     >
       {copied ? <CheckCheck size={13} className="text-emerald-400" /> : <Copy size={13} />}
       {copied ? "הועתק!" : "העתק קוד"}
@@ -187,8 +187,7 @@ export default function TrustBadgePage() {
   return (
     <div
       dir="rtl"
-      className="min-h-screen flex flex-col"
-      style={{ background: "hsl(0 0% 5%)" }}
+      className="min-h-screen flex flex-col bg-background"
     >
       <BusinessNavbar />
 
@@ -219,7 +218,7 @@ export default function TrustBadgePage() {
               הציגו ביקורות אמיתיות{" "}
               <span className="text-primary">בכל מקום</span>
             </h1>
-            <p className="text-lg text-white/50 leading-relaxed mb-8">
+            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
               הטמיעו את ווידג׳ט האמון של ReviewWise באתר שלכם ותנו לביקורות
               המאומתות לעבוד בשבילכם — אפס קוד, תמיד עדכני.
             </p>
@@ -256,7 +255,7 @@ export default function TrustBadgePage() {
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                       active
                         ? "bg-primary/15 border-primary/40 text-primary"
-                        : "bg-white/4 border-white/8 text-white/50 hover:text-white hover:bg-white/8"
+                        : "bg-muted/40 border-border/40 text-muted-foreground hover:text-white hover:bg-muted/50"
                     }`}
                   >
                     <Icon size={15} />
@@ -265,7 +264,7 @@ export default function TrustBadgePage() {
                 );
               })}
             </div>
-            <p className="text-center text-xs text-white/35 mt-3">
+            <p className="text-center text-xs text-muted-foreground/60 mt-3">
               {VARIANTS.find(v => v.id === activeVariant)?.desc}
             </p>
           </div>
@@ -275,20 +274,20 @@ export default function TrustBadgePage() {
         <section className="px-4 pb-16">
           <div className="mx-auto max-w-5xl">
             <div
-              className="rounded-2xl border border-white/8 overflow-hidden"
+              className="rounded-2xl border border-border/40 overflow-hidden"
               style={{
                 background:
                   "repeating-linear-gradient(45deg, hsl(0 0% 8%), hsl(0 0% 8%) 10px, hsl(0 0% 7%) 10px, hsl(0 0% 7%) 20px)",
               }}
             >
               {/* Chrome bar */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/8 bg-white/3">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-border/40 bg-muted/30">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-red-500/50" />
                   <div className="w-3 h-3 rounded-full bg-amber-400/50" />
                   <div className="w-3 h-3 rounded-full bg-emerald-400/50" />
                 </div>
-                <div className="flex-1 mx-4 px-3 py-1 rounded bg-white/5 text-xs text-white/25 text-right">
+                <div className="flex-1 mx-4 px-3 py-1 rounded bg-muted/30 text-xs text-muted-foreground/50 text-right">
                   yourwebsite.co.il
                 </div>
               </div>
@@ -317,7 +316,7 @@ export default function TrustBadgePage() {
             </div>
 
             {/* Demo note */}
-            <p className="text-center text-xs text-white/30 mt-3">
+            <p className="text-center text-xs text-muted-foreground/50 mt-3">
               * מוצג דאטה לדוגמה — לאחר כניסה לחשבון ייטענו נתוני העסק שלכם
             </p>
           </div>
@@ -325,10 +324,10 @@ export default function TrustBadgePage() {
 
         {/* ── Fixed badge demo toggle ───────────────────────────────────────── */}
         <section className="px-4 pb-12">
-          <div className="mx-auto max-w-5xl flex items-center justify-between gap-4 px-6 py-4 rounded-2xl border border-white/8 bg-white/3">
+          <div className="mx-auto max-w-5xl flex items-center justify-between gap-4 px-6 py-4 rounded-2xl border border-border/40 bg-muted/30">
             <div>
-              <p className="text-sm font-medium text-white/80">תג פינה קבוע (Fixed)</p>
-              <p className="text-xs text-white/40 mt-0.5">
+              <p className="text-sm font-medium text-foreground/80">תג פינה קבוע (Fixed)</p>
+              <p className="text-xs text-muted-foreground/70 mt-0.5">
                 מציף בפינת המסך — מושלם לדפי נחיתה ארוכים
               </p>
             </div>
@@ -337,14 +336,14 @@ export default function TrustBadgePage() {
               className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-all ${
                 showFixed
                   ? "bg-primary/30 border-primary/50"
-                  : "bg-white/8 border-white/15"
+                  : "bg-muted/50 border-border/50"
               }`}
             >
               <motion.span
                 animate={{ x: showFixed ? 20 : 2 }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 className={`inline-block h-4 w-4 rounded-full transition-colors ${
-                  showFixed ? "bg-primary" : "bg-white/40"
+                  showFixed ? "bg-primary" : "bg-muted/400"
                 }`}
               />
             </button>
@@ -360,7 +359,7 @@ export default function TrustBadgePage() {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-white">קוד ההטמעה</h2>
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-muted-foreground/70">
                   {user
                     ? "קוד ההטמעה מותאם לעסק שלכם"
                     : "העתיקו את הקוד והדביקו ב-HTML של האתר שלכם"}
@@ -368,9 +367,9 @@ export default function TrustBadgePage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/8 overflow-hidden">
+            <div className="rounded-2xl border border-border/40 overflow-hidden">
               {/* Tab bar */}
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/8 bg-white/3">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-muted/30">
                 <div className="flex items-center gap-2">
                   {VARIANTS.map(v => (
                     <button
@@ -379,7 +378,7 @@ export default function TrustBadgePage() {
                       className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
                         activeVariant === v.id
                           ? "bg-primary/15 text-primary"
-                          : "text-white/35 hover:text-white/60"
+                          : "text-muted-foreground/60 hover:text-muted-foreground"
                       }`}
                     >
                       {v.label}
@@ -409,16 +408,16 @@ export default function TrustBadgePage() {
                 {!user && (
                   <div
                     className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-b-2xl"
-                    style={{ background: "hsl(0 0% 6% / 0.85)", backdropFilter: "blur(2px)" }}
+                    style={{ background: "hsl(var(--background) / 0.9)", backdropFilter: "blur(2px)" }}
                   >
                     <div className="flex flex-col items-center gap-3 text-center px-6">
                       <div className="w-10 h-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
                         <Lock size={16} className="text-primary" />
                       </div>
-                      <p className="text-sm font-semibold text-white/90">
+                      <p className="text-sm font-semibold text-foreground">
                         קוד ההטמעה מותאם לעסק שלך
                       </p>
-                      <p className="text-xs text-white/45 max-w-xs leading-relaxed">
+                      <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
                         התחברו כדי לצפות בקוד ההטמעה המלא והמותאם לעסק שלכם
                       </p>
                       <Button
@@ -434,7 +433,7 @@ export default function TrustBadgePage() {
               </div>
             </div>
 
-            <p className="text-xs text-white/30 mt-3 leading-relaxed">
+            <p className="text-xs text-muted-foreground/50 mt-3 leading-relaxed">
               הביקורות והדירוג מתעדכנים אוטומטית — אין צורך לשנות את הקוד לאחר ההטמעה.
               יש שאלות?{" "}
               <a
@@ -493,11 +492,11 @@ export default function TrustBadgePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.3 }}
-                  className="flex flex-col gap-2 p-5 rounded-xl border border-white/8 bg-white/3 hover:bg-white/5 transition-colors"
+                  className="flex flex-col gap-2 p-5 rounded-xl border border-border/40 bg-muted/30 hover:bg-muted/30 transition-colors"
                 >
                   <span className="text-2xl">{f.icon}</span>
-                  <p className="font-semibold text-white/90 text-sm">{f.title}</p>
-                  <p className="text-xs text-white/45 leading-relaxed">{f.body}</p>
+                  <p className="font-semibold text-foreground text-sm">{f.title}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{f.body}</p>
                 </motion.div>
               ))}
             </div>
@@ -519,7 +518,7 @@ export default function TrustBadgePage() {
                 <h2 className="text-2xl font-bold text-white mb-3">
                   מוכנים להציג את הביקורות שלכם?
                 </h2>
-                <p className="text-white/50 mb-8 max-w-md mx-auto">
+                <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                   שדרגו לתכנית Pro וקבלו גישה מלאה לווידג׳ט האמון, ניתוח AI,
                   ואינטגרציות עם HubSpot וגוגל שיטס.
                 </p>
@@ -533,7 +532,7 @@ export default function TrustBadgePage() {
                   <Button
                     asChild
                     variant="outline"
-                    className="border-white/15 text-white/70 hover:text-white hover:bg-white/5"
+                    className="border-border/50 text-foreground/70 hover:text-white hover:bg-muted/30"
                   >
                     <a href="/business/pricing" className="flex items-center gap-1.5">
                       <span>ראו את כל התכניות</span>
@@ -550,7 +549,7 @@ export default function TrustBadgePage() {
         <section className="px-4 pb-20">
           <div className="mx-auto max-w-2xl">
             <h2 className="text-xl font-bold text-white text-center mb-8">שאלות נפוצות</h2>
-            <div className="rounded-2xl border border-white/8 px-6 bg-white/2">
+            <div className="rounded-2xl border border-border/40 px-6 bg-muted/20">
               {FAQ.map(item => (
                 <FaqItem key={item.q} q={item.q} a={item.a} />
               ))}

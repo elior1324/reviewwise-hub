@@ -185,9 +185,9 @@ function AccountStatusBanner({ user, authLoading, business, bLoading }: AccountS
       transition={{ duration: 0.35 }}
       className="mx-4 mb-6"
     >
-      <div className="mx-auto max-w-3xl flex items-center gap-3 px-5 py-3.5 rounded-2xl border border-white/10 bg-white/3">
-        <LogIn size={15} className="text-white/40 shrink-0" />
-        <p className="text-sm text-white/50 flex-1">
+      <div className="mx-auto max-w-3xl flex items-center gap-3 px-5 py-3.5 rounded-2xl border border-border/50 bg-muted/30">
+        <LogIn size={15} className="text-muted-foreground/70 shrink-0" />
+        <p className="text-sm text-muted-foreground flex-1">
           כדי לקבל קוד הטמעה מותאם אישית לעסק שלכם —{" "}
           <Link to="/business/login" className="text-primary/80 hover:text-primary underline underline-offset-2 font-medium">
             כניסה לחשבון
@@ -216,7 +216,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/6 hover:bg-white/10 text-white/60 hover:text-white transition-all"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted/40 hover:bg-muted/50 text-muted-foreground hover:text-white transition-all"
     >
       {copied ? <CheckCheck size={13} className="text-emerald-400" /> : <Copy size={13} />}
       {copied ? "הועתק!" : "העתק קוד"}
@@ -303,30 +303,30 @@ function BadgeCard({ item, ownerBusiness }: BadgeCardProps) {
       viewport={{ once: true }}
       transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: `${cfg.accent}30`, background: `linear-gradient(160deg, ${cfg.accentBg}90, hsl(0 0% 6%))` }}
+      style={{ borderColor: `${cfg.accent}30`, background: `linear-gradient(160deg, ${cfg.accentBg}20, hsl(var(--card)))` }}
     >
       <div className="px-6 pt-6 pb-4">
         <div className="mb-5">
           <p className="text-xs font-medium mb-1" style={{ color: `${cfg.accent}90` }}>{item.eligibility}</p>
           <h3 className="text-lg font-bold text-white">{cfg.label}</h3>
-          <p className="text-xs text-white/45 mt-1 leading-relaxed">{cfg.sublabel}</p>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{cfg.sublabel}</p>
         </div>
-        <div className="flex items-center justify-center py-6 rounded-xl border" style={{ background: "hsl(0 0% 8%)", borderColor: "hsl(0 0% 12%)" }}>
+        <div className="flex items-center justify-center py-6 rounded-xl border" style={{ background: "hsl(var(--muted))", borderColor: "hsl(var(--border))" }}>
           <PrestigeBadge type={item.type} slug={slug} name={name} grade={grade} rating={rating} size="md" noLink />
         </div>
       </div>
 
       <div className="px-6 pb-4">
-        <p className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-2">תנאי זכאות</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2">תנאי זכאות</p>
         <ul className="space-y-1.5">
           {item.criteria.map(c => (
-            <li key={c} className="flex items-start gap-2 text-xs text-white/60">
+            <li key={c} className="flex items-start gap-2 text-xs text-muted-foreground">
               <ShieldCheck size={11} className="shrink-0 mt-0.5" style={{ color: cfg.accent }} />
               {c}
             </li>
           ))}
         </ul>
-        <p className="text-xs text-white/35 leading-relaxed mt-3">{item.who}</p>
+        <p className="text-xs text-muted-foreground/60 leading-relaxed mt-3">{item.who}</p>
       </div>
 
       <div className="px-6 pb-6">
@@ -337,12 +337,12 @@ function BadgeCard({ item, ownerBusiness }: BadgeCardProps) {
         <AnimatePresence initial={false}>
           {open && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }} className="overflow-hidden mt-3">
-              <div className="rounded-xl border border-white/8 overflow-hidden">
-                <div className="flex items-center justify-between px-3 py-2 border-b border-white/8 bg-white/3">
-                  <span className="text-[10px] font-mono text-white/30">embed.html</span>
+              <div className="rounded-xl border border-border/40 overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2 border-b border-border/40 bg-muted/30">
+                  <span className="text-[10px] font-mono text-muted-foreground/60">embed.html</span>
                   <CopyButton text={snippet} />
                 </div>
-                <pre className="p-4 text-[10px] leading-relaxed overflow-x-auto whitespace-pre-wrap" style={{ color: `${cfg.accent}cc`, background: "hsl(0 0% 5%)" }}>
+                <pre className="p-4 text-[10px] leading-relaxed overflow-x-auto whitespace-pre-wrap" style={{ color: `${cfg.accent}cc`, background: "hsl(var(--card))" }}>
                   <code>{snippet}</code>
                 </pre>
               </div>
@@ -352,8 +352,8 @@ function BadgeCard({ item, ownerBusiness }: BadgeCardProps) {
                   הקוד כבר מוגדר לעסק שלכם — הדביקו ישירות באתר
                 </p>
               ) : (
-                <p className="text-[10px] text-white/30 mt-2 leading-relaxed">
-                  החליפו <code className="text-white/50">your-business-slug</code> בכתובת הפרופיל שלכם ב-ReviewHub.
+                <p className="text-[10px] text-muted-foreground/60 mt-2 leading-relaxed">
+                  החליפו <code className="text-muted-foreground">your-business-slug</code> בכתובת הפרופיל שלכם ב-ReviewHub.
                 </p>
               )}
             </motion.div>
@@ -423,7 +423,7 @@ function BadgesTab({ ownerBusiness }: BadgesTabProps) {
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-white mb-2">ארבעת תגי הפרסטיז׳</h2>
-            <p className="text-sm text-white/40 max-w-lg mx-auto">כל תג מבוסס על נתונים אמיתיים — ניתן לאימות בלחיצה. ככל שהציון גבוה יותר, כך התג מרשים יותר.</p>
+            <p className="text-sm text-muted-foreground/70 max-w-lg mx-auto">כל תג מבוסס על נתונים אמיתיים — ניתן לאימות בלחיצה. ככל שהציון גבוה יותר, כך התג מרשים יותר.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {BADGE_CATALOGUE.map(item => (
@@ -438,20 +438,20 @@ function BadgesTab({ ownerBusiness }: BadgesTabProps) {
         <div className="mx-auto max-w-4xl">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-white mb-2">איך זה עובד</h2>
-            <p className="text-sm text-white/40">שלושה שלבים מהרישום להצגת התג</p>
+            <p className="text-sm text-muted-foreground/70">שלושה שלבים מהרישום להצגת התג</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {HOW_STEPS.map((step, i) => {
               const Icon = step.icon;
               return (
-                <motion.div key={step.num} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.4 }} className="flex flex-col gap-4 p-6 rounded-2xl border border-white/8 bg-white/3">
+                <motion.div key={step.num} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.4 }} className="flex flex-col gap-4 p-6 rounded-2xl border border-border/40 bg-muted/30">
                   <div className="flex items-center justify-between">
                     <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center"><Icon size={18} className="text-primary" /></div>
-                    <span className="text-3xl font-black text-white/8">{step.num}</span>
+                    <span className="text-3xl font-black text-muted-foreground/20">{step.num}</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white/90 mb-1.5">{step.title}</h3>
-                    <p className="text-xs text-white/45 leading-relaxed">{step.body}</p>
+                    <h3 className="font-semibold text-foreground mb-1.5">{step.title}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{step.body}</p>
                   </div>
                 </motion.div>
               );
@@ -463,26 +463,26 @@ function BadgesTab({ ownerBusiness }: BadgesTabProps) {
       {/* Distribution loop */}
       <section className="px-4">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-2xl border border-violet-500/20 p-8 md:p-10" style={{ background: "linear-gradient(135deg, hsl(270 40% 8%), hsl(0 0% 6%))" }}>
+          <div className="rounded-2xl border border-violet-500/20 p-8 md:p-10" style={{ background: "linear-gradient(135deg, hsl(270 40% 96%), hsl(var(--card)))" }}>
             <div className="flex items-center gap-3 mb-5">
               <div className="p-2.5 rounded-xl bg-violet-500/15 border border-violet-500/25"><Link2 size={18} className="text-violet-400" /></div>
               <h2 className="text-xl font-bold text-white">לולאת הפצה — Trust Distribution Loop</h2>
             </div>
-            <p className="text-sm text-white/60 leading-relaxed mb-6">כל תג שמוטמע באתר של עסק מכיל לינק חזרה לפרופיל האמון שלו ב-ReviewHub. כך נוצרת לולאה שמחזקת את שני הצדדים:</p>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-6">כל תג שמוטמע באתר של עסק מכיל לינק חזרה לפרופיל האמון שלו ב-ReviewHub. כך נוצרת לולאה שמחזקת את שני הצדדים:</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               {[
                 { icon: "🏢", title: "ליזמים", body: "תגי האמון מגבירים המרות — לקוחות רואים הוכחה חיצונית ניטרלית, לא שיווק עצמי." },
                 { icon: "👥", title: "ללקוחות", body: "לחיצה על התג מובילה לפרופיל שניתן לאמת בעצמאות — ביקורות אמיתיות, נוסחה פתוחה." },
                 { icon: "🔗", title: "ל-ReviewHub", body: "כל הטמעה מייצרת backlink איכותי ומגדילה את סמכות הפלטפורמה — ללא תשלום פרסומי." },
               ].map(p => (
-                <div key={p.title} className="rounded-xl border border-white/8 bg-white/3 p-4">
+                <div key={p.title} className="rounded-xl border border-border/40 bg-muted/30 p-4">
                   <span className="text-2xl mb-3 block">{p.icon}</span>
-                  <p className="font-semibold text-white/80 text-sm mb-1">{p.title}</p>
-                  <p className="text-xs text-white/40 leading-relaxed">{p.body}</p>
+                  <p className="font-semibold text-foreground/80 text-sm mb-1">{p.title}</p>
+                  <p className="text-xs text-muted-foreground/70 leading-relaxed">{p.body}</p>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-white/30 leading-relaxed border-t border-white/8 pt-5">
+            <p className="text-xs text-muted-foreground/60 leading-relaxed border-t border-border/40 pt-5">
               חשוב: תגי הפרסטיז׳ אינם למכירה ואינם ניתנים לרכישה. ציון האמון מחושב אוטומטית — בעל עסק לא יכול לשנות אותו על ידי תשלום.
               <Link to="/about" className="text-violet-400/70 hover:text-violet-400 underline underline-offset-2 mr-1">קראו את המתודולוגיה המלאה ←</Link>
             </p>
@@ -494,10 +494,10 @@ function BadgesTab({ ownerBusiness }: BadgesTabProps) {
       <section className="px-4">
         <div className="mx-auto max-w-3xl">
           <h2 className="text-xl font-bold text-white text-center mb-8">גדלים זמינים</h2>
-          <div className="rounded-2xl border border-white/8 bg-white/2 p-8 flex flex-col gap-6 items-center">
+          <div className="rounded-2xl border border-border/40 bg-muted/20 p-8 flex flex-col gap-6 items-center">
             {(["sm", "md", "lg"] as const).map(sz => (
               <div key={sz} className="flex flex-col items-center gap-2">
-                <p className="text-[10px] font-medium text-white/30 uppercase tracking-widest">{sz.toUpperCase()}</p>
+                <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest">{sz.toUpperCase()}</p>
                 <PrestigeBadge
                   type="highly-trusted"
                   slug={ownerBusiness?.slug ?? "demo"}
@@ -605,7 +605,7 @@ function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
                 <button
                   key={v.id}
                   onClick={() => setActiveVariant(v.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${active ? "bg-primary/15 border-primary/40 text-primary" : "bg-white/4 border-white/8 text-white/50 hover:text-white hover:bg-white/8"}`}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${active ? "bg-primary/15 border-primary/40 text-primary" : "bg-muted/40 border-border/40 text-muted-foreground hover:text-white hover:bg-muted/50"}`}
                 >
                   <Icon size={15} />
                   <span>{v.label}</span>
@@ -613,22 +613,22 @@ function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
               );
             })}
           </div>
-          <p className="text-center text-xs text-white/35">{WIDGET_VARIANTS.find(v => v.id === activeVariant)?.desc}</p>
+          <p className="text-center text-xs text-muted-foreground/60">{WIDGET_VARIANTS.find(v => v.id === activeVariant)?.desc}</p>
         </div>
       </section>
 
       {/* Live preview */}
       <section className="px-4">
         <div className="mx-auto max-w-5xl">
-          <div className="rounded-2xl border border-white/8 overflow-hidden" style={{ background: "repeating-linear-gradient(45deg, hsl(0 0% 8%), hsl(0 0% 8%) 10px, hsl(0 0% 7%) 10px, hsl(0 0% 7%) 20px)" }}>
+          <div className="rounded-2xl border border-border/40 overflow-hidden" style={{ background: "repeating-linear-gradient(45deg, hsl(var(--muted)), hsl(var(--muted)) 10px, hsl(var(--card)) 10px, hsl(var(--card)) 20px)" }}>
             {/* Chrome bar */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/8 bg-white/3">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-border/40 bg-muted/30">
               <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-red-500/50" />
                 <div className="w-3 h-3 rounded-full bg-amber-400/50" />
                 <div className="w-3 h-3 rounded-full bg-emerald-400/50" />
               </div>
-              <div className="flex-1 mx-4 px-3 py-1 rounded bg-white/5 text-xs text-white/25 text-right">
+              <div className="flex-1 mx-4 px-3 py-1 rounded bg-muted/30 text-xs text-muted-foreground/50 text-right">
                 {ownerBusiness?.slug ? `yourwebsite.co.il — /${ownerBusiness.slug}` : "yourwebsite.co.il"}
               </div>
             </div>
@@ -654,23 +654,23 @@ function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
               מציג נתונים של {ownerBusiness!.name} — ביקורות חיות יופיעו כשהווידג'ט יוטמע באתר שלכם
             </p>
           ) : (
-            <p className="text-center text-xs text-white/30 mt-3">* מוצג דאטה לדוגמה — לאחר כניסה לחשבון ייטענו נתוני העסק שלכם</p>
+            <p className="text-center text-xs text-muted-foreground/60 mt-3">* מוצג דאטה לדוגמה — לאחר כניסה לחשבון ייטענו נתוני העסק שלכם</p>
           )}
         </div>
       </section>
 
       {/* Fixed badge demo */}
       <section className="px-4">
-        <div className="mx-auto max-w-5xl flex items-center justify-between gap-4 px-6 py-4 rounded-2xl border border-white/8 bg-white/3">
+        <div className="mx-auto max-w-5xl flex items-center justify-between gap-4 px-6 py-4 rounded-2xl border border-border/40 bg-muted/30">
           <div>
-            <p className="text-sm font-medium text-white/80">תג פינה קבוע (Fixed)</p>
-            <p className="text-xs text-white/40 mt-0.5">מציף בפינת המסך — מושלם לדפי נחיתה ארוכים</p>
+            <p className="text-sm font-medium text-foreground/80">תג פינה קבוע (Fixed)</p>
+            <p className="text-xs text-muted-foreground/70 mt-0.5">מציף בפינת המסך — מושלם לדפי נחיתה ארוכים</p>
           </div>
           <button
             onClick={() => setShowFixed(v => !v)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-all ${showFixed ? "bg-primary/30 border-primary/50" : "bg-white/8 border-white/15"}`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-all ${showFixed ? "bg-primary/30 border-primary/50" : "bg-muted/50 border-border/50"}`}
           >
-            <motion.span animate={{ x: showFixed ? 20 : 2 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className={`inline-block h-4 w-4 rounded-full transition-colors ${showFixed ? "bg-primary" : "bg-white/40"}`} />
+            <motion.span animate={{ x: showFixed ? 20 : 2 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className={`inline-block h-4 w-4 rounded-full transition-colors ${showFixed ? "bg-primary" : "bg-muted/400"}`} />
           </button>
         </div>
         <AnimatePresence>
@@ -685,7 +685,7 @@ function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
             <div className="p-2 rounded-lg bg-primary/15 border border-primary/25"><Code2 size={16} className="text-primary" /></div>
             <div>
               <h2 className="text-lg font-bold text-white">קוד ההטמעה</h2>
-              <p className="text-xs text-white/40">
+              <p className="text-xs text-muted-foreground/70">
                 {isPersonalised
                   ? `מוגדר אוטומטית לחשבון ${ownerBusiness!.name} — הדביקו ישירות ב-HTML של האתר שלכם`
                   : "העתיקו את הקוד והדביקו ב-HTML של האתר שלכם"}
@@ -698,22 +698,22 @@ function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
               </div>
             )}
           </div>
-          <div className="rounded-2xl border border-white/8 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/8 bg-white/3">
+          <div className="rounded-2xl border border-border/40 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-muted/30">
               <div className="flex items-center gap-2">
                 {WIDGET_VARIANTS.map(v => (
-                  <button key={v.id} onClick={() => setActiveVariant(v.id)} className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${activeVariant === v.id ? "bg-primary/15 text-primary" : "text-white/35 hover:text-white/60"}`}>
+                  <button key={v.id} onClick={() => setActiveVariant(v.id)} className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${activeVariant === v.id ? "bg-primary/15 text-primary" : "text-muted-foreground/60 hover:text-muted-foreground"}`}>
                     {v.label}
                   </button>
                 ))}
               </div>
               <CopyButton text={snippet} />
             </div>
-            <pre className="p-5 text-xs leading-relaxed overflow-x-auto" style={{ color: "hsl(168 60% 65%)", background: "hsl(0 0% 6%)" }}>
+            <pre className="p-5 text-xs leading-relaxed overflow-x-auto" style={{ color: "hsl(var(--primary))", background: "hsl(var(--card))" }}>
               <code>{snippet}</code>
             </pre>
           </div>
-          <p className="text-xs text-white/30 mt-3 leading-relaxed">
+          <p className="text-xs text-muted-foreground/60 mt-3 leading-relaxed">
             {isPersonalised ? (
               <>הביקורות והדירוג מתעדכנים אוטומטית — אין צורך לשנות את הקוד. יש שאלות?{" "}</>
             ) : (
@@ -730,10 +730,10 @@ function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
           <h2 className="text-xl font-bold text-white text-center mb-8">למה ווידג'ט האמון של ReviewHub?</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {WIDGET_FEATURES.map(f => (
-              <motion.div key={f.title} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3 }} className="flex flex-col gap-2 p-5 rounded-xl border border-white/8 bg-white/3 hover:bg-white/5 transition-colors">
+              <motion.div key={f.title} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3 }} className="flex flex-col gap-2 p-5 rounded-xl border border-border/40 bg-muted/30 hover:bg-muted/30 transition-colors">
                 <span className="text-2xl">{f.icon}</span>
-                <p className="font-semibold text-white/90 text-sm">{f.title}</p>
-                <p className="text-xs text-white/45 leading-relaxed">{f.body}</p>
+                <p className="font-semibold text-foreground text-sm">{f.title}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{f.body}</p>
               </motion.div>
             ))}
           </div>
@@ -770,7 +770,7 @@ export default function PrestigeBadgesPage() {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen flex flex-col" style={{ background: "hsl(0 0% 5%)" }}>
+    <div dir="rtl" className="min-h-screen flex flex-col bg-background">
       <BusinessNavbar />
 
       <main className="flex-1">
@@ -787,16 +787,16 @@ export default function PrestigeBadgesPage() {
               הציגו אמון{" "}
               <span className="text-violet-400">בכל מקום</span>
             </h1>
-            <p className="text-lg text-white/50 leading-relaxed max-w-lg mx-auto">
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto">
               תגי פרסטיז׳ סטטיים שמרוויחים עם ציון האמון, וווידג'טים חיים שמציגים ביקורות מאומתות — שניהם עם קוד הטמעה לאתר שלכם.
             </p>
           </motion.div>
         </section>
 
         {/* ── Tab switcher ──────────────────────────────────────────────────── */}
-        <div className="sticky top-16 z-30 px-4 pb-6" style={{ background: "hsl(0 0% 5%)" }}>
+        <div className="sticky top-16 z-30 px-4 pb-6 bg-background">
           <div className="mx-auto max-w-md">
-            <div className="flex rounded-2xl border border-white/10 bg-white/4 p-1 gap-1">
+            <div className="flex rounded-2xl border border-border/50 bg-muted/40 p-1 gap-1">
               {([
                 { id: "badges"  as Tab, label: "תגי פרסטיז׳",    icon: Award },
                 { id: "widgets" as Tab, label: "ווידג'טים לאתר", icon: Layout },
@@ -806,8 +806,8 @@ export default function PrestigeBadgesPage() {
                   onClick={() => switchTab(id)}
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
                     activeTab === id
-                      ? "bg-white/10 text-white shadow-sm"
-                      : "text-white/40 hover:text-white/70"
+                      ? "bg-muted/50 text-white shadow-sm"
+                      : "text-muted-foreground/70 hover:text-white/70"
                   }`}
                 >
                   <Icon size={14} />
@@ -847,17 +847,17 @@ export default function PrestigeBadgesPage() {
         {/* ── Shared CTA ────────────────────────────────────────────────────── */}
         <section className="px-4 pb-20">
           <div className="mx-auto max-w-2xl text-center">
-            <div className="rounded-2xl border border-primary/25 px-8 py-12" style={{ background: "linear-gradient(135deg, hsl(168 45% 8% / 0.6), hsl(0 0% 5%))" }}>
+            <div className="rounded-2xl border border-primary/25 px-8 py-12" style={{ background: "linear-gradient(135deg, hsl(168 45% 95% / 0.6), hsl(var(--background)))" }}>
               <div className="text-4xl mb-4">🏆</div>
               <h2 className="text-2xl font-bold text-white mb-3">מוכנים לרשום את העסק שלכם?</h2>
-              <p className="text-white/45 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
+              <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm leading-relaxed">
                 הצעד הראשון הוא להיכנס למאגר ReviewHub. לאחר שתאספו ביקורות מאומתות — תגי הפרסטיז׳ והווידג'טים נפתחים אוטומטית.
               </p>
               <div className="flex items-center justify-center gap-3 flex-wrap">
                 <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8">
                   <Link to="/business/signup">רשמו את העסק</Link>
                 </Button>
-                <Button asChild variant="outline" className="border-white/15 text-white/60 hover:text-white hover:bg-white/5">
+                <Button asChild variant="outline" className="border-border/50 text-muted-foreground hover:text-white hover:bg-muted/30">
                   <Link to="/search" className="flex items-center gap-1.5">
                     <span>חפשו במאגר</span>
                     <ArrowLeft size={13} />

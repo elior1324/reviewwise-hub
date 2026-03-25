@@ -29,7 +29,7 @@ export const MiniBadge = ({
       whileHover={{ y: -3, boxShadow: "0 12px 40px hsl(168 45% 30% / 0.25)" }}
       transition={{ type: "spring", stiffness: 340, damping: 28 }}
       dir="rtl"
-      className="group inline-flex items-center gap-3 px-4 py-3 rounded-2xl border border-white/10 text-inherit no-underline cursor-pointer"
+      className="group inline-flex items-center gap-3 px-4 py-3 rounded-2xl border border-border/50 text-inherit no-underline cursor-pointer"
       style={{
         background: "linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 6%))",
         boxShadow: "0 4px 24px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(168 45% 30% / 0.12)",
@@ -41,7 +41,7 @@ export const MiniBadge = ({
       <ReviewWiseLogo size="sm" showVerified={false} />
 
       {/* Divider */}
-      <div className="w-px h-8 bg-white/10 shrink-0" />
+      <div className="w-px h-8 bg-muted/50 shrink-0" />
 
       {/* Rating data */}
       <div className="flex flex-col gap-0.5 min-w-0">
@@ -51,7 +51,7 @@ export const MiniBadge = ({
           </span>
           <Stars rating={rating} size={13} />
         </div>
-        <span className="text-[10px] text-white/40 leading-none">
+        <span className="text-[10px] text-muted-foreground/70 leading-none">
           {reviewCount.toLocaleString("he-IL")} ביקורות
         </span>
       </div>
@@ -59,7 +59,7 @@ export const MiniBadge = ({
       {/* External link hint */}
       <ExternalLink
         size={11}
-        className="text-white/20 group-hover:text-primary transition-colors mr-auto shrink-0"
+        className="text-muted-foreground/40 group-hover:text-primary transition-colors mr-auto shrink-0"
       />
     </motion.a>
   );

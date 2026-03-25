@@ -19,24 +19,24 @@ const ReviewCard = ({
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.3, delay: index * 0.06 }}
-    className="flex flex-col gap-2.5 px-5 py-4 rounded-2xl border border-white/8 bg-white/[0.04] backdrop-blur-sm min-w-0 flex-1"
+    className="flex flex-col gap-2.5 px-5 py-4 rounded-2xl border border-border/40 bg-muted/20 backdrop-blur-sm min-w-0 flex-1"
     style={{ minHeight: 148 }}
   >
     {/* Stars row */}
     <Stars rating={review.rating} size={14} />
 
     {/* Review text */}
-    <p className="text-sm text-white/80 leading-relaxed line-clamp-3 flex-1">
+    <p className="text-sm text-foreground/80 leading-relaxed line-clamp-3 flex-1">
       {review.text}
     </p>
 
     {/* Footer */}
     <div className="flex items-center justify-between gap-2 mt-auto">
       <div className="flex flex-col">
-        <span className="text-xs font-semibold text-white/90">
+        <span className="text-xs font-semibold text-foreground">
           {review.anonymous ? "אנונימי" : review.reviewerName}
         </span>
-        <span className="text-[10px] text-white/35">{review.date}</span>
+        <span className="text-[10px] text-muted-foreground/60">{review.date}</span>
       </div>
       {review.verified && (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[10px] font-medium shrink-0">
@@ -95,8 +95,8 @@ export const FullCarousel = ({
 
   return (
     <div
-      className="relative w-full rounded-2xl border border-white/8 overflow-hidden select-none"
-      style={{ background: "linear-gradient(135deg, hsl(0 0% 6%), hsl(168 20% 5%))" }}
+      className="relative w-full rounded-2xl border border-border/40 overflow-hidden select-none"
+      style={{ background: "var(--card-gradient)" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       dir="rtl"
@@ -108,7 +108,7 @@ export const FullCarousel = ({
       <div className="relative flex flex-col md:flex-row gap-0 md:gap-0">
 
         {/* ── Left panel: brand + aggregate rating ── */}
-        <div className="flex flex-col justify-center gap-4 px-6 py-6 md:px-8 md:py-8 md:w-56 shrink-0 border-b md:border-b-0 md:border-l border-white/8">
+        <div className="flex flex-col justify-center gap-4 px-6 py-6 md:px-8 md:py-8 md:w-56 shrink-0 border-b md:border-b-0 md:border-l border-border/40">
           <ReviewWiseLogo size="md" showVerified />
 
           <div className="flex flex-col gap-1">
@@ -116,7 +116,7 @@ export const FullCarousel = ({
               {rating.toFixed(1)}
             </span>
             <Stars rating={rating} size={18} />
-            <span className="text-xs text-white/45 mt-0.5">
+            <span className="text-xs text-muted-foreground mt-0.5">
               {reviewCount.toLocaleString("he-IL")} ביקורות מאומתות
             </span>
           </div>
@@ -129,7 +129,7 @@ export const FullCarousel = ({
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[10px] text-white/35 hover:text-white/70 transition-colors"
+              className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/60 hover:text-foreground/70 transition-colors"
             >
               <ExternalLink size={9} />
               {businessName}
@@ -156,7 +156,7 @@ export const FullCarousel = ({
                       <ReviewCard key={r.id} review={r} index={i} />
                     ))
                   : (
-                    <div className="flex-1 flex items-center justify-center text-white/30 text-sm py-8">
+                    <div className="flex-1 flex items-center justify-center text-muted-foreground/50 text-sm py-8">
                       אין עדיין ביקורות להצגה
                     </div>
                   )
@@ -177,7 +177,7 @@ export const FullCarousel = ({
                     className={`transition-all rounded-full ${
                       i === page
                         ? "w-4 h-1.5 bg-primary"
-                        : "w-1.5 h-1.5 bg-white/20 hover:bg-white/40"
+                        : "w-1.5 h-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
                     }`}
                     aria-label={`עמוד ${i + 1}`}
                   />
@@ -188,14 +188,14 @@ export const FullCarousel = ({
               <div className="flex items-center gap-1">
                 <button
                   onClick={prev}
-                  className="w-7 h-7 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/12 border border-white/10 text-white/50 hover:text-white transition-all"
+                  className="w-7 h-7 rounded-full flex items-center justify-center bg-muted/30 hover:bg-muted/50 border border-border/50 text-muted-foreground hover:text-foreground transition-all"
                   aria-label="הקודם"
                 >
                   <ChevronRight size={14} />
                 </button>
                 <button
                   onClick={next}
-                  className="w-7 h-7 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/12 border border-white/10 text-white/50 hover:text-white transition-all"
+                  className="w-7 h-7 rounded-full flex items-center justify-center bg-muted/30 hover:bg-muted/50 border border-border/50 text-muted-foreground hover:text-foreground transition-all"
                   aria-label="הבא"
                 >
                   <ChevronLeft size={14} />

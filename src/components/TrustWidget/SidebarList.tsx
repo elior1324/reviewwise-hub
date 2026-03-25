@@ -18,7 +18,7 @@ const SidebarReviewItem = ({
     whileInView={{ opacity: 1, x: 0 }}
     viewport={{ once: true }}
     transition={{ delay: index * 0.07, duration: 0.3 }}
-    className="group flex flex-col gap-1.5 py-3 border-b border-white/6 last:border-b-0"
+    className="group flex flex-col gap-1.5 py-3 border-b border-border/30 last:border-b-0"
   >
     {/* Stars + verified */}
     <div className="flex items-center justify-between gap-2">
@@ -32,13 +32,13 @@ const SidebarReviewItem = ({
     </div>
 
     {/* Review text */}
-    <p className="text-xs text-white/70 leading-relaxed line-clamp-2">
+    <p className="text-xs text-foreground/70 leading-relaxed line-clamp-2">
       {review.text}
     </p>
 
     {/* Meta */}
-    <div className="flex items-center gap-1.5 text-[10px] text-white/35">
-      <span className="font-medium text-white/55">
+    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
+      <span className="font-medium text-muted-foreground">
         {review.anonymous ? "אנונימי" : review.reviewerName}
       </span>
       {review.courseName && (
@@ -64,9 +64,9 @@ const RatingBar = ({
   pct: number;
   delay: number;
 }) => (
-  <div className="flex items-center gap-2 text-[10px] text-white/45">
+  <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
     <span className="w-8 shrink-0 text-left">{label}</span>
-    <div className="flex-1 h-1 rounded-full bg-white/8 overflow-hidden">
+    <div className="flex-1 h-1 rounded-full bg-muted/50 overflow-hidden">
       <motion.div
         className="h-full rounded-full bg-primary"
         initial={{ width: 0 }}
@@ -114,7 +114,7 @@ export const SidebarList = ({
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       dir="rtl"
-      className="flex flex-col gap-0 rounded-2xl border border-white/8 overflow-hidden"
+      className="flex flex-col gap-0 rounded-2xl border border-border/40 overflow-hidden"
       style={{
         background: "linear-gradient(180deg, hsl(0 0% 7%), hsl(168 12% 5%))",
         boxShadow: "0 4px 30px hsl(0 0% 0% / 0.45), inset 0 1px 0 hsl(168 45% 30% / 0.1)",
@@ -123,7 +123,7 @@ export const SidebarList = ({
       }}
     >
       {/* ── Header ── */}
-      <div className="px-4 pt-4 pb-3 border-b border-white/8">
+      <div className="px-4 pt-4 pb-3 border-b border-border/40">
         <ReviewWiseLogo size="sm" showVerified />
 
         {/* Aggregate score */}
@@ -133,7 +133,7 @@ export const SidebarList = ({
           </span>
           <div className="flex flex-col gap-0.5 pb-0.5">
             <Stars rating={rating} size={14} />
-            <span className="text-[10px] text-white/35 leading-none">
+            <span className="text-[10px] text-muted-foreground/60 leading-none">
               מתוך {reviewCount.toLocaleString("he-IL")} ביקורות
             </span>
           </div>
@@ -154,7 +154,7 @@ export const SidebarList = ({
             <SidebarReviewItem key={r.id} review={r} index={i} />
           ))
         ) : (
-          <p className="py-4 text-center text-xs text-white/30">אין ביקורות להצגה עדיין</p>
+          <p className="py-4 text-center text-xs text-muted-foreground/50">אין ביקורות להצגה עדיין</p>
         )}
       </div>
 
@@ -163,7 +163,7 @@ export const SidebarList = ({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center gap-1.5 px-4 py-3 border-t border-white/8 text-[11px] font-medium text-primary/70 hover:text-primary hover:bg-primary/5 transition-all"
+        className="flex items-center justify-center gap-1.5 px-4 py-3 border-t border-border/40 text-[11px] font-medium text-primary/70 hover:text-primary hover:bg-primary/5 transition-all"
       >
         <Star size={11} strokeWidth={2.5} />
         <span>כל הביקורות של {businessName}</span>
