@@ -32,14 +32,17 @@ const ALLOWED_ORIGINS: string[] = [
   "https://www.reviewhub.info",
   "https://reviewshub.info",
   "https://www.reviewshub.info",
-  // Add staging / preview URLs here as needed:
-  // "https://staging.reviewhub.co.il",
 ];
 
 /** Allow localhost:* in development for Vite dev server */
 function isLocalDev(origin: string): boolean {
   return /^https?:\/\/localhost(:\d+)?$/.test(origin) ||
          /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin);
+}
+
+/** Allow Lovable preview/deploy URLs (e.g. https://<id>.lovable.app) */
+function isLovablePreview(origin: string): boolean {
+  return /^https:\/\/[a-z0-9-]+\.lovable\.app$/.test(origin);
 }
 
 /**
@@ -52,6 +55,7 @@ export function getCorsHeaders(req: Request): Record<string, string> {
 
   const isAllowed =
     ALLOWED_ORIGINS.includes(origin) ||
+    isLovablePreview(origin) ||
     (isDev && isLocalDev(origin));
 
   return {

@@ -66,8 +66,6 @@ import ResourcesPage from "./pages/business/resources/ResourcesPage";
 
 // WhatsApp review collection — no login required (customer-facing)
 import WhatsAppReviewPage from "./pages/WhatsAppReviewPage";
-// Instagram DM review collection — no login required (customer-facing)
-import InstagramDMReviewPage from "./pages/InstagramDMReviewPage";
 
 // Evidence submission — token-based, no login required
 import EvidenceUploadPanel from "./components/EvidenceUploadPanel";
@@ -103,8 +101,6 @@ const App = () => (
 
             {/* WhatsApp review collection — customer submits via link from business */}
             <Route path="/wa/:token" element={<WhatsAppReviewPage />} />
-            {/* Instagram DM review collection — customer submits via link from business */}
-            <Route path="/ig/:token" element={<InstagramDMReviewPage />} />
 
             {/* Embeddable widget page — bare iframe, no navbar/footer */}
             <Route path="/widget/:slug" element={<WidgetPage />} />
