@@ -60,7 +60,9 @@ export const FullCarousel = ({
   reviewCount,
   reviews = [],
   profileUrl,
+  theme = "dark",
 }: TrustWidgetProps) => {
+  const isDark = theme === "dark";
   const href = profileUrl ?? `/biz/${slug}`;
   const fiveStarReviews = reviews.filter(r => r.rating >= 4);
   const pages = Math.max(1, Math.ceil(fiveStarReviews.length / PER_PAGE));
@@ -95,8 +97,12 @@ export const FullCarousel = ({
 
   return (
     <div
-      className="relative w-full rounded-2xl border border-border/40 overflow-hidden select-none"
-      style={{ background: "var(--card-gradient)" }}
+      className={`relative w-full rounded-2xl border overflow-hidden select-none ${isDark ? "border-white/10" : "border-border/40"}`}
+      style={{
+        background: isDark
+          ? "linear-gradient(135deg, hsl(0 0% 6%), hsl(168 20% 5%))"
+          : "linear-gradient(135deg, hsl(0 0% 100%), hsl(210 15% 97%))",
+      }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       dir="rtl"
@@ -112,7 +118,7 @@ export const FullCarousel = ({
           <ReviewWiseLogo size="md" showVerified />
 
           <div className="flex flex-col gap-1">
-            <span className="text-2xl font-bold text-white tabular-nums">
+            <span className={`text-2xl font-bold tabular-nums ${isDark ? "text-white" : "text-foreground"}`}>
               {rating.toFixed(1)}
             </span>
             <Stars rating={rating} size={18} />

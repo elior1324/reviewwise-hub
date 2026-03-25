@@ -16,8 +16,10 @@ export const MiniBadge = ({
   rating,
   reviewCount,
   profileUrl,
+  theme = "dark",
 }: TrustWidgetProps) => {
   const href = profileUrl ?? `/biz/${slug}`;
+  const isDark = theme === "dark";
 
   return (
     <motion.a
@@ -29,10 +31,14 @@ export const MiniBadge = ({
       whileHover={{ y: -3, boxShadow: "0 12px 40px hsl(168 45% 30% / 0.25)" }}
       transition={{ type: "spring", stiffness: 340, damping: 28 }}
       dir="rtl"
-      className="group inline-flex items-center gap-3 px-4 py-3 rounded-2xl border border-border/50 text-inherit no-underline cursor-pointer"
+      className={`group inline-flex items-center gap-3 px-4 py-3 rounded-2xl border text-inherit no-underline cursor-pointer ${isDark ? "border-white/10" : "border-border/50"}`}
       style={{
-        background: "linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 6%))",
-        boxShadow: "0 4px 24px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(168 45% 30% / 0.12)",
+        background: isDark
+          ? "linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 6%))"
+          : "linear-gradient(145deg, hsl(0 0% 100%), hsl(210 15% 97%))",
+        boxShadow: isDark
+          ? "0 4px 24px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(168 45% 30% / 0.12)"
+          : "0 4px 16px hsl(220 20% 8% / 0.06), 0 0 0 1px hsl(168 60% 28% / 0.12)",
         minWidth: 220,
         maxWidth: 280,
       }}
@@ -46,7 +52,7 @@ export const MiniBadge = ({
       {/* Rating data */}
       <div className="flex flex-col gap-0.5 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="font-bold text-white text-base tabular-nums leading-none">
+          <span className={`font-bold text-base tabular-nums leading-none ${isDark ? "text-white" : "text-foreground"}`}>
             {rating.toFixed(1)}
           </span>
           <Stars rating={rating} size={13} />

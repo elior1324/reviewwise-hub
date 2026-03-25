@@ -90,7 +90,9 @@ export const SidebarList = ({
   reviewCount,
   reviews = [],
   profileUrl,
+  theme = "dark",
 }: TrustWidgetProps) => {
+  const isDark = theme === "dark";
   const href = profileUrl ?? `/biz/${slug}`;
 
   // Compute star breakdown from provided reviews (or simulate it)
@@ -114,10 +116,14 @@ export const SidebarList = ({
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       dir="rtl"
-      className="flex flex-col gap-0 rounded-2xl border border-border/40 overflow-hidden"
+      className={`flex flex-col gap-0 rounded-2xl border overflow-hidden ${isDark ? "border-white/10" : "border-border/40"}`}
       style={{
-        background: "linear-gradient(180deg, hsl(0 0% 7%), hsl(168 12% 5%))",
-        boxShadow: "0 4px 30px hsl(0 0% 0% / 0.45), inset 0 1px 0 hsl(168 45% 30% / 0.1)",
+        background: isDark
+          ? "linear-gradient(180deg, hsl(0 0% 7%), hsl(168 12% 5%))"
+          : "linear-gradient(180deg, hsl(0 0% 100%), hsl(210 15% 97%))",
+        boxShadow: isDark
+          ? "0 4px 30px hsl(0 0% 0% / 0.45), inset 0 1px 0 hsl(168 45% 30% / 0.1)"
+          : "0 4px 20px hsl(220 20% 8% / 0.08), inset 0 1px 0 hsl(0 0% 100%)",
         width: "100%",
         maxWidth: 320,
       }}
@@ -128,7 +134,7 @@ export const SidebarList = ({
 
         {/* Aggregate score */}
         <div className="flex items-end gap-2 mt-3">
-          <span className="text-3xl font-bold text-white leading-none tabular-nums">
+          <span className={`text-3xl font-bold leading-none tabular-nums ${isDark ? "text-white" : "text-foreground"}`}>
             {rating.toFixed(1)}
           </span>
           <div className="flex flex-col gap-0.5 pb-0.5">

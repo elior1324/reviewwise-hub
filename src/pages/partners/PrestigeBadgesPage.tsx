@@ -667,7 +667,7 @@ function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
                   transition={{ duration: 0.25 }}
                   className={activeVariant === "full" ? "w-full" : activeVariant === "sidebar" ? "w-full max-w-sm" : "w-full max-w-xs"}
                 >
-                  <TrustWidget variant={activeVariant} {...previewProps} />
+                  <TrustWidget variant={activeVariant} {...previewProps} theme={previewDark ? "dark" : "light"} />
                 </motion.div>
               </AnimatePresence>
             </div>

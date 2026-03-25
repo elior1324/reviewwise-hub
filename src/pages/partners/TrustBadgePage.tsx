@@ -311,7 +311,7 @@ export default function TrustBadgePage() {
               </div>
 
               {/* Preview area */}
-              <div className={`min-h-64 flex items-center justify-center p-8 ${previewDark ? "[&_.text-foreground]:!text-white [&_.text-foreground\\/80]:!text-white/80 [&_.text-foreground\\/70]:!text-white/70 [&_.text-muted-foreground]:!text-white/50 [&_.bg-muted\\/30]:!bg-white/5 [&_.border-border\\/40]:!border-white/10" : ""}`}>
+              <div className="min-h-64 flex items-center justify-center p-8">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={`${activeVariant}-${previewDark}`}
@@ -327,7 +327,7 @@ export default function TrustBadgePage() {
                         : "w-full max-w-xs"
                     }
                   >
-                    <TrustWidget variant={activeVariant} {...widgetProps} />
+                    <TrustWidget variant={activeVariant} {...widgetProps} theme={previewDark ? "dark" : "light"} />
                   </motion.div>
                 </AnimatePresence>
               </div>
