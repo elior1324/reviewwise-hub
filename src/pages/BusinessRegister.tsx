@@ -96,7 +96,8 @@ const BusinessRegister = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.businessName || !form.email || (!form.category && !form.customCategory)) {
+    const categoryParts = form.category ? form.category.split(",").map(s => s.trim()).filter(Boolean) : [];
+    if (!form.businessName || !form.email || (categoryParts.length === 0 && !form.customCategory)) {
       toast({ title: "אנא מלאו את כל השדות הנדרשים", variant: "destructive" });
       return;
     }
@@ -127,8 +128,11 @@ const BusinessRegister = () => {
     const cleanCustomCategory = sanitizeText(form.customCategory, CUSTOM_CATEGORY_MAX);
     const cleanFounderName    = sanitizeText(form.founderName,   FOUNDER_NAME_MAX);
 
-    const isCustomCategory = form.category === OTHER_VALUE && cleanCustomCategory.trim();
-    const finalCategory = isCustomCategory ? "אחר" : form.category;
+    const catParts = form.category ? form.category.split(",").map(s => s.trim()).filter(Boolean) : [];
+    const hasOtherCat = catParts.includes(OTHER_VALUE);
+    const cleanCats = catParts.filter(c => c !== OTHER_VALUE);
+    if (hasOtherCat && cleanCustomCategory.trim()) cleanCats.push("אחר");
+    const finalCategory = cleanCats.join(",") || null;
 
     const slug = cleanBusinessName
       .toLowerCase()
@@ -271,25 +275,55 @@ const BusinessRegister = () => {
                   </Select>
                 </div>
 
-                {/* Category */}
+                {/* Category — multi-select up to 5 */}
                 <div>
-                  <Label className="mb-2 block">קטגוריה *</Label>
-                  <Select value={form.category} onValueChange={v => update("category", v)}>
-                    <SelectTrigger className="glass border-border/50">
-                      <SelectValue placeholder="בחרו קטגוריה" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredCategories.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                      <SelectItem value={OTHER_VALUE}>
-                        <span className="flex items-center gap-1.5">
-                          <Sparkles size={14} className="text-primary" />
-                          אחר — הוסיפו קטגוריה חדשה
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label className="mb-2 block">קטגוריות (עד 5) *</Label>
+                  <p className="text-xs text-muted-foreground mb-2">בחרו את התחומים הרלוונטיים לעסק שלכם</p>
+                  {(() => {
+                    const selected = form.category ? form.category.split(",").map(s => s.trim()).filter(s => s && s !== OTHER_VALUE) : [];
+                    const hasOther = form.category?.includes(OTHER_VALUE);
+                    const toggle = (cat: string) => {
+                      if (cat === OTHER_VALUE) {
+                        const next = hasOther ? selected : [...selected, OTHER_VALUE];
+                        update("category", next.join(","));
+                        if (hasOther) update("customCategory", "");
+                        return;
+                      }
+                      const next = selected.includes(cat) ? selected.filter(c => c !== cat) : selected.length < 5 ? [...selected, cat] : selected;
+                      const parts = hasOther ? [...next, OTHER_VALUE] : next;
+                      update("category", parts.join(","));
+                    };
+                    return (
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto rounded-md border border-border/50 glass p-3" dir="rtl">
+                        <div className="flex flex-wrap gap-1.5">
+                          {filteredCategories.map(c => {
+                            const active = selected.includes(c);
+                            const disabled = !active && selected.length >= 5;
+                            return (
+                              <button
+                                key={c}
+                                type="button"
+                                onClick={() => !disabled && toggle(c)}
+                                className={`px-2.5 py-1 rounded-full text-xs transition-colors ${active ? "bg-primary text-primary-foreground" : disabled ? "bg-muted/30 text-muted-foreground/40 cursor-not-allowed" : "bg-muted/50 text-foreground hover:bg-muted/70"}`}
+                              >
+                                {c}
+                              </button>
+                            );
+                          })}
+                          <button
+                            type="button"
+                            onClick={() => toggle(OTHER_VALUE)}
+                            className={`px-2.5 py-1 rounded-full text-xs transition-colors flex items-center gap-1 ${hasOther ? "bg-primary text-primary-foreground" : "bg-muted/50 text-foreground hover:bg-muted/70"}`}
+                          >
+                            <Sparkles size={12} /> אחר
+                          </button>
+                        </div>
+                        {(selected.length > 0 || hasOther) && (
+                          <p className="text-xs text-muted-foreground pt-1">{selected.length} / 5 נבחרו</p>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Custom category input */}

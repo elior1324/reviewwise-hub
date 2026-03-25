@@ -21,15 +21,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Development Commands
 
 ```bash
-npm run dev              # Start Vite dev server
+npm run dev              # Start Vite dev server (http://localhost:8080)
 npm run build            # Production build
 npx tsc --noEmit         # Type check without emitting
 npm run lint             # ESLint
-npm run test             # Run unit tests (Vitest)
+npm run test             # Run all unit tests (Vitest)
 npm run test:watch       # Watch mode
+npm run test:coverage    # Unit tests with V8 coverage report
+npm run test:all         # Run unit tests + E2E tests sequentially
 npm run test:e2e         # Playwright E2E tests
 npm run test:e2e:headed  # E2E with browser visible
+npm run test:e2e:debug   # E2E with Playwright inspector
 ```
+
+**Running a single test:**
+```bash
+npx vitest run src/lib/sanitize     # Unit: run tests matching a path/name
+npx playwright test auth.spec.ts    # E2E: run a specific spec file
+```
+
+**Test file locations:**
+- Unit tests: colocated in `src/` as `*.test.ts` / `*.test.tsx` (Vitest + jsdom + Testing Library)
+- E2E tests: `tests/e2e/*.spec.ts` (Playwright, Chromium + Mobile Safari)
+- Test setup (global mocks for jsdom, framer-motion, sonner, router): `src/test/setup.ts`
+
+**Path alias:** `@/` resolves to `src/` (configured in tsconfig + vite + vitest).
 
 **Supabase CLI:**
 ```bash

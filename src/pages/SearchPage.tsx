@@ -9,8 +9,9 @@ import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, FREELANCER_CATEGORIES, SAAS_CATEGORIES,
-  SAAS_SUBCATEGORIES, PRICING_MODEL_LABELS, COURSE_FORMATS, type Business, type Course, type PricingModel, type CourseFormat, type SocialLinks,
+  FREELANCER_SUBCATEGORIES, CATEGORY_PLURAL, FREELANCER_CATEGORIES, COURSE_CATEGORIES, SAAS_CATEGORIES,
+  SAAS_SUBCATEGORIES, PRICING_MODEL_LABELS, COURSE_FORMATS, DELIVERY_FORMATS, DELIVERY_FORMAT_DB_MAP,
+  type Business, type Course, type PricingModel, type CourseFormat, type DeliveryFormat, type SocialLinks,
 } from "@/data/mockData";
 import { Cpu } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -91,6 +92,7 @@ const SearchPage = () => {
   const [selectedSaasSubcat, setSelectedSaasSubcat] = useState<string | null>(null);
   const [selectedPricingModel, setSelectedPricingModel] = useState<PricingModel | "הכל">("הכל");
   const [selectedCourseFormat, setSelectedCourseFormat] = useState<CourseFormat>("הכל");
+  const [selectedDeliveryFormat, setSelectedDeliveryFormat] = useState<DeliveryFormat>("הכל");
   const [minRating, setMinRating] = useState(0);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
   const [sortOption, setSortOption] = useState<SortOption>("default");
@@ -111,15 +113,20 @@ const SearchPage = () => {
         .order("rating", { ascending: false });
 
       if (bizData) {
-        const mapped: Business[] = bizData.map((b: any) => ({
+        const mapped: Business[] = bizData.map((b: any) => {
+          const cats = b.category ? b.category.split(",").map((s: string) => s.trim()) : [];
+          const primaryCat = cats[0] || "";
+          const detectedType = cats.some((c: string) => FREELANCER_CATEGORIES.includes(c))
+            ? "freelancer" as const
+            : cats.some((c: string) => SAAS_CATEGORIES.includes(c))
+              ? "saas" as const
+              : "course-provider" as const;
+          return ({
           slug: b.slug,
           name: b.name,
-          type: FREELANCER_CATEGORIES.includes(b.category)
-            ? "freelancer" as const
-            : SAAS_CATEGORIES.includes(b.category)
-              ? "saas" as const
-              : "course-provider" as const,
-          category: b.category,
+          type: detectedType,
+          category: primaryCat,
+          categories: cats,
           rating: Number(b.rating) || 0,
           reviewCount: b.review_count || 0,
           verifiedReviewCount: b.verified_review_count || 0,
@@ -134,7 +141,8 @@ const SearchPage = () => {
           founderName: b.founder_name || undefined,
           verifiedRatio: b.verified_ratio != null ? Number(b.verified_ratio) : undefined,
           trustTier: b.trust_tier || undefined,
-        }));
+          deliveryFormat: b.delivery_format || undefined,
+        })});
         setAllBusinesses(mapped);
       }
 
@@ -208,22 +216,29 @@ const SearchPage = () => {
     : [];
 
   const freelancersFiltered = allBusinesses.filter(b => {
-    if (b.type !== "freelancer") return false;
-    const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query) || (b.subcategory && b.subcategory.includes(query));
-    const matchesCat = selectedFreelancerCat === "הכל" || b.category === selectedFreelancerCat;
+    const cats = b.categories || [b.category];
+    const isFreelancer = b.type === "freelancer" || cats.some(c => FREELANCER_CATEGORIES.includes(c));
+    if (!isFreelancer) return false;
+    const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || cats.some(c => c.includes(query)) || (b.subcategory && b.subcategory.includes(query));
+    const matchesCat = selectedFreelancerCat === "הכל" || cats.includes(selectedFreelancerCat);
     const matchesSubcat = !selectedSubcat || b.subcategory === selectedSubcat;
     const matchesRating = b.rating >= minRating;
-    return matchesQuery && matchesCat && matchesSubcat && matchesRating;
+    const matchesDelivery = selectedDeliveryFormat === "הכל" || b.deliveryFormat === DELIVERY_FORMAT_DB_MAP[selectedDeliveryFormat as Exclude<DeliveryFormat, "הכל">];
+    return matchesQuery && matchesCat && matchesSubcat && matchesRating && matchesDelivery;
   });
 
   const freelancers = useMemo(() => sortBusinesses(freelancersFiltered, sortOption), [freelancersFiltered, sortOption]);
 
   const courseProviders = allBusinesses.filter(b => {
-    if (b.type !== "course-provider") return false;
-    const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query);
-    const matchesCat = selectedCourseCat === "הכל" || b.category === selectedCourseCat;
+    const cats = b.categories || [b.category];
+    if (b.type !== "course-provider" && !cats.some(c => COURSE_CATEGORIES.includes(c))) return false;
+    const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || cats.some(c => c.includes(query));
+    const matchesCat = selectedCourseCat === "הכל" || cats.includes(selectedCourseCat);
     const matchesRating = b.rating >= minRating;
-    return matchesQuery && matchesCat && matchesRating;
+    const matchesFormat = selectedCourseFormat === "הכל" || b.deliveryFormat === DELIVERY_FORMAT_DB_MAP[
+      selectedCourseFormat === "דיגיטלי / אונליין" ? "דיגיטלי" : selectedCourseFormat as Exclude<DeliveryFormat, "הכל">
+    ];
+    return matchesQuery && matchesCat && matchesRating && matchesFormat;
   });
 
   const filteredCourses = allCourses.filter(c => {
@@ -236,9 +251,10 @@ const SearchPage = () => {
 
   // ── SaaS / AI Tools filtering ────────────────────────────────────────────
   const saasProducts = allBusinesses.filter(b => {
-    if (b.type !== "saas") return false;
-    const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || b.category.includes(query);
-    const matchesCat = selectedSaasCat === "הכל" || b.category === selectedSaasCat;
+    const cats = b.categories || [b.category];
+    if (b.type !== "saas" && !cats.some(c => SAAS_CATEGORIES.includes(c))) return false;
+    const matchesQuery = !query || b.name.toLowerCase().includes(query.toLowerCase()) || b.description.includes(query) || cats.some(c => c.includes(query));
+    const matchesCat = selectedSaasCat === "הכל" || cats.includes(selectedSaasCat);
     const matchesSubcat = !selectedSaasSubcat || b.subcategory === selectedSaasSubcat;
     const matchesRating = b.rating >= minRating;
     const matchesPricing = selectedPricingModel === "הכל" || b.pricingModel === selectedPricingModel;
@@ -462,7 +478,20 @@ const SearchPage = () => {
               </motion.div>
             )}
 
-            {currentSubcats.length === 0 && <div className="mb-6" />}
+            {/* Delivery format filter */}
+            <div className="flex gap-2 flex-wrap mb-6 items-center">
+              <span className="text-xs text-muted-foreground ml-1">פגישה:</span>
+              {DELIVERY_FORMATS.map(fmt => (
+                <Button
+                  key={fmt}
+                  variant={selectedDeliveryFormat === fmt ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedDeliveryFormat(fmt)}
+                >
+                  {fmt}
+                </Button>
+              ))}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {freelancers.map((biz, i) => (

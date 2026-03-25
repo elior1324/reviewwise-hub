@@ -159,7 +159,7 @@ const ProfileSection = ({
   saving,
 }: {
   business: Business;
-  profileForm: { name: string; description: string; category: string; founder_name: string; logo_url: string; cover_url: string };
+  profileForm: { name: string; description: string; category: string; founder_name: string; logo_url: string; cover_url: string; delivery_format: string };
   setProfileForm: React.Dispatch<React.SetStateAction<typeof profileForm>>;
   onSave: () => Promise<void>;
   saving: boolean;
@@ -230,27 +230,73 @@ const ProfileSection = ({
       />
     </div>
 
-    {/* Category */}
+    {/* Category — multi-select up to 5 */}
     <div className="space-y-2 max-w-md">
-      <Label htmlFor="p-category" className="text-sm font-medium text-zinc-300">קטגוריה</Label>
-      <select
-        id="p-category"
-        value={profileForm.category}
-        onChange={(e) => setProfileForm({ ...profileForm, category: e.target.value })}
-        className="w-full h-10 rounded-md border border-zinc-700/60 bg-zinc-800/50 text-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-        dir="rtl"
-      >
-        <option value="">בחרו קטגוריה</option>
-        <optgroup label="פרילנסרים ונותני שירות">
-          {FREELANCER_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-        </optgroup>
-        <optgroup label="קורסים והכשרות">
-          {COURSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-        </optgroup>
-        <optgroup label="SaaS וכלים דיגיטליים">
-          {SAAS_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-        </optgroup>
-      </select>
+      <Label className="text-sm font-medium text-zinc-300">קטגוריות (עד 5)</Label>
+      <p className="text-xs text-zinc-500">בחרו את התחומים הרלוונטיים לעסק שלכם</p>
+      {(() => {
+        const selected = profileForm.category ? profileForm.category.split(",").map(s => s.trim()).filter(Boolean) : [];
+        const toggle = (cat: string) => {
+          const next = selected.includes(cat) ? selected.filter(c => c !== cat) : selected.length < 5 ? [...selected, cat] : selected;
+          setProfileForm({ ...profileForm, category: next.join(",") });
+        };
+        const groups = [
+          { label: "פרילנסרים ונותני שירות", cats: FREELANCER_CATEGORIES },
+          { label: "קורסים והכשרות", cats: COURSE_CATEGORIES },
+          { label: "SaaS וכלים דיגיטליים", cats: SAAS_CATEGORIES },
+        ];
+        return (
+          <div className="space-y-3 max-h-64 overflow-y-auto rounded-md border border-zinc-700/60 bg-zinc-800/50 p-3" dir="rtl">
+            {groups.map(g => (
+              <div key={g.label}>
+                <p className="text-xs font-semibold text-zinc-400 mb-1.5">{g.label}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {g.cats.map(c => {
+                    const active = selected.includes(c);
+                    const disabled = !active && selected.length >= 5;
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => !disabled && toggle(c)}
+                        className={`px-2.5 py-1 rounded-full text-xs transition-colors ${active ? "bg-primary text-white" : disabled ? "bg-zinc-800 text-zinc-600 cursor-not-allowed" : "bg-zinc-700/60 text-zinc-300 hover:bg-zinc-600/60"}`}
+                      >
+                        {c}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+      {profileForm.category && (
+        <p className="text-xs text-zinc-400">{profileForm.category.split(",").filter(Boolean).length} / 5 נבחרו</p>
+      )}
+    </div>
+
+    {/* Delivery format */}
+    <div className="space-y-2 max-w-md">
+      <Label className="text-sm font-medium text-zinc-300">סוג פגישה</Label>
+      <div className="flex gap-2 flex-wrap">
+        {[
+          { value: "", label: "לא נבחר" },
+          { value: "digital", label: "דיגיטלי" },
+          { value: "frontal", label: "פרונטלי" },
+          { value: "hybrid", label: "היברידי" },
+        ].map(opt => (
+          <Button
+            key={opt.value}
+            type="button"
+            variant={profileForm.delivery_format === opt.value ? "default" : "outline"}
+            size="sm"
+            onClick={() => setProfileForm({ ...profileForm, delivery_format: opt.value })}
+          >
+            {opt.label}
+          </Button>
+        ))}
+      </div>
     </div>
 
     {/* Founder name */}
@@ -772,7 +818,7 @@ const BusinessSettingsPage = () => {
 
   // Profile form
   const [profileForm, setProfileForm] = useState({
-    name: "", description: "", category: "", founder_name: "", logo_url: "", cover_url: "",
+    name: "", description: "", category: "", founder_name: "", logo_url: "", cover_url: "", delivery_format: "",
   });
 
   // Contact form
@@ -820,6 +866,7 @@ const BusinessSettingsPage = () => {
             founder_name: d.founder_name || "",
             logo_url: d.logo_url || "",
             cover_url: d.cover_url || "",
+            delivery_format: d.delivery_format || "",
           });
           setContactForm({
             email: d.email || "",
@@ -861,6 +908,7 @@ const BusinessSettingsPage = () => {
         founder_name: profileForm.founder_name || null,
         logo_url: profileForm.logo_url || null,
         cover_url: profileForm.cover_url || null,
+        delivery_format: profileForm.delivery_format || null,
         updated_at: new Date().toISOString(),
       };
       console.log("[SaveProfile] updating business:", business.id, updateData);
