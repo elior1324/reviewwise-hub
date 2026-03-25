@@ -55,195 +55,224 @@ html {
   line-height: 1.8 !important;
 }
 
-/* ── Invert Colors: professional light mode ─────────────────────────
-   Designed as a full light-theme alternative, not a naive CSS invert.
-   Every value is tuned for WCAG AA contrast on a white background.
-   ALSO overrides hardcoded Tailwind dark classes (text-white, bg-zinc-*, etc.) */
+/* ── Dark Mode (accessibility toggle) ──────────────────────────────
+   Activated via the "מצב כהה" toggle in the accessibility menu.
+   Overrides the default light theme with the dark palette. */
 .a11y-invert-colors {
-  --background: 210 20% 98% !important;
-  --foreground: 220 15% 15% !important;
+  --background: 0 0% 4% !important;
+  --foreground: 0 0% 96% !important;
 
-  --card: 0 0% 100% !important;
-  --card-foreground: 220 15% 15% !important;
+  --card: 0 0% 7% !important;
+  --card-foreground: 0 0% 96% !important;
 
-  --popover: 0 0% 100% !important;
-  --popover-foreground: 220 15% 15% !important;
+  --popover: 0 0% 7% !important;
+  --popover-foreground: 0 0% 96% !important;
 
-  --primary: 168 55% 32% !important;
-  --primary-foreground: 0 0% 100% !important;
+  --primary: 168 45% 30% !important;
+  --primary-foreground: 0 0% 98% !important;
 
-  --secondary: 210 15% 93% !important;
-  --secondary-foreground: 220 15% 25% !important;
+  --secondary: 0 0% 11% !important;
+  --secondary-foreground: 0 0% 85% !important;
 
-  --muted: 210 15% 94% !important;
-  --muted-foreground: 220 10% 42% !important;
+  --muted: 0 0% 11% !important;
+  --muted-foreground: 0 0% 50% !important;
 
-  --accent: 40 95% 48% !important;
-  --accent-foreground: 0 0% 5% !important;
+  --accent: 40 95% 54% !important;
+  --accent-foreground: 0 0% 2% !important;
 
-  --destructive: 0 72% 46% !important;
+  --destructive: 0 72% 51% !important;
   --destructive-foreground: 0 0% 100% !important;
 
-  --border: 220 10% 82% !important;
-  --input: 220 10% 82% !important;
-  --ring: 168 55% 32% !important;
+  --border: 0 0% 14% !important;
+  --input: 0 0% 14% !important;
+  --ring: 168 45% 30% !important;
 
   --star: 38 100% 50% !important;
-  --star-empty: 220 10% 78% !important;
-  --trust-green: 168 55% 32% !important;
-  --trust-green-light: 168 35% 92% !important;
-  --glow-primary: 168 55% 32% !important;
-  --glow-accent: 168 40% 42% !important;
+  --star-empty: 0 0% 20% !important;
+  --trust-green: 168 45% 30% !important;
+  --trust-green-light: 168 30% 12% !important;
+  --glow-primary: 168 45% 30% !important;
+  --glow-accent: 168 35% 45% !important;
 
-  --hero-gradient: linear-gradient(135deg, hsl(168 55% 32% / 0.06), hsl(210 20% 94% / 0.5), transparent) !important;
-  --card-gradient: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 15% 97%)) !important;
-  --card-shadow: 0 1px 3px hsl(220 15% 15% / 0.06), 0 1px 2px hsl(220 15% 15% / 0.04) !important;
-  --card-shadow-hover: 0 8px 25px hsl(220 15% 15% / 0.1), 0 0 15px hsl(168 55% 32% / 0.06) !important;
-  --glass-bg: hsl(0 0% 100% / 0.9) !important;
-  --glass-border: hsl(220 10% 82% / 0.6) !important;
+  --hero-gradient: linear-gradient(135deg, hsl(168 45% 30% / 0.08), hsl(168 35% 45% / 0.04), transparent) !important;
+  --card-gradient: linear-gradient(145deg, hsl(0 0% 9%), hsl(0 0% 6%)) !important;
+  --card-shadow: 0 1px 3px hsl(0 0% 0% / 0.4), 0 1px 2px hsl(0 0% 0% / 0.3) !important;
+  --card-shadow-hover: 0 8px 30px hsl(0 0% 0% / 0.5), 0 0 20px hsl(168 45% 30% / 0.07) !important;
+  --glass-bg: hsl(0 0% 6% / 0.8) !important;
+  --glass-border: hsl(0 0% 16% / 0.6) !important;
 
-  --sidebar-background: 210 15% 97% !important;
-  --sidebar-foreground: 220 15% 15% !important;
-  --sidebar-primary: 168 55% 32% !important;
-  --sidebar-primary-foreground: 0 0% 100% !important;
-  --sidebar-accent: 210 15% 93% !important;
-  --sidebar-accent-foreground: 220 15% 15% !important;
-  --sidebar-border: 220 10% 82% !important;
-  --sidebar-ring: 168 55% 32% !important;
+  --sidebar-background: 0 0% 5% !important;
+  --sidebar-foreground: 0 0% 96% !important;
+  --sidebar-primary: 168 45% 30% !important;
+  --sidebar-primary-foreground: 0 0% 98% !important;
+  --sidebar-accent: 0 0% 11% !important;
+  --sidebar-accent-foreground: 0 0% 96% !important;
+  --sidebar-border: 0 0% 14% !important;
+  --sidebar-ring: 168 45% 30% !important;
 }
 
-/* ── Hardcoded dark class overrides for invert mode ────────────────
-   Many components use text-white, bg-zinc-900, etc. directly.
-   These don't respond to CSS variables, so we force-override them. */
+/* ── Hardcoded light class overrides for dark mode ────────────────
+   Many components use text-white, bg-zinc-900, etc. for dark styling.
+   In dark mode we restore these to their intended dark appearance. */
 
-/* Text colors: white → dark, zinc-light → dark */
-.a11y-invert-colors .text-white { color: hsl(220 15% 15%) !important; }
-.a11y-invert-colors .text-zinc-100 { color: hsl(220 15% 20%) !important; }
-.a11y-invert-colors .text-zinc-200 { color: hsl(220 12% 25%) !important; }
-.a11y-invert-colors .text-zinc-300 { color: hsl(220 10% 32%) !important; }
-.a11y-invert-colors .text-zinc-400 { color: hsl(220 8% 42%) !important; }
-.a11y-invert-colors .text-zinc-500 { color: hsl(220 6% 50%) !important; }
+/* Text colors: restore white text in dark mode */
+.a11y-invert-colors .text-white { color: white !important; }
 
-/* Background colors: dark → light */
-.a11y-invert-colors .bg-zinc-900 { background-color: hsl(210 20% 98%) !important; }
-.a11y-invert-colors .bg-zinc-800 { background-color: hsl(210 15% 96%) !important; }
-.a11y-invert-colors .bg-zinc-700 { background-color: hsl(210 12% 92%) !important; }
-.a11y-invert-colors .bg-black { background-color: hsl(210 20% 98%) !important; }
-
-/* Partial opacity backgrounds */
-.a11y-invert-colors [class*="bg-zinc-900\/"] { background-color: hsl(210 20% 96% / 0.5) !important; }
-.a11y-invert-colors [class*="bg-zinc-800\/"] { background-color: hsl(210 15% 94% / 0.5) !important; }
-.a11y-invert-colors [class*="bg-black\/"] { background-color: hsl(220 15% 15% / 0.3) !important; }
-
-/* Border colors: dark → light */
-.a11y-invert-colors .border-zinc-700 { border-color: hsl(220 10% 82%) !important; }
-.a11y-invert-colors .border-zinc-600 { border-color: hsl(220 10% 78%) !important; }
-.a11y-invert-colors [class*="border-zinc-700\/"] { border-color: hsl(220 10% 82% / 0.6) !important; }
-.a11y-invert-colors [class*="border-zinc-600\/"] { border-color: hsl(220 10% 78% / 0.6) !important; }
-
-/* Placeholder text */
-.a11y-invert-colors [class*="placeholder:text-zinc"] { --tw-placeholder-opacity: 1; }
-.a11y-invert-colors ::placeholder { color: hsl(220 8% 55%) !important; }
-
-/* Gradient text — make readable on light background */
+/* Gradient text — brighter for dark background */
 .a11y-invert-colors .gradient-text {
-  background: linear-gradient(135deg, hsl(168 55% 28%), hsl(168 45% 38%)) !important;
+  background: linear-gradient(135deg, hsl(168 45% 50%), hsl(168 35% 65%)) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
 }
 
-/* Noise overlay — reduce on light background */
-.a11y-invert-colors .noise-overlay::before { opacity: 0.02 !important; }
+/* Noise overlay — slightly stronger on dark */
+.a11y-invert-colors .noise-overlay::before { opacity: 0.03 !important; }
 
-/* Glass effect — lighter for light mode */
+/* Glass effect — dark glass */
 .a11y-invert-colors .glass {
-  background: hsl(0 0% 100% / 0.85) !important;
-  border-color: hsl(220 10% 82% / 0.5) !important;
+  background: hsl(0 0% 6% / 0.8) !important;
+  border-color: hsl(0 0% 16% / 0.6) !important;
 }
 
-/* Animated border glow — reduce intensity for light mode */
-.a11y-invert-colors .animated-border::before { opacity: 0.3 !important; }
-
-/* Dark badges — flip for readability */
-.a11y-invert-colors [class*="dark:bg-"] { background-color: inherit; }
-.a11y-invert-colors [class*="dark:text-"] { color: inherit; }
-
 /* Scrollbar */
-.a11y-invert-colors ::-webkit-scrollbar-track { background: hsl(210 15% 96%) !important; }
-.a11y-invert-colors ::-webkit-scrollbar-thumb { background: hsl(220 10% 78%) !important; }
+.a11y-invert-colors ::-webkit-scrollbar-track { background: hsl(0 0% 6%) !important; }
+.a11y-invert-colors ::-webkit-scrollbar-thumb { background: hsl(0 0% 22%) !important; }
 
-/* Input fields in settings pages */
+/* Input fields */
 .a11y-invert-colors input,
 .a11y-invert-colors textarea,
 .a11y-invert-colors select {
-  background-color: hsl(0 0% 100%) !important;
-  color: hsl(220 15% 15%) !important;
-  border-color: hsl(220 10% 78%) !important;
+  background-color: hsl(0 0% 7%) !important;
+  color: hsl(0 0% 96%) !important;
+  border-color: hsl(0 0% 18%) !important;
 }
 
 /* Dropdown menus */
 .a11y-invert-colors [role="menu"],
 .a11y-invert-colors [data-radix-popper-content-wrapper] * {
-  background-color: hsl(0 0% 100%) !important;
-  color: hsl(220 15% 15%) !important;
-  border-color: hsl(220 10% 82%) !important;
+  background-color: hsl(0 0% 7%) !important;
+  color: hsl(0 0% 96%) !important;
+  border-color: hsl(0 0% 14%) !important;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 96%;
+    --background: 210 20% 98%;
+    --foreground: 220 15% 15%;
 
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 15%;
 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
 
-    --primary: 168 45% 30%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 168 55% 32%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 11%;
-    --secondary-foreground: 0 0% 85%;
+    --secondary: 210 15% 93%;
+    --secondary-foreground: 220 15% 25%;
 
-    --muted: 0 0% 11%;
-    --muted-foreground: 0 0% 50%;
+    --muted: 210 15% 94%;
+    --muted-foreground: 220 10% 42%;
 
-    --accent: 40 95% 54%;
-    --accent-foreground: 0 0% 2%;
+    --accent: 40 95% 48%;
+    --accent-foreground: 0 0% 5%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 72% 46%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 14%;
-    --input: 0 0% 14%;
-    --ring: 168 45% 30%;
+    --border: 220 10% 86%;
+    --input: 220 10% 86%;
+    --ring: 168 55% 32%;
 
     --radius: 0.875rem;
 
     --star: 38 100% 50%;
-    --star-empty: 0 0% 20%;
-    --trust-green: 168 45% 30%;
-    --trust-green-light: 168 30% 12%;
-    --glow-primary: 168 45% 30%;
-    --glow-accent: 168 35% 45%;
-    --hero-gradient: linear-gradient(135deg, hsl(168 45% 30% / 0.08), hsl(168 35% 45% / 0.04), transparent);
-    --card-gradient: linear-gradient(145deg, hsl(0 0% 9%), hsl(0 0% 6%));
-    --card-shadow: 0 1px 3px hsl(0 0% 0% / 0.4), 0 1px 2px hsl(0 0% 0% / 0.3);
-    --card-shadow-hover: 0 8px 30px hsl(0 0% 0% / 0.5), 0 0 20px hsl(168 45% 30% / 0.07);
-    --glass-bg: hsl(0 0% 6% / 0.8);
-    --glass-border: hsl(0 0% 16% / 0.6);
+    --star-empty: 220 10% 78%;
+    --trust-green: 168 55% 32%;
+    --trust-green-light: 168 35% 92%;
+    --glow-primary: 168 55% 32%;
+    --glow-accent: 168 40% 42%;
+    --hero-gradient: linear-gradient(135deg, hsl(168 55% 32% / 0.06), hsl(210 20% 94% / 0.5), transparent);
+    --card-gradient: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 15% 97%));
+    --card-shadow: 0 1px 3px hsl(220 15% 15% / 0.06), 0 1px 2px hsl(220 15% 15% / 0.04);
+    --card-shadow-hover: 0 8px 25px hsl(220 15% 15% / 0.1), 0 0 15px hsl(168 55% 32% / 0.06);
+    --glass-bg: hsl(0 0% 100% / 0.9);
+    --glass-border: hsl(220 10% 82% / 0.6);
 
-    --sidebar-background: 0 0% 5%;
-    --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 168 45% 30%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 11%;
-    --sidebar-accent-foreground: 0 0% 96%;
-    --sidebar-border: 0 0% 14%;
-    --sidebar-ring: 168 45% 30%;
+    --sidebar-background: 210 15% 97%;
+    --sidebar-foreground: 220 15% 15%;
+    --sidebar-primary: 168 55% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 15% 93%;
+    --sidebar-accent-foreground: 220 15% 15%;
+    --sidebar-border: 220 10% 82%;
+    --sidebar-ring: 168 55% 32%;
   }
 }
+
+/* ── Hardcoded dark-class overrides for light default ─────────────
+   Components use text-white, bg-zinc-900, etc. These need to be
+   flipped for the light default. Reverted by .a11y-invert-colors. */
+
+/* Text: white → dark on light backgrounds */
+:root:not(.a11y-invert-colors) .text-white { color: hsl(220 15% 15%); }
+:root:not(.a11y-invert-colors) .text-zinc-100 { color: hsl(220 15% 20%); }
+:root:not(.a11y-invert-colors) .text-zinc-200 { color: hsl(220 12% 25%); }
+:root:not(.a11y-invert-colors) .text-zinc-300 { color: hsl(220 10% 32%); }
+:root:not(.a11y-invert-colors) .text-zinc-400 { color: hsl(220 8% 42%); }
+:root:not(.a11y-invert-colors) .text-zinc-500 { color: hsl(220 6% 50%); }
+
+/* Backgrounds: dark → light */
+:root:not(.a11y-invert-colors) .bg-zinc-900 { background-color: hsl(210 20% 98%); }
+:root:not(.a11y-invert-colors) .bg-zinc-800 { background-color: hsl(210 15% 96%); }
+:root:not(.a11y-invert-colors) .bg-zinc-700 { background-color: hsl(210 12% 92%); }
+:root:not(.a11y-invert-colors) .bg-black { background-color: hsl(210 20% 98%); }
+
+/* Partial opacity dark backgrounds */
+:root:not(.a11y-invert-colors) [class*="bg-zinc-900\/"] { background-color: hsl(210 20% 96% / 0.5); }
+:root:not(.a11y-invert-colors) [class*="bg-zinc-800\/"] { background-color: hsl(210 15% 94% / 0.5); }
+:root:not(.a11y-invert-colors) [class*="bg-black\/"] { background-color: hsl(220 15% 15% / 0.05); }
+
+/* Borders: dark → light */
+:root:not(.a11y-invert-colors) .border-zinc-700 { border-color: hsl(220 10% 86%); }
+:root:not(.a11y-invert-colors) .border-zinc-600 { border-color: hsl(220 10% 82%); }
+:root:not(.a11y-invert-colors) [class*="border-zinc-700\/"] { border-color: hsl(220 10% 86% / 0.6); }
+:root:not(.a11y-invert-colors) [class*="border-zinc-600\/"] { border-color: hsl(220 10% 82% / 0.6); }
+
+/* Placeholder */
+:root:not(.a11y-invert-colors) ::placeholder { color: hsl(220 8% 55%); }
+
+/* Gradient text — for light bg */
+:root:not(.a11y-invert-colors) .gradient-text {
+  background: linear-gradient(135deg, hsl(168 55% 28%), hsl(168 45% 38%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Noise overlay — subtle on light */
+:root:not(.a11y-invert-colors) .noise-overlay::after { opacity: 0.015; }
+
+/* Animated border glow — subtle on light */
+:root:not(.a11y-invert-colors) .animated-border::before { opacity: 0.3; }
+
+/* Buttons with text-white inside primary bg should keep white text */
+:root:not(.a11y-invert-colors) .bg-primary .text-white,
+:root:not(.a11y-invert-colors) [class*="bg-primary"] .text-white,
+:root:not(.a11y-invert-colors) .bg-destructive .text-white,
+:root:not(.a11y-invert-colors) [class*="bg-destructive"] .text-white,
+:root:not(.a11y-invert-colors) .bg-emerald-500 .text-white,
+:root:not(.a11y-invert-colors) [class*="bg-emerald"] .text-white,
+:root:not(.a11y-invert-colors) [class*="bg-green"] .text-white,
+:root:not(.a11y-invert-colors) [class*="bg-red"] .text-white,
+:root:not(.a11y-invert-colors) [class*="bg-blue"] .text-white,
+:root:not(.a11y-invert-colors) [class*="bg-amber"] .text-white,
+:root:not(.a11y-invert-colors) [class*="bg-\\[#"] .text-white {
+  color: white;
+}
+
+/* Keep text-white on colored badge backgrounds */
+:root:not(.a11y-invert-colors) .text-primary-foreground { color: hsl(0 0% 100%); }
 
 @layer base {
   * {

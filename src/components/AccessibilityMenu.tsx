@@ -149,7 +149,7 @@ const AccessibilityMenu = () => {
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggle("invertColors")}>
           <span className="flex items-center justify-between w-full">
-            <span>הפיכת צבעים</span>
+            <span>מצב כהה</span>
             {isActive("invertColors") && <span className="text-xs text-primary">✓</span>}
           </span>
         </DropdownMenuItem>
