@@ -271,7 +271,7 @@ const BusinessProfile = () => {
           businessSlug: bizData.slug,
           date: new Date(r.created_at).toLocaleDateString("he-IL"),
           purchaseDate: r.created_at,
-          verified: r.verified || false,
+          verified: r.verified_purchase || r.is_verified_purchase || r.is_purchase_verified || false,
           anonymous: r.anonymous || false,
           updatedAt: r.updated_at && r.updated_at !== r.created_at
             ? new Date(r.updated_at).toLocaleDateString("he-IL")
