@@ -235,53 +235,12 @@ const Navbar = () => {
                 מאגר האמון
               </Link>
               {/* ── קהילה dropdown — Leaderboard + Referrals ── */}
-              <DropdownMenu open={communityOpen} onOpenChange={setCommunityOpen}>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className={`text-sm transition-colors flex items-center gap-1 focus-visible:outline-none relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-all ${
-                      isActive("/leaderboard")
-                        ? "text-foreground font-semibold after:bg-primary"
-                        : "text-muted-foreground hover:text-foreground after:bg-transparent"
-                    }`}
-                    aria-haspopup="menu"
-                    aria-expanded={communityOpen}
-                  >
-                    <Trophy size={14} aria-hidden="true" />
-                    קהילה
-                    <ChevronDown
-                      size={13}
-                      className={`transition-transform duration-200 ${communityOpen ? "rotate-180" : ""}`}
-                      aria-hidden="true"
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="center" className="w-48" style={{ direction: "rtl" }}>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/leaderboard"
-                      className="flex items-center gap-2 w-full"
-                      onClick={() => setCommunityOpen(false)}
-                    >
-                      <Trophy size={15} className="text-muted-foreground shrink-0" aria-hidden="true" />
-                      לוח המובילים
-                    </Link>
-                  </DropdownMenuItem>
-                  {/* Referral link — temporarily disabled, keep for future re-enable
-                  {user && (
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/user/referrals"
-                        className="flex items-center gap-2 w-full"
-                        onClick={() => setCommunityOpen(false)}
-                      >
-                        <Gift size={15} className="text-primary shrink-0" aria-hidden="true" />
-                        <span className="text-primary font-medium">הזמינו חברים</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  */}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Link to="/leaderboard" className={navLinkCls("/leaderboard")}>
+                <Trophy size={14} aria-hidden="true" />
+                קהילה
+              </Link>
+              {/* Community dropdown — temporarily replaced with direct link.
+                  Restore dropdown when referral system is re-enabled. */}
               <Link to="/compare" className={navLinkCls("/compare")}>
                 <Scale size={14} aria-hidden="true" />
                 השוואה
@@ -501,30 +460,16 @@ const Navbar = () => {
                 )}
               </div>
 
-              <div className="border-t border-border/30 pt-2 pb-1">
-                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider px-0 mb-1">
-                  קהילה
-                </p>
+              <div className="border-t border-border/30 pt-1">
                 <Link
                   to="/leaderboard"
-                  className="flex items-center gap-2 text-sm py-2.5 min-h-[44px] text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >
                   <Trophy size={14} aria-hidden="true" />
-                  לוח המובילים
+                  קהילה
                 </Link>
-                {/* Referral link — temporarily disabled
-                {user && (
-                  <Link
-                    to="/user/referrals"
-                    className="flex items-center gap-2 text-sm py-2.5 min-h-[44px] text-primary font-medium"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <Gift size={14} aria-hidden="true" />
-                    הזמינו חברים
-                  </Link>
-                )}
-                */}
+                {/* Referral link — temporarily disabled, restore when re-enabling referral system */}
               </div>
 
               <div className="border-t border-border/30 pt-1">
