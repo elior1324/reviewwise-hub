@@ -222,10 +222,25 @@ const BusinessProfile = () => {
         );
         const earlyBirdIds = new Set(sortedByDate.slice(0, 5).map((r: any) => r.id));
 
-        // ── Compute rating & reviewCount for business (since table lacks them) ──
-        const totalReviews = reviewDataFinal.length;
+        // ── Fetch WhatsApp reviews early so they count in the average ────────
+        const { data: waReviews } = await supabase.from("whatsapp_reviews")
+          .select("id, author_name, rating, text, received_at, source_url")
+          .eq("business_id", bizData.id)
+          .eq("is_approved", true)
+          .eq("is_flagged", false)
+          .order("received_at", { ascending: false });
+
+        if (waReviews) setWhatsappReviews(waReviews as WhatsAppReview[]);
+
+        // ── Compute rating & reviewCount — includes native + approved WhatsApp ──
+        const waRatings = (waReviews || []).filter((r: any) => r.rating != null).map((r: any) => r.rating as number);
+        const allRatings = [
+          ...reviewDataFinal.map((r: any) => r.rating || 0),
+          ...waRatings,
+        ];
+        const totalReviews = allRatings.length;
         const avgRating = totalReviews > 0
-          ? reviewDataFinal.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / totalReviews
+          ? allRatings.reduce((sum, r) => sum + r, 0) / totalReviews
           : 0;
 
         // Now we can set business with real computed values
@@ -317,15 +332,7 @@ const BusinessProfile = () => {
         if (gReviews) setGoogleReviews(gReviews as GoogleReview[]);
       }
 
-      // ── 5. Fetch WhatsApp reviews (approved, non-flagged) ────────────────────
-      const { data: waReviews } = await supabase.from("whatsapp_reviews")
-        .select("id, author_name, rating, text, received_at, source_url")
-        .eq("business_id", bizData.id)
-        .eq("is_approved", true)
-        .eq("is_flagged", false)
-        .order("received_at", { ascending: false });
-
-      if (waReviews) setWhatsappReviews(waReviews as WhatsAppReview[]);
+      // WhatsApp reviews already fetched above (before rating computation)
 
       setLoading(false);
     };

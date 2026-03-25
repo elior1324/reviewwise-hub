@@ -162,5 +162,5 @@ serve(async (req: Request) => {
     success:    true,
     review_id:  inserted.id,
     message:    "תודה על הביקורת! היא תוצג לאחר אישור בעל העסק.",
-  });
+  }, 200, cors);
 });

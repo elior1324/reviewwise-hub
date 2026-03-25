@@ -829,13 +829,16 @@ const BusinessSettingsPage = () => {
             social_links: d.social_links || { facebook: "", instagram: "", linkedin: "", twitter: "", tiktok: "" },
           });
 
-          // Fetch review stats
+          // Fetch review stats (native + approved WhatsApp)
           const { data: rData } = await supabase.from("reviews").select("rating").eq("business_id", data.id);
-          if (rData) {
-            const total = rData.length;
-            const avg = total > 0 ? rData.reduce((s, r) => s + (r.rating || 0), 0) / total : 0;
-            setReviewStats({ total, averageRating: avg });
-          }
+          const { data: waData } = await supabase.from("whatsapp_reviews").select("rating").eq("business_id", data.id).eq("is_approved", true).eq("is_flagged", false);
+          const allRatings = [
+            ...(rData || []).map(r => r.rating || 0),
+            ...(waData || []).filter(r => r.rating != null).map(r => r.rating as number),
+          ];
+          const total = allRatings.length;
+          const avg = total > 0 ? allRatings.reduce((s, r) => s + r, 0) / total : 0;
+          setReviewStats({ total, averageRating: avg });
         }
       } catch {
         toast.error("לא הצלחנו לטעון את פרטי העסק");
