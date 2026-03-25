@@ -14,10 +14,9 @@ import { motion } from "framer-motion";
 import {
   Star, MessageSquare, TrendingUp, Users, MousePointerClick, DollarSign,
   Bell, Brain, AlertTriangle, ArrowUpRight, ArrowDownRight, BarChart3, FileText, Video, HelpCircle,
-  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Code2, Link2, Handshake,
+  Crown, Lock, Webhook, Contact, CalendarClock, Sparkles, Eye, Link2, Handshake,
   ExternalLink, Tag, BarChart2, Shield, ShieldCheck, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Briefcase
 } from "lucide-react";
-import TrustBadgeDashboard from "@/components/TrustBadgeDashboard";
 import ModerationCaseTracker from "@/components/ModerationCaseTracker";
 import IntegrationsTab from "@/components/IntegrationsTab";
 import CollaborationPromoCard from "@/components/CollaborationPromoCard";
@@ -1535,25 +1534,6 @@ const BusinessDashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-
-              <div className="border-t border-border/30" />
-
-              {/* ─── Widget Embed ─────────────────────────────────────── */}
-              <div>
-                <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2 mb-3">
-                  <Code2 size={15} className="text-accent" /> ווידג׳ט להטמעה
-                </h3>
-                <TrustBadgeDashboard
-                  businessSlug={businessId ? businessSlug : ""}
-                  businessName={displayBusiness.name}
-                  rating={Number(displayStats[0]?.value) || 0}
-                  reviewCount={Number(displayStats[1]?.value) || 0}
-                  reviews={realReviews.map(r => ({
-                    id: r.id, rating: r.rating, text: r.text, reviewerName: r.reviewerName,
-                    anonymous: r.anonymous, verified: r.verified, courseName: r.courseName, date: r.date,
-                  }))}
-                />
               </div>
 
               <div className="border-t border-border/30" />
