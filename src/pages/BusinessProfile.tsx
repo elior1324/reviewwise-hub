@@ -257,7 +257,7 @@ const BusinessProfile = () => {
           website: bizData.website || undefined,
           email: bizData.email || undefined,
           phone: bizData.phone || undefined,
-          socialLinks: undefined,                  // social_links doesn't exist in DB
+          socialLinks: bizData.social_links as Record<string, string> | undefined,
         };
         setBusiness(mappedBiz);
 
