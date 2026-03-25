@@ -90,6 +90,8 @@ interface ReviewCardProps {
   activeCaseStatus?: string | null;
   /** Whether the spam filter has flagged this review */
   isSpamFlagged?: boolean;
+  /** Compact mode — hide extra elements, match WhatsApp card size */
+  compact?: boolean;
 }
 
 const ReviewCard = ({
@@ -124,6 +126,7 @@ const ReviewCard = ({
   reviewSource,
   activeCaseStatus,
   isSpamFlagged = false,
+  compact = false,
 }: ReviewCardProps) => {
 
   // Derive provenance source from existing fields if not explicitly provided
@@ -258,6 +261,34 @@ const ReviewCard = ({
     }
     setEditSaving(false);
   };
+
+  if (compact) {
+    return (
+      <Card className={`border bg-card ${reviewTier === "open" ? "border-border/30 bg-card/70" : "border-primary/15 bg-primary/3"}`}>
+        <CardContent className="p-3">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 font-display font-semibold text-xs text-primary select-none">
+              {anonymous ? <User size={12} className="text-primary/60" /> : reviewerName.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-foreground truncate">
+                {anonymous ? "אנונימי" : reviewerName}
+              </p>
+              <p className="text-[10px] text-muted-foreground/60">{date}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <StarRating rating={rating} size={13} />
+            <ReviewProvenanceBadge source={derivedSource} />
+          </div>
+          <p className="text-xs text-foreground/80 leading-relaxed mt-1.5 line-clamp-3">{displayText}</p>
+          {courseName && (
+            <p className="mt-1 text-[10px] text-muted-foreground truncate">קורס: {courseName}</p>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.3, ease: "easeOut" }}>

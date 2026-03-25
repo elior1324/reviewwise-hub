@@ -782,7 +782,7 @@ const BusinessProfile = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.04 }}
                     >
-                      <ReviewCard {...review} reviewTier="verified" />
+                      <ReviewCard {...review} reviewTier="verified" compact />
                     </motion.div>
                   ))}
                 </div>
@@ -811,7 +811,7 @@ const BusinessProfile = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.04 }}
                     >
-                      <ReviewCard {...review} reviewTier="open" />
+                      <ReviewCard {...review} reviewTier="open" compact />
                     </motion.div>
                   ))}
                 </div>
