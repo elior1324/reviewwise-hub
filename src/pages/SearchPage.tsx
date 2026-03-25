@@ -211,6 +211,53 @@ const SearchPage = () => {
   const ALL_FREELANCER_CATS = ["הכל", ...freelancerCats.filter(c => c !== "אחר"), "אחר"];
   const ALL_COURSE_CATS = ["הכל", ...courseCats.filter(c => c !== "אחר"), "אחר"];
 
+  // Count businesses per freelancer category
+  const allFreelancerBusinesses = allBusinesses.filter(b => {
+    const cats = b.categories || [b.category];
+    return b.type === "freelancer" || cats.some(c => FREELANCER_CATEGORIES.includes(c));
+  });
+  const freelancerCatCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const cat of ALL_FREELANCER_CATS) {
+      if (cat === "הכל") {
+        counts[cat] = allFreelancerBusinesses.length;
+      } else {
+        counts[cat] = allFreelancerBusinesses.filter(b => (b.categories || [b.category]).includes(cat)).length;
+      }
+    }
+    return counts;
+  }, [allFreelancerBusinesses, ALL_FREELANCER_CATS]);
+
+  // Count businesses per course category
+  const allCourseBusinesses = allBusinesses.filter(b => {
+    const cats = b.categories || [b.category];
+    return b.type === "course-provider" || cats.some(c => COURSE_CATEGORIES.includes(c));
+  });
+  const courseCatCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const cat of ALL_COURSE_CATS) {
+      if (cat === "הכל") {
+        counts[cat] = allCourseBusinesses.length;
+      } else {
+        counts[cat] = allCourseBusinesses.filter(b => (b.categories || [b.category]).includes(cat)).length;
+      }
+    }
+    return counts;
+  }, [allCourseBusinesses, ALL_COURSE_CATS]);
+
+  // Count businesses per SaaS category
+  const allSaasBusinesses = allBusinesses.filter(b => {
+    const cats = b.categories || [b.category];
+    return b.type === "saas" || cats.some(c => SAAS_CATEGORIES.includes(c));
+  });
+  const saasCatCounts = useMemo(() => {
+    const counts: Record<string, number> = { "הכל": allSaasBusinesses.length };
+    for (const cat of SAAS_CATEGORIES) {
+      counts[cat] = allSaasBusinesses.filter(b => (b.categories || [b.category]).includes(cat)).length;
+    }
+    return counts;
+  }, [allSaasBusinesses]);
+
   const currentSubcats = selectedFreelancerCat !== "הכל" 
     ? FREELANCER_SUBCATEGORIES[selectedFreelancerCat] || [] 
     : [];
@@ -434,13 +481,18 @@ const SearchPage = () => {
           <TabsContent value="freelancers">
             <div className="flex gap-2 flex-wrap mb-3">
               {ALL_FREELANCER_CATS.map(cat => (
-                <Button 
-                  key={cat} 
-                  variant={selectedFreelancerCat === cat ? "default" : "outline"} 
-                  size="sm" 
+                <Button
+                  key={cat}
+                  variant={selectedFreelancerCat === cat ? "default" : "outline"}
+                  size="sm"
                   onClick={() => handleCatSelect(cat)}
                 >
                   {cat}
+                  {freelancerCatCounts[cat] > 0 && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full mr-1 ${selectedFreelancerCat === cat ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {freelancerCatCounts[cat]}
+                    </span>
+                  )}
                   {FREELANCER_SUBCATEGORIES[cat] && selectedFreelancerCat !== cat && (
                     <ChevronDown size={12} className="mr-1 opacity-50" />
                   )}
@@ -515,6 +567,11 @@ const SearchPage = () => {
               {ALL_COURSE_CATS.map(cat => (
                 <Button key={cat} variant={selectedCourseCat === cat ? "default" : "outline"} size="sm" onClick={() => setSelectedCourseCat(cat)}>
                   {cat}
+                  {courseCatCounts[cat] > 0 && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full mr-1 ${selectedCourseCat === cat ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {courseCatCounts[cat]}
+                    </span>
+                  )}
                 </Button>
               ))}
             </div>
@@ -626,6 +683,11 @@ const SearchPage = () => {
                   onClick={() => handleSaasCatSelect(cat)}
                 >
                   {cat}
+                  {saasCatCounts[cat] > 0 && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full mr-1 ${selectedSaasCat === cat ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {saasCatCounts[cat]}
+                    </span>
+                  )}
                   {SAAS_SUBCATEGORIES[cat] && selectedSaasCat !== cat && (
                     <ChevronDown size={12} className="mr-1 opacity-50" />
                   )}
