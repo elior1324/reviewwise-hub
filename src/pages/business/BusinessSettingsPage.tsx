@@ -71,6 +71,8 @@ import {
   Users,
   Settings,
   Link2,
+  Youtube,
+  Plus,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -326,6 +328,7 @@ const ProfileSection = ({
 const SOCIAL_PLATFORMS = [
   { key: "facebook",  icon: Facebook,  label: "Facebook",  placeholder: "https://facebook.com/..." },
   { key: "instagram", icon: Instagram, label: "Instagram", placeholder: "https://instagram.com/..." },
+  { key: "youtube",   icon: Youtube,   label: "YouTube",   placeholder: "https://youtube.com/@..." },
   { key: "linkedin",  icon: Linkedin,  label: "LinkedIn",  placeholder: "https://linkedin.com/..." },
   { key: "twitter",   icon: Twitter,   label: "Twitter / X", placeholder: "https://twitter.com/..." },
   { key: "tiktok",    icon: Music,     label: "TikTok",    placeholder: "https://tiktok.com/@..." },
@@ -436,6 +439,59 @@ const ContactSection = ({
           />
         </div>
       ))}
+
+      {/* Custom links */}
+      {Object.entries(contactForm.social_links)
+        .filter(([key]) => !SOCIAL_PLATFORMS.some(p => p.key === key) && key !== "website")
+        .map(([key]) => (
+          <div key={key} className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium text-zinc-300 flex items-center gap-1.5">
+                <Link2 className="w-3.5 h-3.5" />{key}
+              </Label>
+              <button
+                type="button"
+                className="text-xs text-destructive hover:underline"
+                onClick={() => {
+                  const next = { ...contactForm.social_links };
+                  delete next[key];
+                  setContactForm({ ...contactForm, social_links: next });
+                }}
+              >
+                הסר
+              </button>
+            </div>
+            <Input
+              value={contactForm.social_links[key] || ""}
+              onChange={(e) =>
+                setContactForm({
+                  ...contactForm,
+                  social_links: { ...contactForm.social_links, [key]: e.target.value },
+                })
+              }
+              placeholder="https://..."
+              className="bg-zinc-800/50 border-zinc-700/60 text-white placeholder:text-zinc-500"
+            />
+          </div>
+        ))}
+
+      {/* Add custom link button */}
+      <button
+        type="button"
+        className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors mt-2"
+        onClick={() => {
+          const name = prompt("שם הקישור (לדוגמה: Telegram, WhatsApp, Threads)");
+          if (!name?.trim()) return;
+          const key = name.trim().toLowerCase().replace(/\s+/g, "_");
+          setContactForm({
+            ...contactForm,
+            social_links: { ...contactForm.social_links, [key]: "" },
+          });
+        }}
+      >
+        <Plus className="w-4 h-4" />
+        הוסיפו קישור נוסף
+      </button>
     </div>
 
     <div className="pt-2">
@@ -824,7 +880,7 @@ const BusinessSettingsPage = () => {
   // Contact form
   const [contactForm, setContactForm] = useState({
     email: "", phone: "", website: "", personal_affiliate_url: "",
-    social_links: { facebook: "", instagram: "", linkedin: "", twitter: "", tiktok: "" } as Record<string, string>,
+    social_links: { facebook: "", instagram: "", youtube: "", linkedin: "", twitter: "", tiktok: "" } as Record<string, string>,
   });
 
   // Password form
@@ -873,7 +929,7 @@ const BusinessSettingsPage = () => {
             phone: d.phone || "",
             website: d.website || "",
             personal_affiliate_url: d.personal_affiliate_url || "",
-            social_links: d.social_links || { facebook: "", instagram: "", linkedin: "", twitter: "", tiktok: "" },
+            social_links: d.social_links || { facebook: "", instagram: "", youtube: "", linkedin: "", twitter: "", tiktok: "" },
           });
 
           // Fetch review stats (native + approved WhatsApp)
