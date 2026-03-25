@@ -29,7 +29,7 @@ export interface PrestigeBadgeProps {
   name: string;
   grade: string;
   rating: number;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   /** If true, renders as a plain div (no outer anchor — for use inside <a> tags) */
   noLink?: boolean;
 }
@@ -75,6 +75,7 @@ const BADGE_CONFIG = {
 }>;
 
 const SIZE_MAP = {
+  xs: { outer: "h-8 pr-2 pl-2.5 gap-1.5 rounded-lg", icon: 12, title: "text-[9px]", sub: "text-[8px]", dot: "w-1 h-1" },
   sm: { outer: "h-12 pr-3 pl-4 gap-2.5 rounded-xl", icon: 16, title: "text-[11px]", sub: "text-[9px]", dot: "w-1.5 h-1.5" },
   md: { outer: "h-14 pr-3.5 pl-5 gap-3 rounded-2xl", icon: 20, title: "text-xs", sub: "text-[10px]", dot: "w-2 h-2" },
   lg: { outer: "h-16 pr-4 pl-6 gap-3.5 rounded-2xl", icon: 24, title: "text-sm", sub: "text-[11px]", dot: "w-2 h-2" },

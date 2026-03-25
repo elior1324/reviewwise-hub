@@ -343,15 +343,29 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
               className="flex flex-row flex-wrap md:flex-col gap-2 md:shrink-0 md:self-center"
             >
               {eligibleBadges.map(badgeType => (
-                <PrestigeBadge
-                  key={badgeType}
-                  type={badgeType}
-                  slug={business.slug}
-                  name={business.name}
-                  grade={grade}
-                  rating={business.rating}
-                  size="sm"
-                />
+                <span key={badgeType}>
+                  {/* xs on mobile, sm on desktop */}
+                  <span className="md:hidden">
+                    <PrestigeBadge
+                      type={badgeType}
+                      slug={business.slug}
+                      name={business.name}
+                      grade={grade}
+                      rating={business.rating}
+                      size="xs"
+                    />
+                  </span>
+                  <span className="hidden md:inline-block">
+                    <PrestigeBadge
+                      type={badgeType}
+                      slug={business.slug}
+                      name={business.name}
+                      grade={grade}
+                      rating={business.rating}
+                      size="sm"
+                    />
+                  </span>
+                </span>
               ))}
             </motion.div>
           )}

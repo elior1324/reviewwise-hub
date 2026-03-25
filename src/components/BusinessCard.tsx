@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import type { SocialLinks, PricingModel } from "@/data/mockData";
 import { PRICING_MODEL_LABELS } from "@/data/mockData";
 import { sanitizeUrl } from "@/lib/sanitize";
-import { computeEligibleBadges, PrestigeBadge } from "./PrestigeBadge";
 
 const TelegramIcon = ({ size = 14 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -71,7 +70,6 @@ const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewC
   const trust = cardTrustGrade(rating, verifiedReviewCount);
   const tierDisplay = trustTier && trustTier !== "unrated" ? TRUST_TIER_DISPLAY[trustTier] : null;
   const isSaas = type === "saas";
-  const eligibleBadges = computeEligibleBadges({ rating, verifiedCount: verifiedReviewCount, type: type || "", category });
   const activeSocials = socialLinks
     ? Object.entries(socialLinks).filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim() !== "")
     : [];
@@ -159,23 +157,6 @@ const BusinessCard = ({ slug, name, type, category, subcategory, rating, reviewC
               {verifiedRatio != null && (
                 <span className="opacity-70 ml-0.5">({Math.round(verifiedRatio * 100)}%)</span>
               )}
-            </div>
-          )}
-          {/* Prestige badges */}
-          {eligibleBadges.length > 0 && (
-            <div className="flex gap-1.5 flex-wrap mb-1.5" onClick={(e) => e.stopPropagation()}>
-              {eligibleBadges.slice(0, 2).map(badgeType => (
-                <PrestigeBadge
-                  key={badgeType}
-                  type={badgeType}
-                  slug={slug}
-                  name={name}
-                  grade={trust.grade}
-                  rating={rating}
-                  size="sm"
-                  noLink
-                />
-              ))}
             </div>
           )}
           {/* SaaS: pricing model + founder */}
