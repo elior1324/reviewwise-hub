@@ -160,6 +160,7 @@ export default function TrustBadgePage() {
   const { user } = useAuth();
   const [activeVariant, setActiveVariant] = useState<"full" | "mini" | "sidebar">("full");
   const [showFixed, setShowFixed] = useState(false);
+  const [previewDark, setPreviewDark] = useState(false);
   const [realSlug, setRealSlug] = useState<string | null>(null);
 
   // Fetch the authenticated user's business slug
@@ -273,30 +274,47 @@ export default function TrustBadgePage() {
         {/* ── Live Preview ──────────────────────────────────────────────────── */}
         <section className="px-4 pb-16">
           <div className="mx-auto max-w-5xl">
+            {/* Light / Dark toggle */}
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <button
+                onClick={() => setPreviewDark(false)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${!previewDark ? "bg-primary/15 border-primary/40 text-primary" : "bg-muted/30 border-border/40 text-muted-foreground hover:text-foreground"}`}
+              >
+                ☀️ רקע בהיר
+              </button>
+              <button
+                onClick={() => setPreviewDark(true)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${previewDark ? "bg-primary/15 border-primary/40 text-primary" : "bg-muted/30 border-border/40 text-muted-foreground hover:text-foreground"}`}
+              >
+                🌙 רקע כהה
+              </button>
+            </div>
+
             <div
-              className="rounded-2xl border border-border/40 overflow-hidden"
+              className="rounded-2xl border border-border/40 overflow-hidden transition-colors duration-300"
               style={{
-                background:
-                  "repeating-linear-gradient(45deg, hsl(0 0% 8%), hsl(0 0% 8%) 10px, hsl(0 0% 7%) 10px, hsl(0 0% 7%) 20px)",
+                background: previewDark
+                  ? "repeating-linear-gradient(45deg, hsl(0 0% 8%), hsl(0 0% 8%) 10px, hsl(0 0% 7%) 10px, hsl(0 0% 7%) 20px)"
+                  : "repeating-linear-gradient(45deg, hsl(210 15% 96%), hsl(210 15% 96%) 10px, hsl(210 12% 94%) 10px, hsl(210 12% 94%) 20px)",
               }}
             >
               {/* Chrome bar */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-border/40 bg-muted/30">
+              <div className={`flex items-center gap-2 px-4 py-3 border-b ${previewDark ? "border-white/10 bg-black/30" : "border-border/40 bg-white/60"}`}>
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-red-500/50" />
                   <div className="w-3 h-3 rounded-full bg-amber-400/50" />
                   <div className="w-3 h-3 rounded-full bg-emerald-400/50" />
                 </div>
-                <div className="flex-1 mx-4 px-3 py-1 rounded bg-muted/30 text-xs text-muted-foreground/50 text-right">
-                  yourwebsite.co.il
+                <div className={`flex-1 mx-4 px-3 py-1 rounded text-xs text-right ${previewDark ? "bg-white/5 text-white/25" : "bg-black/5 text-black/30"}`}>
+                  yourwebsite.co.il — /{snippetSlug}
                 </div>
               </div>
 
               {/* Preview area */}
-              <div className="min-h-64 flex items-center justify-center p-8">
+              <div className={`min-h-64 flex items-center justify-center p-8 ${previewDark ? "[&_.text-foreground]:!text-white [&_.text-foreground\\/80]:!text-white/80 [&_.text-foreground\\/70]:!text-white/70 [&_.text-muted-foreground]:!text-white/50 [&_.bg-muted\\/30]:!bg-white/5 [&_.border-border\\/40]:!border-white/10" : ""}`}>
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={activeVariant}
+                    key={`${activeVariant}-${previewDark}`}
                     initial={{ opacity: 0, scale: 0.96, y: 8 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, y: -8 }}

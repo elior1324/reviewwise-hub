@@ -135,10 +135,10 @@ function AccountStatusBanner({ user, authLoading, business, bLoading }: AccountS
             <UserCheck size={15} className="text-emerald-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-emerald-300 leading-snug">
-              מחובר לחשבון: <span className="text-white">{business.name}</span>
+            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 leading-snug">
+              מחובר לחשבון: <span className="text-foreground font-bold">{business.name}</span>
             </p>
-            <p className="text-xs text-emerald-400/60 mt-0.5">
+            <p className="text-xs text-emerald-600/70 mt-0.5">
               קוד ההטמעה מוגדר אוטומטית לעסק שלכם — אין צורך לערוך אותו
             </p>
           </div>
@@ -572,6 +572,7 @@ interface WidgetsTabProps {
 
 function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
   const [activeVariant, setActiveVariant] = useState<"full" | "mini" | "sidebar">("full");
+  const [previewDark, setPreviewDark] = useState(false);
   const [showFixed, setShowFixed] = useState(false);
 
   // Use real slug in embed code when owner is connected
@@ -605,7 +606,7 @@ function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
                 <button
                   key={v.id}
                   onClick={() => setActiveVariant(v.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${active ? "bg-primary/15 border-primary/40 text-primary" : "bg-muted/40 border-border/40 text-muted-foreground hover:text-white hover:bg-muted/50"}`}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${active ? "bg-primary/15 border-primary/40 text-primary" : "bg-muted/40 border-border/40 text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
                 >
                   <Icon size={15} />
                   <span>{v.label}</span>
@@ -620,15 +621,38 @@ function WidgetsTab({ ownerBusiness }: WidgetsTabProps) {
       {/* Live preview */}
       <section className="px-4">
         <div className="mx-auto max-w-5xl">
-          <div className="rounded-2xl border border-border/40 overflow-hidden" style={{ background: "repeating-linear-gradient(45deg, hsl(var(--muted)), hsl(var(--muted)) 10px, hsl(var(--card)) 10px, hsl(var(--card)) 20px)" }}>
+          {/* Light / Dark toggle */}
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <button
+              onClick={() => setPreviewDark(false)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${!previewDark ? "bg-primary/15 border-primary/40 text-primary" : "bg-muted/30 border-border/40 text-muted-foreground hover:text-foreground"}`}
+            >
+              ☀️ רקע בהיר
+            </button>
+            <button
+              onClick={() => setPreviewDark(true)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${previewDark ? "bg-primary/15 border-primary/40 text-primary" : "bg-muted/30 border-border/40 text-muted-foreground hover:text-foreground"}`}
+            >
+              🌙 רקע כהה
+            </button>
+          </div>
+
+          <div
+            className="rounded-2xl border border-border/40 overflow-hidden transition-colors duration-300"
+            style={{
+              background: previewDark
+                ? "repeating-linear-gradient(45deg, hsl(0 0% 8%), hsl(0 0% 8%) 10px, hsl(0 0% 7%) 10px, hsl(0 0% 7%) 20px)"
+                : "repeating-linear-gradient(45deg, hsl(210 15% 96%), hsl(210 15% 96%) 10px, hsl(210 12% 94%) 10px, hsl(210 12% 94%) 20px)",
+            }}
+          >
             {/* Chrome bar */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-border/40 bg-muted/30">
+            <div className={`flex items-center gap-2 px-4 py-3 border-b ${previewDark ? "border-white/10 bg-black/30" : "border-border/40 bg-white/60"}`}>
               <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-red-500/50" />
                 <div className="w-3 h-3 rounded-full bg-amber-400/50" />
                 <div className="w-3 h-3 rounded-full bg-emerald-400/50" />
               </div>
-              <div className="flex-1 mx-4 px-3 py-1 rounded bg-muted/30 text-xs text-muted-foreground/50 text-right">
+              <div className={`flex-1 mx-4 px-3 py-1 rounded text-xs text-right ${previewDark ? "bg-white/5 text-white/25" : "bg-black/5 text-black/30"}`}>
                 {ownerBusiness?.slug ? `yourwebsite.co.il — /${ownerBusiness.slug}` : "yourwebsite.co.il"}
               </div>
             </div>
