@@ -17,7 +17,7 @@
 //   --card / --border         – card surface & outline
 //   --card-shadow / --card-shadow-hover
 
-import { Star, ShieldCheck, MessageCircle, Facebook, Globe } from "lucide-react";
+import { Star, ShieldCheck, MessageCircle, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,6 @@ import { cn } from "@/lib/utils";
 const SOURCE_TAG_CONFIG = {
   verified_purchase: { label: "רכישה מאומתת", className: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40", Icon: ShieldCheck },
   whatsapp:          { label: "WhatsApp", className: "text-green-500 bg-green-50 dark:bg-green-950/30", Icon: MessageCircle },
-  facebook:          { label: "Facebook", className: "text-blue-500 bg-blue-50 dark:bg-blue-950/30", Icon: Facebook },
   website:           { label: "אתר ReviewHub", className: "text-muted-foreground bg-muted/50", Icon: Globe },
 } as const;
 
@@ -45,7 +44,7 @@ export interface ReviewTestimonial {
   /** If provided, business name becomes a clickable link to the profile */
   businessSlug?: string;
   /** Source platform tag shown below business name */
-  sourceTag?: "verified_purchase" | "whatsapp" | "facebook" | "website";
+  sourceTag?: "verified_purchase" | "whatsapp" | "website";
 }
 
 interface ReviewsMarqueeProps {

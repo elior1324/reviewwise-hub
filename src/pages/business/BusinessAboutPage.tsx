@@ -7,7 +7,6 @@ import { FULL_BUSINESS_FAQ } from "@/data/businessFaq";
 import { motion } from "framer-motion";
 import {
   MessageCircle,
-  Instagram,
   Mail,
   QrCode,
   ShieldCheck,
@@ -35,7 +34,6 @@ const fadeUp = {
 
 const CHANNELS = [
   { icon: MessageCircle, label: "WhatsApp",      desc: "שיעור פתיחה גבוה, ישיר" },
-  { icon: Instagram,     label: "Instagram DM",  desc: "אוטומטי" },
   { icon: Mail,          label: "אימייל",         desc: "עם תבנית מותאמת" },
   { icon: QrCode,        label: "QR Code",        desc: "לדלפק, למוצר, לחשבונית" },
 ];
@@ -44,7 +42,7 @@ const STEPS = [
   {
     num: "01",
     title: "שלח קישור ייחודי",
-    body: "מלוח הבקרה שלך, שניות. הקישור יוצא דרך WhatsApp, Instagram DM, אימייל, או QR Code.",
+    body: "מלוח הבקרה שלך, שניות. הקישור יוצא דרך WhatsApp, אימייל, או QR Code.",
   },
   {
     num: "02",
@@ -67,7 +65,7 @@ const RATING_LAYERS = [
   {
     icon: "⭐",
     title: "דירוג כוכבים",
-    desc: "ממוצע של כל הביקורות שנבדקו ואושרו — מ-ReviewHub, Google, Facebook, WhatsApp, Instagram. 1–5 כוכבים, מעוגל לעשרון אחד.",
+    desc: "ממוצע של כל הביקורות שנבדקו ואושרו — מ-ReviewHub, Google ו-WhatsApp. 1–5 כוכבים, מעוגל לעשרון אחד.",
     note: "לא ניתן לרכישה",
   },
   {

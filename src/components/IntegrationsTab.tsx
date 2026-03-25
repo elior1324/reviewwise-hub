@@ -86,10 +86,6 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
   const [googleConnecting, setGoogleConnecting] = useState(false);
   const [googleImporting, setGoogleImporting] = useState(false);
 
-  const [facebookConnected, setFacebookConnected] = useState(false);
-  const [facebookConnecting, setFacebookConnecting] = useState(false);
-  const [facebookImporting, setFacebookImporting] = useState(false);
-
   const [loading, setLoading] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
@@ -121,8 +117,6 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
         }
         const google = result.data.find((d: any) => d.integration_type === "google");
         if (google?.active) setGoogleConnected(true);
-        const facebook = result.data.find((d: any) => d.integration_type === "facebook");
-        if (facebook?.active) setFacebookConnected(true);
       }
       setLoading(false);
     };
@@ -182,12 +176,12 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
     setHubspotSaving(false);
   };
 
-  const handleOAuthConnect = async (provider: "google" | "facebook") => {
+  const handleOAuthConnect = async (provider: "google") => {
     if (isDemo) {
       toast({ title: "מצב דמו", description: "הירשמו כדי לחבר חשבון." });
       return;
     }
-    provider === "google" ? setGoogleConnecting(true) : setFacebookConnecting(true);
+    setGoogleConnecting(true);
     try {
       const { data: result, error } = await supabase.functions.invoke("get-oauth-connect-url", {
         body: { provider, business_id: businessId },
@@ -199,19 +193,18 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
       }
       window.location.href = result.url;
     } finally {
-      provider === "google" ? setGoogleConnecting(false) : setFacebookConnecting(false);
+      setGoogleConnecting(false);
     }
   };
 
-  const handleImportReviews = async (provider: "google" | "facebook") => {
+  const handleImportReviews = async (provider: "google") => {
     if (isDemo) {
       toast({ title: "מצב דמו", description: "הירשמו כדי לייבא ביקורות." });
       return;
     }
-    provider === "google" ? setGoogleImporting(true) : setFacebookImporting(true);
+    setGoogleImporting(true);
     try {
-      const fnName = provider === "google" ? "import-google-reviews" : "import-facebook-reviews";
-      const { data: result, error } = await supabase.functions.invoke(fnName, {
+      const { data: result, error } = await supabase.functions.invoke("import-google-reviews", {
         body: { business_id: businessId },
       });
       if (error || result?.error) {
@@ -225,7 +218,7 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
         description: skipped > 0 ? `${skipped} ביקורות דולגו (ללא טקסט)` : "כל הביקורות יובאו בהצלחה",
       });
     } finally {
-      provider === "google" ? setGoogleImporting(false) : setFacebookImporting(false);
+      setGoogleImporting(false);
     }
   };
 
@@ -630,81 +623,6 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
               <Star size={12} className="text-muted-foreground mt-0.5 shrink-0" />
               <p className="text-[11px] text-muted-foreground leading-relaxed">
                 הביקורות יסומנו כ-"Google Business" ויוצגו בפרופיל העסק בנפרד מביקורות מאומתות ReviewHub.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* ── Facebook Page Reviews ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-      >
-        <Card className="shadow-card bg-card overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1877F2]/3 via-transparent to-transparent pointer-events-none" />
-          <CardHeader className="relative">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#1877F2]/10 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" className="w-6 h-6" fill="#1877F2">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </div>
-              <div className="flex-1">
-                <CardTitle className="text-base font-display font-bold flex items-center gap-2 flex-wrap">
-                  Facebook Page Reviews
-                </CardTitle>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  ייבאו דירוגים מהעמוד שלכם בפייסבוק
-                </p>
-              </div>
-              <div className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border ${
-                facebookConnected
-                  ? "bg-primary/10 border-primary/20 text-primary"
-                  : "bg-muted/50 border-border/40 text-muted-foreground"
-              }`}>
-                <CircleDot size={10} className={facebookConnected ? "text-primary" : "text-muted-foreground/40"} />
-                {facebookConnected ? "מחובר" : "לא מחובר"}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="relative space-y-4">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              חברו את עמוד הפייסבוק שלכם כדי לייבא ביקורות ודירוגים ולהציגם בפרופיל העסק שלכם ב-ReviewHub.
-            </p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <Button
-                onClick={() => handleOAuthConnect("facebook")}
-                disabled={facebookConnecting || loading}
-                variant={facebookConnected ? "outline" : "default"}
-                className={`gap-2 ${facebookConnected ? "" : "bg-[#1877F2] hover:bg-[#166FE5] text-white"}`}
-              >
-                {facebookConnecting ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : facebookConnected ? (
-                  <CheckCircle2 size={14} />
-                ) : (
-                  <Link2 size={14} />
-                )}
-                {facebookConnected ? "חבר מחדש" : "חבר Facebook Page"}
-              </Button>
-              {facebookConnected && (
-                <Button
-                  onClick={() => handleImportReviews("facebook")}
-                  disabled={facebookImporting || loading}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  {facebookImporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-                  ייבא ביקורות
-                </Button>
-              )}
-            </div>
-            <div className="pt-2 border-t border-border/20 flex items-start gap-2">
-              <Star size={12} className="text-muted-foreground mt-0.5 shrink-0" />
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                נדרשת הרשאת pages_read_user_content. ביקורות ללא טקסט (דירוג בלבד) יסוננו אוטומטית.
               </p>
             </div>
           </CardContent>
