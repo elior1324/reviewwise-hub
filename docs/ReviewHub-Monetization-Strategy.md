@@ -45,11 +45,11 @@ Prepared for strategic review
 
 # Executive Summary
 
-ReviewHub is a **trust infrastructure platform** for the digital economy. Unlike Trustpilot or Google Reviews, which rely on self-reported and unverified reviews, ReviewHub ties every review to a verified purchase transaction — creating a trust signal that is fundamentally more valuable to both businesses and consumers.
+ReviewHub is a **trust infrastructure platform** for the digital economy. Unlike traditional review platforms which rely on self-reported and unverified reviews, ReviewHub ties every review to a verified purchase transaction — creating a trust signal that is fundamentally more valuable to both businesses and consumers.
 
 This document defines ReviewHub's monetization architecture across five revenue categories: SaaS subscriptions, affiliate commissions, premium features, data intelligence, and marketplace effects.
 
-**The core insight:** ReviewHub transforms trust from a cost center (the Trustpilot model, where businesses pay to manage reputation) into a **revenue center** (businesses earn through verified trust via the integrated affiliate system). This changes adoption economics fundamentally.
+**The core insight:** ReviewHub transforms trust from a cost center (the traditional model, where businesses pay to manage reputation) into a **revenue center** (businesses earn through verified trust via the integrated affiliate system). This changes adoption economics fundamentally.
 
 ---
 
@@ -145,7 +145,7 @@ Consumer visits verified business profile
 | Consumer Sentiment Index | Real-time sentiment data across verticals — licensing to media, analysts |
 | Verification-as-a-Service API | Third parties use ReviewHub's verification engine to validate transactions in their own platforms |
 
-**Why this matters:** Trustpilot generates significant revenue from data licensing. ReviewHub's data is more valuable because it's transaction-verified, not self-reported.
+**Why this matters:** Traditional review platforms generate significant revenue from data licensing. ReviewHub's data is more valuable because it's transaction-verified, not self-reported.
 
 ---
 
@@ -174,7 +174,7 @@ More verified businesses
                 → (cycle repeats)
 ```
 
-**The critical insight:** Unlike Trustpilot where businesses join defensively (to manage negative reviews), ReviewHub businesses join **offensively** — the affiliate system means verified trust directly generates revenue. This changes the adoption psychology from "cost center" to "revenue channel."
+**The critical insight:** Unlike traditional platforms where businesses join defensively (to manage negative reviews), ReviewHub businesses join **offensively** — the affiliate system means verified trust directly generates revenue. This changes the adoption psychology from "cost center" to "revenue channel."
 
 ### Network Effects
 
@@ -186,11 +186,11 @@ More verified businesses
 
 # 3. Competitive Positioning
 
-| Dimension | Trustpilot | Google Reviews | ReviewHub |
+| Dimension | Traditional Platforms | Open Review Sites | ReviewHub |
 |---|---|---|---|
 | Review verification | Self-reported, optional | Anonymous, no verification | Transaction-linked, proof required |
 | Trust Score | Based on volume + recency | Based on average rating | Based on verified purchases, consistency, quality |
-| Business monetization | Subscription only (cost center) | Free (no control) | Subscription + affiliate (revenue center) |
+| Business monetization | Subscription only (cost center) | Free (no control) | Performance-based (revenue center) |
 | Consumer benefit | Read reviews | Read reviews | Read reviews + get verified discounts |
 | Data quality | Vulnerable to fake reviews | Highly vulnerable | Structurally resistant (purchase proof) |
 | Affiliate integration | None | None | Native, per-service, dynamic percentage |

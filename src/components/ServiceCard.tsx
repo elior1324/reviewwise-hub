@@ -1,8 +1,7 @@
 /**
  * ServiceCard — Public-facing service/product card
  *
- * Inspired by Trustpilot's clean trust-first aesthetic, adapted for
- * ReviewHub's trust + affiliate model.
+ * Clean trust-first design for ReviewHub's trust + affiliate model.
  *
  * Decision logic:
  *   hasAffiliate (affiliate_url + affiliate_percentage > 0):

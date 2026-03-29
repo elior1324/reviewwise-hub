@@ -4,7 +4,7 @@
  * AI-generated summary of a business's reviews, rendered on the public
  * business profile page.
  *
- * Transparency requirements (Trustpilot-benchmark):
+ * Transparency requirements:
  *   1. Must show the time period the summary is based on.
  *   2. Must show how many reviews were analysed.
  *   3. Must state explicitly that the summary was generated automatically.

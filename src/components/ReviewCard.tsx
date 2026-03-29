@@ -285,6 +285,14 @@ const ReviewCard = ({
           {courseName && (
             <p className="mt-1 text-[10px] text-muted-foreground truncate">קורס: {courseName}</p>
           )}
+          <button
+            onClick={handleLike}
+            disabled={likeLoading}
+            className={`mt-2 flex items-center gap-1 text-[10px] transition-colors ${liked ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+          >
+            <ThumbsUp size={10} className={liked ? "fill-primary" : ""} />
+            {likeCount > 0 ? likeCount : "מועיל"}
+          </button>
         </CardContent>
       </Card>
     );

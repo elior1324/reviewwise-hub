@@ -1,5 +1,5 @@
 /**
- * ReviewFormSection — Trustpilot-style delayed-auth review flow.
+ * ReviewFormSection — Delayed-auth review flow.
  *
  * Users can write a review WITHOUT logging in first.
  * Auth is only required when they click "Submit".
@@ -73,35 +73,49 @@ function clearPending() {
   localStorage.removeItem(STORAGE_KEY);
 }
 
-// ── Star Picker ──────────────────────────────────────────────────────────────
+// ── Star Picker — dynamic rating colors ──────────────────────────────────────
 const RATING_LABELS: Record<number, string> = {
   1: "גרוע", 2: "לא טוב", 3: "בסדר", 4: "טוב", 5: "מעולה",
 };
 
+const RATING_COLORS: Record<number, { fill: string; bg: string }> = {
+  1: { fill: "fill-red-500 text-red-500",       bg: "bg-red-500" },
+  2: { fill: "fill-orange-400 text-orange-400",  bg: "bg-orange-400" },
+  3: { fill: "fill-yellow-400 text-yellow-400",  bg: "bg-yellow-400" },
+  4: { fill: "fill-lime-500 text-lime-500",      bg: "bg-lime-500" },
+  5: { fill: "fill-emerald-500 text-emerald-500", bg: "bg-emerald-500" },
+};
+
 const StarPicker = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => {
   const [hovered, setHovered] = useState(0);
+  const active = hovered || value;
+  const colors = active > 0 ? RATING_COLORS[active] : null;
+
   return (
     <div className="flex items-center gap-0.5 sm:gap-1" dir="ltr">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          onClick={() => onChange(star)}
-          onMouseEnter={() => setHovered(star)}
-          onMouseLeave={() => setHovered(0)}
-          className="p-1.5 -m-1 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
-          aria-label={`${star} כוכבים`}
-        >
-          <Star
-            size={28}
-            className={
-              star <= (hovered || value)
-                ? "fill-amber-400 text-amber-400"
-                : "fill-transparent text-muted-foreground/25"
-            }
-          />
-        </button>
-      ))}
+      {[1, 2, 3, 4, 5].map((star) => {
+        const isFilled = star <= active;
+        return (
+          <button
+            key={star}
+            type="button"
+            onClick={() => onChange(star)}
+            onMouseEnter={() => setHovered(star)}
+            onMouseLeave={() => setHovered(0)}
+            className={`p-1 rounded-md transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              isFilled && colors ? colors.bg : "bg-transparent"
+            }`}
+            aria-label={`${star} כוכבים`}
+          >
+            <Star
+              size={28}
+              className={`transition-colors duration-150 ${
+                isFilled ? "fill-white text-white" : "fill-transparent text-muted-foreground/25"
+              }`}
+            />
+          </button>
+        );
+      })}
     </div>
   );
 };
