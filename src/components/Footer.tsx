@@ -93,12 +93,6 @@ const Footer = () => {
             >
               ווידג'טים ותגי אמון
             </Link>
-            <Link
-              to="/business/pricing"
-              className="block text-sm text-primary/80 hover:text-primary font-medium transition-colors"
-            >
-              מחירון
-            </Link>
           </div>
         </div>
 

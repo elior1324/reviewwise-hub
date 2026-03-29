@@ -686,127 +686,18 @@ const AccountSection = ({
   businessId,
   reviewStats,
   onOpenDelete,
-  onCouponSuccess,
 }: {
   business: Business;
   businessId: string;
   reviewStats: { total: number; averageRating: number };
   onOpenDelete: () => void;
-  onCouponSuccess?: () => void;
 }) => {
-  const [couponCode, setCouponCode] = useState("");
-  const [couponLoading, setCouponLoading] = useState(false);
-  const [couponError, setCouponError] = useState<string | null>(null);
-  const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
-
-  const handleActivateCoupon = async () => {
-    const trimmed = couponCode.trim().toUpperCase();
-    if (!trimmed) { setCouponError("נא להזין קוד"); return; }
-    setCouponLoading(true);
-    setCouponError(null);
-    setCouponSuccess(null);
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("apply-coupon", {
-        body: { code: trimmed, business_id: businessId },
-      });
-      if (fnError || !data?.success) {
-        setCouponError(data?.error ?? "קוד לא תקין או שכבר נעשה בו שימוש");
-        return;
-      }
-      setCouponSuccess("הקוד הופעל בהצלחה! יש לך גישת פרימיום");
-      setCouponCode("");
-      onCouponSuccess?.();
-    } catch {
-      setCouponError("שגיאת רשת. נסו שנית.");
-    } finally {
-      setCouponLoading(false);
-    }
-  };
-  const tierLabel = business.subscription_tier === "pro"
-    ? "פרו" : business.subscription_tier === "enterprise"
-    ? "ארגוני" : "חינמי";
-
-  const tierClass = business.subscription_tier === "pro"
-    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0"
-    : business.subscription_tier === "enterprise"
-    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0"
-    : "bg-zinc-700/80 text-zinc-200";
-
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-xl font-bold text-white mb-1">ניהול חשבון</h2>
-        <p className="text-sm text-zinc-400">מידע על העסק, מנוי, ואפשרויות מתקדמות</p>
+        <p className="text-sm text-zinc-400">מידע על העסק ואפשרויות מתקדמות</p>
       </div>
-
-      {/* Subscription */}
-      <div className="space-y-3 max-w-lg">
-        <h3 className="text-sm font-semibold text-white">התוכנית הנוכחית</h3>
-        <div className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-zinc-700/60 rounded-xl p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-2">
-              <p className="text-zinc-400 text-xs">תוכנית כרגע:</p>
-              <Badge className={cn("text-sm font-semibold px-3 py-1", tierClass)}>{tierLabel}</Badge>
-              <p className="text-zinc-400 text-xs mt-2">
-                {business.subscription_tier === "free"
-                  ? "אתם משתמשים בתוכנית החינמית. שדרגו לפרו לקבלת תכונות נוספות."
-                  : business.subscription_tier === "pro"
-                  ? "תוכנית פרו — גישה לכל התכונות המתקדמות."
-                  : "תוכנית ארגונית עם תמיכה ייעודית."}
-              </p>
-            </div>
-            {business.subscription_tier === "free" && (
-              <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 shrink-0">
-                <a href="/business/pricing">שדרגו עכשיו</a>
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Coupon activation — only shown for free tier users */}
-      {business.subscription_tier === "free" && !couponSuccess && (
-        <div className="max-w-lg">
-          <div className="border border-zinc-700/60 bg-zinc-800/30 rounded-xl p-5 space-y-3">
-            <div>
-              <h3 className="text-sm font-semibold text-white">הפעלת קוד גישה</h3>
-              <p className="text-xs text-zinc-500 mt-1">הכנס קוד כדי לקבל גישת פרימיום ל-90 יום</p>
-            </div>
-            <div className="flex gap-2" dir="ltr">
-              <Input
-                value={couponCode}
-                onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(null); }}
-                onKeyDown={(e) => e.key === "Enter" && handleActivateCoupon()}
-                placeholder="הכנס קוד קופון"
-                className="font-mono tracking-widest bg-zinc-800/50 border-zinc-700/60 text-white placeholder:text-zinc-500 uppercase"
-                maxLength={12}
-                disabled={couponLoading}
-              />
-              <Button
-                onClick={handleActivateCoupon}
-                disabled={couponLoading || !couponCode.trim()}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 gap-1.5"
-                size="sm"
-              >
-                {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "הפעל קוד"}
-              </Button>
-            </div>
-            {couponError && (
-              <p className="text-red-400 text-xs">{couponError}</p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Coupon success message */}
-      {couponSuccess && (
-        <div className="max-w-lg">
-          <div className="border border-green-700/40 bg-green-950/20 rounded-xl p-4 flex items-center gap-3">
-            <CheckCircle2 className="text-green-400 shrink-0" size={18} />
-            <p className="text-green-300 text-sm font-medium">{couponSuccess}</p>
-          </div>
-        </div>
-      )}
 
       <Separator className="bg-zinc-700/40" />
 
@@ -1136,13 +1027,8 @@ const BusinessSettingsPage = () => {
                       <p className="text-xs text-zinc-400 truncate">{business.email}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className={cn(
-                        "text-xs",
-                        business.subscription_tier === "pro" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
-                        business.subscription_tier === "enterprise" ? "bg-purple-500/20 text-purple-400 border-purple-500/30" :
-                        "bg-zinc-700/60 text-zinc-300"
-                      )}>
-                        {business.subscription_tier === "pro" ? "פרו" : business.subscription_tier === "enterprise" ? "ארגוני" : "חינמי"}
+                      <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
+                        חינם
                       </Badge>
                       {business.verified && (
                         <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs gap-1">
@@ -1215,7 +1101,6 @@ const BusinessSettingsPage = () => {
                     businessId={business.id}
                     reviewStats={reviewStats}
                     onOpenDelete={() => setDeleteModalOpen(true)}
-                    onCouponSuccess={() => window.location.reload()}
                   />
                 )}
               </div>

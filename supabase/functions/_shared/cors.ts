@@ -16,13 +16,17 @@
  *   - For local development, also allow localhost origins.
  *
  * USAGE IN EVERY EDGE FUNCTION:
- *   import { corsHeaders, getCorsHeaders } from "../_shared/cors.ts";
+ *   import { corsHeaders, getCorsHeaders, assertOrigin } from "../_shared/cors.ts";
  *
- *   // Static (use when you don't need per-request origin check):
- *   { headers: corsHeaders }
+ *   // Server-side origin enforcement (recommended for authenticated endpoints):
+ *   const originCheck = assertOrigin(req);
+ *   if (originCheck) return originCheck;   // 403 for disallowed origins
  *
- *   // Dynamic (recommended — validates the caller's Origin per request):
+ *   // Dynamic CORS headers (validates the caller's Origin per request):
  *   { headers: getCorsHeaders(req) }
+ *
+ *   // Static (use when you don't have access to the request object):
+ *   { headers: corsHeaders }
  */
 
 const ALLOWED_ORIGINS: string[] = [
@@ -45,21 +49,52 @@ function isLovablePreview(origin: string): boolean {
   return /^https:\/\/[a-z0-9-]+\.lovable\.app$/.test(origin);
 }
 
+/** Check whether an origin string is in the allowlist. */
+export function isOriginAllowed(origin: string | null): boolean {
+  if (!origin) return false;
+  const isDev = Deno.env.get("ENVIRONMENT") !== "production";
+  return (
+    ALLOWED_ORIGINS.includes(origin) ||
+    isLovablePreview(origin) ||
+    (isDev && isLocalDev(origin))
+  );
+}
+
+/**
+ * Server-side origin enforcement gate.
+ *
+ * Returns a 403 Response for disallowed origins, or null if the origin is valid.
+ * Handles both OPTIONS preflight and normal requests.
+ *
+ * Usage:
+ *   const blocked = assertOrigin(req);
+ *   if (blocked) return blocked;
+ */
+export function assertOrigin(req: Request): Response | null {
+  const origin = req.headers.get("Origin");
+  if (isOriginAllowed(origin)) return null;
+
+  const headers = getCorsHeaders(req);
+
+  if (req.method === "OPTIONS") {
+    return new Response("Forbidden", { status: 403, headers });
+  }
+
+  return new Response(
+    JSON.stringify({ error: "Invalid origin" }),
+    { status: 403, headers: { ...headers, "Content-Type": "application/json" } },
+  );
+}
+
 /**
  * Returns CORS headers that echo the request Origin only if it is allowed.
- * Sends a restrictive "null" origin for all other callers.
+ * Falls back to the primary allowed origin for disallowed callers.
  */
 export function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("Origin") || "";
-  const isDev  = Deno.env.get("ENVIRONMENT") !== "production";
-
-  const isAllowed =
-    ALLOWED_ORIGINS.includes(origin) ||
-    isLovablePreview(origin) ||
-    (isDev && isLocalDev(origin));
 
   return {
-    "Access-Control-Allow-Origin":  isAllowed ? origin : ALLOWED_ORIGINS[0],
+    "Access-Control-Allow-Origin":  isOriginAllowed(origin) ? origin : ALLOWED_ORIGINS[0],
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-api-key",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Vary": "Origin",

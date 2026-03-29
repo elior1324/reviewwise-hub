@@ -47,7 +47,6 @@ import MerchantVerificationDashboard from "./pages/business/MerchantVerification
 import BusinessLanding from "./pages/business/BusinessLanding";
 import BusinessDashboard from "./pages/business/BusinessDashboard";
 import BusinessAuth from "./pages/business/BusinessAuth";
-import PricingPage from "./pages/business/PricingPage";
 import OAuthCallbackPage from "./pages/business/OAuthCallbackPage";
 import BusinessAboutPage from "./pages/business/BusinessAboutPage";
 import BusinessEarlyAccessPage from "./pages/business/BusinessEarlyAccessPage";
@@ -136,7 +135,6 @@ const App = () => (
             <Route path="/business" element={<BusinessLanding />} />
             <Route path="/business/login" element={<BusinessAuth mode="login" />} />
             <Route path="/business/signup" element={<BusinessAuth mode="signup" />} />
-            <Route path="/business/pricing" element={<PricingPage />} />
             <Route path="/business/about" element={<BusinessAboutPage />} />
             <Route path="/business/early-access" element={<BusinessEarlyAccessPage />} />
 
@@ -183,9 +181,6 @@ const App = () => (
             {/* Legacy routes redirect to merged page */}
             <Route path="/business/resources/docs" element={<Navigate to="/business/resources" replace />} />
             <Route path="/business/resources/blog" element={<Navigate to="/business/resources" replace />} />
-
-            {/* /pricing → canonical URL */}
-            <Route path="/pricing" element={<Navigate to="/business/pricing" replace />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

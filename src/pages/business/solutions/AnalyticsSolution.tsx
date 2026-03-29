@@ -71,7 +71,7 @@ const AnalyticsSolution = () => {
                   התחילו בחינם
                 </Button>
               </Link>
-              <Link to="/business/pricing">
+              <Link to="/register">
                 <Button size="lg" variant="outline" className="border-border/50 font-semibold">
                   ראו תכניות מחיר
                 </Button>

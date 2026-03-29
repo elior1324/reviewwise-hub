@@ -162,23 +162,6 @@ const Navbar = () => {
                   </DropdownMenuItem>
                 ))}
 
-                {/* Pricing — visible only to logged-in users */}
-                {canSeePricing && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/business/pricing"
-                        className="flex items-center gap-2 w-full"
-                        onClick={() => setProductOpen(false)}
-                      >
-                        <Tag size={15} className="text-primary shrink-0" aria-hidden="true" />
-                        <span className="text-primary font-medium">מחירים</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-
                 {/* Business login CTA — only when not logged in */}
                 {!user && (
                   <>
@@ -215,10 +198,6 @@ const Navbar = () => {
               <Link to="/partners/prestige-badges?tab=widgets" className={navLinkCls("/partners/prestige-badges", true)}>
                 <Layout size={14} aria-hidden="true" />
                 וידג׳טים
-              </Link>
-              <Link to="/business/pricing" className={navLinkCls("/business/pricing", true)}>
-                <Tag size={14} aria-hidden="true" />
-                תמחור
               </Link>
               <Link to="/business/about" className={navLinkCls("/business/about", true)}>
                 <BookOpen size={14} aria-hidden="true" />
@@ -374,14 +353,6 @@ const Navbar = () => {
                 וידג׳טים
               </Link>
               <Link
-                to="/business/pricing"
-                className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
-                onClick={() => setMobileOpen(false)}
-              >
-                <Tag size={14} aria-hidden="true" />
-                תמחור
-              </Link>
-              <Link
                 to="/business/about"
                 className="flex items-center gap-2 text-sm py-3 min-h-[44px] text-zinc-200 hover:text-white"
                 onClick={() => setMobileOpen(false)}
@@ -448,16 +419,6 @@ const Navbar = () => {
                     {label}
                   </Link>
                 ))}
-                {canSeePricing && (
-                  <Link
-                    to="/business/pricing"
-                    className="flex items-center gap-2 text-sm py-2.5 min-h-[44px] text-primary font-medium"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <Tag size={14} aria-hidden="true" />
-                    מחירים
-                  </Link>
-                )}
               </div>
 
               <div className="border-t border-border/30 pt-1">

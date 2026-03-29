@@ -5,7 +5,7 @@ import ReviewCard from "@/components/ReviewCard";
 import ReviewSummary from "@/components/ReviewSummary";
 import ServiceCard from "@/components/ServiceCard";
 import BusinessHero from "@/components/BusinessHero";
-import AddReviewForm from "@/components/AddReviewForm";
+import ReviewFormSection from "@/components/ReviewFormSection";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import GoogleReviewsSection, { type GoogleReview, type GoogleProfileData } from "@/components/GoogleReviewsSection";
 import WhatsAppReviewsSection, { type WhatsAppReview } from "@/components/WhatsAppReviewsSection";
@@ -37,7 +37,6 @@ const BusinessProfile = () => {
   const [collabCoupon, setCollabCoupon] = useState<string | null>(null);
   const [couponRevealed, setCouponRevealed] = useState(false);
   const [collabCopied, setCollabCopied] = useState(false);
-  const [showReviewForm, setShowReviewForm] = useState(false);
 
   // Google Reviews state
   const [googleProfile, setGoogleProfile]   = useState<GoogleProfileData | null>(null);
@@ -560,6 +559,7 @@ const BusinessProfile = () => {
           affiliateMode={affiliateMode}
           affiliateSlug={slug}
           personalAffiliateUrls={personalAffiliateUrls}
+          couponCode={collabCoupon}
         />
 
         {/* ── Business Trust Status Banner (Feature 4) ─────────────────────
@@ -629,54 +629,12 @@ const BusinessProfile = () => {
         {/* Testimonial Videos/Images */}
         {dbBusinessId && <TestimonialCarousel businessId={dbBusinessId} />}
 
-        {/* Add Review — compact single-line CTA */}
-        <div className="mb-5 flex items-center gap-2 flex-wrap">
-          <Button
-            size="sm"
-            variant={showReviewForm ? "outline" : "default"}
-            className="h-8 text-xs gap-1.5"
-            onClick={() => {
-              if (!user) { navigate("/auth"); return; }
-              setShowReviewForm(prev => !prev);
-            }}
-          >
-            <PenLine size={12} />
-            הוספת ביקורת
-          </Button>
-
-          {collabActive && (
-            <span className="flex items-center gap-1 text-[11px] text-primary border border-primary/20 bg-primary/5 px-2 py-1 rounded-lg">
-              <Handshake size={11} className="shrink-0" /> תנאי רכישה מסונכרנים
-              {(collabMethod === "coupon" || collabMethod === "both") && !couponRevealed && (
-                <button onClick={() => setCouponRevealed(true)} className="underline mr-1">הצג קופון</button>
-              )}
-              {(collabMethod === "link" || collabMethod === "both") && (
-                <button onClick={handleCollabAccess} className="underline mr-1 flex items-center gap-0.5"><Link2 size={10} /> לרכישה</button>
-              )}
-            </span>
-          )}
-
-          {collabActive && (collabMethod === "coupon" || collabMethod === "both") && couponRevealed && collabCoupon && (
-            <span className="inline-flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-1">
-              <Tag size={12} className="text-primary" />
-              <code className="font-mono font-bold text-primary tracking-widest">{collabCoupon}</code>
-              <button onClick={handleCopyCoupon} className="text-muted-foreground hover:text-primary transition-colors" title="העתקת קוד">
-                {collabCopied ? <CheckCheck size={13} className="text-primary" /> : <Copy size={13} />}
-              </button>
-            </span>
-          )}
-        </div>
-
-        {showReviewForm && user && (
-          <div className="mb-5">
-            <AddReviewForm
-              businessSlug={business.slug}
-              businessName={business.name}
-              businessId={dbBusinessId || undefined}
-              isVerifiedPurchaser={false}
-            />
-          </div>
-        )}
+        {/* Review Form — always visible, auth on submit */}
+        <ReviewFormSection
+          businessSlug={business.slug}
+          businessName={business.name}
+          businessId={dbBusinessId || undefined}
+        />
 
         {/* ══════════════════════════════════════════════════════════════════
             REVIEW SOURCE BREAKDOWN — dual-purpose: stats + filter

@@ -166,9 +166,9 @@ export default function BusinessAboutPage() {
                   <ArrowLeft size={16} aria-hidden="true" />
                 </Button>
               </Link>
-              <Link to="/business/pricing">
+              <Link to="/register">
                 <Button size="lg" variant="outline" className="border-border/50 font-semibold">
-                  תוכניות ומחירים
+                  הצטרפו בחינם
                 </Button>
               </Link>
             </motion.div>
@@ -510,9 +510,9 @@ export default function BusinessAboutPage() {
                     <ArrowLeft size={16} aria-hidden="true" />
                   </Button>
                 </Link>
-                <Link to="/business/pricing">
+                <Link to="/register">
                   <Button size="lg" variant="outline" className="border-border/50 font-semibold">
-                    תוכניות ומחירים
+                    הצטרפו בחינם
                   </Button>
                 </Link>
               </div>

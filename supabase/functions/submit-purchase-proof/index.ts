@@ -12,16 +12,17 @@
  */
 import { serve }        from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders, assertOrigin } from "../_shared/cors.ts";
 
 serve(async (req) => {
+  // ── Server-side origin enforcement — block disallowed origins before any logic ─
+  const blocked = assertOrigin(req);
+  if (blocked) return blocked;
+
+  const cors = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: CORS_HEADERS });
+    return new Response(null, { headers: cors });
   }
 
   try {
@@ -30,7 +31,7 @@ serve(async (req) => {
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
@@ -46,7 +47,7 @@ serve(async (req) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
@@ -58,14 +59,14 @@ serve(async (req) => {
     if (!review_id || !proof_type) {
       return new Response(JSON.stringify({ error: "review_id and proof_type are required" }), {
         status: 400,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
     if (!["receipt", "crm", "invoice"].includes(proof_type)) {
       return new Response(JSON.stringify({ error: "proof_type must be receipt, crm, or invoice" }), {
         status: 400,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
@@ -79,14 +80,14 @@ serve(async (req) => {
     if (reviewErr || !review) {
       return new Response(JSON.stringify({ error: "Review not found" }), {
         status: 404,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
     if (review.user_id !== user.id) {
       return new Response(JSON.stringify({ error: "Forbidden: you do not own this review" }), {
         status: 403,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
@@ -106,7 +107,7 @@ serve(async (req) => {
           ? "This review is already verified."
           : "A verification is already pending for this review.",
       }), {
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
@@ -130,7 +131,7 @@ serve(async (req) => {
       console.error("insert error:", insertErr);
       return new Response(JSON.stringify({ error: "Failed to create verification record" }), {
         status: 500,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
@@ -183,7 +184,7 @@ serve(async (req) => {
                 ? "Submitted for manual review."
                 : "Receipt could not be verified — contact support if this is an error.",
             }), {
-              headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+              headers: { ...cors, "Content-Type": "application/json" },
             });
           }
         } catch (e) {
@@ -204,7 +205,7 @@ serve(async (req) => {
         status:  "approved",
         message: "CRM purchase verification approved ✓",
       }), {
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
       });
     }
 
@@ -213,14 +214,14 @@ serve(async (req) => {
       status:  "pending",
       message: "Purchase proof submitted. We'll review it within 24 hours.",
     }), {
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      headers: { ...cors, "Content-Type": "application/json" },
     });
 
   } catch (e) {
     console.error("submit-purchase-proof error:", e);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      headers: { ...cors, "Content-Type": "application/json" },
     });
   }
 });

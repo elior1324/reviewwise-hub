@@ -316,6 +316,37 @@ html {
     overflow-x: hidden;
     padding-top: 4rem; /* offset for fixed navbar (h-16 = 64px = 4rem) */
   }
+  /* ── RTL defaults for form elements ──────────────────────────────
+     Ensures Hebrew text starts from the right in all inputs/textareas.
+     Elements with dir="ltr" (email, URL, code) override this. */
+  input,
+  textarea,
+  select {
+    text-align: right;
+  }
+  input[dir="ltr"],
+  textarea[dir="ltr"],
+  select[dir="ltr"],
+  input[type="email"],
+  input[type="url"],
+  input[type="date"],
+  input[type="number"] {
+    text-align: left;
+    direction: ltr;
+  }
+  /* Placeholders inherit direction but should match the input */
+  input[dir="ltr"]::placeholder,
+  input[type="email"]::placeholder,
+  input[type="url"]::placeholder {
+    text-align: left;
+    direction: ltr;
+  }
+  /* Hebrew placeholders in LTR inputs — keep readable */
+  input[type="password"]::placeholder {
+    text-align: right;
+    direction: rtl;
+  }
+
   /* Prevent mobile keyboard from hiding focused inputs */
   input:focus,
   textarea:focus,

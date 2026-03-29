@@ -139,6 +139,10 @@ serve(async (req: Request) => {
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const HYP_TERMINAL              = Deno.env.get("HYP_TERMINAL_NUMBER") ?? "";
   const HYP_API_KEY               = Deno.env.get("HYP_API_KEY") ?? "";
+  if (!HYP_API_KEY) {
+    console.error("[hyp-webhook] FATAL: HYP_API_KEY not configured — refusing to process without signature verification");
+    return new Response("Service misconfigured", { status: 503 });
+  }
   const RESEND_API_KEY            = Deno.env.get("RESEND_API_KEY");
   const FRONTEND_URL              = Deno.env.get("FRONTEND_URL") ?? "https://reviewhub.co.il";
 
@@ -168,28 +172,30 @@ serve(async (req: Request) => {
     return new Response("Forbidden", { status: 403 });
   }
 
-  // ── HMAC signature verification ───────────────────────────────────────────
+  // ── HMAC signature verification (MANDATORY) ─────────────────────────────
   // hyp signs the IPN with HMAC-SHA256 over sorted key=value pairs (excluding Hesh itself)
   // using HYP_API_KEY (PassP) as the secret. This prevents forged payment notifications.
-  if (HYP_API_KEY) {
-    const sortedKeys = [...params.keys()]
-      .filter(k => k !== "Hesh")
-      .sort();
-    const message = sortedKeys.map(k => `${k}=${params.get(k)}`).join("&");
-    const expectedHesh = hmac("sha256", HYP_API_KEY, message, "utf8", "hex") as string;
-    // Constant-time comparison to prevent timing attacks
-    const expectedBytes = new TextEncoder().encode(expectedHesh.toLowerCase());
-    const receivedBytes = new TextEncoder().encode(hesh.toLowerCase());
-    let mismatch = expectedBytes.length !== receivedBytes.length ? 1 : 0;
-    for (let i = 0; i < Math.min(expectedBytes.length, receivedBytes.length); i++) {
-      mismatch |= expectedBytes[i] ^ receivedBytes[i];
-    }
-    if (mismatch !== 0) {
-      console.error(`[hyp-webhook] HMAC verification FAILED — possible forgery attempt`);
-      return new Response("Forbidden", { status: 403 });
-    }
-  } else {
-    console.warn("[hyp-webhook] HYP_API_KEY not set — skipping HMAC verification (insecure)");
+  // Verification is ALWAYS enforced — no fallback bypass in any environment.
+  if (!hesh) {
+    console.error("[hyp-webhook] Missing Hesh (HMAC signature) in IPN — rejecting");
+    return new Response("Forbidden — missing signature", { status: 403 });
+  }
+
+  const sortedKeys = [...params.keys()]
+    .filter(k => k !== "Hesh")
+    .sort();
+  const message = sortedKeys.map(k => `${k}=${params.get(k)}`).join("&");
+  const expectedHesh = hmac("sha256", HYP_API_KEY, message, "utf8", "hex") as string;
+  // Constant-time comparison to prevent timing attacks
+  const expectedBytes = new TextEncoder().encode(expectedHesh.toLowerCase());
+  const receivedBytes = new TextEncoder().encode(hesh.toLowerCase());
+  let mismatch = expectedBytes.length !== receivedBytes.length ? 1 : 0;
+  for (let i = 0; i < Math.min(expectedBytes.length, receivedBytes.length); i++) {
+    mismatch |= expectedBytes[i] ^ receivedBytes[i];
+  }
+  if (mismatch !== 0) {
+    console.error(`[hyp-webhook] HMAC verification FAILED — possible forgery attempt`);
+    return new Response("Forbidden", { status: 403 });
   }
 
   if (!userId) {
@@ -227,6 +233,46 @@ serve(async (req: Request) => {
     return new Response("OK", { status: 200 }); // return 200 so hyp doesn't retry
   }
 
+  // ── Idempotency guard — MUST happen BEFORE any subscription writes ──────
+  // Uses the same processed_payment_transactions table as grow-make-webhook.
+  // PRIMARY KEY on transaction_id guarantees only one delivery is processed.
+  //
+  // Uses INSERT ... ON CONFLICT (transaction_id) DO NOTHING for concurrency
+  // safety: two simultaneous IPNs with the same transId will not throw — one
+  // wins the insert, the other silently skips. We detect which happened by
+  // checking whether a row was returned via .select().
+  if (!transId) {
+    console.error("[hyp-webhook] Missing transaction Id — cannot enforce idempotency");
+    return new Response("Bad request — missing transaction Id", { status: 400 });
+  }
+
+  const { data: idempRow, error: idempErr } = await admin
+    .from("processed_payment_transactions")
+    .upsert(
+      {
+        transaction_id: transId,
+        source:         "hyp",
+        user_id:        userId,
+        business_id:    biz.id,
+        plan_id:        priceId || null,
+        amount_ils:     amountILS,
+      },
+      { onConflict: "transaction_id", ignoreDuplicates: true },
+    )
+    .select("transaction_id")
+    .maybeSingle();
+
+  if (idempErr) {
+    console.error(`[hyp-webhook] Idempotency insert failed: ${idempErr.message}`);
+    return new Response("Internal error", { status: 500 });
+  }
+
+  if (!idempRow) {
+    // ON CONFLICT DO NOTHING fired — this transId was already processed
+    console.log(`[hyp-webhook] DUPLICATE_SKIP — transId=${transId} already processed`);
+    return new Response("OK — duplicate, already processed", { status: 200 });
+  }
+
   const now   = new Date();
   const planMeta = PLAN_META[priceId] ?? { tier: tier || "pro", billingCycle: "monthly" };
   const extendDays = planMeta.billingCycle === "annual" ? ANNUAL_DAYS : MONTHLY_DAYS;
@@ -234,12 +280,19 @@ serve(async (req: Request) => {
   if (isTokenOnly) {
     // ── Trial activated: card saved, no charge ────────────────────────────
     const trialEnds = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    await admin.from("businesses").update({
+    const { error: updateErr } = await admin.from("businesses").update({
       subscription_tier: planMeta.tier,
       trial_ends_at:     trialEnds.toISOString(),
       hyp_card_token:    token,
       hyp_transaction_id: transId,
     }).eq("id", biz.id);
+
+    if (updateErr) {
+      console.error(`[hyp-webhook] Trial update failed: ${updateErr.message}`);
+      // Rollback idempotency row so hyp can retry
+      await admin.from("processed_payment_transactions").delete().eq("transaction_id", transId);
+      return new Response("Internal error", { status: 500 });
+    }
 
     console.log(`[hyp-webhook] Trial activated for business=${biz.id} trial_ends=${trialEnds.toISOString()}`);
   } else {
@@ -257,7 +310,14 @@ serve(async (req: Request) => {
     };
     if (token) updates.hyp_card_token = token; // update token if refreshed
 
-    await admin.from("businesses").update(updates).eq("id", biz.id);
+    const { error: updateErr } = await admin.from("businesses").update(updates).eq("id", biz.id);
+
+    if (updateErr) {
+      console.error(`[hyp-webhook] Subscription update failed: ${updateErr.message}`);
+      // Rollback idempotency row so hyp can retry
+      await admin.from("processed_payment_transactions").delete().eq("transaction_id", transId);
+      return new Response("Internal error", { status: 500 });
+    }
 
     console.log(`[hyp-webhook] Subscription extended for business=${biz.id} expires=${newExpiry.toISOString()}`);
   }

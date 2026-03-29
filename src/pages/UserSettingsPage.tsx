@@ -257,6 +257,7 @@ const ProfileSection = ({
 // ── Section: Security ──────────────────────────────────────────────────────────
 
 const SecuritySection = ({ profile }: { profile: UserProfile }) => {
+  const navigate = useNavigate();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -275,7 +276,7 @@ const SecuritySection = ({ profile }: { profile: UserProfile }) => {
       return;
     }
     if (newPassword.length < 8) {
-      toast.error("הסיסמה החדשה חייבת להיות לפחות 8 תווים");
+      toast.error("הסיסמה החדשה חייבת להיות לפחות 8 תווי��");
       return;
     }
 
@@ -290,10 +291,15 @@ const SecuritySection = ({ profile }: { profile: UserProfile }) => {
       const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
       if (updateError) throw updateError;
 
-      toast.success("סיסמה שונתה בהצלחה");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      // Invalidate all sessions globally (all devices/tabs) and force re-login.
+      // scope: "global" revokes refresh tokens server-side.
+      // The onAuthStateChange listener in AuthContext automatically handles local
+      // cleanup (stops SessionTimeout, clears user/session state) when the
+      // session becomes null — no separate signOut() call needed.
+      toast.success("הסיסמה שונתה בהצלחה. יש להתחבר מחדש.");
+      await supabase.auth.signOut({ scope: "global" });
+      navigate("/auth");
+      return;
     } catch {
       toast.error("שגיאה בשינוי הסיסמה");
     } finally {

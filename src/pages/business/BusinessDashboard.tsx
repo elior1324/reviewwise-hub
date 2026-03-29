@@ -3,9 +3,7 @@ import BusinessNavbar from "@/components/BusinessNavbar";
 import BusinessFooter from "@/components/BusinessFooter";
 import InvoiceTemplateUploader from "@/components/InvoiceTemplateUploader";
 import TestimonialMediaUploader from "@/components/TestimonialMediaUploader";
-import LockedOverlay from "@/components/LockedOverlay";
 import DevControlPanel from "@/components/DevControlPanel";
-import UpgradeModal from "@/components/UpgradeModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +17,7 @@ import {
 } from "lucide-react";
 import ModerationCaseTracker from "@/components/ModerationCaseTracker";
 import IntegrationsTab from "@/components/IntegrationsTab";
-import CollaborationPromoCard from "@/components/CollaborationPromoCard";
+import PurchaseLinkCard from "@/components/PurchaseLinkCard";
 import { type CollabConfig } from "@/components/CollaborationSetupModal";
 import GoogleLinkingPanel from "@/components/GoogleLinkingPanel";
 import AffiliateProgramPanel from "@/components/AffiliateProgramPanel";
@@ -27,7 +25,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { type Review, type Course } from "@/data/mockData";
 import { useState, useEffect } from "react";
 import { useAuth, SubscriptionTier } from "@/contexts/AuthContext";
-import { useFeatureGating } from "@/hooks/useFeatureGating";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -336,10 +333,6 @@ const BusinessDashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [dbTier, setDbTier] = useState<SubscriptionTier>("free");
   const [monthlyReviewCount, setMonthlyReviewCount] = useState(0);
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
-  const [upgradeModalTier, setUpgradeModalTier] = useState<"pro" | "enterprise">("pro");
-  const [upgradeModalFeature, setUpgradeModalFeature] = useState<string | undefined>();
-
   // Collaboration program state
   const [collabConfig, setCollabConfig] = useState<CollabConfig>({ active: false, method: null, coupon: null });
   const [referralClickCount, setReferralClickCount] = useState(0);
@@ -361,18 +354,6 @@ const BusinessDashboard = () => {
 
   // Notification strip state
   const [notifStripExpanded, setNotifStripExpanded] = useState(false);
-
-  // Determine tier — use DB tier for real users, demo tier for demo mode
-  const currentTier: SubscriptionTier = !isDemo ? dbTier : demoTier;
-  const isEnterprise = currentTier === "enterprise";
-  const isPro = currentTier === "pro" || currentTier === "enterprise";
-  const isFree = currentTier === "free";
-
-  const handleUpgradeWithModal = (tier: "pro" | "enterprise" = "pro", featureName?: string) => {
-    setUpgradeModalTier(tier);
-    setUpgradeModalFeature(featureName);
-    setUpgradeModalOpen(true);
-  };
 
   // Fetch real data if user is logged in and owns a business
   useEffect(() => {
@@ -669,22 +650,6 @@ const BusinessDashboard = () => {
   const conversions = isDemo ? 25 : displayClicks.reduce((s, c) => s + c.conversions, 0);
   const totalRevenue = isDemo ? 48850 : displayClicks.reduce((s, c) => s + c.revenue, 0);
 
-  const handleUpgrade = () => {
-    setUpgradeModalOpen(true);
-  };
-
-  const EnterpriseBadge = () => (
-    <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-[10px] px-1.5 py-0.5 rounded-full font-bold mr-1">
-      <Crown size={10} /> אנטרפרייז
-    </span>
-  );
-
-  const ProBadge = () => (
-    <span className="inline-flex items-center gap-1 bg-accent/10 text-accent text-[10px] px-1.5 py-0.5 rounded-full font-bold mr-1">
-      <Sparkles size={10} /> מקצועי
-    </span>
-  );
-
   if (loadingData) {
     return (
       <div className="min-h-screen bg-background noise-overlay" dir="rtl">
@@ -736,16 +701,6 @@ const BusinessDashboard = () => {
             <span className="text-[10px] font-semibold bg-zinc-800 border border-zinc-600/50 text-zinc-300 px-2.5 py-1 rounded-full shrink-0 uppercase tracking-wide">
               {currentTier === "enterprise" ? "Enterprise" : currentTier === "pro" ? "Pro" : "Free"}
             </span>
-            {/* Pricing shortcut — hidden for Enterprise (already on top tier) */}
-            {currentTier !== "enterprise" && (
-              <button
-                onClick={() => navigate("/business/pricing")}
-                className="hidden sm:flex items-center gap-1 text-[10px] font-semibold text-primary/80 hover:text-primary border border-primary/30 hover:border-primary/60 bg-primary/5 hover:bg-primary/10 px-2.5 py-1 rounded-full shrink-0 transition-all"
-              >
-                <Tag size={10} aria-hidden="true" />
-                שדרג
-              </button>
-            )}
           </div>
         )}
 
@@ -761,93 +716,9 @@ const BusinessDashboard = () => {
           </div>
         )}
 
-        {/* Review Limit Warning for Free tier */}
-        {isFree && monthlyReviewCount >= 8 && (
-          <div className={`mb-6 rounded-lg border px-5 py-4 ${
-            monthlyReviewCount >= 10
-              ? "border-destructive/30 bg-destructive/5"
-              : "border-yellow-500/30 bg-yellow-500/5"
-          }`}>
-            <div className="flex items-center gap-3">
-              <AlertTriangle size={20} className={monthlyReviewCount >= 10 ? "text-destructive" : "text-yellow-500"} />
-              <div className="flex-1">
-                {monthlyReviewCount >= 10 ? (
-                  <>
-                    <p className="font-display font-semibold text-destructive text-sm">הגעתם למגבלת הביקורות החודשית (10/10)</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      העסק שלכם הגיע למגבלת 10 ביקורות בחודש בחבילת הסטארטר. שדרגו למקצועי כדי לקבל ביקורות ללא הגבלה!
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="font-display font-semibold text-yellow-600 text-sm">קרובים למגבלה ({monthlyReviewCount}/10 ביקורות החודש)</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      נותרו {10 - monthlyReviewCount} ביקורות בחבילת הסטארטר. שדרגו למקצועי כדי לקבל ביקורות ללא הגבלה.
-                    </p>
-                  </>
-                )}
-              </div>
-              <Button
-                size="sm"
-                onClick={() => handleUpgradeWithModal("pro", "ביקורות ללא הגבלה")}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
-              >
-                <Sparkles size={14} className="ml-1" /> שדרגו עכשיו
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Collaboration Program Card (real users only) ──────────── */}
+        {/* ── Purchase Link & Coupon — quick-edit card ──────────── */}
         {!isDemo && businessId && (
-          <CollaborationPromoCard
-            businessId={businessId}
-            businessSlug={businessSlug}
-            config={collabConfig}
-            onConfigChange={setCollabConfig}
-            referralClickCount={referralClickCount}
-          />
-        )}
-
-        {/* ── Affiliate Program Promo Banner (real, non-enrolled users only) ── */}
-        {!isDemo && businessId && !affiliateEnrolled && (
-          <div className="mb-6 rounded-xl border border-emerald-500/25 bg-emerald-50/20 dark:bg-emerald-900/10 px-5 py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex items-start gap-3 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
-                  <TrendingUp size={18} className="text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-sm text-foreground">
-                      {affiliateProgramStatus === "declined"
-                        ? "עדיין לא מאוחר להצטרף לתוכנית השותפים"
-                        : affiliateProgramStatus === "paused"
-                        ? "תוכנית השותפים מושהית — הפעילו אותה מחדש"
-                        : "הצטרפו לתוכנית השותפים של ReviewHub"}
-                    </p>
-                    {affiliateProgramStatus === "declined" && (
-                      <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-[10px]">דחיתם בהרשמה</Badge>
-                    )}
-                    {affiliateProgramStatus === "paused" && (
-                      <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-[10px]">מושהה</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    קבלו קישור ייחודי · לקוחות מקבלים 5% הנחה · אתם שומרים 90% · ללא עלות כניסה
-                  </p>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                onClick={() => setActiveTab("affiliate-program")}
-                className="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
-              >
-                <TrendingUp size={13} />
-                {affiliateProgramStatus === "paused" ? "הפעל מחדש" : "הפעל עכשיו"}
-              </Button>
-            </div>
-          </div>
+          <PurchaseLinkCard businessId={businessId} />
         )}
 
         {/* No demo tier selector — removed all fake data */}
@@ -971,7 +842,6 @@ const BusinessDashboard = () => {
               <div className="flex flex-wrap gap-1">
                 <TabsTrigger value="ai-insights" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Brain size={13} className="ml-1" /> תובנות AI ודוחות
-                  {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
               </div>
             </div>
@@ -993,7 +863,6 @@ const BusinessDashboard = () => {
                 </TabsTrigger>
                 <TabsTrigger value="trust-verification" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <FileText size={13} className="ml-1" /> אימות רכישה
-                  {isFree && <ProBadge />}
                 </TabsTrigger>
                 <TabsTrigger value="trust-google" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <svg width={13} height={13} viewBox="0 0 24 24" className="ml-1">
@@ -1012,7 +881,6 @@ const BusinessDashboard = () => {
                 </TabsTrigger>
                 <TabsTrigger value="trust-social" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
                   <Video size={13} className="ml-1" /> הוכחה חברתית
-                  {isFree && <ProBadge />}
                 </TabsTrigger>
               </div>
             </div>
@@ -1039,7 +907,6 @@ const BusinessDashboard = () => {
               <div className="flex flex-wrap gap-1">
                 <TabsTrigger value="integrations-hub" className="rounded-lg text-xs px-3 py-1.5 h-auto data-[state=active]:bg-accent data-[state=active]:text-accent-foreground gap-1">
                   <Link2 size={13} className="ml-1" /> מרכז אינטגרציות
-                  {!isEnterprise && <EnterpriseBadge />}
                 </TabsTrigger>
               </div>
             </div>
@@ -1110,7 +977,7 @@ const BusinessDashboard = () => {
             </div>
 
             {/* ── Clicks & Conversions ──────────────────────────────────────────── */}
-            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
+            
             <TooltipProvider delayDuration={200}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 mt-2">
               {[
@@ -1173,12 +1040,12 @@ const BusinessDashboard = () => {
                 </div>
               </CardContent>
             </Card>
-            </LockedOverlay>
+            
           </TabsContent>
 
           {/* Purchase Verification */}
           <TabsContent value="trust-verification">
-            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
+            
             <div className="space-y-6">
 
               {/* ── KPI strip ───────────────────────────────────────────── */}
@@ -1222,12 +1089,12 @@ const BusinessDashboard = () => {
               <PurchaseVerificationQueue businessId={businessId} isDemo={isDemo} />
 
             </div>
-            </LockedOverlay>
+            
           </TabsContent>
 
           {/* AI Insights & Reports — renamed from ai-system */}
           <TabsContent value="ai-insights">
-            <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
+            
             <div className="space-y-4">
               {/* Period filter header */}
               <div className="flex items-center justify-between gap-4">
@@ -1378,12 +1245,12 @@ const BusinessDashboard = () => {
                 </CardContent>
               </Card>
             </div>
-            </LockedOverlay>
+            
           </TabsContent>
 
           {/* Social Proof */}
           <TabsContent value="trust-social">
-            <LockedOverlay isLocked={isFree} tier="pro" onUpgrade={handleUpgrade}>
+            
             <div className="max-w-2xl">
               <p className="text-muted-foreground text-sm mb-4">
                 העלו עד 5 סרטונים או תמונות של לקוחות מרוצים. ניתן להעלות קבצים ישירות או להוסיף קישורי YouTube / TikTok.
@@ -1392,12 +1259,12 @@ const BusinessDashboard = () => {
               </p>
               <TestimonialMediaUploader businessId={businessId || "demo"} maxItems={5} />
             </div>
-            </LockedOverlay>
+            
           </TabsContent>
 
           {/* ── Integrations Hub — CRM + Webhooks + Widget + Integrations + Collaboration ── */}
           <TabsContent value="integrations-hub">
-            <LockedOverlay isLocked={!isEnterprise} onUpgrade={handleUpgrade}>
+            
             <div className="space-y-6">
 
               {/* ─── CRM & Leads ─────────────────────────────────────── */}
@@ -1545,9 +1412,9 @@ const BusinessDashboard = () => {
                 </h3>
                 <IntegrationsTab
                   businessId={businessId || "demo"}
-                  isEnterprise={isEnterprise}
+                  isEnterprise={true}
                   isDemo={isDemo}
-                  onUpgrade={() => handleUpgradeWithModal("enterprise", "אינטגרציות")}
+                  onUpgrade={() => {}}
                 />
               </div>
 
@@ -1644,7 +1511,7 @@ const BusinessDashboard = () => {
               </div>
 
             </div>
-            </LockedOverlay>
+            
           </TabsContent>
 
           {/* ── Compliance & Moderation Panel ─────────────────────────── */}
@@ -1856,12 +1723,6 @@ const BusinessDashboard = () => {
         </Tabs>
       </div>
       <BusinessFooter />
-      <UpgradeModal
-        open={upgradeModalOpen}
-        onOpenChange={setUpgradeModalOpen}
-        requiredTier={upgradeModalTier}
-        featureName={upgradeModalFeature}
-      />
     </div>
   );
 };

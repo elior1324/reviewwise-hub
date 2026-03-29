@@ -50,6 +50,7 @@ interface BusinessHeroProps {
   affiliateMode?: "reviewhub_model" | "personal_affiliate" | "none";
   affiliateSlug?: string;
   personalAffiliateUrls?: string[];
+  couponCode?: string | null;
 }
 
 const SOCIAL_ICONS = [
@@ -63,7 +64,7 @@ const SOCIAL_ICONS = [
   { key: "tiktok" as const, Icon: TikTokIcon, label: "TikTok" },
 ];
 
-const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", affiliateSlug, personalAffiliateUrls = [] }: BusinessHeroProps) => {
+const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", affiliateSlug, personalAffiliateUrls = [], couponCode }: BusinessHeroProps) => {
   const verifiedCount = verifiedReviewCount ?? business.verifiedReviewCount ?? 0;
   const grade = computeTrustGrade(business.rating, verifiedCount).grade;
 
@@ -211,19 +212,23 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
               </span>
             </motion.div>
 
-            {/* Affiliate CTA — immediately after trust signals, before description */}
-            {affiliateMode !== "none" && (
-              <motion.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
-                className="flex flex-col gap-2 mb-4"
-              >
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
-                  {affiliateMode === "reviewhub_model" && affiliateSlug && (
-                    <>
+            {/* Purchase CTA — link + optional coupon */}
+            {(() => {
+              const linkUrl = personalAffiliateUrls.length > 0 ? sanitizeUrl(personalAffiliateUrls[0]) : null;
+              const hasLink = !!linkUrl;
+              const hasCoupon = !!couponCode;
+              if (!hasLink && !hasCoupon) return null;
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="flex flex-col gap-2 mb-4"
+                >
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+                    {hasLink && (
                       <a
-                        href={`/go/${affiliateSlug}`}
+                        href={linkUrl!}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 font-bold text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-5 py-2.5 transition-all duration-200 shadow-md shadow-primary/20"
@@ -231,44 +236,22 @@ const BusinessHero = ({ business, verifiedReviewCount, affiliateMode = "none", a
                         <ExternalLink size={15} />
                         כניסה לאתר
                       </a>
+                    )}
+                    {hasCoupon && (
                       <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-amber-50 dark:bg-amber-950/30 border border-amber-400/40 text-amber-700 dark:text-amber-400 rounded-xl px-3 py-2">
                         <Tag size={12} />
-                        קוד: <code className="font-mono font-bold tracking-wider">RH5</code>
-                        <span className="text-amber-600/70 dark:text-amber-400/60">· 5% הנחה</span>
+                        קוד הנחה: <code className="font-mono font-bold tracking-wider">{couponCode}</code>
                       </span>
-                    </>
+                    )}
+                  </div>
+                  {hasLink && (
+                    <span className="text-[11px] text-muted-foreground/60">
+                      רכישה דרך הקישור עשויה לכלול הטבה מיוחדת
+                    </span>
                   )}
-                  {affiliateMode === "personal_affiliate" && personalAffiliateUrls.length > 0 && (() => {
-                    const safe = sanitizeUrl(personalAffiliateUrls[0]);
-                    if (!safe) return null;
-                    return (
-                      <>
-                        <a
-                          href={safe}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 font-bold text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-5 py-2.5 transition-all duration-200 shadow-md shadow-primary/20"
-                        >
-                          <ExternalLink size={15} />
-                          קנו דרך הקישור
-                        </a>
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-amber-50 dark:bg-amber-950/30 border border-amber-400/40 text-amber-700 dark:text-amber-400 rounded-xl px-3 py-2">
-                          <Tag size={12} />
-                          רכישה דרך הקישור מקנה 5% הנחה
-                        </span>
-                      </>
-                    );
-                  })()}
-                </div>
-                {/* Micro-trust text — reuses existing verified count text as CTA support */}
-                {verifiedCount > 0 && (
-                  <span className="text-[11px] text-muted-foreground/70 flex items-center gap-1">
-                    <ShieldCheck size={10} />
-                    {verifiedCount} מאומתות · {business.reviewCount} ביקורות
-                  </span>
-                )}
-              </motion.div>
-            )}
+                </motion.div>
+              );
+            })()}
 
             {/* Description — moved below CTA for natural flow */}
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-muted-foreground mb-4 max-w-2xl text-sm">

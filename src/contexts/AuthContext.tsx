@@ -155,7 +155,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user,             setUser]             = useState<User | null>(null);
   const [session,          setSession]          = useState<Session | null>(null);
   const [loading,          setLoading]          = useState(true);
-  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>("free");
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>("enterprise");
   const [subscriptionEnd,  setSubscriptionEnd]  = useState<string | null>(null);
 
   // Ref-guarded flags / singletons
@@ -197,20 +197,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // ── Subscription check ─────────────────────────────────────────────────────
 
+  // Platform is 100% free — no subscription checks needed
   const checkSubscription = useCallback(async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke("check-subscription");
-      if (error) { devErr("checkSubscription error:", error); return; }
-      if (data?.subscribed) {
-        setSubscriptionTier(productIdToTier(data.product_id));
-        setSubscriptionEnd(data.subscription_end);
-      } else {
-        setSubscriptionTier("free");
-        setSubscriptionEnd(null);
-      }
-    } catch (err) {
-      devErr("checkSubscription threw:", err);
-    }
+    setSubscriptionTier("enterprise");
+    setSubscriptionEnd(null);
   }, []);
 
   // ── Referral processing helper ─────────────────────────────────────────────
@@ -245,7 +235,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
           startSessionTimeout();
         } else {
-          setSubscriptionTier("free");
+          setSubscriptionTier("enterprise");
           setSubscriptionEnd(null);
           sessionTimeoutRef.current?.stop();
         }
