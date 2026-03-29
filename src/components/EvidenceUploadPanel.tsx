@@ -107,7 +107,10 @@ const EvidenceUploadPanel = () => {
 
     try {
       // Upload to Supabase Storage (evidence bucket — private)
-      const ext      = selectedFile.name.split(".").pop()?.toLowerCase() || "pdf";
+      const rawExt = selectedFile.name.split(".").pop()?.toLowerCase() || "";
+      const ALLOWED_EXT = new Set(["pdf", "jpg", "jpeg", "png", "webp"]);
+      const ext = ALLOWED_EXT.has(rawExt) ? rawExt : null;
+      if (!ext) { toast.error("סוג קובץ לא נתמך — PDF, JPG, PNG, או WebP בלבד"); setPhase("ready"); return; }
       const filePath = `disputes/${tokenInfo.reviewId}/${Date.now()}-evidence.${ext}`;
 
       const { error: uploadErr } = await supabase.storage

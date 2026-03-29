@@ -50,8 +50,14 @@ const InvoiceTemplateUploader = forwardRef<HTMLDivElement, InvoiceTemplateUpload
     }
 
     setUploading(true);
-    const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
-    const filePath = `templates/${businessId}/${Date.now()}.${ext}`;
+    const rawExt = file.name.split(".").pop()?.toLowerCase() || "";
+    const ALLOWED_DOC_EXT = new Set(["pdf", "jpg", "jpeg", "png", "webp", "heic", "heif", "csv"]);
+    if (!ALLOWED_DOC_EXT.has(rawExt)) {
+      toast({ title: "סוג קובץ לא נתמך", variant: "destructive" });
+      setUploading(false);
+      return;
+    }
+    const filePath = `templates/${businessId}/${Date.now()}.${rawExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from("invoices")

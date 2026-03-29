@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { Star, Send, Loader2, CheckCircle2, LogIn, PenLine, ShieldCheck, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 // ── LocalStorage ─────────────────────────────────────────────────────────────
 const STORAGE_KEY = "reviewhub_pending_review";
@@ -230,6 +231,7 @@ const ReviewFormSection = ({ businessSlug, businessName, businessId }: ReviewFor
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const pendingAutoSubmit = useRef(false);
   const hasAutoSubmitted = useRef(false);
@@ -238,6 +240,7 @@ const ReviewFormSection = ({ businessSlug, businessName, businessId }: ReviewFor
   // ── Submit review to Edge Function ─────────────────────────────────────────
   const submitReview = useCallback(async (r: number, s: string, t: string) => {
     if (!businessId || submittingRef.current) return;
+    if (!turnstileToken) { toast.error("אנא המתינו לאימות CAPTCHA"); return; }
     submittingRef.current = true;
     setSubmitting(true);
 
@@ -253,7 +256,7 @@ const ReviewFormSection = ({ businessSlug, businessName, businessId }: ReviewFor
           anonymous: false,
           indemnityAccepted: true,
           indemnityAcceptedAt: new Date().toISOString(),
-          turnstileToken: "bypass",
+          turnstileToken,
         },
       });
 
@@ -277,7 +280,7 @@ const ReviewFormSection = ({ businessSlug, businessName, businessId }: ReviewFor
     }
     submittingRef.current = false;
     setSubmitting(false);
-  }, [businessId]);
+  }, [businessId, turnstileToken]);
 
   // ── Restore pending review from localStorage ──────────────────────────────
   useEffect(() => {
@@ -289,29 +292,25 @@ const ReviewFormSection = ({ businessSlug, businessName, businessId }: ReviewFor
     setExperienceDate(pending.experienceDate || "");
   }, [businessSlug]);
 
-  // ── Auto-submit after in-modal auth (email/password) ──────────────────────
+  // ── Auto-submit after auth (in-modal or OAuth redirect) ────────────────────
+  // Triggers when user + turnstileToken both become available after auth.
   useEffect(() => {
-    if (!user || !pendingAutoSubmit.current || hasAutoSubmitted.current) return;
-    pendingAutoSubmit.current = false;
-    hasAutoSubmitted.current = true;
+    if (!user || !turnstileToken || hasAutoSubmitted.current || !businessId) return;
 
-    const pending = loadPending(businessSlug);
-    if (pending && pending.rating > 0 && pending.text.trim().length >= 10 && businessId) {
-      submitReview(pending.rating, pending.subject, pending.text);
-    }
-  }, [user, businessSlug, businessId, submitReview]);
-
-  // ── Handle OAuth redirect (Google login returns to same page) ─────────────
-  useEffect(() => {
-    if (!user || hasAutoSubmitted.current || !businessId) return;
+    // In-modal auth: pendingAutoSubmit flag is set by handleAuthSuccess
+    // OAuth redirect: pending review exists in localStorage from before redirect
     const pending = loadPending(businessSlug);
     if (!pending) return;
-    if (pending.rating > 0 && pending.text.trim().length >= 10) {
+
+    const shouldSubmit = pendingAutoSubmit.current || // in-modal auth
+      (pending.rating > 0 && pending.text.trim().length >= 10); // OAuth redirect
+
+    if (shouldSubmit) {
+      pendingAutoSubmit.current = false;
       hasAutoSubmitted.current = true;
       submitReview(pending.rating, pending.subject, pending.text);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user, turnstileToken, businessSlug, businessId, submitReview]);
 
   // ── Handle form submit click ──────────────────────────────────────────────
   const handleSubmit = () => {
@@ -363,7 +362,7 @@ const ReviewFormSection = ({ businessSlug, businessName, businessId }: ReviewFor
   }
 
   // ── Review form ───────────────────────────────────────────────────────────
-  const isReady = rating > 0 && text.trim().length >= 10;
+  const isReady = rating > 0 && text.trim().length >= 10 && !!turnstileToken;
 
   return (
     <>
@@ -430,6 +429,13 @@ const ReviewFormSection = ({ businessSlug, businessName, businessId }: ReviewFor
                 max={new Date().toISOString().split("T")[0]}
               />
             </div>
+
+            {/* CAPTCHA */}
+            <TurnstileWidget
+              onSuccess={setTurnstileToken}
+              onExpire={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
+            />
 
             {/* Trust + Submit */}
             <div className="pt-3 border-t border-border/30 space-y-3">

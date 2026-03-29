@@ -78,7 +78,9 @@ const ImageUploadField = ({
 
     try {
       // Build the final storage path (include file extension from MIME)
-      const ext = file.name.split(".").pop() ?? "jpg";
+      const rawExt = file.name.split(".").pop()?.toLowerCase() ?? "";
+      const ALLOWED_IMG_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif"]);
+      const ext = ALLOWED_IMG_EXT.has(rawExt) ? rawExt : "jpg";
       const path = storagePath.endsWith(`.${ext}`) ? storagePath : `${storagePath}.${ext}`;
 
       const { error: upErr } = await supabase.storage

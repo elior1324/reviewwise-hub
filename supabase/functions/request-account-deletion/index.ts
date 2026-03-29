@@ -31,6 +31,22 @@ import { serve }        from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
+/** Per-user deletion attempt tracker (in-memory). Max 3 attempts per hour. */
+const deletionAttempts = new Map<string, { count: number; resetAt: number }>();
+const DEL_RATE_LIMIT  = 3;
+const DEL_RATE_WINDOW = 60 * 60 * 1000; // 1 hour
+
+function isDeletionRateLimited(userId: string): boolean {
+  const now = Date.now();
+  const entry = deletionAttempts.get(userId);
+  if (!entry || now > entry.resetAt) {
+    deletionAttempts.set(userId, { count: 1, resetAt: now + DEL_RATE_WINDOW });
+    return false;
+  }
+  entry.count++;
+  return entry.count > DEL_RATE_LIMIT;
+}
+
 serve(async (req) => {
   const CORS_HEADERS = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
@@ -67,6 +83,11 @@ serve(async (req) => {
 
     if (jwtErr || !callerUser) {
       return json({ error: "Unauthorized — invalid token" }, 401);
+    }
+
+    // ── Rate limit: max 3 deletion attempts per user per hour ───────────────
+    if (isDeletionRateLimited(callerUser.id)) {
+      return json({ error: "Too many deletion attempts — try again in an hour" }, 429);
     }
 
     // ── 2. Parse body ─────────────────────────────────────────────────────────

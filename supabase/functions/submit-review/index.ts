@@ -171,7 +171,12 @@ serve(async (req: Request) => {
     const isDevBypass = (turnstileToken as string) === DEV_BYPASS_TOKEN;
 
     if (!turnstileSecretKey) {
-      // No secret configured → log a warning but allow in development.
+      // No secret configured — block in production, warn in dev.
+      const isProd = Deno.env.get("ENVIRONMENT") === "production";
+      if (isProd) {
+        console.error("[submit-review] TURNSTILE_SECRET_KEY not set in production — blocking request");
+        return jsonResp({ error: "Server misconfiguration — please contact support" }, 503, cors);
+      }
       console.warn("[submit-review] TURNSTILE_SECRET_KEY not set — skipping Turnstile verification (dev mode)");
     } else if (isDevBypass) {
       // Frontend is running without a Turnstile site key — all other

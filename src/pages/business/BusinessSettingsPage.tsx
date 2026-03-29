@@ -858,15 +858,15 @@ const BusinessSettingsPage = () => {
         delivery_format: profileForm.delivery_format || null,
         updated_at: new Date().toISOString(),
       };
-      console.log("[SaveProfile] updating business:", business.id, updateData);
+      if (import.meta.env.DEV) console.log("[SaveProfile] updating business:", business.id, updateData);
       const { error } = await supabase.from("businesses").update(updateData).eq("id", business.id);
       if (error) {
-        console.error("[SaveProfile] Supabase error:", error.message, error.code, error.details);
+        if (import.meta.env.DEV) console.error("[SaveProfile] Supabase error:", error.message, error.code, error.details);
         throw error;
       }
       toast.success("פרטי העסק נשמרו בהצלחה");
     } catch (err) {
-      console.error("[SaveProfile] error:", err);
+      if (import.meta.env.DEV) console.error("[SaveProfile] error:", err);
       toast.error("לא הצלחנו לשמור את פרטי העסק");
     }
     finally { setSaving(false); }

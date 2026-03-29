@@ -62,8 +62,13 @@ const TestimonialMediaUploader = ({ businessId, maxItems = 5 }: Props) => {
     }
 
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `${businessId}/${Date.now()}.${ext}`;
+    const rawExt = file.name.split(".").pop()?.toLowerCase() ?? "";
+    const ALLOWED_MEDIA_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "mp4", "mov", "webm"]);
+    if (!ALLOWED_MEDIA_EXT.has(rawExt)) {
+      toast.error("סוג קובץ לא נתמך");
+      return;
+    }
+    const path = `${businessId}/${Date.now()}.${rawExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from("testimonials")

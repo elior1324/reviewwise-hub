@@ -26,7 +26,9 @@ import { toast } from "sonner";
 const TIMEOUT_MS = 10000;
 
 function log(msg: string, data?: unknown) {
-  console.log(`%c[AuthCallback] ${msg}`, "color:#6366f1;font-weight:bold", data ?? "");
+  if (import.meta.env.DEV) {
+    console.log(`%c[AuthCallback] ${msg}`, "color:#6366f1;font-weight:bold", data ?? "");
+  }
 }
 
 const AuthCallback = () => {
@@ -81,8 +83,10 @@ const AuthCallback = () => {
     const fail = (reason: string) => {
       if (settled) return;
       settled = true;
-      console.error("[AuthCallback] FAILED:", reason);
-      console.error("[AuthCallback] Full URL:", window.location.href);
+      if (import.meta.env.DEV) {
+        console.error("[AuthCallback] FAILED:", reason);
+        console.error("[AuthCallback] Full URL:", window.location.href);
+      }
       toast.error("ההתחברות עם Google נכשלה. נסו שוב.");
       navigate(isBusinessIntent ? "/business/login" : "/auth", { replace: true });
     };

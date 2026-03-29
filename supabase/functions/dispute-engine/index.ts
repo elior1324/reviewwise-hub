@@ -424,6 +424,16 @@ serve(async (req: Request) => {
       const { token, filePath } = body as { token: string; filePath: string };
       if (!token || !filePath) return fail("Missing token or filePath", 400, cors);
 
+      // ── Server-side file validation (magic bytes) ───────────────────────
+      const { validateFile } = await import("../_shared/file-validation.ts");
+      const { data: evidenceBlob, error: eDlErr } = await admin.storage
+        .from("invoices")
+        .download(filePath);
+      if (eDlErr || !evidenceBlob) return fail("Evidence file not found", 404, cors);
+      const evidenceBytes = new Uint8Array(await evidenceBlob.arrayBuffer());
+      const evidenceCheck = validateFile(evidenceBytes, "document", evidenceBytes.byteLength);
+      if (!evidenceCheck.valid) return fail(evidenceCheck.reason!, 400, cors);
+
       const { data: tokenRow } = await admin
         .from("dispute_tokens")
         .select("id, review_id, reviewer_id, expires_at, used")

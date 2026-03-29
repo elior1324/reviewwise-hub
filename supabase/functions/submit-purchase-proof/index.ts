@@ -13,6 +13,7 @@
 import { serve }        from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, assertOrigin } from "../_shared/cors.ts";
+import { validateFile } from "../_shared/file-validation.ts";
 
 serve(async (req) => {
   // ── Server-side origin enforcement — block disallowed origins before any logic ─
@@ -89,6 +90,27 @@ serve(async (req) => {
         status: 403,
         headers: { ...cors, "Content-Type": "application/json" },
       });
+    }
+
+    // ── 3b. Server-side file validation (magic bytes) ────────────────────────
+    if (proof_url) {
+      const { data: proofBlob, error: pDlErr } = await admin.storage
+        .from("invoices")
+        .download(proof_url);
+      if (pDlErr || !proofBlob) {
+        return new Response(JSON.stringify({ error: "Proof file not found in storage" }), {
+          status: 404,
+          headers: { ...cors, "Content-Type": "application/json" },
+        });
+      }
+      const proofBytes = new Uint8Array(await proofBlob.arrayBuffer());
+      const proofCheck = validateFile(proofBytes, "document", proofBytes.byteLength);
+      if (!proofCheck.valid) {
+        return new Response(JSON.stringify({ error: proofCheck.reason }), {
+          status: 400,
+          headers: { ...cors, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // ── 4. Check for existing pending/approved proof ─────────────────────────

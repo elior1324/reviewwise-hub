@@ -29,14 +29,17 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL ||
-  "https://pujsopidbejeuqteormi.supabase.co";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+if (!SUPABASE_URL) {
+  throw new Error("VITE_SUPABASE_URL is not set — check your .env file");
+}
 
 const SUPABASE_PUBLISHABLE_KEY =
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  "sb_publishable_QUsQCewBaHrVIHxPfJWsrQ_BGRFjrBq";
+  import.meta.env.VITE_SUPABASE_ANON_KEY;
+if (!SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error("VITE_SUPABASE_PUBLISHABLE_KEY is not set — check your .env file");
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

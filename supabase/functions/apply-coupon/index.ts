@@ -18,26 +18,7 @@
 
 import { serve }        from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const ALLOWED_ORIGINS = [
-  Deno.env.get("FRONTEND_URL") || "https://reviewhub.co.il",
-  "https://www.reviewhub.co.il",
-  "https://reviewshub.info",
-  "https://www.reviewshub.info",
-];
-
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("Origin") || "";
-  const isDev   = Deno.env.get("ENVIRONMENT") !== "production";
-  const isLocal = /^https?:\/\/localhost(:\d+)?$/.test(origin);
-  const isAllowed = ALLOWED_ORIGINS.includes(origin) || (isDev && isLocal);
-  return {
-    "Access-Control-Allow-Origin":  isAllowed ? origin : ALLOWED_ORIGINS[0],
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Vary": "Origin",
-  };
-}
+import { getCorsHeaders, assertOrigin } from "../_shared/cors.ts";
 
 function json(body: Record<string, unknown>, status: number, cors: Record<string, string>) {
   return new Response(JSON.stringify(body), {
@@ -46,9 +27,30 @@ function json(body: Record<string, unknown>, status: number, cors: Record<string
   });
 }
 
+/** Per-user coupon attempt tracker (in-memory, resets on cold start). */
+const couponAttempts = new Map<string, { count: number; resetAt: number }>();
+const COUPON_RATE_LIMIT  = 5;          // max attempts
+const COUPON_RATE_WINDOW = 60 * 1000;  // per 1 minute
+
+function isRateLimited(userId: string): boolean {
+  const now = Date.now();
+  const entry = couponAttempts.get(userId);
+  if (!entry || now > entry.resetAt) {
+    couponAttempts.set(userId, { count: 1, resetAt: now + COUPON_RATE_WINDOW });
+    return false;
+  }
+  entry.count++;
+  return entry.count > COUPON_RATE_LIMIT;
+}
+
 serve(async (req: Request) => {
   const cors = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+
+  // ── Server-side origin enforcement ──────────────────────────────────────
+  const blocked = assertOrigin(req);
+  if (blocked) return blocked;
+
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405, cors);
 
   const SUPABASE_URL              = Deno.env.get("SUPABASE_URL")!;
@@ -67,6 +69,11 @@ serve(async (req: Request) => {
   const { data: { user }, error: authError } = await anonClient.auth.getUser();
   if (authError || !user) {
     return json({ error: "Unauthorized" }, 401, cors);
+  }
+
+  // ── Rate limit: max 5 coupon attempts per user per minute ───────────────
+  if (isRateLimited(user.id)) {
+    return json({ error: "יותר מדי ניסיונות — נסו שוב בעוד דקה" }, 429, cors);
   }
 
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);

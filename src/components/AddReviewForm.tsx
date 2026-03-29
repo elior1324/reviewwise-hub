@@ -148,8 +148,13 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
       if (uploadedFiles.length > 0 && user) {
         setUploading(true);
         for (const file of uploadedFiles) {
-          const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
-          const filePath = `receipts/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+          const rawExt = file.name.split(".").pop()?.toLowerCase() || "";
+          const ALLOWED_DOC_EXT = new Set(["pdf", "jpg", "jpeg", "png", "webp", "csv"]);
+          if (!ALLOWED_DOC_EXT.has(rawExt)) {
+            toast.error("סוג קובץ לא נתמך");
+            continue;
+          }
+          const filePath = `receipts/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${rawExt}`;
 
           const { error: uploadError } = await supabase.storage
             .from("invoices")

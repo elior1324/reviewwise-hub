@@ -1737,6 +1737,8 @@ export default BusinessDashboard;
 //   3. List pending (not yet approved) WhatsApp reviews for moderation
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { QRCodeSVG } from "qrcode.react";
+
 const WA_BASE_URL = typeof window !== "undefined" ? window.location.origin : "https://reviewshub.info";
 
 const WhatsAppSvg = () => (
@@ -1762,10 +1764,14 @@ const WhatsAppFlowPanel = ({
 }) => {
   const [flowToken, setFlowToken]           = useState<string | null>(null);
   const [linkCopied, setLinkCopied]         = useState(false);
+  const [msgCopied, setMsgCopied]           = useState(false);
   const [loadingFlow, setLoadingFlow]       = useState(false);
   const [pendingReviews, setPendingReviews] = useState<PendingWAReview[]>([]);
+  const [approvedCount, setApprovedCount]   = useState(0);
+  const [totalCount, setTotalCount]         = useState(0);
   const [approvingId, setApprovingId]       = useState<string | null>(null);
   const [rejectingId, setRejectingId]       = useState<string | null>(null);
+  const [showQR, setShowQR]                 = useState(false);
 
   // ── Load flow token ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -1792,7 +1798,27 @@ const WhatsAppFlowPanel = ({
       });
   }, [businessId, isDemo]);
 
+  // ── Load funnel stats ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (isDemo || !businessId) return;
+    supabase.from("whatsapp_reviews")
+      .select("id, is_approved", { count: "exact" })
+      .eq("business_id", businessId)
+      .then(({ data, count }) => {
+        setTotalCount(count ?? 0);
+        setApprovedCount(data?.filter(r => r.is_approved).length ?? 0);
+      });
+  }, [businessId, isDemo]);
+
   const reviewLink = flowToken ? `${WA_BASE_URL}/wa/${flowToken}` : null;
+
+  const handleCopyMessage = () => {
+    if (!reviewLink) return;
+    const message = `היי 👋\nנשמח לשמוע מכם — מה חשבתם על השירות?\nלחצו כאן ושתפו בקלות:\n${reviewLink}`;
+    navigator.clipboard.writeText(message);
+    setMsgCopied(true);
+    setTimeout(() => setMsgCopied(false), 2500);
+  };
 
   const handleCopyLink = () => {
     if (!reviewLink) return;
@@ -1840,54 +1866,91 @@ const WhatsAppFlowPanel = ({
   return (
     <div className="space-y-6 max-w-2xl" dir="rtl">
 
-      {/* ── Section intro ───────────────────────────────────────────────── */}
+      {/* ── Link, QR, and Message Template ─────────────────────────────── */}
       <Card className="shadow-card bg-card">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
-            <WhatsAppSvg /> ביקורות WhatsApp
+            <WhatsAppSvg /> איסוף ביקורות WhatsApp
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            שלחו ללקוחות שלכם קישור ייחודי דרך WhatsApp. הם ישאירו ביקורת ללא צורך בהרשמה.
-            הביקורת תוצג בדף הפרופיל שלכם לאחר אישורכם.
+            שלחו ללקוחות הודעה אישית עם קישור לביקורת. הם ישאירו משוב ללא הרשמה — והביקורת תפורסם לאחר אישורכם.
           </p>
 
-          {/* Link display */}
           {loadingFlow ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock size={14} className="animate-spin" />
-              מייצר קישור...
+              <Clock size={14} className="animate-spin" /> מייצר קישור...
             </div>
           ) : reviewLink ? (
-            <div className="flex items-center gap-2 flex-wrap">
-              <code className="flex-1 text-xs bg-muted/60 border border-border/40 rounded-lg px-3 py-2 font-mono text-foreground truncate" dir="ltr">
-                {reviewLink}
-              </code>
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1.5 shrink-0"
-                onClick={handleCopyLink}
-              >
-                {linkCopied
-                  ? <><CheckCircle2 size={13} className="text-green-500" /> הועתק</>
-                  : <><ExternalLink size={13} /> העתק קישור</>
-                }
-              </Button>
+            <div className="space-y-3">
+              {/* Link + Copy buttons */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <code className="flex-1 text-xs bg-muted/60 border border-border/40 rounded-lg px-3 py-2 font-mono text-foreground truncate" dir="ltr">
+                  {reviewLink}
+                </code>
+                <Button size="sm" variant="outline" className="gap-1.5 shrink-0" onClick={handleCopyLink}>
+                  {linkCopied ? <><CheckCircle2 size={13} className="text-green-500" /> הועתק</> : <><ExternalLink size={13} /> העתק קישור</>}
+                </Button>
+              </div>
+
+              {/* Action buttons row */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button size="sm" variant="outline" className="gap-1.5" onClick={handleCopyMessage}>
+                  <WhatsAppSvg />
+                  {msgCopied ? "הועתק!" : "העתק הודעה מוכנה"}
+                </Button>
+                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setShowQR(prev => !prev)}>
+                  {showQR ? "הסתר QR" : "הצג QR"}
+                </Button>
+              </div>
+
+              {/* QR Code */}
+              {showQR && (
+                <div className="flex justify-center py-3">
+                  <div className="bg-white p-4 rounded-xl border border-border/40 inline-block">
+                    <QRCodeSVG value={reviewLink} size={160} level="M" />
+                    <p className="text-[10px] text-muted-foreground text-center mt-2">סרקו כדי להשאיר ביקורת</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Message preview */}
+              <div className="border border-[#25D366]/20 bg-[#25D366]/5 rounded-xl p-3">
+                <p className="text-[11px] font-medium text-foreground/80 mb-1.5">תבנית ההודעה:</p>
+                <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+                  היי 👋{"\n"}נשמח לשמוע מכם — מה חשבתם על השירות?{"\n"}לחצו כאן ושתפו בקלות:{"\n"}<span className="text-primary underline" dir="ltr">{reviewLink}</span>
+                </p>
+              </div>
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">לא ניתן ליצור קישור כרגע.</p>
           )}
 
-          <div className="flex items-start gap-2 text-[11px] text-muted-foreground/70 border border-[#25D366]/15 bg-[#25D366]/5 rounded-lg px-3 py-2.5">
-            <WhatsAppSvg />
-            <span>
-              הקישור ייחודי לעסק שלכם. כל ביקורת שתתקבל תחכה לאישורכם לפני פרסום.
-            </span>
+          <div className="flex items-start gap-2 text-[11px] text-muted-foreground/60 leading-relaxed">
+            <ShieldCheck size={12} className="shrink-0 mt-0.5 text-muted-foreground/40" />
+            כל ביקורת שתתקבל תחכה לאישורכם לפני פרסום. הקישור ייחודי לעסק שלכם.
           </div>
         </CardContent>
       </Card>
+
+      {/* ── Funnel Analytics Strip ────────────────────────────────────── */}
+      {totalCount > 0 && (
+        <div className="flex items-center gap-4 flex-wrap text-xs text-muted-foreground bg-muted/30 border border-border/30 rounded-xl px-4 py-3">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#25D366]" />
+            {totalCount} ביקורות התקבלו
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-primary" />
+            {approvedCount} פורסמו
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            {pendingReviews.length} ממתינות
+          </span>
+        </div>
+      )}
 
       {/* ── Pending reviews moderation ──────────────────────────────────── */}
       <Card className="shadow-card bg-card">

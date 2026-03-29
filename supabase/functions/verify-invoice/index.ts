@@ -2,6 +2,7 @@ import { serve }            from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient }     from "https://esm.sh/@supabase/supabase-js@2";
 import { checkAiRateLimit } from "../_shared/rate-limit.ts";
 import { getCorsHeaders }   from "../_shared/cors.ts";
+import { validateFile }     from "../_shared/file-validation.ts";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -64,6 +65,23 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     if (action === "analyze_template") {
+      // ── Server-side file validation (magic bytes) ─────────────────────────
+      const { data: fileBlob, error: dlErr } = await supabase.storage
+        .from("invoices")
+        .download(filePath);
+      if (dlErr || !fileBlob) {
+        return new Response(JSON.stringify({ error: "File not found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const fileBytes = new Uint8Array(await fileBlob.arrayBuffer());
+      const validation = validateFile(fileBytes, "document", fileBytes.byteLength);
+      if (!validation.valid) {
+        return new Response(JSON.stringify({ error: validation.reason }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { data: signedUrl } = await supabase.storage
         .from("invoices")
         .createSignedUrl(filePath, 600);
@@ -150,6 +168,23 @@ Respond ONLY with valid JSON, no markdown.`,
 
         return new Response(JSON.stringify({ verified: false, match_score: 0, reason: "no_templates" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // ── Server-side file validation (magic bytes) for receipt ──────────────
+      const { data: receiptBlob, error: rDlErr } = await supabase.storage
+        .from("invoices")
+        .download(filePath);
+      if (rDlErr || !receiptBlob) {
+        return new Response(JSON.stringify({ error: "Receipt file not found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const receiptBytes = new Uint8Array(await receiptBlob.arrayBuffer());
+      const receiptValidation = validateFile(receiptBytes, "document", receiptBytes.byteLength);
+      if (!receiptValidation.valid) {
+        return new Response(JSON.stringify({ error: receiptValidation.reason }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
