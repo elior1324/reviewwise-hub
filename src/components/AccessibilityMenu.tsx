@@ -183,7 +183,7 @@ const AccessibilityMenu = () => {
 
       {/* Mobile — fixed floating button, bottom-left (portalled to body to escape Navbar stacking context) */}
       {createPortal(
-        <div className="sm:hidden fixed bottom-4 left-4 z-[9999]">
+        <div className="sm:hidden fixed bottom-[4.5rem] left-4 z-[9999]">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
