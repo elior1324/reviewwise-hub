@@ -668,23 +668,36 @@ const BusinessProfile = () => {
             ))}
           </div>
 
-          {/* Sort order — applies to native reviews */}
-          {showNativeSection && (
-            <div className="flex items-center gap-2">
-              <ArrowUpDown size={12} className="text-muted-foreground" />
-              <select
-                value={sortOrder}
-                onChange={e => setSortOrder(e.target.value as typeof sortOrder)}
-                className="text-xs bg-card border border-border/50 rounded-lg px-2.5 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer"
-                dir="rtl"
-              >
-                <option value="newest">חדשות קודם</option>
-                <option value="oldest">ישנות קודם</option>
-                <option value="highest">דירוג גבוה</option>
-                <option value="lowest">דירוג נמוך</option>
-              </select>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Sort order — applies to native reviews */}
+            {showNativeSection && (
+              <>
+                <ArrowUpDown size={12} className="text-muted-foreground" />
+                <select
+                  value={sortOrder}
+                  onChange={e => setSortOrder(e.target.value as typeof sortOrder)}
+                  className="text-xs bg-card border border-border/50 rounded-lg px-2.5 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer"
+                  dir="rtl"
+                >
+                  <option value="newest">חדשות קודם</option>
+                  <option value="oldest">ישנות קודם</option>
+                  <option value="highest">דירוג גבוה</option>
+                  <option value="lowest">דירוג נמוך</option>
+                </select>
+              </>
+            )}
+
+            {/* Shortcut to write review */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs px-3 gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+              onClick={() => document.getElementById("write-review")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              <PenLine size={12} />
+              כתבו ביקורת
+            </Button>
+          </div>
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════
@@ -877,11 +890,13 @@ const BusinessProfile = () => {
         )}
 
         {/* Review Form — shown after all reviews so visitors see reviews first */}
-        <ReviewFormSection
-          businessSlug={business.slug}
-          businessName={business.name}
-          businessId={dbBusinessId || undefined}
-        />
+        <div id="write-review">
+          <ReviewFormSection
+            businessSlug={business.slug}
+            businessName={business.name}
+            businessId={dbBusinessId || undefined}
+          />
+        </div>
 
       </div>
       <Footer />
