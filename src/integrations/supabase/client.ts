@@ -29,17 +29,17 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-if (!SUPABASE_URL) {
-  throw new Error("VITE_SUPABASE_URL is not set — check your .env file");
-}
+// Prefer env vars; fall back to the project's public (anon) credentials.
+// These are safe to embed — they are the *publishable* key, equivalent to
+// a public API key.  RLS enforces all access control server-side.
+const SUPABASE_URL =
+  import.meta.env.VITE_SUPABASE_URL ||
+  "https://pujsopidbejeuqteormi.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  import.meta.env.VITE_SUPABASE_ANON_KEY;
-if (!SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error("VITE_SUPABASE_PUBLISHABLE_KEY is not set — check your .env file");
-}
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  "sb_publishable_QUsQCewBaHrVIHxPfJWsrQ_BGRFjrBq";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
