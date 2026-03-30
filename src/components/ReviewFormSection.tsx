@@ -79,11 +79,11 @@ const RATING_LABELS: Record<number, string> = {
 };
 
 const RATING_COLORS: Record<number, { fill: string; bg: string }> = {
-  1: { fill: "fill-red-500 text-red-500",       bg: "bg-red-500" },
-  2: { fill: "fill-orange-400 text-orange-400",  bg: "bg-orange-400" },
-  3: { fill: "fill-yellow-400 text-yellow-400",  bg: "bg-yellow-400" },
-  4: { fill: "fill-lime-500 text-lime-500",      bg: "bg-lime-500" },
-  5: { fill: "fill-emerald-500 text-emerald-500", bg: "bg-emerald-500" },
+  1: { fill: "fill-red-500 text-red-500",         bg: "bg-red-500" },
+  2: { fill: "fill-orange-500 text-orange-500",    bg: "bg-orange-500" },
+  3: { fill: "fill-amber-400 text-amber-400",      bg: "bg-amber-400" },
+  4: { fill: "fill-lime-400 text-lime-400",        bg: "bg-lime-400" },
+  5: { fill: "fill-emerald-400 text-emerald-400",  bg: "bg-emerald-400" },
 };
 
 const StarPicker = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => {
