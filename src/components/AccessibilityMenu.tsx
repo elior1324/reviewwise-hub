@@ -86,8 +86,8 @@ const AccessibilityMenu = () => {
     return val === true;
   });
 
-  const menuContent = (
-    <DropdownMenuContent align="end" className="w-56">
+  const menuItems = (
+    <>
       <DropdownMenuItem onClick={cycleFontSize}>
         <span className="flex items-center justify-between w-full">
           <span>גודל טקסט</span>
@@ -155,7 +155,7 @@ const AccessibilityMenu = () => {
           איפוס הגדרות
         </span>
       </DropdownMenuItem>
-    </DropdownMenuContent>
+    </>
   );
 
   return (
@@ -175,7 +175,9 @@ const AccessibilityMenu = () => {
             )}
           </Button>
         </DropdownMenuTrigger>
-        {menuContent}
+        <DropdownMenuContent align="end" className="w-56">
+          {menuItems}
+        </DropdownMenuContent>
       </DropdownMenu>
 
       {/* Mobile — fixed floating button, bottom-left */}
@@ -193,7 +195,9 @@ const AccessibilityMenu = () => {
               )}
             </Button>
           </DropdownMenuTrigger>
-          {menuContent}
+          <DropdownMenuContent side="top" align="start" className="w-56">
+            {menuItems}
+          </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </>
