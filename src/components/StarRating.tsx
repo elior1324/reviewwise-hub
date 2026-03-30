@@ -9,11 +9,23 @@ interface StarRatingProps {
   animated?: boolean;
 }
 
+// Dynamic star colors matching the review form picker
+const RATING_STAR_COLORS: Record<number, { fill: string; text: string }> = {
+  1: { fill: "fill-red-500 text-red-500",       text: "text-red-500" },
+  2: { fill: "fill-orange-400 text-orange-400",  text: "text-orange-400" },
+  3: { fill: "fill-yellow-400 text-yellow-400",  text: "text-yellow-400" },
+  4: { fill: "fill-lime-500 text-lime-500",      text: "text-lime-500" },
+  5: { fill: "fill-emerald-500 text-emerald-500", text: "text-emerald-500" },
+};
+
 const StarRating = ({ rating, maxRating = 5, size = 20, showValue = false, animated = false }: StarRatingProps) => {
+  const rounded = Math.round(rating);
+  const colors = RATING_STAR_COLORS[Math.max(1, Math.min(5, rounded))] || RATING_STAR_COLORS[3];
+
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: maxRating }, (_, i) => {
-        const filled = i < Math.round(rating);
+        const filled = i < rounded;
         const StarWrapper = animated ? motion.div : "div";
         const animProps = animated
           ? {
@@ -28,7 +40,7 @@ const StarRating = ({ rating, maxRating = 5, size = 20, showValue = false, anima
               size={size}
               className={
                 filled
-                  ? "fill-star text-star drop-shadow-[0_0_6px_hsl(38,100%,50%,0.5)] transition-all duration-200"
+                  ? `${colors.fill} transition-all duration-200`
                   : "fill-star-empty text-star-empty transition-all duration-200"
               }
             />
@@ -36,7 +48,7 @@ const StarRating = ({ rating, maxRating = 5, size = 20, showValue = false, anima
         );
       })}
       {showValue && (
-        <span className="mr-1.5 font-display font-bold text-star text-sm tracking-tight">
+        <span className={`mr-1.5 font-display font-bold text-sm tracking-tight ${colors.text}`}>
           {rating.toFixed(1)}
         </span>
       )}
