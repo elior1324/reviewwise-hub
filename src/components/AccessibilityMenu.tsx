@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Accessibility, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -180,26 +181,29 @@ const AccessibilityMenu = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Mobile — fixed floating button, bottom-left */}
-      <div className="sm:hidden fixed bottom-4 left-4 z-50">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              size="icon"
-              className={`w-10 h-10 rounded-full shadow-lg border border-border/50 bg-card hover:bg-card/90 relative ${hasAnyActive ? "text-primary border-primary/50" : "text-foreground"}`}
-              aria-label="תפריט נגישות"
-            >
-              <Accessibility size={18} />
-              {hasAnyActive && (
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary" />
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="w-56">
-            {menuItems}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      {/* Mobile — fixed floating button, bottom-left (portalled to body to escape Navbar stacking context) */}
+      {createPortal(
+        <div className="sm:hidden fixed bottom-4 left-4 z-[9999]">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                className={`w-10 h-10 rounded-full shadow-lg border border-border/50 bg-card hover:bg-card/90 relative ${hasAnyActive ? "text-primary border-primary/50" : "text-foreground"}`}
+                aria-label="תפריט נגישות"
+              >
+                <Accessibility size={18} />
+                {hasAnyActive && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-56">
+              {menuItems}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>,
+        document.body
+      )}
     </>
   );
 };
