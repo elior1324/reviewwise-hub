@@ -273,7 +273,13 @@ const GoogleLinkingPanel = ({ businessId }: Props) => {
                     {c.address && <p className="text-xs text-muted-foreground truncate">{c.address}</p>}
                     {c.rating != null && (
                       <div className="flex items-center gap-1 mt-0.5">
-                        <Star size={10} className="fill-amber-400 text-amber-400" />
+                        <Star size={10} className={
+                          c.rating >= 4.5 ? "fill-emerald-400 text-emerald-400" :
+                          c.rating >= 3.5 ? "fill-lime-400 text-lime-400" :
+                          c.rating >= 2.5 ? "fill-amber-400 text-amber-400" :
+                          c.rating >= 1.5 ? "fill-orange-500 text-orange-500" :
+                          "fill-red-500 text-red-500"
+                        } />
                         <span className="text-xs text-muted-foreground">{c.rating} ({c.review_count?.toLocaleString()} ביקורות)</span>
                       </div>
                     )}

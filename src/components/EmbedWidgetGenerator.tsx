@@ -117,7 +117,14 @@ const EmbedWidgetGenerator = ({ businessSlug, businessName, rating, reviewCount,
                       <Star
                         key={i}
                         size={14}
-                        className={i < displayStars ? "fill-star text-star" : "text-muted-foreground/30"}
+                        className={i < displayStars
+                          ? displayStars >= 5 ? "fill-emerald-400 text-emerald-400"
+                          : displayStars >= 4 ? "fill-lime-400 text-lime-400"
+                          : displayStars >= 3 ? "fill-amber-400 text-amber-400"
+                          : displayStars >= 2 ? "fill-orange-500 text-orange-500"
+                          : "fill-red-500 text-red-500"
+                          : "fill-transparent text-muted-foreground/20"
+                        }
                       />
                     ))}
                   </div>

@@ -11,11 +11,11 @@ interface StarRatingProps {
 
 // Dynamic star colors matching the review form picker
 const RATING_STAR_COLORS: Record<number, { fill: string; text: string }> = {
-  1: { fill: "fill-red-500 text-red-500",       text: "text-red-500" },
-  2: { fill: "fill-orange-400 text-orange-400",  text: "text-orange-400" },
-  3: { fill: "fill-yellow-400 text-yellow-400",  text: "text-yellow-400" },
-  4: { fill: "fill-lime-500 text-lime-500",      text: "text-lime-500" },
-  5: { fill: "fill-emerald-500 text-emerald-500", text: "text-emerald-500" },
+  1: { fill: "fill-red-500 text-red-500 drop-shadow-[0_0_4px_rgba(239,68,68,0.5)]",         text: "text-red-500" },
+  2: { fill: "fill-orange-500 text-orange-500 drop-shadow-[0_0_4px_rgba(249,115,22,0.5)]",   text: "text-orange-500" },
+  3: { fill: "fill-amber-400 text-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]",     text: "text-amber-400" },
+  4: { fill: "fill-lime-400 text-lime-400 drop-shadow-[0_0_4px_rgba(163,230,53,0.5)]",       text: "text-lime-400" },
+  5: { fill: "fill-emerald-400 text-emerald-400 drop-shadow-[0_0_4px_rgba(52,211,153,0.5)]", text: "text-emerald-400" },
 };
 
 const StarRating = ({ rating, maxRating = 5, size = 20, showValue = false, animated = false }: StarRatingProps) => {

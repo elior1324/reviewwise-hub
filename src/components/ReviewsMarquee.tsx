@@ -58,7 +58,16 @@ interface ReviewsMarqueeProps {
 
 // ─── Star rating sub-component ────────────────────────────────────────────────
 
+const MARQUEE_STAR_COLORS: Record<number, string> = {
+  1: "fill-red-500 text-red-500",
+  2: "fill-orange-500 text-orange-500",
+  3: "fill-amber-400 text-amber-400",
+  4: "fill-lime-400 text-lime-400",
+  5: "fill-emerald-400 text-emerald-400",
+};
+
 function StarRating({ rating }: { rating: number }) {
+  const color = MARQUEE_STAR_COLORS[Math.max(1, Math.min(5, Math.round(rating)))] || MARQUEE_STAR_COLORS[3];
   return (
     <div className="flex gap-0.5" aria-label={`דירוג ${rating} מתוך 5`}>
       {[1, 2, 3, 4, 5].map((i) => (
@@ -67,8 +76,8 @@ function StarRating({ rating }: { rating: number }) {
           size={14}
           className={
             i <= rating
-              ? "fill-star text-star"
-              : "fill-star-empty text-star-empty opacity-30"
+              ? color
+              : "fill-transparent text-muted-foreground/20"
           }
         />
       ))}
@@ -258,7 +267,7 @@ export function ReviewsMarquee({
                 <Star
                   key={i}
                   size={20}
-                  className="fill-star text-star"
+                  className="fill-emerald-400 text-emerald-400"
                 />
               ))}
             </span>

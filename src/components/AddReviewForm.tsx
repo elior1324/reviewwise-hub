@@ -512,8 +512,12 @@ const AddReviewForm = ({ businessSlug, businessName, businessId, courseId, isVer
                             size={28}
                             className={`transition-colors ${
                               i <= (hoverRating || rating)
-                                ? "fill-star text-star"
-                                : "fill-star-empty text-star-empty"
+                                ? (hoverRating || rating) >= 5 ? "fill-emerald-400 text-emerald-400"
+                                : (hoverRating || rating) >= 4 ? "fill-lime-400 text-lime-400"
+                                : (hoverRating || rating) >= 3 ? "fill-amber-400 text-amber-400"
+                                : (hoverRating || rating) >= 2 ? "fill-orange-500 text-orange-500"
+                                : "fill-red-500 text-red-500"
+                                : "fill-transparent text-muted-foreground/20"
                             }`}
                           />
                         </button>

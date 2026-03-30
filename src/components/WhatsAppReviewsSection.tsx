@@ -31,18 +31,28 @@ const WhatsAppIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
+const WA_STAR_COLORS: Record<number, string> = {
+  1: "fill-red-500 text-red-500",
+  2: "fill-orange-500 text-orange-500",
+  3: "fill-amber-400 text-amber-400",
+  4: "fill-lime-400 text-lime-400",
+  5: "fill-emerald-400 text-emerald-400",
+};
+
 const StarRow = ({ rating, size = 11 }: { rating: number; size?: number }) => {
+  const rounded = Math.round(rating);
   const full  = Math.floor(rating);
   const half  = rating - full >= 0.5;
   const empty = 5 - full - (half ? 1 : 0);
+  const color = WA_STAR_COLORS[Math.max(1, Math.min(5, rounded))] || WA_STAR_COLORS[3];
   return (
     <div className="flex items-center gap-0.5">
       {Array(full).fill(null).map((_, i) => (
-        <Star key={`f${i}`} size={size} className="fill-amber-400 text-amber-400" />
+        <Star key={`f${i}`} size={size} className={color} />
       ))}
-      {half && <Star size={size} className="fill-amber-200 text-amber-400" />}
+      {half && <Star size={size} className={color} style={{ opacity: 0.6 }} />}
       {Array(empty).fill(null).map((_, i) => (
-        <Star key={`e${i}`} size={size} className="fill-transparent text-amber-300" />
+        <Star key={`e${i}`} size={size} className="fill-transparent text-muted-foreground/20" />
       ))}
     </div>
   );
