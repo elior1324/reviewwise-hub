@@ -643,14 +643,14 @@ const BusinessProfile = () => {
         />
 
         {/* ── Filter bar: rating + sort ────────────────────────────────────── */}
-        <div className="flex items-center gap-3 mb-6 flex-wrap justify-between">
+        <div className="flex items-center gap-2 mb-4 flex-wrap justify-between">
           {/* Rating filter — only shown for native review sources */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-muted-foreground shrink-0">דירוג:</span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] text-muted-foreground shrink-0">דירוג:</span>
             <Button
               variant={filterRating === null ? "default" : "outline"}
               size="sm"
-              className="h-7 text-xs px-2.5"
+              className="h-6 text-[11px] px-2"
               onClick={() => setFilterRating(null)}
             >
               הכל
@@ -660,7 +660,7 @@ const BusinessProfile = () => {
                 key={r}
                 variant={filterRating === r ? "default" : "outline"}
                 size="sm"
-                className="h-7 text-xs px-2.5"
+                className="h-6 text-[11px] px-1.5"
                 onClick={() => setFilterRating(filterRating === r ? null : r)}
               >
                 {r}★
@@ -668,15 +668,15 @@ const BusinessProfile = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {/* Sort order — applies to native reviews */}
             {showNativeSection && (
               <>
-                <ArrowUpDown size={12} className="text-muted-foreground" />
+                <ArrowUpDown size={10} className="text-muted-foreground" />
                 <select
                   value={sortOrder}
                   onChange={e => setSortOrder(e.target.value as typeof sortOrder)}
-                  className="text-xs bg-card border border-border/50 rounded-lg px-2.5 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer"
+                  className="text-[11px] bg-card border border-border/50 rounded-lg px-2 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer"
                   dir="rtl"
                 >
                   <option value="newest">חדשות קודם</option>
@@ -691,10 +691,10 @@ const BusinessProfile = () => {
             <Button
               variant="outline"
               size="sm"
-              className="h-7 text-xs px-3 gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+              className="h-6 text-[11px] px-2 gap-1 border-primary/30 text-primary hover:bg-primary/10"
               onClick={() => document.getElementById("write-review")?.scrollIntoView({ behavior: "smooth" })}
             >
-              <PenLine size={12} />
+              <PenLine size={10} />
               כתבו ביקורת
             </Button>
           </div>
@@ -706,12 +706,12 @@ const BusinessProfile = () => {
 
         {/* ── Native ReviewHub reviews ─────────────────────────────────────── */}
         {showNativeSection && (
-          <div className="space-y-6">
+          <div className="space-y-4">
 
             {/* Trust score notice */}
             {totalVerified > 0 && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-lg px-3 py-2.5">
-                <ShieldCheck size={13} className="text-primary shrink-0" />
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground bg-primary/5 border border-primary/15 rounded-lg px-2.5 py-1.5">
+                <ShieldCheck size={11} className="text-primary shrink-0" />
                 <span>
                   ציון האמון מחושב מ-<strong className="text-foreground">{totalVerified} ביקורות מאומתות רכישה</strong> בלבד
                   {totalOpen > 0 && ` · ${totalOpen} משובי קהילה מוצגים בנפרד ואינם נספרים`}
@@ -720,8 +720,8 @@ const BusinessProfile = () => {
             )}
 
             {/* Platform transparency disclosure */}
-            <div className="flex items-start gap-2 text-[11px] text-muted-foreground/70 border border-border/30 rounded-lg px-3 py-2.5 bg-muted/20">
-              <Info size={11} className="shrink-0 mt-0.5" />
+            <div className="flex items-start gap-1.5 text-[10px] text-muted-foreground/70 border border-border/30 rounded-lg px-2.5 py-1.5 bg-muted/20">
+              <Info size={10} className="shrink-0 mt-0.5" />
               <span>
                 חלק מהכותבים עשויים להיות בעלי עסקים הרשומים בפלטפורמה. ReviewHub מאפשרת לבעלי עסקים לדרג עסקים אחרים בתחומים שאינם מתחרים. ביקורת מסוג זה כפופה לאותן דרישות אימות ומדיניות ציות.
               </span>

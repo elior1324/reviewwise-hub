@@ -154,7 +154,7 @@ function SourceChip({
           onClick={onClick}
           whileTap={{ scale: 0.96 }}
           className={`
-            inline-flex items-center gap-1.5 rounded-xl px-3 py-2 border text-xs font-medium
+            inline-flex items-center gap-1 rounded-lg px-2 py-1.5 border text-[11px] font-medium
             transition-all duration-200 cursor-pointer select-none
             ${active
               ? `${def.activeBg} ${def.activeBorder} ${def.color} shadow-sm ring-1 ring-inset ring-current/10`
@@ -167,7 +167,7 @@ function SourceChip({
           {def.icon}
           <span>{def.shortLabel}</span>
           <span className={`
-            ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold
+            px-1 py-px rounded-full text-[9px] font-semibold
             ${active
               ? "bg-current/15 text-current"
               : "bg-border/40 text-muted-foreground"
@@ -175,8 +175,7 @@ function SourceChip({
           `}>
             {count}
           </span>
-          {/* Tier badge */}
-          <span className="text-[9px] opacity-50 font-normal">
+          <span className="text-[8px] opacity-50 font-normal">
             T{def.tier}
           </span>
         </motion.button>
@@ -248,11 +247,11 @@ const ReviewSourceBreakdown = ({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`rounded-xl border border-border/40 bg-card/50 p-4 mb-6 ${className}`}
+      className={`rounded-xl border border-border/40 bg-card/50 px-3 py-2.5 mb-4 ${className}`}
       dir="rtl"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
         <div className="flex items-center gap-2">
           <ExternalLink size={13} className="text-muted-foreground" />
           <span className="text-xs font-semibold text-foreground">
@@ -275,14 +274,14 @@ const ReviewSourceBreakdown = ({
       </div>
 
       {/* Source chips — "All" button + per-source */}
-      <div className="flex items-center gap-2 flex-wrap mb-3">
+      <div className="flex items-center gap-1.5 flex-wrap mb-2">
         {/* All button */}
         <motion.button
           type="button"
           onClick={() => onFilterChange("all")}
           whileTap={{ scale: 0.96 }}
           className={`
-            inline-flex items-center gap-1.5 rounded-xl px-3 py-2 border text-xs font-medium
+            inline-flex items-center gap-1 rounded-lg px-2 py-1.5 border text-[11px] font-medium
             transition-all duration-200
             ${activeFilter === "all"
               ? "bg-primary/15 border-primary/40 text-primary shadow-sm"
@@ -293,7 +292,7 @@ const ReviewSourceBreakdown = ({
         >
           הכל
           <span className={`
-            px-1.5 py-0.5 rounded-full text-[10px] font-semibold
+            px-1 py-px rounded-full text-[9px] font-semibold
             ${activeFilter === "all" ? "bg-primary/15 text-primary" : "bg-border/40 text-muted-foreground"}
           `}>
             {total}
@@ -313,7 +312,7 @@ const ReviewSourceBreakdown = ({
       </div>
 
       {/* Trust hierarchy legend */}
-      <div className="border-t border-border/30 pt-2.5">
+      <div className="border-t border-border/30 pt-1.5">
         <TierLegend />
       </div>
     </motion.div>
