@@ -629,13 +629,6 @@ const BusinessProfile = () => {
         {/* Testimonial Videos/Images */}
         {dbBusinessId && <TestimonialCarousel businessId={dbBusinessId} />}
 
-        {/* Review Form — always visible, auth on submit */}
-        <ReviewFormSection
-          businessSlug={business.slug}
-          businessName={business.name}
-          businessId={dbBusinessId || undefined}
-        />
-
         {/* ══════════════════════════════════════════════════════════════════
             REVIEW SOURCE BREAKDOWN — dual-purpose: stats + filter
             Clicking a source chip filters the sections below.
@@ -732,7 +725,7 @@ const BusinessProfile = () => {
                     T1 · נספר בציון
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
                   {verifiedFiltered.map((review, i) => (
                     <motion.div
                       key={review.id}
@@ -761,7 +754,7 @@ const BusinessProfile = () => {
                 <p className="text-xs text-muted-foreground mb-4">
                   משובים אלו לא עברו אימות רכישה ואינם נספרים בציון האמון הדיגיטלי.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
                   {openFiltered.map((review, i) => (
                     <motion.div
                       key={review.id}
@@ -882,6 +875,13 @@ const BusinessProfile = () => {
             </Button>
           </div>
         )}
+
+        {/* Review Form — shown after all reviews so visitors see reviews first */}
+        <ReviewFormSection
+          businessSlug={business.slug}
+          businessName={business.name}
+          businessId={dbBusinessId || undefined}
+        />
 
       </div>
       <Footer />
