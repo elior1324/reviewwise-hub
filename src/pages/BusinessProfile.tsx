@@ -643,61 +643,57 @@ const BusinessProfile = () => {
         />
 
         {/* ── Filter bar: rating + sort ────────────────────────────────────── */}
-        <div className="flex items-center gap-2 mb-4 flex-wrap justify-between">
-          {/* Rating filter — only shown for native review sources */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] text-muted-foreground shrink-0">דירוג:</span>
+        <div className="flex items-center gap-1.5 mb-4 flex-wrap">
+          {/* Rating filter */}
+          <span className="text-[11px] text-muted-foreground shrink-0">דירוג:</span>
+          <Button
+            variant={filterRating === null ? "default" : "outline"}
+            size="sm"
+            className="h-6 text-[11px] px-2"
+            onClick={() => setFilterRating(null)}
+          >
+            הכל
+          </Button>
+          {[5, 4, 3, 2, 1].map(r => (
             <Button
-              variant={filterRating === null ? "default" : "outline"}
+              key={r}
+              variant={filterRating === r ? "default" : "outline"}
               size="sm"
-              className="h-6 text-[11px] px-2"
-              onClick={() => setFilterRating(null)}
+              className="h-6 text-[11px] px-1.5"
+              onClick={() => setFilterRating(filterRating === r ? null : r)}
             >
-              הכל
+              {r}★
             </Button>
-            {[5, 4, 3, 2, 1].map(r => (
-              <Button
-                key={r}
-                variant={filterRating === r ? "default" : "outline"}
-                size="sm"
-                className="h-6 text-[11px] px-1.5"
-                onClick={() => setFilterRating(filterRating === r ? null : r)}
-              >
-                {r}★
-              </Button>
-            ))}
-          </div>
+          ))}
 
-          <div className="flex items-center gap-1.5">
-            {/* Sort order — applies to native reviews */}
-            {showNativeSection && (
-              <>
-                <ArrowUpDown size={10} className="text-muted-foreground" />
-                <select
-                  value={sortOrder}
-                  onChange={e => setSortOrder(e.target.value as typeof sortOrder)}
-                  className="text-[11px] bg-card border border-border/50 rounded-lg px-2 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer"
-                  dir="rtl"
-                >
-                  <option value="newest">חדשות קודם</option>
-                  <option value="oldest">ישנות קודם</option>
-                  <option value="highest">דירוג גבוה</option>
-                  <option value="lowest">דירוג נמוך</option>
-                </select>
-              </>
-            )}
+          {/* Separator dot */}
+          <span className="text-border hidden sm:inline">·</span>
 
-            {/* Shortcut to write review */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-6 text-[11px] px-2 gap-1 border-primary/30 text-primary hover:bg-primary/10"
-              onClick={() => document.getElementById("write-review")?.scrollIntoView({ behavior: "smooth" })}
+          {/* Sort order */}
+          {showNativeSection && (
+            <select
+              value={sortOrder}
+              onChange={e => setSortOrder(e.target.value as typeof sortOrder)}
+              className="h-6 text-[11px] bg-card border border-border/50 rounded-lg px-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer"
+              dir="rtl"
             >
-              <PenLine size={10} />
-              כתבו ביקורת
-            </Button>
-          </div>
+              <option value="newest">חדשות קודם</option>
+              <option value="oldest">ישנות קודם</option>
+              <option value="highest">דירוג גבוה</option>
+              <option value="lowest">דירוג נמוך</option>
+            </select>
+          )}
+
+          {/* Shortcut to write review */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-6 text-[11px] px-2 gap-1 border-primary/30 text-primary hover:bg-primary/10"
+            onClick={() => document.getElementById("write-review")?.scrollIntoView({ behavior: "smooth" })}
+          >
+            <PenLine size={10} />
+            כתבו ביקורת
+          </Button>
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════
