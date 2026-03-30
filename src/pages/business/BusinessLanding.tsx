@@ -9,13 +9,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Link } from "react-router-dom";
 import {
   ShieldCheck, Star, TrendingUp, Zap, BarChart3, Code,
-  Award, ArrowLeft, CheckCircle, Users, X, Crown, Sparkles,
-  Lock, MessageSquare, FileText, Webhook, LineChart, Headphones,
+  Award, ArrowLeft, Users, Crown, Sparkles,
+  MessageSquare, FileText, Webhook, LineChart, Headphones,
   UserCheck, Globe, ChevronDown, HelpCircle, Eye, Tag
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { useState, useRef, useCallback, useEffect } from "react";
 
 
@@ -44,74 +43,15 @@ const PRO_FEATURES: Feature[] = [
 ];
 
 const PREMIUM_FEATURES: Feature[] = [
-  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", locked: true, tooltip: "סנכרנו ביקורות ולידים ישירות למערכת ה-CRM שלכם — HubSpot, Salesforce ועוד." },
-  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", locked: true, tooltip: "ביקורת חיובית הופכת אוטומטית לליד — המערכת שולחת הפניה ללקוח המרוצה." },
-  { icon: Webhook, title: "Webhook למערכות חיצוניות", desc: "חברו ל-Zapier, Make ולכל מערכת עם webhook.", locked: true, tooltip: "כל אירוע (ביקורת חדשה, ליד וכו׳) נשלח אוטומטית ל-Zapier, Make או כל מערכת אחרת." },
-  { icon: Globe, title: "Google Ads Review Stars ⭐", desc: "הציגו כוכבי דירוג ישירות במודעות Google שלכם.", locked: true, tooltip: "כוכבי הדירוג שלכם מופיעים ישירות במודעות Google — מגדיל CTR ואמינות." },
-  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", locked: true, tooltip: "דוחות AI יומיים עם ניתוח מעמיק — מגמות, התרעות על ביקורות שליליות ותחזיות." },
-  { icon: Code, title: "גישת API מלאה", desc: "בנו אינטגרציות מותאמות אישית עם ה-API שלנו.", locked: true, tooltip: "גישה מלאה ל-API של ReviewHub — בנו אינטגרציות מותאמות לצרכים שלכם." },
+  { icon: Users, title: "חיבור CRM", desc: "חברו HubSpot, Salesforce ועוד ישירות לפלטפורמה.", tooltip: "סנכרנו ביקורות ולידים ישירות למערכת ה-CRM שלכם — HubSpot, Salesforce ועוד." },
+  { icon: FileText, title: "ניהול לידים והפניות", desc: "ניהול לידים אוטומטי — כל ביקורת חיובית הופכת להפניה.", tooltip: "ביקורת חיובית הופכת אוטומטית לליד — המערכת שולחת הפניה ללקוח המרוצה." },
+  { icon: Webhook, title: "Webhook למערכות חיצוניות", desc: "חברו ל-Zapier, Make ולכל מערכת עם webhook.", tooltip: "כל אירוע (ביקורת חדשה, ליד וכו׳) נשלח אוטומטית ל-Zapier, Make או כל מערכת אחרת." },
+  { icon: Globe, title: "Google Ads Review Stars ⭐", desc: "הציגו כוכבי דירוג ישירות במודעות Google שלכם.", tooltip: "כוכבי הדירוג שלכם מופיעים ישירות במודעות Google — מגדיל CTR ואמינות." },
+  { icon: LineChart, title: "דוחות AI מתקדמים יומיים", desc: "ניתוח עמוק עם מגמות, התרעות ותחזיות.", tooltip: "דוחות AI יומיים עם ניתוח מעמיק — מגמות, התרעות על ביקורות שליליות ותחזיות." },
+  { icon: Code, title: "גישת API מלאה", desc: "בנו אינטגרציות מותאמות אישית עם ה-API שלנו.", tooltip: "גישה מלאה ל-API של ReviewHub — בנו אינטגרציות מותאמות לצרכים שלכם." },
 ];
 
-const PLANS = [
-  {
-    name: "סטארטר",
-    price: "חינם",
-    period: "לתמיד",
-    tier: "free" as const,
-    features: [
-      "פרופיל עסקי ציבורי",
-      "עד 10 ביקורות בחודש",
-      "תג דירוג בסיסי",
-      "תגובות לביקורות",
-    ],
-    excluded: ["רשתות חברתיות ואתר", "דאשבורד אנליטיקס", "וידג׳טים להטמעה", "בקשות ביקורת אוטומטיות", "חיבור CRM ולידים", "דוחות AI"],
-    cta: "התחילו בחינם",
-    highlighted: false,
-  },
-  {
-    name: "מקצועי",
-    price: "₪189",
-    period: "/חודש",
-    tier: "pro" as const,
-    originalPrice: "₪249",
-    savings: "חסכו ₪60/חודש",
-    features: [
-      "עסק אחד לחשבון",
-      "ביקורות ללא הגבלה",
-      "רשתות חברתיות ואתר בפרופיל",
-      "דאשבורד מתקדם עם אנליטיקס",
-      "וידג׳טים להטמעה באתר",
-      "בקשות ביקורת אוטומטיות",
-      "Verified Deal — מודל 5/5 (לומד חוסך 5%, ReviewHub גובה 5%)",
-      "תמיכה בעדיפות",
-    ],
-    excluded: ["סיכומי AI שבועיים", "חיבור CRM ולידים", "Google Ads Review Stars", "דוחות AI יומיים"],
-    cta: "התחילו 14 ימי ניסיון",
-    highlighted: true,
-  },
-  {
-    name: "אנטרפרייז",
-    price: "₪479",
-    period: "/חודש",
-    tier: "enterprise" as const,
-    features: [
-      "הכל מהמקצועי, ועוד:",
-      "עסקים ללא הגבלה בחשבון אחד",
-      "סיכומי AI שבועיים",
-      "חיבור CRM — HubSpot, Salesforce ועוד",
-      "ניהול לידים והפניות אוטומטי",
-      "Webhook לכל מערכת (Zapier/Make)",
-      "Google Ads Review Stars ⭐",
-      "דוחות AI מתקדמים יומיים",
-      "גישת API מלאה",
-      "מנהל הצלחה אישי",
-    ],
-    excluded: [],
-    cta: "שדרגו לאנטרפרייז",
-    highlighted: false,
-    enterprise: true,
-  },
-];
+// All features are free — no paid plans
 
 // Trusted companies — fetched from DB (verified businesses with good ratings)
 // Smooth collapsible with measured height
@@ -148,9 +88,7 @@ const SmoothCollapse = ({ isOpen, preview, title }: { isOpen: boolean; preview?:
 };
 
 const BusinessLanding = () => {
-  const { user, subscriptionTier } = useAuth();
-  const { toast } = useToast();
-  const checkoutLoading: string | null = null;
+  const { user } = useAuth();
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
   const [trustedCompanies, setTrustedCompanies] = useState<{ name: string; initials: string }[]>([]);
 
@@ -177,13 +115,7 @@ const BusinessLanding = () => {
     setExpandedFeature(prev => prev === title ? null : title);
   };
 
-  const handleCheckout = (_tier: "pro" | "enterprise") => {
-    toast({
-      title: "מערכת תשלומים בשדרוג",
-      description: "אנו עובדים על שיפור מערכת התשלומים. אנא צרו קשר לשדרוג ידני.",
-      variant: "destructive",
-    });
-  };
+  // All features are free — no checkout needed
 
   return (
     <div className="min-h-screen bg-background noise-overlay" dir="rtl">
@@ -371,10 +303,10 @@ const BusinessLanding = () => {
       <section className="container py-20">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-            <Sparkles size={14} /> תוכנית מקצועי{user ? " — ₪189/חודש" : ""}
+            <Sparkles size={14} /> כלים מתקדמים — חינם
           </div>
           <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">כלים מתקדמים לניהול נתונים</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה וכלי גילוי — הכל מבוסס על נתוני אמון אמיתיים</p>
+          <p className="text-muted-foreground max-w-xl mx-auto">אנליטיקס, אוטומציה וכלי גילוי — הכל מבוסס על נתוני אמון אמיתיים. חינם לגמרי.</p>
         </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {PRO_FEATURES.map(({ icon: Icon, title, desc, preview, tooltip }, i) => (
@@ -422,10 +354,10 @@ const BusinessLanding = () => {
         <div className="container py-20">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-foreground text-background text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-              <Crown size={14} /> תוכנית אנטרפרייז{user ? " — ₪479/חודש" : ""}
+              <Crown size={14} /> אינטגרציות מתקדמות — חינם
             </div>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">CRM, לידים ואינטגרציות</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">חברו את ReviewHub לכל המערכות שלכם והפכו ביקורות ללידים</p>
+            <p className="text-muted-foreground max-w-xl mx-auto">חברו את ReviewHub לכל המערכות שלכם והפכו ביקורות ללידים — הכל חינם</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {PREMIUM_FEATURES.map(({ icon: Icon, title, desc, preview, tooltip }, i) => (
@@ -438,8 +370,8 @@ const BusinessLanding = () => {
                 }`}
                 onClick={() => preview && toggleFeature(title)}
               >
-                <div className="absolute top-4 left-4 flex items-center gap-2">
-                  {tooltip && (
+                {tooltip && (
+                  <div className="absolute top-4 left-4">
                     <TooltipProvider delayDuration={100}>
                       <Tooltip>
                         <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -452,11 +384,8 @@ const BusinessLanding = () => {
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                  )}
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
-                    <Lock size={10} /> אנטרפרייז
                   </div>
-                </div>
+                )}
                 <div className="flex items-start justify-between">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                     <Icon size={22} className="text-primary" />
@@ -474,108 +403,27 @@ const BusinessLanding = () => {
         </div>
       </section>
 
-      {/* Pricing — only visible to authenticated users */}
-      {user && (
-        <section className="container py-20" id="pricing">
-          <div className="text-center mb-12">
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">תוכניות ומחירים</h2>
-            <p className="text-muted-foreground">בחרו את התוכנית המתאימה לעסק שלכם</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
-            {PLANS.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                custom={i}
-                className={`rounded-xl p-6 border ${
-                  plan.highlighted
-                    ? "bg-card border-primary/50 shadow-card-hover relative scale-[1.03]"
-                    : plan.enterprise
-                    ? "bg-gradient-to-b from-card to-primary/5 border-primary/30 relative"
-                    : "bg-card border-border/50"
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                    <Sparkles size={12} /> הכי פופולרי
-                  </div>
-                )}
-                {plan.enterprise && (
-                  <div className="absolute -top-3 right-4 bg-foreground text-background text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                    <Crown size={12} /> הכל כולל הכל
-                  </div>
-                )}
-                <h3 className="font-display font-bold text-xl text-foreground mb-1">{plan.name}</h3>
-                <div className="mb-1">
-                  {plan.originalPrice && (
-                    <span className="text-sm text-muted-foreground line-through ml-2">{plan.originalPrice}</span>
-                  )}
-                  <span className="font-display font-bold text-3xl text-primary">{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{plan.period}</span>
-                </div>
-                {plan.savings && (
-                  <p className="text-xs text-primary font-semibold mb-3">{plan.savings}</p>
-                )}
-                {!plan.savings && <div className="mb-4" />}
-                <ul className="space-y-2 mb-4">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
-                      <CheckCircle size={14} className="text-primary shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                {plan.excluded.length > 0 && (
-                  <ul className="space-y-1.5 mb-4 opacity-50">
-                    {plan.excluded.map((f: string) => (
-                      <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground line-through">
-                        <X size={14} className="shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {plan.tier === "free" ? (
-                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80" disabled={subscriptionTier === "free"}>
-                    {subscriptionTier === "free" ? "✓ התוכנית הנוכחית" : plan.cta}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => handleCheckout(plan.tier as "pro" | "enterprise")}
-                    disabled={checkoutLoading === plan.tier || subscriptionTier === plan.tier}
-                    className={`w-full ${
-                      plan.highlighted
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90 glow-primary"
-                        : plan.enterprise
-                        ? "bg-foreground text-background hover:bg-foreground/90"
-                        : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                    }`}
-                  >
-                    {subscriptionTier === plan.tier ? "✓ התוכנית הנוכחית" : checkoutLoading === plan.tier ? "טוען..." : plan.cta}
-                  </Button>
-                )}
-              </motion.div>
-            ))}
-          </div>
-          <p className="text-center text-xs text-muted-foreground mt-8">כל התוכניות כוללות SSL, גיבוי יומי ואבטחת מידע מלאה. ביטול בכל עת.</p>
-        </section>
-      )}
+      {/* Free platform banner */}
+      <section className="container py-16" id="pricing">
+        <div className="rounded-2xl p-10 text-center bg-primary/5 border border-primary/20">
+          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">חינם לגמרי</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto mb-2">כל הפיצ׳רים, כל הכלים, ללא הגבלה — בחינם. אין תוכניות בתשלום, אין כרטיס אשראי.</p>
+          <p className="text-xs text-muted-foreground">SSL, גיבוי יומי ואבטחת מידע מלאה — כלולים.</p>
+        </div>
+      </section>
 
-      {/* CTA for non-authenticated — replaces pricing */}
+      {/* CTA for non-authenticated */}
       {!user && (
         <section className="container py-20">
           <div className="rounded-2xl p-10 md:p-16 text-center relative overflow-hidden animated-border" style={{ background: "linear-gradient(135deg, hsl(160 84% 39% / 0.08), hsl(160 60% 55% / 0.04))" }}>
             <div className="absolute inset-0 bg-primary/5 blur-3xl" />
             <div className="relative">
-              <Lock size={32} className="mx-auto mb-4 text-primary" />
+              <ShieldCheck size={32} className="mx-auto mb-4 text-primary" />
               <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
-                רוצים לראות מחירים ולהתחיל?
+                הכל חינם. בלי תנאים.
               </h2>
               <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-                צרו חשבון עסקי בחינם כדי לראות את כל התוכניות, המחירים והפיצ'רים המתקדמים. ההרשמה לוקחת פחות מדקה.
+                צרו חשבון עסקי וקבלו גישה לכל הכלים — אנליטיקס, ווידג׳טים, AI, אינטגרציות ועוד. חינם לגמרי, ללא כרטיס אשראי.
               </p>
               <div className="flex gap-3 justify-center flex-wrap">
                 <Link to="/business/signup">
@@ -604,7 +452,7 @@ const BusinessLanding = () => {
                 הציון שלכם — בלתי תלוי
               </h2>
               <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-                שדרגו לכלים מתקדמים — הציון שלכם ממשיך להיות מחושב באופן עצמאי, ללא קשר לתוכנית.
+                כל הכלים פתוחים לכם בחינם. הציון שלכם מחושב באופן עצמאי ולא ניתן לרכישה.
               </p>
               <Link to="/business/dashboard">
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-primary gap-2">

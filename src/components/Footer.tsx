@@ -150,6 +150,12 @@ const Footer = () => {
               מדיניות ביטולים והחזרים
             </Link>
             <Link
+              to="/review-policy"
+              className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
+            >
+              מדיניות ביקורות
+            </Link>
+            <Link
               to="/accessibility"
               className="block text-sm text-muted-foreground hover:text-foreground md:hover:translate-x-0.5 transition-all duration-200"
             >

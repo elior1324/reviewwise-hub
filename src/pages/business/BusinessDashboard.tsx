@@ -697,9 +697,9 @@ const BusinessDashboard = () => {
               <p className="text-sm font-medium text-zinc-100 truncate">{displayBusiness.name}</p>
               <p className="text-xs text-zinc-400 truncate">{displayBusiness.email}</p>
             </div>
-            {/* Tier chip */}
+            {/* Free badge */}
             <span className="text-[10px] font-semibold bg-zinc-800 border border-zinc-600/50 text-zinc-300 px-2.5 py-1 rounded-full shrink-0 uppercase tracking-wide">
-              {currentTier === "enterprise" ? "Enterprise" : currentTier === "pro" ? "Pro" : "Free"}
+              חינם
             </span>
           </div>
         )}
@@ -1255,7 +1255,7 @@ const BusinessDashboard = () => {
               <p className="text-muted-foreground text-sm mb-4">
                 העלו עד 5 סרטונים או תמונות של לקוחות מרוצים. ניתן להעלות קבצים ישירות או להוסיף קישורי YouTube / TikTok.
                 <br />
-                <span className="text-xs text-primary">זמין למנויי Professional ו-Enterprise בלבד.</span>
+                <span className="text-xs text-primary">זמין לכל עסק רשום — חינם.</span>
               </p>
               <TestimonialMediaUploader businessId={businessId || "demo"} maxItems={5} />
             </div>

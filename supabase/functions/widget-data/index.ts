@@ -55,13 +55,7 @@ serve(async (req) => {
       });
     }
 
-    // Only Pro and Enterprise can use the widget
-    if (biz.subscription_tier !== "pro" && biz.subscription_tier !== "enterprise") {
-      return new Response(JSON.stringify({ error: "Widget available for Pro and Enterprise plans only" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Widget is free for all businesses — no tier check needed
 
     const rating = Number(biz.rating) || 0;
     const reviewCount = biz.review_count || 0;

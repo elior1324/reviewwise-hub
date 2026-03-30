@@ -35,6 +35,7 @@ import ModernSlaveryStatement from "./pages/ModernSlaveryStatement";
 import AccessibilityStatement from "./pages/AccessibilityStatement";
 import RefundPolicy from "./pages/RefundPolicy";
 import CookiePolicy from "./pages/legal/CookiePolicy";
+import ReviewPolicyPage from "./pages/ReviewPolicyPage";
 import DPA from "./pages/legal/DPA";
 
 // Reviewer
@@ -119,6 +120,7 @@ const App = () => (
             <Route path="/accessibility" element={<AccessibilityStatement />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/cookies" element={<CookiePolicy />} />
+            <Route path="/review-policy" element={<ReviewPolicyPage />} />
             <Route path="/legal/dpa" element={<DPA />} />
 
             {/* Reviewer */}

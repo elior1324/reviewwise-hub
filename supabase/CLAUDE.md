@@ -43,7 +43,7 @@ This directory contains the database layer: SQL migration history, Deno TypeScri
 
 ### Payment Functions
 
-- PayPlus has been fully removed from this codebase. `create-checkout/` and `payplus-webhook/` Edge Functions no longer exist.
+- All payment provider Edge Functions have been removed: `create-checkout/`, `grow-make-webhook/`, `hyp-webhook/`, `payplus-webhook/`. No active payment provider exists.
 - When a payment provider is integrated in the future, always verify webhook HMAC signatures before processing any payment event.
 
 ### Cron Functions

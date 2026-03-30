@@ -64,8 +64,7 @@ const Navbar = () => {
     }`;
   };
 
-  // Pricing is now open to all authenticated users (C-7 fix)
-  const canSeePricing = !!user;
+  // All features are free — no pricing page needed
 
   const handleSignOut = async () => {
     await signOut();

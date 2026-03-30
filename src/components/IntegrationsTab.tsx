@@ -89,7 +89,7 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
   const [loading, setLoading] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  const disabled = !isEnterprise;
+  const disabled = false; // All features are free
 
   useEffect(() => {
     if (isDemo || !businessId) {
@@ -321,7 +321,7 @@ const IntegrationsTab = ({ businessId, isEnterprise, isDemo, onUpgrade }: Integr
                 <CardTitle className="text-lg font-display font-bold flex items-center gap-2 flex-wrap">
                   התחברו ל-6,000+ אפליקציות דרך Zapier & Make
                   <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-2">
-                    <Crown size={10} className="ml-1" /> אנטרפרייז
+                    חינם
                   </Badge>
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">

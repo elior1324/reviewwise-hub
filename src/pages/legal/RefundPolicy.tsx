@@ -70,8 +70,8 @@ const RefundPolicy = () => (
           </h1>
           <p className="text-muted-foreground text-lg">גרסה 1.0 — מרץ 2026</p>
           <p className="text-muted-foreground mt-2">
-            מדיניות זו מסדירה את תנאי ביטול עסקאות והחזרים כספיים עבור שירותי ReviewHub בתשלום,
-            בהתאם לחוק הגנת הצרכן, התשמ&quot;א-1981.
+            ReviewHub היא פלטפורמה חינמית לגמרי. אין תוכניות בתשלום, אין מנויים ואין חיובים.
+            מדיניות זו נשמרת לצורך שקיפות בהתאם לחוק הגנת הצרכן, התשמ&quot;א-1981.
           </p>
         </motion.div>
       </div>
@@ -165,24 +165,12 @@ const RefundPolicy = () => (
           </ul>
         </Section>
 
-        {/* 5 — Free plan */}
-        <Section icon={RotateCcw} title='תוכנית חינם (Starter)'>
+        {/* 5 — Free platform */}
+        <Section icon={RotateCcw} title="שירות חינמי">
           <p>
-            תוכנית החינם אינה כרוכה בתשלום ולכן אינה כפופה למדיניות ביטולים והחזרים. ניתן
-            למחוק חשבון חינמי בכל עת דרך הגדרות החשבון.
+            ReviewHub היא פלטפורמה חינמית לגמרי. אין תוכניות בתשלום, אין מנויים ואין חיובים.
+            ניתן למחוק חשבון בכל עת דרך הגדרות החשבון.
           </p>
-        </Section>
-
-        {/* 6 — Trial */}
-        <Section icon={Clock} title="תקופות ניסיון">
-          <p className="mb-3">ככל שתקבלו תקופת ניסיון חינם:</p>
-          <ul className="list-disc pr-6 space-y-2 text-muted-foreground">
-            <li>לא ייגבה תשלום בתקופת הניסיון.</li>
-            <li>
-              בתום תקופת הניסיון, המנוי יתחדש אוטומטית לתוכנית בתשלום אלא אם תבטלו לפני כן.
-            </li>
-            <li>ביטול בתקופת הניסיון אינו כרוך בדמי ביטול.</li>
-          </ul>
         </Section>
 
         {/* 7 — Special cases */}

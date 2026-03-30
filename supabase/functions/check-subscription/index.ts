@@ -4,9 +4,9 @@
  * Checks whether the authenticated user has an active paid subscription.
  * Backed entirely by the Supabase DB — no external payment API calls needed.
  *
- * Subscription state is maintained by the hyp-webhook IPN handler:
- *   • Successful payment  → subscription_expires_at is extended
- *   • J4 tokenisation     → trial_ends_at is set (30-day free trial)
+ * Subscription state is maintained by:
+ *   • apply-coupon Edge Function  → sets subscription_tier + subscription_expires_at
+ *   • No active payment provider  — Grow/HYP have been removed
  *
  * Response shape:
  *   { subscribed, tier, subscription_end, in_trial }

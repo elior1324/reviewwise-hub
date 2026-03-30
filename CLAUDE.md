@@ -10,8 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Server-state:** TanStack React Query 5
 **Global state:** Context API only — `AuthContext` (auth + MFA + rate limiting + subscription) and `ModeContext` (user/business toggle)
 **Forms:** React Hook Form + Zod — no exceptions
-**Backend:** Supabase (PostgreSQL + RLS + Auth + 42 Edge Functions in Deno TypeScript)
-**Payments:** Grow payment links (direct redirect, no server-side checkout). Coupon-based access system for premium tiers.
+**Backend:** Supabase (PostgreSQL + RLS + Auth + 39 Edge Functions in Deno TypeScript)
+**Payments:** Coupon-based access system for premium tiers. No active payment provider — Grow/HYP have been removed.
 **Hosting:** Lovable/Netlify CDN
 **UI language:** Hebrew-first, full RTL (`lang="he"`, `dir="rtl"`)
 **Supabase project:** `pujsopidbejeuqteormi` (region: ap-southeast-1)
@@ -84,7 +84,7 @@ npx supabase functions deploy <name>                                            
 - Never hardcode secrets, API keys, or credentials anywhere. Frontend uses `import.meta.env.VITE_*`. Edge Functions use `Deno.env.get()`. Server-side secrets (`RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, etc.) must never appear in the frontend bundle.
 - Never use the Supabase service role key in frontend code. It belongs only in Edge Functions for privileged operations.
 - Never bypass RLS by switching to the service role client from frontend components.
-- When integrating any future payment provider, always verify webhook HMAC signatures before processing.
+- When integrating a future payment provider, always verify webhook HMAC signatures before processing. No payment provider is currently active.
 
 ### Trust Score Isolation — Critical Architectural Rule
 
@@ -104,12 +104,12 @@ The trust system has three strictly isolated layers. Never mix them.
 
 ### Checkout & Subscription Architecture
 
-- **Pricing page** (`PricingPage.tsx`) uses direct Grow payment links — no server-side checkout. Links are in `GROW_PAYMENT_LINKS` constant.
+- **No active payment provider.** Grow and HYP (YaadPay) have been removed. Do not introduce a payment provider without explicit discussion.
 - **Coupon system** (`apply-coupon` Edge Function) handles premium access codes. Coupons are in `public.coupons` table, redemptions in `public.coupon_redemptions`.
 - `duration_months = 0` means **lifetime** access (no expiration). `subscription_expires_at = NULL` on a non-free tier = lifetime.
 - `check-subscription` Edge Function determines active tier. It auto-downgrades to "free" when `subscription_expires_at` has passed, but **never** downgrades lifetime subscriptions (NULL expiry).
 - Three subscription tiers: `"free"` | `"pro"` | `"enterprise"`. Feature gating is in `src/hooks/useFeatureGating.ts`.
-- Do not introduce Stripe, PayPlus, or other payment providers without explicit discussion. The current system is coupon + Grow links only.
+- Platform is currently 100% free — `checkSubscription()` in AuthContext returns `"enterprise"` for all users. When a payment provider is added, this must be replaced with a real server-side check.
 
 ### Auth & Sessions
 
@@ -188,7 +188,6 @@ These phrases indicate incomplete work and require verification before closing a
 | `RESEND_API_KEY` | Edge Functions only | Transactional email |
 | `TURNSTILE_SECRET_KEY` | Edge Functions only | Cloudflare Turnstile verification |
 | `CRON_SECRET` | Edge Functions only | Cron job auth header |
-| `GROW_MAKE_SECRET` | Edge Functions only | Make.com webhook auth |
 | `FRONTEND_URL` | Edge Functions only | Public app URL for links/redirects |
 
 Frontend code cannot and must not access `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, or any other server-side secret.
@@ -214,12 +213,11 @@ Frontend code cannot and must not access `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY
 | `src/components/ServiceCard.tsx` | Service/product card with dynamic affiliate CTA |
 | `src/components/CouponInput.tsx` | Coupon code input UI (used in settings page) |
 | `src/components/AccessibilityMenu.tsx` | Accessibility toolbar (9 a11y features, persisted in localStorage) |
-| `src/pages/business/PricingPage.tsx` | Pricing plans with Grow payment link redirect |
+| `src/pages/business/PricingPage.tsx` | Pricing plans (coupon-based, no active payment provider) |
 | `src/pages/business/BusinessSettingsPage.tsx` | Business settings — profile, contact, affiliate URL, coupon activation |
-| `supabase/functions/` | 42 Deno TypeScript Edge Functions |
+| `supabase/functions/` | 39 Deno TypeScript Edge Functions |
 | `supabase/functions/apply-coupon/` | Coupon redemption (supports lifetime via duration_months=0) |
 | `supabase/functions/check-subscription/` | Subscription state check (handles lifetime NULL expiry) |
-| `supabase/functions/grow-make-webhook/` | Post-payment webhook from Grow via Make |
 | `supabase/migrations/` | 78+ SQL migration files (applied history) |
 | `public/_headers` | Netlify security headers (CSP, HSTS, MIME) |
 | `vite.config.ts` | Build config + CSP header configuration |

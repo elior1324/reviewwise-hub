@@ -84,7 +84,7 @@ function buildEmbedSnippet(slug: string, variant: "full" | "mini" | "sidebar") {
 const FAQ = [
   {
     q: "באיזה תכנית זמין ווידג׳ט האמון?",
-    a: "ווידג׳ט האמון זמין לעסקים בתכנית Pro ו-Premium. תכנית הבסיס כוללת תג מינימלי בלבד.",
+    a: "ווידג׳ט האמון זמין לכל עסק רשום ב-ReviewHub — חינם לגמרי, ללא הגבלה.",
   },
   {
     q: "האם הווידג׳ט יאט את האתר שלי?",
@@ -96,7 +96,7 @@ const FAQ = [
   },
   {
     q: "האם אפשר לעצב את הווידג׳ט לפי המותג שלי?",
-    a: "בתכנית Premium ניתן לבחור בין ערכת נושא בהירה לכהה, וכן לציין צבע מותג מותאם. תמיכה ב-CSS מותאם אישית בתכנית Enterprise.",
+    a: "כן. ניתן לבחור בין ערכת נושא בהירה לכהה, וכן לציין צבע מותג מותאם. תמיכה ב-CSS מותאם אישית זמינה לכל עסק.",
   },
   {
     q: "האם זה עובד על מובייל?",
@@ -224,21 +224,7 @@ export default function TrustBadgePage() {
               המאומתות לעבוד בשבילכם — אפס קוד, תמיד עדכני.
             </p>
 
-            {!isPro && user && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-400 text-sm mb-6"
-              >
-                <Lock size={14} />
-                <span>
-                  הווידג׳ט זמין לתכניות Pro ו-Premium.{" "}
-                  <a href="/register" className="underline underline-offset-2 hover:text-amber-300">
-                    שדרגו עכשיו
-                  </a>
-                </span>
-              </motion.div>
-            )}
+            {/* Widget is free for all businesses */}
           </motion.div>
         </section>
 
@@ -537,25 +523,15 @@ export default function TrustBadgePage() {
                   מוכנים להציג את הביקורות שלכם?
                 </h2>
                 <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                  שדרגו לתכנית Pro וקבלו גישה מלאה לווידג׳ט האמון, ניתוח AI,
-                  ואינטגרציות עם HubSpot וגוגל שיטס.
+                  הירשמו בחינם וקבלו גישה מלאה לווידג׳ט האמון, ניתוח AI,
+                  ואינטגרציות — הכל ללא עלות.
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <Button
                     asChild
                     className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8"
                   >
-                    <a href="/register">שדרגו לPro</a>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="border-border/50 text-foreground/70 hover:text-white hover:bg-muted/30"
-                  >
-                    <a href="/register" className="flex items-center gap-1.5">
-                      <span>ראו את כל התכניות</span>
-                      <ExternalLink size={13} />
-                    </a>
+                    <a href="/register">הירשמו בחינם</a>
                   </Button>
                 </div>
               </div>

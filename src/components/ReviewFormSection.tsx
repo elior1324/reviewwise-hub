@@ -456,6 +456,10 @@ const ReviewFormSection = ({ businessSlug, businessName, businessId }: ReviewFor
               <p className="text-[11px] text-muted-foreground/60 flex items-start gap-1.5 leading-relaxed">
                 <ShieldCheck size={12} className="shrink-0 mt-0.5 text-muted-foreground/40" />
                 ביקורות מתבססות על חוויה אישית ועוברות בדיקה לפני פרסום.
+                {" "}
+                <a href="/review-policy" target="_blank" rel="noopener noreferrer" className="text-primary/60 hover:text-primary hover:underline whitespace-nowrap">
+                  מדיניות ביקורות
+                </a>
               </p>
               <Button
                 onClick={handleSubmit}

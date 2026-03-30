@@ -36,24 +36,7 @@ interface SocialLinksEditorProps {
 }
 
 const SocialLinksEditor = ({ values, onChange, locked = false }: SocialLinksEditorProps) => {
-  if (locked) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-xl border border-border/50 bg-muted/30 p-6 text-center"
-      >
-        <Lock size={24} className="mx-auto mb-3 text-muted-foreground" />
-        <p className="font-display font-semibold text-foreground mb-1">קישורי רשתות חברתיות</p>
-        <p className="text-sm text-muted-foreground mb-3">
-          חברו את הרשתות החברתיות, אתר האינטרנט וכל הפלטפורמות שלכם לפרופיל העסקי.
-        </p>
-        <p className="text-xs text-primary font-medium">
-          זמין בחבילת מקצועי (₪189/חו׳) ומעלה
-        </p>
-      </motion.div>
-    );
-  }
+  // Social links are free for all users — locked state no longer applies
 
   return (
     <motion.div

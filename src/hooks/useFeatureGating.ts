@@ -39,39 +39,32 @@ function hasAtLeast(current: SubscriptionTier, required: SubscriptionTier): bool
   return TIER_ORDER[current] >= TIER_ORDER[required];
 }
 
-export function useFeatureGating(tier: SubscriptionTier): FeatureAccess {
+export function useFeatureGating(_tier: SubscriptionTier): FeatureAccess {
   return useMemo(() => {
-    const isPro = hasAtLeast(tier, "pro");
-    const isEnterprise = hasAtLeast(tier, "enterprise");
-
+    // All features are free — no tier gating
     return {
-      // Basic — always available
       publicProfile: true,
-      reviewLimit: isPro ? Infinity : 10,
+      reviewLimit: Infinity,
       basicBadge: true,
       replyToReviews: true,
-
-      // Pro and above
-      unlimitedReviews: isPro,
-      socialLinks: isPro,
-      analyticsDashboard: isPro,
-      embedWidgets: true,        // available on all plans including free
-      autoReviewRequests: isPro,
-      affiliateSystem: isPro,
-      prioritySupport: isPro,
-      weeklyAiSummaries: isPro,
-
-      // Enterprise only
-      unlimitedBusinesses: isEnterprise,
-      dailyAiReports: isEnterprise,
-      crmIntegration: isEnterprise,
-      leadsManagement: isEnterprise,
-      webhooks: isEnterprise,
-      googleAdsStars: isEnterprise,
-      fullApiAccess: isEnterprise,
-      personalSuccessManager: isEnterprise,
+      unlimitedReviews: true,
+      socialLinks: true,
+      analyticsDashboard: true,
+      embedWidgets: true,
+      autoReviewRequests: true,
+      affiliateSystem: true,
+      prioritySupport: true,
+      weeklyAiSummaries: true,
+      unlimitedBusinesses: true,
+      dailyAiReports: true,
+      crmIntegration: true,
+      leadsManagement: true,
+      webhooks: true,
+      googleAdsStars: true,
+      fullApiAccess: true,
+      personalSuccessManager: true,
     };
-  }, [tier]);
+  }, []);
 }
 
 export function getTierLabel(tier: SubscriptionTier): string {
