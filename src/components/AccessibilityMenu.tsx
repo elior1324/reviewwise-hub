@@ -86,91 +86,117 @@ const AccessibilityMenu = () => {
     return val === true;
   });
 
+  const menuContent = (
+    <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuItem onClick={cycleFontSize}>
+        <span className="flex items-center justify-between w-full">
+          <span>גודל טקסט</span>
+          <span className="text-xs text-muted-foreground">{fontSizeLabels[settings.fontSize]}</span>
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => toggle("highContrast")}>
+        <span className="flex items-center justify-between w-full">
+          <span>ניגודיות גבוהה</span>
+          {isActive("highContrast") && <span className="text-xs text-primary">✓</span>}
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => toggle("reducedMotion")}>
+        <span className="flex items-center justify-between w-full">
+          <span>הפחתת אנימציות</span>
+          {isActive("reducedMotion") && <span className="text-xs text-primary">✓</span>}
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => toggle("linkHighlight")}>
+        <span className="flex items-center justify-between w-full">
+          <span>הדגשת קישורים</span>
+          {isActive("linkHighlight") && <span className="text-xs text-primary">✓</span>}
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => toggle("readableFont")}>
+        <span className="flex items-center justify-between w-full">
+          <span>פונט קריא</span>
+          {isActive("readableFont") && <span className="text-xs text-primary">✓</span>}
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => toggle("bigCursor")}>
+        <span className="flex items-center justify-between w-full">
+          <span>סמן מוגדל</span>
+          {isActive("bigCursor") && <span className="text-xs text-primary">✓</span>}
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => toggle("grayscale")}>
+        <span className="flex items-center justify-between w-full">
+          <span>גווני אפור</span>
+          {isActive("grayscale") && <span className="text-xs text-primary">✓</span>}
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => toggle("textSpacing")}>
+        <span className="flex items-center justify-between w-full">
+          <span>ריווח טקסט</span>
+          {isActive("textSpacing") && <span className="text-xs text-primary">✓</span>}
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => toggle("boldText")}>
+        <span className="flex items-center justify-between w-full">
+          <span>טקסט מודגש</span>
+          {isActive("boldText") && <span className="text-xs text-primary">✓</span>}
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => toggle("invertColors")}>
+        <span className="flex items-center justify-between w-full">
+          <span>מצב כהה</span>
+          {isActive("invertColors") && <span className="text-xs text-primary">✓</span>}
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onClick={resetAll} className="text-muted-foreground">
+        <span className="flex items-center gap-2">
+          <RotateCcw size={14} />
+          איפוס הגדרות
+        </span>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  );
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`rounded-full border border-border/50 relative ${hasAnyActive ? "text-primary border-primary/50" : ""}`}
-          aria-label="תפריט נגישות"
-        >
-          <Accessibility size={18} />
-          {hasAnyActive && (
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary" />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuItem onClick={cycleFontSize}>
-          <span className="flex items-center justify-between w-full">
-            <span>גודל טקסט</span>
-            <span className="text-xs text-muted-foreground">{fontSizeLabels[settings.fontSize]}</span>
-          </span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toggle("highContrast")}>
-          <span className="flex items-center justify-between w-full">
-            <span>ניגודיות גבוהה</span>
-            {isActive("highContrast") && <span className="text-xs text-primary">✓</span>}
-          </span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toggle("reducedMotion")}>
-          <span className="flex items-center justify-between w-full">
-            <span>הפחתת אנימציות</span>
-            {isActive("reducedMotion") && <span className="text-xs text-primary">✓</span>}
-          </span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toggle("linkHighlight")}>
-          <span className="flex items-center justify-between w-full">
-            <span>הדגשת קישורים</span>
-            {isActive("linkHighlight") && <span className="text-xs text-primary">✓</span>}
-          </span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toggle("readableFont")}>
-          <span className="flex items-center justify-between w-full">
-            <span>פונט קריא</span>
-            {isActive("readableFont") && <span className="text-xs text-primary">✓</span>}
-          </span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toggle("bigCursor")}>
-          <span className="flex items-center justify-between w-full">
-            <span>סמן מוגדל</span>
-            {isActive("bigCursor") && <span className="text-xs text-primary">✓</span>}
-          </span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toggle("grayscale")}>
-          <span className="flex items-center justify-between w-full">
-            <span>גווני אפור</span>
-            {isActive("grayscale") && <span className="text-xs text-primary">✓</span>}
-          </span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toggle("textSpacing")}>
-          <span className="flex items-center justify-between w-full">
-            <span>ריווח טקסט</span>
-            {isActive("textSpacing") && <span className="text-xs text-primary">✓</span>}
-          </span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toggle("boldText")}>
-          <span className="flex items-center justify-between w-full">
-            <span>טקסט מודגש</span>
-            {isActive("boldText") && <span className="text-xs text-primary">✓</span>}
-          </span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toggle("invertColors")}>
-          <span className="flex items-center justify-between w-full">
-            <span>מצב כהה</span>
-            {isActive("invertColors") && <span className="text-xs text-primary">✓</span>}
-          </span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={resetAll} className="text-muted-foreground">
-          <span className="flex items-center gap-2">
-            <RotateCcw size={14} />
-            איפוס הגדרות
-          </span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      {/* Desktop — inline in Navbar */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`hidden sm:inline-flex rounded-full border border-border/50 relative ${hasAnyActive ? "text-primary border-primary/50" : ""}`}
+            aria-label="תפריט נגישות"
+          >
+            <Accessibility size={18} />
+            {hasAnyActive && (
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary" />
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        {menuContent}
+      </DropdownMenu>
+
+      {/* Mobile — fixed floating button, bottom-left */}
+      <div className="sm:hidden fixed bottom-4 left-4 z-50">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon"
+              className={`w-10 h-10 rounded-full shadow-lg border border-border/50 bg-card hover:bg-card/90 relative ${hasAnyActive ? "text-primary border-primary/50" : "text-foreground"}`}
+              aria-label="תפריט נגישות"
+            >
+              <Accessibility size={18} />
+              {hasAnyActive && (
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary" />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          {menuContent}
+        </DropdownMenu>
+      </div>
+    </>
   );
 };
 
