@@ -70,7 +70,7 @@ const RefundPolicy = () => (
           </h1>
           <p className="text-muted-foreground text-lg">גרסה 1.0 — מרץ 2026</p>
           <p className="text-muted-foreground mt-2">
-            ReviewHub היא פלטפורמה חינמית לגמרי. אין תוכניות בתשלום, אין מנויים ואין חיובים.
+            ReviewHub היא פלטפורמה חינמית לגמרי, ללא הגבלת זמן. אין תוכניות בתשלום, אין מנויים ואין חיובים.
             מדיניות זו נשמרת לצורך שקיפות בהתאם לחוק הגנת הצרכן, התשמ&quot;א-1981.
           </p>
         </motion.div>
@@ -131,45 +131,14 @@ const RefundPolicy = () => (
           </ul>
         </Section>
 
-        {/* 3 — Cancellation fees */}
-        <Section icon={CreditCard} title="דמי ביטול">
-          <p className="mb-3">בהתאם לחוק הגנת הצרכן:</p>
-          <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-            <li>
-              <strong>ביטול בתוך 14 ימים ולפני תחילת מתן השירות:</strong> ReviewHub רשאית
-              לגבות <strong>דמי ביטול בסך 5% מערך העסקה או 100 ש&quot;ח — הנמוך מביניהם</strong>.
-            </li>
-            <li>
-              <strong>ביטול לאחר תחילת מתן השירות:</strong> יינתן החזר יחסי (Pro Rata) עבור
-              התקופה שלא נוצלה, בניכוי דמי ביטול.
-            </li>
-            <li>
-              <strong>ביטול לאחר 14 ימים:</strong> לא יינתן החזר כספי, אך המנוי לא יתחדש
-              אוטומטית בתום התקופה הנוכחית.
-            </li>
-          </ul>
-          <div className="p-4 rounded-lg bg-secondary/50 border border-border/50 text-foreground text-sm">
-            💡 <strong>שימו לב:</strong> ביטול חידוש אוטומטי אינו מהווה ביטול עסקה. לביטול
-            חידוש, יש להודיע לפחות 30 ימים לפני תום תקופת המנוי הנוכחית.
-          </div>
-        </Section>
-
-        {/* 4 — Refund process */}
-        <Section icon={Clock} title="תהליך ההחזר הכספי">
-          <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-            <li>
-              החזר כספי יבוצע <strong>תוך 14 ימי עסקים</strong> מיום קבלת הודעת הביטול.
-            </li>
-            <li>ההחזר יבוצע באותו אמצעי תשלום שבו בוצעה העסקה המקורית.</li>
-            <li>ReviewHub תשלח אישור ביטול ופירוט ההחזר בדוא&quot;ל.</li>
-          </ul>
-        </Section>
-
-        {/* 5 — Free platform */}
+        {/* 3 — Free service — no fees */}
         <Section icon={RotateCcw} title="שירות חינמי">
+          <p className="mb-3">
+            ReviewHub היא פלטפורמה חינמית לגמרי, ללא הגבלת זמן. מאחר שאין חיובים כספיים,
+            אין צורך בביטול עסקה, דמי ביטול או החזרים. ניתן למחוק חשבון בכל עת דרך הגדרות החשבון.
+          </p>
           <p>
-            ReviewHub היא פלטפורמה חינמית לגמרי. אין תוכניות בתשלום, אין מנויים ואין חיובים.
-            ניתן למחוק חשבון בכל עת דרך הגדרות החשבון.
+            במקרה של שינוי עתידי במודל השירות, תישלח הודעה בדוא״ל לפחות 30 ימים מראש לכל בעלי העסקים הרשומים.
           </p>
         </Section>
 

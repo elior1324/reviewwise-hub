@@ -407,8 +407,8 @@ const BusinessLanding = () => {
       <section className="container py-16" id="pricing">
         <div className="rounded-2xl p-10 text-center bg-primary/5 border border-primary/20">
           <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-3">חינם לגמרי</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto mb-2">כל הפיצ׳רים, כל הכלים, ללא הגבלה — בחינם. אין תוכניות בתשלום, אין כרטיס אשראי.</p>
-          <p className="text-xs text-muted-foreground">SSL, גיבוי יומי ואבטחת מידע מלאה — כלולים.</p>
+          <p className="text-muted-foreground max-w-xl mx-auto mb-2">כל הפיצ׳רים, כל הכלים, ללא הגבלה — בחינם. אין תוכניות בתשלום, אין כרטיס אשראי, אין הגבלת זמן.</p>
+          <p className="text-xs text-muted-foreground">SSL, גיבוי יומי ואבטחת מידע מלאה — כלולים. אם יחול שינוי במודל — תקבלו הודעה 30 ימים מראש.</p>
         </div>
       </section>
 
@@ -420,7 +420,7 @@ const BusinessLanding = () => {
             <div className="relative">
               <ShieldCheck size={32} className="mx-auto mb-4 text-primary" />
               <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-4">
-                הכל חינם. בלי תנאים.
+                הכל חינם. בלי הגבלת זמן.
               </h2>
               <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
                 צרו חשבון עסקי וקבלו גישה לכל הכלים — אנליטיקס, ווידג׳טים, AI, אינטגרציות ועוד. חינם לגמרי, ללא כרטיס אשראי.

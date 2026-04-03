@@ -721,6 +721,13 @@ const BusinessDashboard = () => {
           <PurchaseLinkCard businessId={businessId} />
         )}
 
+        {/* Free platform notice */}
+        {!isDemo && (
+          <p className="text-[11px] text-muted-foreground/70 -mt-4 mb-6 px-1">
+            הפלטפורמה חינמית ללא הגבלת זמן. אם יחול שינוי — תקבלו הודעה בדוא״ל 30 ימים מראש.
+          </p>
+        )}
+
         {/* No demo tier selector — removed all fake data */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
