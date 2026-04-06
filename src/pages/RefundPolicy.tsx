@@ -41,7 +41,8 @@ const RefundPolicy = () => {
               גרסה 1.0 — מרץ 2026
             </p>
             <p className="text-muted-foreground mt-2">
-              מדיניות זו מסדירה את תנאי ביטול עסקאות והחזרים כספיים עבור שירותי ReviewHub בתשלום, בהתאם לחוק הגנת הצרכן, התשמ"א-1981.
+              ReviewHub היא פלטפורמה חינמית לגמרי, ללא הגבלת זמן. אין תוכניות בתשלום, אין מנויים ואין חיובים.
+              מדיניות זו נשמרת לצורך שקיפות בהתאם לחוק הגנת הצרכן, התשמ"א-1981.
             </p>
           </motion.div>
         </div>
@@ -50,77 +51,15 @@ const RefundPolicy = () => {
       <div className="container py-12 max-w-4xl">
         <div className="space-y-12">
 
-          {/* Right to Cancel */}
-          <Section icon={Shield} title="זכות ביטול עסקה — חוק הגנת הצרכן">
+          {/* Free service — no fees */}
+          <Section icon={RotateCcw} title="שירות חינמי">
             <p className="mb-3">
-              בהתאם לסעיף 14ג לחוק הגנת הצרכן, התשמ"א-1981, ולתקנות הגנת הצרכן (ביטול עסקה), התשע"א-2010, עומדת לכם הזכות לבטל עסקה בתנאים הבאים:
+              ReviewHub היא פלטפורמה חינמית לגמרי, ללא הגבלת זמן. מאחר שאין חיובים כספיים,
+              אין צורך בביטול עסקה, דמי ביטול או החזרים. ניתן למחוק חשבון בכל עת דרך הגדרות החשבון.
             </p>
-            <div className="p-4 rounded-lg bg-primary/10 border border-primary/20 text-foreground mb-4">
-              <p className="font-semibold mb-2">📋 זכות ביטול עסקה בעסקת מכר מרחוק:</p>
-              <p>רשאים לבטל את העסקה <strong>תוך 14 ימים מיום ביצוע העסקה או מיום קבלת מסמך הגילוי</strong> (המאוחר מביניהם), ובתנאי שלא החלתם לעשות שימוש בשירות.</p>
-            </div>
-            <ul className="list-disc pr-6 space-y-2 text-muted-foreground">
-              <li><strong>תקופת ביטול:</strong> 14 ימים מיום ביצוע העסקה או מיום קבלת פרטי העסקה בכתב — לפי המאוחר.</li>
-              <li><strong>אזרח ותיק / אדם עם מוגבלות / עולה חדש:</strong> זכאים לביטול תוך <strong>4 חודשים</strong> מיום ביצוע העסקה או מיום קבלת פרטי העסקה — לפי המאוחר, ובלבד שההתקשרות כללה שיחה בין הצדדים (כולל שיחה באמצעות תקשורת אלקטרונית).</li>
-            </ul>
-          </Section>
-
-          {/* How to Cancel */}
-          <Section icon={FileText} title="אופן ביטול העסקה">
-            <p className="mb-3">ניתן לבטל עסקה באחת הדרכים הבאות:</p>
-            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-              <li><strong>דוא"ל:</strong> שליחת הודעת ביטול לכתובת <a href="mailto:support@reviewshub.info" className="text-primary hover:underline">support@reviewshub.info</a></li>
-              <li><strong>טופס מקוון:</strong> באמצעות פנייה דרך עמוד "צור קשר" באתר</li>
-              <li><strong>דואר רשום:</strong> ReviewHub, תל אביב, ישראל</li>
-            </ul>
-            <p className="mb-3">הודעת הביטול צריכה לכלול:</p>
-            <ul className="list-disc pr-6 space-y-1 text-muted-foreground">
-              <li>שם מלא וכתובת אימייל של בעל החשבון</li>
-              <li>שם התוכנית / מנוי שברצונכם לבטל</li>
-              <li>תאריך ביצוע העסקה</li>
-              <li>סיבת הביטול (לא חובה אך מומלץ)</li>
-            </ul>
-          </Section>
-
-          {/* Cancellation Fees */}
-          <Section icon={CreditCard} title="דמי ביטול">
-            <p className="mb-3">בהתאם לחוק הגנת הצרכן:</p>
-            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-              <li><strong>ביטול בתוך 14 ימים ולפני תחילת מתן השירות:</strong> ReviewHub רשאית לגבות <strong>דמי ביטול בסך 5% מערך העסקה או 100 ש"ח — הנמוך מביניהם</strong>.</li>
-              <li><strong>ביטול לאחר תחילת מתן השירות:</strong> יינתן החזר יחסי (Pro Rata) עבור התקופה שלא נוצלה, בניכוי דמי ביטול כאמור.</li>
-              <li><strong>ביטול לאחר 14 ימים:</strong> לא יינתן החזר כספי, אך המנוי לא יתחדש אוטומטית בתום התקופה הנוכחית.</li>
-            </ul>
-            <div className="p-4 rounded-lg bg-secondary/50 border border-border/50 text-foreground text-sm">
-              💡 <strong>שימו לב:</strong> ביטול חידוש אוטומטי אינו מהווה ביטול עסקה. לביטול חידוש, יש להודיע לפחות 30 ימים לפני תום תקופת המנוי הנוכחית.
-            </div>
-          </Section>
-
-          {/* Refund Process */}
-          <Section icon={Clock} title="תהליך ההחזר הכספי">
-            <ul className="list-disc pr-6 space-y-2 text-muted-foreground mb-4">
-              <li>החזר כספי יבוצע <strong>תוך 14 ימי עסקים</strong> מיום קבלת הודעת הביטול.</li>
-              <li>ההחזר יבוצע באותו אמצעי תשלום בו בוצעה העסקה המקורית.</li>
-              <li>ReviewHub תשלח אישור ביטול ופירוט ההחזר בדוא"ל.</li>
-            </ul>
-          </Section>
-
-          {/* Free Plan */}
-          <Section icon={RotateCcw} title="תוכנית חינם (Starter)">
             <p>
-              תוכנית החינם אינה כרוכה בתשלום ולכן אינה כפופה למדיניות ביטולים והחזרים. ניתן למחוק חשבון חינמי בכל עת דרך הגדרות החשבון.
+              במקרה של שינוי עתידי במודל השירות, תישלח הודעה בדוא״ל לפחות 30 ימים מראש לכל בעלי העסקים הרשומים.
             </p>
-          </Section>
-
-          {/* Trial Period */}
-          <Section icon={Clock} title="תקופות ניסיון">
-            <p className="mb-3">
-              ככל שתקבלו תקופת ניסיון חינם:
-            </p>
-            <ul className="list-disc pr-6 space-y-2 text-muted-foreground">
-              <li>לא ייגבה תשלום בתקופת הניסיון.</li>
-              <li>בתום תקופת הניסיון, המנוי יתחדש אוטומטית לתוכנית בתשלום אלא אם תבטלו לפני כן.</li>
-              <li>ביטול בתקופת הניסיון אינו כרוך בדמי ביטול.</li>
-            </ul>
           </Section>
 
           {/* Special Cases */}

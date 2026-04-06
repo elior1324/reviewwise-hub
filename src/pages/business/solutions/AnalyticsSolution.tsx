@@ -141,7 +141,7 @@ const AnalyticsSolution = () => {
               קבלו תובנות עמוקות על העסק שלכם
             </h2>
             <p className="text-muted-foreground mb-6">
-              האנליטיקס המלא זמין בתכנית Pro ומעלה — התחילו בחינם ושדרגו בכל עת.
+              כל כלי האנליטיקס זמינים לכל עסק רשום — חינם לגמרי, ללא הגבלה.
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
               <Link to="/business/signup">
