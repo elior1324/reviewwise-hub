@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import { Play, X, Video } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -165,6 +164,13 @@ const TestimonialCarousel = ({ businessId }: Props) => {
     return null;
   };
 
+  // Duplicate items for seamless infinite loop
+  const scrollItems = [...media, ...media];
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  // Pause on hover
+  const [paused, setPaused] = useState(false);
+
   return (
     <div className="mb-4">
       <div className="flex items-center gap-1.5 mb-2">
@@ -172,26 +178,38 @@ const TestimonialCarousel = ({ businessId }: Props) => {
         <span className="text-xs font-medium text-muted-foreground">חוויות לקוחות</span>
       </div>
 
-      <Carousel opts={{ align: "start", direction: "rtl" }} className="w-full">
-        <CarouselContent className="-ml-2">
-          {media.map((item) => (
-            <CarouselItem key={item.id} className="pl-2 basis-1/3 sm:basis-1/4 md:basis-1/5">
+      <div
+        className="overflow-hidden"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        <div
+          ref={trackRef}
+          className="flex gap-3 w-max"
+          style={{
+            animation: `testimonial-scroll ${media.length * 5}s linear infinite`,
+            animationPlayState: paused ? "paused" : "running",
+          }}
+        >
+          {scrollItems.map((item, i) => (
+            <div key={`${item.id}-${i}`} className="shrink-0 w-36 sm:w-44">
               <div className="h-20 overflow-hidden rounded-md border border-border/40">
                 {renderThumbnail(item)}
               </div>
               {item.caption && (
                 <p className="text-[10px] text-muted-foreground truncate mt-0.5 px-0.5">{item.caption}</p>
               )}
-            </CarouselItem>
+            </div>
           ))}
-        </CarouselContent>
-        {media.length > 4 && (
-          <>
-            <CarouselPrevious className="hidden md:flex h-6 w-6" />
-            <CarouselNext className="hidden md:flex h-6 w-6" />
-          </>
-        )}
-      </Carousel>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes testimonial-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
 
       {/* Full-screen overlay on click */}
       <AnimatePresence>
