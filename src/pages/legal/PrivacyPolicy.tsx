@@ -240,16 +240,16 @@ type Block =
 const AccordionItem = ({ section }: { section: typeof SECTIONS[0] }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/[0.03]">
+    <div className="border border-border/50 rounded-2xl overflow-hidden bg-card/50">
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-6 py-4 text-right hover:bg-white/[0.04] transition-colors"
+        className="w-full flex items-center justify-between px-6 py-4 text-right hover:bg-muted/50 transition-colors"
         aria-expanded={open}
       >
-        <span className="font-semibold text-white text-sm">{section.title}</span>
+        <span className="font-semibold text-foreground text-sm">{section.title}</span>
         <ChevronDown
           size={16}
-          className={`text-white/40 transition-transform duration-200 shrink-0 ml-4 ${open ? "rotate-180" : ""}`}
+          className={`text-muted-foreground/60 transition-transform duration-200 shrink-0 ml-4 ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -262,19 +262,19 @@ const AccordionItem = ({ section }: { section: typeof SECTIONS[0] }) => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-6 pb-5 pt-1 border-t border-white/10 space-y-3">
+            <div className="px-6 pb-5 pt-1 border-t border-border/50 space-y-3">
               {(section.body as Block[]).map((block, i) => {
                 if (block.type === "p") return (
-                  <p key={i} className="text-sm text-white/60 leading-relaxed">{block.text}</p>
+                  <p key={i} className="text-sm text-muted-foreground leading-relaxed">{block.text}</p>
                 );
                 if (block.type === "subtitle") return (
-                  <p key={i} className="text-sm font-semibold text-white/80 mt-3">{block.text}</p>
+                  <p key={i} className="text-sm font-semibold text-foreground/80 mt-3">{block.text}</p>
                 );
                 if (block.type === "list") return (
                   <ul key={i} className="space-y-1.5">
                     {block.items.map((item, j) => (
-                      <li key={j} className="flex gap-2 text-sm text-white/60">
-                        <span className="text-emerald-400 shrink-0 mt-0.5">•</span>
+                      <li key={j} className="flex gap-2 text-sm text-muted-foreground">
+                        <span className="text-primary shrink-0 mt-0.5">•</span>
                         <span>{item}</span>
                       </li>
                     ))}
@@ -303,11 +303,11 @@ export default function PrivacyPolicy() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-semibold mb-5">
+          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary px-4 py-1.5 rounded-full text-xs font-semibold mb-5">
             <Shield size={13} /> מסמך משפטי מחייב
           </div>
-          <h1 className="text-3xl font-bold text-white mb-3">מדיניות פרטיות</h1>
-          <p className="text-white/50 text-sm">
+          <h1 className="text-3xl font-bold text-foreground mb-3">מדיניות פרטיות</h1>
+          <p className="text-muted-foreground text-sm">
             עודכן לאחרונה: {META.updated} · חל על כלל משתמשי {META.company}
           </p>
         </motion.div>
@@ -329,11 +329,11 @@ export default function PrivacyPolicy() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="mt-8 flex items-center justify-center gap-2 p-4 bg-emerald-500/5 border border-emerald-500/15 rounded-2xl text-sm text-white/50"
+          className="mt-8 flex items-center justify-center gap-2 p-4 bg-primary/5 border border-primary/15 rounded-2xl text-sm text-muted-foreground"
         >
-          <Mail size={14} className="text-emerald-400" />
+          <Mail size={14} className="text-primary" />
           שאלות על פרטיות?&nbsp;
-          <a href={`mailto:${META.email}`} className="text-emerald-400 hover:underline">
+          <a href={`mailto:${META.email}`} className="text-primary hover:underline">
             {META.email}
           </a>
         </motion.div>
