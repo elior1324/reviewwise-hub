@@ -480,15 +480,8 @@ const Index = () => {
       {/* "Why ReviewHub?" bento feature grid with glowing border effect */}
       <FeaturesGrid />
 
-      {/* Scrolling testimonials marquee — real reviews from DB only */}
-      {marqueeReviews.length > 0 ? (
-        <TestimonialsSection
-          title="קולות מהקהילה הדיגיטלית"
-          description="ביקורות מאומתות מקושרות להוכחת רכישה. ביקורות קהילה מוצגות בנפרד ואינן נספרות בציון האמון. לא ניתן לרכוש מיקום ולא ניתן להסיר ביקורת שלילית."
-          className="border-t border-border/40"
-          testimonials={marqueeReviews}
-        />
-      ) : (
+      {/* Testimonials marquee removed */}
+      {marqueeReviews.length === 0 && (
         <section className="border-t border-border/40 bg-background py-16 md:py-24 text-center px-4">
           <p className="text-2xl md:text-3xl font-display font-semibold text-foreground mb-3">
             קולות מהקהילה הדיגיטלית
