@@ -580,7 +580,6 @@ const BusinessDashboard = () => {
   const displayStats = isDemo ? EMPTY_STATS : (realStats || EMPTY_STATS);
   const displayClicks = isDemo ? [] : realClicks;
   const displayNotifications = isDemo ? [] : realNotifications;
-  const aiReport = null;
 
   // Generate real AI report
   const handleGenerateReport = async (type: "weekly" | "daily") => {
@@ -1201,48 +1200,6 @@ const BusinessDashboard = () => {
                               </div>
                             </div>
                           ))}
-                        </div>
-                      ) : isDemo ? (
-                        <div className="space-y-6">
-                          <div>
-                            <h3 className="text-sm font-display font-semibold text-primary flex items-center gap-2 mb-3">
-                              <ArrowUpRight size={16} /> חוזקות
-                            </h3>
-                            <ul className="space-y-2">
-                              {aiReport.strengths.map((s, i) => (
-                                <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                                  {s}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-display font-semibold text-destructive flex items-center gap-2 mb-3">
-                              <ArrowDownRight size={16} /> נקודות לשיפור
-                            </h3>
-                            <ul className="space-y-2">
-                              {aiReport.weaknesses.map((w, i) => (
-                                <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
-                                  {w}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-display font-semibold text-accent flex items-center gap-2 mb-3">
-                              <Brain size={16} /> המלצות AI
-                            </h3>
-                            <ul className="space-y-2">
-                              {aiReport.recommendations.map((r, i) => (
-                                <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
-                                  {r}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
                         </div>
                       ) : (
                         <p className="text-sm text-muted-foreground py-4 text-center">עדיין אין דוחות. לחצו "צור דוח" כדי לייצר את הדוח הראשון.</p>
