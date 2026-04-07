@@ -132,7 +132,10 @@ const BusinessRegister = () => {
     const hasOtherCat = catParts.includes(OTHER_VALUE);
     const cleanCats = catParts.filter(c => c !== OTHER_VALUE);
     if (hasOtherCat && cleanCustomCategory.trim()) cleanCats.push("אחר");
-    const finalCategory = cleanCats.join(",") || null;
+    // category is NOT NULL in the schema. Fall back to "אחר" if no valid
+    // category was selected so the insert never fails on the constraint.
+    const finalCategory = cleanCats.join(",") || "אחר";
+    const hasCustomCategory = hasOtherCat && cleanCustomCategory.trim().length > 0;
 
     const slug = cleanBusinessName
       .toLowerCase()
@@ -146,42 +149,39 @@ const BusinessRegister = () => {
       : {};
 
     try {
+      const insertPayload: Record<string, unknown> = {
+        name: cleanBusinessName,
+        slug,
+        category: finalCategory,
+        owner_id: user.id,
+        email: form.email,
+        phone: form.phone || null,
+        website: sanitizeUrl(canEditSocials ? (socialLinks.website || form.website) : form.website) || null,
+        description: cleanDescription || null,
+        social_links: socialLinksJson,
+        founder_name: cleanFounderName || null,
+        // Affiliate program — three-mode field
+        affiliate_mode: affiliateMode,
+        // Singular URL — only column that exists in the schema
+        personal_affiliate_url: affiliateMode === "personal_affiliate"
+          ? (personalAffiliateUrls.find(u => u.trim()) ?? null)
+          : null,
+        affiliate_enrolled:        affiliateMode === "reviewhub_model",
+        affiliate_enrolled_at:     affiliateMode === "reviewhub_model" ? new Date().toISOString() : null,
+        affiliate_program_status:  affiliateMode === "reviewhub_model" ? "enrolled" :
+                                   affiliateMode === "personal_affiliate" ? "enrolled" : "declined",
+      };
+
       const { data: biz, error: bizError } = await supabase
         .from("businesses")
-        .insert({
-          name: cleanBusinessName,
-          slug,
-          category: finalCategory,
-          owner_id: user.id,
-          email: form.email,
-          phone: form.phone || null,
-          website: sanitizeUrl(canEditSocials ? (socialLinks.website || form.website) : form.website) || null,
-          description: cleanDescription || null,
-          social_links: socialLinksJson,
-          founder_name: cleanFounderName || null,
-          pricing_model: isSaas && form.pricingModel ? form.pricingModel : null,
-          // Affiliate program — new three-mode field + backwards-compat legacy boolean
-          affiliate_mode:             affiliateMode,
-          // Singular URL — first valid entry (backwards compat)
-          personal_affiliate_url:     affiliateMode === "personal_affiliate"
-            ? (personalAffiliateUrls.find(u => u.trim()) ?? null)
-            : null,
-          // Array column — all valid entries
-          personal_affiliate_urls:    affiliateMode === "personal_affiliate"
-            ? personalAffiliateUrls.filter(u => u.trim())
-            : [],
-          affiliate_enrolled:        affiliateMode === "reviewhub_model",
-          affiliate_enrolled_at:     affiliateMode === "reviewhub_model" ? new Date().toISOString() : null,
-          affiliate_program_status:  affiliateMode === "reviewhub_model" ? "enrolled" :
-                                     affiliateMode === "personal_affiliate" ? "enrolled" : "declined",
-        })
+        .insert(insertPayload as any)
         .select("id")
         .single();
 
       if (bizError) throw bizError;
 
       // If custom category, call evaluate-category edge function
-      if (isCustomCategory && biz) {
+      if (hasCustomCategory && biz) {
         const evalType = TYPE_TO_CATEGORY_KEY[form.businessType];
         const { data: evalData, error: evalError } = await supabase.functions.invoke("evaluate-category", {
           body: {

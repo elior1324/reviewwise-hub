@@ -161,7 +161,7 @@ const ProfileSection = ({
   saving,
 }: {
   business: Business;
-  profileForm: { name: string; description: string; category: string; founder_name: string; logo_url: string; cover_url: string; delivery_format: string };
+  profileForm: { name: string; description: string; category: string; founder_name: string; logo_url: string; cover_url: string };
   setProfileForm: React.Dispatch<React.SetStateAction<typeof profileForm>>;
   onSave: () => Promise<void>;
   saving: boolean;
@@ -276,29 +276,6 @@ const ProfileSection = ({
       {profileForm.category && (
         <p className="text-xs text-zinc-400">{profileForm.category.split(",").filter(Boolean).length} / 5 נבחרו</p>
       )}
-    </div>
-
-    {/* Delivery format */}
-    <div className="space-y-2 max-w-md">
-      <Label className="text-sm font-medium text-zinc-300">סוג פגישה</Label>
-      <div className="flex gap-2 flex-wrap">
-        {[
-          { value: "", label: "לא נבחר" },
-          { value: "digital", label: "דיגיטלי" },
-          { value: "frontal", label: "פרונטלי" },
-          { value: "hybrid", label: "היברידי" },
-        ].map(opt => (
-          <Button
-            key={opt.value}
-            type="button"
-            variant={profileForm.delivery_format === opt.value ? "default" : "outline"}
-            size="sm"
-            onClick={() => setProfileForm({ ...profileForm, delivery_format: opt.value })}
-          >
-            {opt.label}
-          </Button>
-        ))}
-      </div>
     </div>
 
     {/* Founder name */}
@@ -753,7 +730,7 @@ const AccountSection = ({
 // ─────────────────────────────────────────────────────────────────────────────
 
 const BusinessSettingsPage = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [loading, setLoading]               = useState(true);
@@ -765,7 +742,7 @@ const BusinessSettingsPage = () => {
 
   // Profile form
   const [profileForm, setProfileForm] = useState({
-    name: "", description: "", category: "", founder_name: "", logo_url: "", cover_url: "", delivery_format: "",
+    name: "", description: "", category: "", founder_name: "", logo_url: "", cover_url: "",
   });
 
   // Contact form
@@ -787,6 +764,10 @@ const BusinessSettingsPage = () => {
   // ── Effects ────────────────────────────────────────────────────────────────
 
   useEffect(() => {
+    // Wait for AuthContext to finish restoring the session before deciding
+    // whether to redirect — otherwise navigating into this page after login
+    // can briefly see user=null and bounce the user back to /business/login.
+    if (authLoading) return;
     if (!user) { navigate("/business/login"); return; }
 
     (async () => {
@@ -810,10 +791,9 @@ const BusinessSettingsPage = () => {
             name: d.name || "",
             description: d.description || "",
             category: d.category || "",
-            founder_name: d.founder_name || "",
+            founder_name: (d as any).founder_name || "",
             logo_url: d.logo_url || "",
-            cover_url: d.cover_url || "",
-            delivery_format: d.delivery_format || "",
+            cover_url: (d as any).cover_url || "",
           });
           setContactForm({
             email: d.email || "",
@@ -840,24 +820,31 @@ const BusinessSettingsPage = () => {
         setLoading(false);
       }
     })();
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   // ── Save handlers ──────────────────────────────────────────────────────────
 
   const handleSaveProfile = async () => {
     if (!business) return;
+    // category is NOT NULL in the schema — refuse to overwrite it with null
+    if (!profileForm.name?.trim()) {
+      toast.error("שם העסק לא יכול להיות ריק");
+      return;
+    }
     setSaving(true);
     try {
-      const updateData = {
-        name: profileForm.name || business.name,
+      const updateData: Record<string, unknown> = {
+        name: profileForm.name.trim(),
         description: profileForm.description || null,
-        category: profileForm.category || null,
         founder_name: profileForm.founder_name || null,
         logo_url: profileForm.logo_url || null,
         cover_url: profileForm.cover_url || null,
-        delivery_format: profileForm.delivery_format || null,
         updated_at: new Date().toISOString(),
       };
+      // Only update category if user actually provided one (NOT NULL constraint)
+      if (profileForm.category?.trim()) {
+        updateData.category = profileForm.category.trim();
+      }
       if (import.meta.env.DEV) console.log("[SaveProfile] updating business:", business.id, updateData);
       const { error } = await supabase.from("businesses").update(updateData).eq("id", business.id);
       if (error) {
@@ -866,8 +853,9 @@ const BusinessSettingsPage = () => {
       }
       toast.success("פרטי העסק נשמרו בהצלחה");
     } catch (err) {
+      const msg = err instanceof Error ? err.message : "שגיאה לא ידועה";
       if (import.meta.env.DEV) console.error("[SaveProfile] error:", err);
-      toast.error("לא הצלחנו לשמור את פרטי העסק");
+      toast.error(`לא הצלחנו לשמור את פרטי העסק: ${msg}`);
     }
     finally { setSaving(false); }
   };
@@ -897,7 +885,11 @@ const BusinessSettingsPage = () => {
       }).eq("id", business.id);
       if (error) throw error;
       toast.success("פרטי הקשר נשמרו בהצלחה");
-    } catch { toast.error("לא הצלחנו לשמור את פרטי הקשר"); }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "שגיאה לא ידועה";
+      if (import.meta.env.DEV) console.error("[SaveContact] error:", err);
+      toast.error(`לא הצלחנו לשמור את פרטי הקשר: ${msg}`);
+    }
     finally { setSaving(false); }
   };
 
