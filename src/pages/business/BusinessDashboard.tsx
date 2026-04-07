@@ -308,7 +308,7 @@ const PurchaseVerificationQueue = ({ businessId, isDemo }: { businessId: string 
 
 const BusinessDashboard = () => {
   const navigate = useNavigate();
-  const { user, subscriptionTier } = useAuth();
+  const { user, loading: authLoading, subscriptionTier } = useAuth();
 
   // Demo tier selector
   const [demoTier, setDemoTier] = useState<DemoTier>("pro");
@@ -357,6 +357,11 @@ const BusinessDashboard = () => {
 
   // Fetch real data if user is logged in and owns a business
   useEffect(() => {
+    // Wait for AuthContext to finish restoring the session before deciding
+    // whether to show demo data — otherwise we flip to demo mode on first
+    // render and the user's real business never loads after login.
+    if (authLoading) return;
+
     const fetchBusinessData = async () => {
       if (!user) {
         setIsDemo(true);
@@ -566,7 +571,7 @@ const BusinessDashboard = () => {
     };
 
     fetchBusinessData();
-  }, [user]);
+  }, [user, authLoading]);
 
   // Choose data source — no fake data, only real or empty
   const displayBusiness = isDemo ? EMPTY_BUSINESS : (businessInfo || EMPTY_BUSINESS);
