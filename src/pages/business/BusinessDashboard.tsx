@@ -33,9 +33,9 @@ import { supabase } from "@/integrations/supabase/client";
 const EMPTY_BUSINESS = { name: "", email: "" };
 const EMPTY_STATS: { icon: any; label: string; value: string; change: string; up: boolean; tooltip: string }[] = [
   { icon: Star, label: "דירוג ממוצע", value: "—", change: "", up: false, tooltip: "טרם התקבלו ביקורות." },
-  { icon: MessageSquare, label: "סה״כ ביקורות", value: "0", change: "", up: false, tooltip: "" },
-  { icon: MousePointerClick, label: "קליקים לאתר", value: "0", change: "", up: false, tooltip: "" },
-  { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: "₪0", change: "", up: false, tooltip: "" },
+  { icon: MessageSquare, label: "סה״כ ביקורות", value: "0", change: "", up: false, tooltip: "מספר הביקורות שהתקבלו עד כה." },
+  { icon: MousePointerClick, label: "קליקים לאתר", value: "0", change: "", up: false, tooltip: "כמה אנשים לחצו על הקישור לאתר שלכם." },
+  { icon: DollarSign, label: "הכנסות דרך ReviewHub", value: "₪0", change: "", up: false, tooltip: "סך ההכנסות מרכישות שהגיעו דרך קישורי האפיליאט." },
 ];
 
 type DemoTier = "free" | "pro" | "enterprise";
